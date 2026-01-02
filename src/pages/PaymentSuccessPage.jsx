@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { checkVehicleHistory } from '../services/vehicleHistoryService';
 import { generateVehicleHistoryPDF } from '../utils/pdfGenerator';
@@ -30,31 +30,38 @@ const PaymentSuccessPage = () => {
       setIsLoading(true);
       console.log('Generating vehicle report for:', registration);
       
+      // Demo data to show for development
+      const demoData = {
+        vrm: registration,
+        make: 'Triumph',
+        model: 'Bonneville America 865',
+        year: '2012',
+        colour: 'Blue',
+        fuelType: 'Petrol',
+        engineSize: '865cc',
+        mileage: 28500,
+        previousOwners: 2,
+        serviceHistory: 'Full service history',
+        stolen: false,
+        writeOff: false,
+        outstandingFinance: false,
+        checkDate: new Date().toISOString(),
+        _isDemoData: true
+      };
+      
       // Call the vehicle history API to generate the report
       const response = await checkVehicleHistory(registration, true); // Force refresh
       
-      if (response.success) {
+      console.log('API Response:', response);
+      
+      // Check if response has complete vehicle details
+      if (response.success && response.data && response.data.make) {
+        console.log('Using real API data');
         setVehicleData(response.data);
       } else {
-        // If API fails, show demo data for development
-        console.log('API failed, showing demo data');
-        setVehicleData({
-          vrm: registration,
-          make: 'Triumph',
-          model: 'Bonneville America 865',
-          year: '2012',
-          colour: 'Blue',
-          fuelType: 'Petrol',
-          engineSize: '865cc',
-          mileage: 28500,
-          previousOwners: 2,
-          serviceHistory: 'Full service history',
-          stolen: false,
-          writeOff: false,
-          outstandingFinance: false,
-          checkDate: new Date().toISOString(),
-          _isDemoData: true
-        });
+        // If API doesn't return complete data, show demo data for development
+        console.log('API returned incomplete data, showing demo data');
+        setVehicleData(demoData);
       }
     } catch (err) {
       console.error('Error generating vehicle report:', err);
