@@ -1,0 +1,418 @@
+.valuation-results-page {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding-top: 40px;
+}
+
+/* Main Container */
+.results-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+  padding-bottom: 60px;
+}
+
+/* Results Card */
+.results-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.result-header-bar {
+  height: 4px;
+  background: linear-gradient(90deg, #dc2626 0%, #ef4444 100%);
+}
+
+.result-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+  padding: 32px 24px 24px;
+  margin: 0;
+}
+
+/* Vehicle Identification */
+.vehicle-identification {
+  padding: 0 32px 32px;
+}
+
+.vehicle-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 24px 0;
+  line-height: 1.4;
+}
+
+.vehicle-details-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: start;
+}
+
+.details-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-row {
+  display: flex;
+  gap: 16px;
+}
+
+.detail-label {
+  color: #6b7280;
+  font-size: 0.95rem;
+  min-width: 180px;
+}
+
+.detail-value {
+  color: #1f2937;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.change-details-row {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.change-details-link {
+  background: none;
+  border: none;
+  color: #0052cc;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  padding: 0;
+  margin-left: 8px;
+}
+
+.change-details-link:hover {
+  color: #003d99;
+}
+
+/* Brand Logo */
+.brand-logo-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+}
+
+.brand-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.brand-icon {
+  font-size: 2.5rem;
+}
+
+/* Valuation Unavailable */
+.valuation-unavailable {
+  background: #fef2f2;
+  border-top: 1px solid #fecaca;
+  border-bottom: 1px solid #fecaca;
+  padding: 24px 32px;
+  text-align: center;
+}
+
+.unavailable-message {
+  color: #374151;
+  font-size: 1rem;
+  margin: 0 0 8px 0;
+}
+
+.unavailable-reason {
+  color: #dc2626;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Valuation Results Section */
+.valuation-results-section {
+  padding: 24px 32px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.valuation-results-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.valuation-prices {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.price-card {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+}
+
+.price-card.featured {
+  background: linear-gradient(135deg, #0052cc 0%, #0066ff 100%);
+  color: white;
+  border: none;
+}
+
+.price-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+
+.price-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.price-description {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* What Next Section */
+.what-next-section {
+  padding: 32px;
+  text-align: center;
+}
+
+.what-next-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 24px 0;
+}
+
+.action-buttons-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-create-advert {
+  background: #0052cc;
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 160px;
+}
+
+.btn-create-advert:hover {
+  background: #003d99;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 82, 204, 0.3);
+}
+
+.btn-find-car {
+  background: white;
+  color: #0052cc;
+  border: 2px solid #0052cc;
+  padding: 14px 32px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 160px;
+}
+
+.btn-find-car:hover {
+  background: #f0f7ff;
+  transform: translateY(-2px);
+}
+
+/* Reset Section */
+.reset-section {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.reset-button {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.reset-button:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Responsive - Tablet */
+@media (max-width: 768px) {
+  .valuation-results-page {
+    padding-top: 20px;
+  }
+
+  .results-container {
+    padding: 0 12px;
+  }
+
+  .result-title {
+    font-size: 1.5rem;
+    padding: 24px 20px 20px;
+  }
+
+  .vehicle-identification {
+    padding: 0 20px 24px;
+  }
+
+  .vehicle-name {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+  }
+
+  .vehicle-details-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .detail-label {
+    min-width: auto;
+    font-size: 0.9rem;
+  }
+
+  .detail-value {
+    font-size: 0.95rem;
+  }
+
+  .brand-logo-column {
+    order: -1;
+    padding: 0;
+  }
+
+  .valuation-unavailable {
+    padding: 20px;
+  }
+
+  .unavailable-message {
+    font-size: 0.95rem;
+  }
+
+  .unavailable-reason {
+    font-size: 1rem;
+  }
+
+  .valuation-results-section {
+    padding: 20px;
+  }
+
+  .valuation-prices {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .what-next-section {
+    padding: 24px 20px;
+  }
+
+  .what-next-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+  }
+
+  .action-buttons-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-create-advert,
+  .btn-find-car {
+    width: 100%;
+    padding: 12px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .valuation-results-page {
+    padding-top: 16px;
+  }
+
+  .result-title {
+    font-size: 1.35rem;
+    padding: 20px 16px 16px;
+  }
+
+  .vehicle-identification {
+    padding: 0 16px 20px;
+  }
+
+  .vehicle-name {
+    font-size: 1rem;
+  }
+
+  .detail-label,
+  .detail-value {
+    font-size: 0.875rem;
+  }
+
+  .brand-name {
+    font-size: 1.25rem;
+  }
+
+  .brand-icon {
+    font-size: 2rem;
+  }
+
+  .valuation-unavailable {
+    padding: 16px;
+  }
+
+  .what-next-section {
+    padding: 20px 16px;
+  }
+
+  .btn-create-advert,
+  .btn-find-car {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+  }
+}

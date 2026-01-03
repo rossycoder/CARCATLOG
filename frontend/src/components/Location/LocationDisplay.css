@@ -1,0 +1,93 @@
+.location-display {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.seller-location,
+.user-location {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.location-icon {
+  font-size: 20px;
+}
+
+.location-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.location-label {
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.location-value {
+  font-size: 14px;
+  color: #212529;
+  font-weight: 600;
+}
+
+.set-location-btn,
+.change-location-btn {
+  background: #0066cc;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.set-location-btn:hover,
+.change-location-btn:hover {
+  background: #0052a3;
+}
+
+.change-location-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.distance-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  margin-top: 12px;
+}
+
+.distance-icon {
+  font-size: 18px;
+}
+
+.distance-value {
+  font-size: 16px;
+  color: #0066cc;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .location-display {
+    padding: 12px;
+  }
+
+  .seller-location,
+  .user-location {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

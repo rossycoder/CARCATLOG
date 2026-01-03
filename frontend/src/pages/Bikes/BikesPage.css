@@ -1,0 +1,321 @@
+.bikes-page {
+  min-height: 100vh;
+}
+
+/* Hero Section */
+.bikes-hero {
+  background: #f5f5f5;
+  padding: 0 20px;
+}
+
+.bikes-hero-background {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  max-width: 1400px;
+  margin: 0 auto;
+  border-radius: 0 0 24px 24px;
+  padding: 60px 20px;
+  text-align: center;
+  color: white;
+}
+
+.bikes-hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.bikes-hero-label {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.bikes-hero-title {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.bikes-hero-subtitle {
+  font-size: 18px;
+  opacity: 0.9;
+  margin-bottom: 32px;
+}
+
+/* Search Form */
+.bikes-search-form {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.bikes-search-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.bikes-search-field label {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.bikes-search-field input,
+.bikes-search-field select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #000;
+}
+
+
+.bikes-search-btn {
+  width: 100%;
+  padding: 14px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.bikes-search-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Quick Links */
+.bikes-quick-links {
+  padding: 40px 20px;
+  background: #f8f9fa;
+}
+
+.quick-links-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.quick-link-card {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid #eee;
+}
+
+.quick-link-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.quick-link-card h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: #1a1a2e;
+}
+
+.quick-link-card p {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Brands Section */
+.bikes-brands {
+  padding: 60px 20px;
+}
+
+.bikes-brands h2 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 32px;
+}
+
+.brands-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.brand-card {
+  background: #f8f9fa;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.brand-card:hover {
+  transform: translateY(-4px);
+  background: #e9ecef;
+}
+
+.brand-logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+}
+
+.brand-placeholder {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.brand-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Partners Section */
+.partners-section {
+  padding: 60px 20px;
+  background: #f8f9fa;
+}
+
+.partners-section h2 {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 32px;
+}
+
+.partners-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.partner-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.partner-image img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+/* Stats Section */
+.bikes-stats {
+  padding: 60px 20px;
+}
+
+.stats-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.stats-number {
+  text-align: center;
+  padding: 40px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 16px;
+  color: white;
+}
+
+.stats-number h2 {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.stats-number p {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+.stats-text h3 {
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+.stats-text p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.outline-btn {
+  padding: 12px 24px;
+  border: 2px solid #1a1a2e;
+  background: transparent;
+  color: #1a1a2e;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.outline-btn:hover {
+  background: #1a1a2e;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .bikes-hero {
+    padding: 0 16px;
+  }
+
+  .bikes-hero-background {
+    padding: 40px 16px;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .bikes-hero-title {
+    font-size: 32px;
+  }
+
+  .bikes-search-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-links-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brands-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .partners-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-content {
+    grid-template-columns: 1fr;
+  }
+}

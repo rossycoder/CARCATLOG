@@ -1,0 +1,372 @@
+.vans-page {
+  min-height: 100vh;
+}
+
+/* Hero Section */
+.vans-hero {
+  background: #f5f5f5;
+  padding: 0 20px;
+}
+
+.vans-hero-background {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+  max-width: 1400px;
+  margin: 0 auto;
+  border-radius: 0 0 24px 24px;
+  padding: 60px 20px;
+  text-align: center;
+  color: white;
+}
+
+.vans-hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.vans-hero-label {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.vans-hero-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.vans-hero-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 32px;
+}
+
+/* Search Form */
+.vans-search-form {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.vans-search-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.vans-search-field label {
+  display: block;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.vans-search-field input,
+.vans-search-field select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #000;
+}
+
+.vans-search-btn {
+  width: 100%;
+  padding: 14px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.vans-search-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Quick Links */
+.vans-quick-links {
+  padding: 60px 20px;
+  background: #f8f9fa;
+}
+
+.quick-links-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.quick-link-card {
+  background: white;
+  padding: 30px 20px;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.quick-link-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.quick-link-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.quick-link-card h3 {
+  font-size: 1.1rem;
+  color: #1e3a5f;
+  margin-bottom: 8px;
+}
+
+.quick-link-card p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Statistics Section */
+.vans-stats {
+  padding: 80px 20px;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+  color: white;
+}
+
+.stats-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 60px;
+  max-width: 1000px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.stats-number h2 {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.stats-number p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.stats-text h3 {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+}
+
+.stats-text p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.outline-btn {
+  padding: 14px 32px;
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.outline-btn:hover {
+  background: white;
+  color: #1e3a5f;
+}
+
+/* Benefits Section */
+.vans-benefits {
+  padding: 80px 20px;
+  background: #f8f9fa;
+}
+
+.vans-benefits h2 {
+  text-align: center;
+  font-size: 2.2rem;
+  color: #1e3a5f;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-top: 48px;
+}
+
+.benefit-card {
+  background: white;
+  text-align: center;
+  padding: 40px 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.benefit-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2563eb, #1d4ed8);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.benefit-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.15);
+}
+
+.benefit-card:hover::before {
+  transform: scaleX(1);
+}
+
+.benefit-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 20px;
+  filter: grayscale(0);
+  transition: transform 0.3s ease;
+}
+
+.benefit-card:hover .benefit-icon {
+  transform: scale(1.1);
+}
+
+.benefit-card h3 {
+  font-size: 1.25rem;
+  color: #1e3a5f;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.benefit-card p {
+  font-size: 15px;
+  color: #666;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+  .quick-links-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .benefits-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .stats-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .vans-hero {
+    padding: 0 16px;
+  }
+
+  .vans-hero-background {
+    padding: 40px 16px;
+    border-radius: 0 0 16px 16px;
+  }
+  
+  .vans-hero-title {
+    font-size: 1.8rem;
+  }
+  
+  .vans-search-inputs {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-links-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .quick-link-card {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    gap: 16px;
+  }
+  
+  .quick-link-icon {
+    font-size: 2rem;
+    margin-bottom: 0;
+  }
+  
+  .benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .benefit-card {
+    padding: 32px 20px;
+  }
+  
+  .stats-number h2 {
+    font-size: 3rem;
+  }
+  
+  .vans-quick-links,
+  .vans-benefits {
+    padding: 40px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .vans-hero-title {
+    font-size: 1.5rem;
+  }
+  
+  .vans-benefits h2 {
+    font-size: 1.6rem;
+  }
+  
+  .benefit-card {
+    padding: 28px 16px;
+  }
+}

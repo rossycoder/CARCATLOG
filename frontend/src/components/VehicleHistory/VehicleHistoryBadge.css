@@ -1,0 +1,171 @@
+.vehicle-history-badge {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+.vehicle-history-badge.loading {
+  border-left: 4px solid #3b82f6;
+}
+
+.vehicle-history-badge.clean {
+  border-left: 4px solid #10b981;
+}
+
+.vehicle-history-badge.has-issues {
+  border-left: 4px solid #ef4444;
+}
+
+.vehicle-history-badge.error {
+  border-left: 4px solid #f59e0b;
+}
+
+.badge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.badge-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.verified-badge {
+  background: #10b981;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-icon {
+  font-size: 1.5rem;
+}
+
+.loading-spinner {
+  font-size: 1.5rem;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text,
+.error-text {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9375rem;
+}
+
+.error-text {
+  color: #dc2626;
+}
+
+.history-indicators {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.indicator {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.indicator.clear {
+  background: #f0fdf4;
+}
+
+.indicator.warning {
+  background: #fef3c7;
+}
+
+.indicator.danger {
+  background: #fee2e2;
+}
+
+.indicator-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.indicator-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.indicator-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.indicator-value {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.check-date {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.check-date small {
+  color: #9ca3af;
+  font-size: 0.8125rem;
+}
+
+.warning-message {
+  margin-top: 16px;
+  padding: 12px;
+  background: #fef3c7;
+  border-radius: 8px;
+  border-left: 3px solid #f59e0b;
+}
+
+.warning-message p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #92400e;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .vehicle-history-badge {
+    padding: 16px;
+  }
+
+  .badge-header h3 {
+    font-size: 1.125rem;
+  }
+
+  .indicator {
+    padding: 10px;
+  }
+
+  .indicator-icon {
+    font-size: 1.25rem;
+  }
+}

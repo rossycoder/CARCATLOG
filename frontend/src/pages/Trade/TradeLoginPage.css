@@ -1,0 +1,180 @@
+.trade-login-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 20px 20px 20px;
+}
+
+.trade-login-container {
+  width: 100%;
+  max-width: 480px;
+}
+
+.trade-login-card {
+  background: white;
+  border-radius: 8px;
+  padding: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.trade-login-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.trade-login-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0 0 32px 0;
+}
+
+.trade-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Form Elements */
+.trade-login-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trade-login-form .form-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.trade-login-form .required {
+  color: #e74c3c;
+  margin-left: 2px;
+}
+
+.trade-login-form .form-input {
+  padding: 14px 16px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.trade-login-form .form-input:focus {
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.trade-login-form .form-input::placeholder {
+  color: #999;
+}
+
+/* Button */
+.trade-login-form .btn-primary {
+  padding: 16px;
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.trade-login-form .btn-primary:hover:not(:disabled) {
+  background: #0052a3;
+}
+
+.trade-login-form .btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Error Message */
+.trade-login-form .error-message {
+  padding: 12px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  color: #c33;
+  font-size: 0.9rem;
+}
+
+/* Links */
+.trade-login-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trade-login-links .link {
+  color: #0066cc;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.trade-login-links .link:hover {
+  text-decoration: underline;
+}
+
+/* Divider */
+.trade-login-form .divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 8px 0;
+}
+
+.trade-login-form .divider::before,
+.trade-login-form .divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+}
+
+.trade-login-form .divider span {
+  padding: 0 16px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Back to Home */
+.back-home-link {
+  display: block;
+  text-align: center;
+  color: #0066cc;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.back-home-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .trade-login-card {
+    padding: 24px;
+  }
+
+  .trade-login-title {
+    font-size: 1.5rem;
+  }
+
+  .trade-login-links {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}

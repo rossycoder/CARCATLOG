@@ -1,0 +1,69 @@
+.nearly-new-cars {
+  background-color: white;
+}
+
+.nearly-new-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.nearly-new-text h2 {
+  font-size: 1.25rem;
+  color: #1f8300;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.nearly-new-text h3 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #242d3d;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.nearly-new-text p {
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.nearly-new-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.car-placeholder {
+  font-size: 10rem;
+  opacity: 0.8;
+}
+
+@media (max-width: 1024px) {
+  .nearly-new-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+
+  .nearly-new-text h3 {
+    font-size: 2rem;
+  }
+
+  .car-placeholder {
+    font-size: 8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .nearly-new-text h3 {
+    font-size: 1.75rem;
+  }
+
+  .car-placeholder {
+    font-size: 6rem;
+  }
+}

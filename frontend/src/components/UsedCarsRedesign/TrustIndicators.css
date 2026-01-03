@@ -1,0 +1,83 @@
+.trust-indicators {
+  padding: 60px 20px;
+  background: #f5f5f5;
+}
+
+.trust-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.trust-rating {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: white;
+  padding: 30px 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.rating-score {
+  font-size: 48px;
+  font-weight: 700;
+  color: #0a1628;
+}
+
+.rating-stars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.star {
+  color: #ffa500;
+  font-size: 20px;
+}
+
+.rating-count {
+  font-size: 14px;
+  color: #666;
+}
+
+.trust-features {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.trust-feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: #1a1a1a;
+}
+
+.feature-icon {
+  color: #0066ff;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+@media (max-width: 768px) {
+  .trust-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .trust-rating {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .trust-features {
+    flex-direction: column;
+    width: 100%;
+  }
+}

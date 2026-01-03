@@ -1,0 +1,260 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useTradeDealerContext } from '../../context/TradeDealerContext';
+import tradeSubscriptionService from '../../services/tradeSubscriptionService';
+import './TradeSubscriptionPage.css';
+
+const TradeSubscriptionPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { dealer } = useTradeDealerContext();
+  const [plans, setPlans] = useState([]);
+  const [currentSubscription, setCurrentSubscription] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [welcomeMessage, setWelcomeMessage] = useState('');
+
+  useEffect(() => {
+    fetchPlansAndSubscription();
+    
+    // Check for welcome message from navigation state
+    if (location.state?.message) {
+      setWelcomeMessage(location.state.message);
+      // Clear the message after showing it
+      setTimeout(() => setWelcomeMessage(''), 5000);
+      // Clear the navigation state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
+  const fetchPlansAndSubscription = async () => {
+    try {
+      setLoading(true);
+      const [plansData, subscriptionData] = await Promise.all([
+        tradeSubscriptionService.getPlans(),
+        tradeSubscriptionService.getCurrentSubscription()
+      ]);
+      
+      setPlans(plansData);
+      setCurrentSubscription(subscriptionData);
+    } catch (err) {
+      console.error('Error fetching subscription data:', err);
+      setError('Failed to load subscription information');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectPlan = async (planSlug) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Create Stripe checkout session and redirect
+      const response = await tradeSubscriptionService.createCheckoutSession(planSlug);
+      
+      if (response.checkoutUrl) {
+        // Redirect to Stripe checkout
+        window.location.href = response.checkoutUrl;
+      } else {
+        setError('Failed to create checkout session');
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Error selecting plan:', err);
+      setError(err.response?.data?.message || 'Failed to process payment. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  const formatPrice = (priceInPence) => {
+    return `£${(priceInPence / 100).toFixed(0)}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="trade-subscription-page">
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading subscription plans...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="trade-subscription-page">
+        <div className="error-container">
+          <p className="error-message">{error}</p>
+          <button onClick={fetchPlansAndSubscription} className="retry-button">
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="trade-subscription-page">
+      {welcomeMessage && (
+        <div style={{
+          padding: '15px 20px',
+          marginBottom: '20px',
+          background: '#3b82f6',
+          color: 'white',
+          borderRadius: '8px',
+          textAlign: 'center',
+          maxWidth: '1200px',
+          margin: '0 auto 20px'
+        }}>
+          {welcomeMessage}
+        </div>
+      )}
+      
+      <div className="subscription-header">
+        <h1>Welcome{dealer?.dealershipName ? `, ${dealer.dealershipName}` : ''}!</h1>
+        <p>Choose a subscription package to start listing your vehicles</p>
+        
+        {currentSubscription && currentSubscription.status === 'active' && (
+          <button 
+            className="continue-dashboard-btn"
+            onClick={() => navigate('/trade/dashboard')}
+          >
+            Continue to Dashboard →
+          </button>
+        )}
+      </div>
+
+      <div className="subscription-plans-grid">
+        {/* BRONZE PLAN */}
+        <div className="subscription-plan-card bronze">
+          <div className="plan-header bronze-header">
+            <h2>BRONZE Package</h2>
+          </div>
+          
+          <div className="plan-content">
+            <div className="plan-price">
+              <h3>Price:</h3>
+              <p className="price-amount">£1000</p>
+              <p className="vat-text">+ VAT</p>
+            </div>
+
+            <div className="plan-summary">
+              <p><strong>Summary:</strong> Our Bronze Subscription let's you list upto 20 cars.</p>
+            </div>
+
+            <div className="plan-features">
+              <h4>What's Included:</h4>
+              <ul>
+                <li>Attract buyers – Display your vehicle's best features with upto 100 photos</li>
+                <li>Attach a YouTube video for each vehicle to boost sales</li>
+                <li>We will provide your listing with a free basic HPI check & MOT status</li>
+                <li>A designated login area with a dealer dashboard to manage & update your stock</li>
+                <li>Unlimited listing alterations to keep your ads upto date</li>
+              </ul>
+            </div>
+
+            <button 
+              className="select-plan-button bronze-button"
+              onClick={() => handleSelectPlan('bronze')}
+              disabled={currentSubscription?.plan?.slug === 'bronze'}
+            >
+              {currentSubscription?.plan?.slug === 'bronze' ? 'Current Plan' : 'Select BRONZE Package'}
+            </button>
+          </div>
+        </div>
+
+        {/* SILVER PLAN */}
+        <div className="subscription-plan-card silver">
+          <div className="plan-header silver-header">
+            <h2>SILVER Package</h2>
+          </div>
+          
+          <div className="plan-content">
+            <div className="plan-price">
+              <h3>Price:</h3>
+              <p className="price-amount">£1500</p>
+              <p className="vat-text">+ VAT</p>
+            </div>
+
+            <div className="plan-summary">
+              <p><strong>Summary:</strong> Our Silver Subscription let's you list upto 35 cars.</p>
+            </div>
+
+            <div className="plan-features">
+              <h4>What's Included:</h4>
+              <ul>
+                <li>Attract buyers – Display your vehicle's best features with upto 100 photos</li>
+                <li>Attach a YouTube video for each vehicle to boost sales</li>
+                <li>We will provide your listing with a free basic HPI check & MOT status</li>
+                <li>A designated login area with a dealer dashboard to manage & update your stock</li>
+                <li>Unlimited listing alterations to keep your ads upto date</li>
+              </ul>
+            </div>
+
+            <button 
+              className="select-plan-button silver-button"
+              onClick={() => handleSelectPlan('silver')}
+              disabled={currentSubscription?.plan?.slug === 'silver'}
+            >
+              {currentSubscription?.plan?.slug === 'silver' ? 'Current Plan' : 'Select SILVER Package'}
+            </button>
+          </div>
+        </div>
+
+        {/* GOLD PLAN */}
+        <div className="subscription-plan-card gold">
+          <div className="plan-header gold-header">
+            <h2>GOLD Package</h2>
+          </div>
+          
+          <div className="plan-content">
+            <div className="plan-price">
+              <h3>Price:</h3>
+              <p className="price-amount">£2000</p>
+              <p className="vat-text">+ VAT</p>
+            </div>
+
+            <div className="plan-summary">
+              <p><strong>Summary:</strong> Our Gold Subscription has unlimited vehicle listings.</p>
+            </div>
+
+            <div className="plan-features">
+              <h4>What's Included:</h4>
+              <ul>
+                <li>Attract buyers – Display your vehicle's best features with upto 100 photos</li>
+                <li>Attach a YouTube video for each vehicle to boost sales</li>
+                <li>We will provide your listing with a free basic HPI check & MOT status</li>
+                <li>A designated login area with a dealer dashboard to manage & update your stock</li>
+                <li>Unlimited listing alterations to keep your ads upto date</li>
+              </ul>
+            </div>
+
+            <button 
+              className="select-plan-button gold-button"
+              onClick={() => handleSelectPlan('gold')}
+              disabled={currentSubscription?.plan?.slug === 'gold'}
+            >
+              {currentSubscription?.plan?.slug === 'gold' ? 'Current Plan' : 'Select GOLD Package'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {currentSubscription && (
+        <div className="current-subscription-info">
+          <h3>Your Current Subscription</h3>
+          <div className="subscription-details">
+            <p><strong>Plan:</strong> {currentSubscription.plan?.name}</p>
+            <p><strong>Status:</strong> {currentSubscription.status}</p>
+            <p><strong>Listings Used:</strong> {currentSubscription.listingsUsed} / {currentSubscription.listingsLimit || 'Unlimited'}</p>
+            <p><strong>Next Billing Date:</strong> {new Date(currentSubscription.currentPeriodEnd).toLocaleDateString()}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TradeSubscriptionPage;

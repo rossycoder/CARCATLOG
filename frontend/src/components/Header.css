@@ -1,0 +1,762 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* HEADER */
+.header {
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* TOP NAV - Desktop Only */
+.top-nav {
+  display: none;
+  background: white;
+  border-bottom: 1px solid #efefef;
+}
+
+.top-nav-links {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  padding: 10px 20px;
+  flex-wrap: wrap;
+}
+
+.top-nav-link {
+  text-decoration: none;
+  color: #333;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.top-nav-link:hover,
+.top-nav-link.active {
+  color: #0066cc;
+  border-bottom: 2px solid #0066cc;
+  padding-bottom: 6px;
+}
+
+/* MAIN HEADER */
+.main-header {
+  width: 100%;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* LEFT - Menu (Mobile Only) */
+.header-left {
+  display: none;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  border-radius: 4px;
+}
+
+.menu-btn:hover {
+  color: #0066cc;
+  background: #f5f5f5;
+}
+
+/* CENTER - LOGO */
+.logo {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  max-width: 150px;
+}
+
+/* MAIN NAV - Desktop Only */
+.main-nav {
+  display: none;
+  gap: 20px;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.main-nav-link {
+  text-decoration: none;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.main-nav-link:hover {
+  color: #0066cc;
+  border-bottom-color: #0066cc;
+}
+
+/* RIGHT - Icons (Saved + Account + Trade) */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #333;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  border-radius: 4px;
+}
+
+.icon-btn:hover {
+  color: #0066cc;
+  background: #f5f5f5;
+}
+
+.saved-btn {
+  color: #333;
+}
+
+.saved-btn:hover {
+  color: #0066cc;
+  background: #f5f5f5;
+}
+
+.account-btn {
+  color: #333;
+}
+
+.account-btn:hover {
+  color: #0066cc;
+  background: #f5f5f5;
+}
+
+.icon-label {
+  display: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.trade-login-btn {
+  display: none;
+}
+
+/* ACCOUNT DROPDOWN - Desktop */
+.account-dropdown-container,
+.trade-dropdown-container {
+  position: relative;
+}
+
+.account-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-width: 220px;
+  z-index: 1002;
+  overflow: hidden;
+}
+
+.account-dropdown-header {
+  padding: 16px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.account-name {
+  display: block;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+}
+
+.account-email {
+  display: block;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.account-dropdown-divider {
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.account-dropdown-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #374151;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.account-dropdown-link:hover {
+  background: #f3f4f6;
+  color: #0066cc;
+}
+
+.account-dropdown-logout {
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  color: #ef4444;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.account-dropdown-logout:hover {
+  background: #fef2f2;
+}
+
+/* Sign in button styling */
+.signin-btn {
+  background: #0066cc !important;
+  color: white !important;
+  border-radius: 6px;
+  padding: 8px 16px !important;
+}
+
+.signin-btn:hover {
+  background: #0052a3 !important;
+}
+
+.signin-btn .icon-label {
+  color: white !important;
+}
+
+/* MOBILE MENU */
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.mobile-menu-overlay.active {
+  display: block;
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  max-width: 85vw;
+  height: 100vh;
+  background: white;
+  z-index: 1001;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.mobile-menu.open {
+  transform: translateX(0);
+}
+
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #efefef;
+}
+
+.mobile-menu-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+  text-align: center;
+}
+
+.close-menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.close-menu-btn:hover {
+  color: #0066cc;
+  background: #f5f5f5;
+}
+
+/* CHANNEL SWITCHER */
+.channel-switcher {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #efefef;
+  background: #fafafa;
+}
+
+.channel-switcher li {
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.channel-switcher a {
+  display: block;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.channel-switcher a:hover,
+.channel-switcher a[aria-current="true"] {
+  color: #0066cc;
+  border-bottom-color: #0066cc;
+  background: white;
+}
+
+.mobile-menu-divider {
+  height: 1px;
+  background: #efefef;
+  margin: 0;
+}
+
+.mobile-menu-section {
+  padding: 8px 0;
+}
+
+.mobile-menu-section-title {
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobile-menu-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.mobile-menu-link:hover {
+  background: #f5f5f5;
+  border-left-color: #0066cc;
+  color: #0066cc;
+}
+
+.mobile-menu-logout {
+  width: calc(100% - 32px);
+  margin: 12px 16px;
+  padding: 12px 16px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mobile-menu-logout:hover {
+  background: #dc2626;
+}
+
+/* ============================================
+   DESKTOP - 1025px+
+   ============================================ */
+@media (min-width: 1025px) {
+  .top-nav {
+    display: block;
+  }
+
+  .top-nav-links {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    justify-content: flex-start;
+    gap: 24px;
+  }
+
+  .header-left {
+    display: none !important;
+  }
+
+  .main-header {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 32px;
+  }
+
+  .logo {
+    flex: 0 0 auto;
+  }
+
+  .logo-img {
+    height: 100px;
+    max-width: 160px;
+  }
+
+  .main-nav {
+    display: flex !important;
+    gap: 28px;
+    flex: 1;
+    justify-content: flex-start;
+  }
+
+  .main-nav-link {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .header-right {
+    display: flex;
+    gap: 24px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .icon-btn {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: #333;
+  }
+
+  .icon-label {
+    display: block;
+  }
+
+  .trade-login-btn,
+  .trade-btn {
+    display: flex !important;
+  }
+
+  .channel-switcher {
+    display: none !important;
+  }
+
+  /* Desktop account dropdown */
+  .account-dropdown-container,
+  .trade-dropdown-container {
+    position: relative;
+  }
+
+  .account-dropdown {
+    display: block;
+  }
+
+  /* Mobile menu should be hidden on desktop */
+  .mobile-menu {
+    display: none !important;
+  }
+
+  .mobile-menu-overlay {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   TABLET - 769px to 1024px
+   ============================================ */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .top-nav {
+    display: block;
+  }
+
+  .top-nav-links {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    justify-content: flex-start;
+    gap: 20px;
+  }
+
+  .header-left {
+    display: none;
+  }
+
+  .main-header {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 24px;
+  }
+
+  .logo {
+    flex: 0 0 auto;
+  }
+
+  .logo-img {
+    height: 40px;
+    max-width: 140px;
+  }
+
+  .main-nav {
+    display: flex !important;
+    gap: 18px;
+    flex: 1;
+    justify-content: flex-start;
+  }
+
+  .main-nav-link {
+    font-size: 0.85rem;
+  }
+
+  .header-right {
+    display: flex;
+    gap: 20px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .icon-btn {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+  }
+
+  .icon-label {
+    display: block;
+  }
+
+  .trade-login-btn,
+  .trade-btn {
+    display: flex !important;
+  }
+
+  .channel-switcher {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   MOBILE - 768px and below
+   ============================================ */
+@media (max-width: 768px) {
+  .top-nav {
+    display: none !important;
+  }
+
+  .main-header {
+    max-width: 100%;
+    padding: 10px 6px;
+    gap: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  .header-left {
+    display: flex !important;
+    gap: 0;
+    flex-shrink: 0;
+    align-items: center;
+    order: 1;
+  }
+
+  .menu-btn {
+    padding: 8px;
+  }
+
+  .logo {
+    flex: 1;
+    margin: 0 8px;
+    order: 2;
+  }
+
+  .logo-img {
+    height: 90px;
+    max-width: 160px;
+  }
+
+  .main-nav {
+    display: none !important;
+  }
+
+  .header-right {
+    display: flex !important;
+    gap: 0;
+    flex-shrink: 0;
+    align-items: center;
+    position: static;
+    transform: none;
+    order: 3;
+  }
+
+  .saved-btn {
+    padding: 8px;
+    color: #333 !important;
+  }
+
+  .saved-btn:hover {
+    color: #0066cc !important;
+  }
+
+  .account-btn {
+    padding: 8px;
+    color: #333 !important;
+  }
+
+  .account-btn:hover {
+    color: #0066cc !important;
+  }
+
+  .trade-login-btn {
+    display: none !important;
+  }
+
+  .channel-switcher {
+    display: flex !important;
+  }
+
+  /* Hide account dropdown on mobile - use mobile menu instead */
+  .account-dropdown {
+    display: none !important;
+  }
+
+  .signin-btn {
+    background: transparent !important;
+    color: #333 !important;
+    padding: 8px !important;
+  }
+
+  .signin-btn .icon-label {
+    display: none;
+  }
+
+  /* Mobile menu should be visible */
+  .mobile-menu {
+    display: block !important;
+  }
+}
+
+/* ============================================
+   SMALL MOBILE - 480px and below
+   ============================================ */
+@media (max-width: 480px) {
+  .main-header {
+    padding: 8px 4px;
+    gap: 6px;
+  }
+
+  .logo-img {
+    height: 85px;
+    max-width: 140px;
+  }
+
+  .menu-btn {
+    padding: 6px;
+  }
+
+  .saved-btn {
+    padding: 6px;
+  }
+
+  .account-btn {
+    padding: 6px;
+  }
+
+  .logo {
+    margin: 0 6px;
+  }
+
+  .channel-switcher a {
+    padding: 10px 12px;
+    font-size: 0.75rem;
+  }
+
+  .header-right {
+    gap: 0;
+  }
+}

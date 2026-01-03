@@ -1,0 +1,458 @@
+/* Bike Finder Form Page Styles */
+
+.bike-finder-form-page {
+  min-height: 100vh;
+  background-color: #F5F5F5;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Form Section */
+.form-section {
+  order: -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 24px;
+  background-color: #F5F5F5;
+  min-height: auto;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 500px;
+  background-color: #FFFFFF;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+}
+
+.form-title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #1A1A1A;
+  margin: 0 0 28px 0;
+  text-align: center;
+  letter-spacing: -0.5px;
+}
+
+.bike-finder-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Form Field Styles */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #1A1A1A;
+}
+
+.required-indicator {
+  color: #DC2626;
+  margin-left: 2px;
+}
+
+.form-input {
+  height: 48px;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #1A1A1A;
+  background-color: #FFFFFF;
+  border: 2px solid #E0E0E0;
+  border-radius: 4px;
+  transition: border-color 0.2s ease;
+}
+
+.form-input::placeholder {
+  color: #999999;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #0033FF;
+}
+
+.form-input.input-error {
+  border-color: #DC2626;
+}
+
+.error-message {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #DC2626;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.warning-message {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #F59E0B;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Submit Button */
+.submit-button {
+  height: 48px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #FFFFFF;
+  background-color: #0066FF;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #0052CC;
+}
+
+.submit-button:active:not(:disabled) {
+  background-color: #003D99;
+}
+
+.submit-button:disabled {
+  background-color: #0066FF;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #FFFFFF;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Back to Top Button */
+.back-to-top-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  background-color: #FFFFFF;
+  border: 2px solid #E0E0E0;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+
+.back-to-top-button:hover {
+  background-color: #F5F5F5;
+  border-color: #0033FF;
+}
+
+.back-to-top-button:focus {
+  outline: 2px solid #0033FF;
+  outline-offset: 2px;
+}
+
+.back-to-top-button svg {
+  width: 20px;
+  height: 20px;
+  color: #1A1A1A;
+}
+
+.back-to-top-text {
+  font-size: 10px;
+  color: #666666;
+  font-weight: 500;
+}
+
+/* Vehicle Details Section */
+.vehicle-details-section {
+  background-color: #FFFFFF;
+  padding: 48px 24px;
+  border-top: 1px solid #E0E0E0;
+}
+
+.vehicle-details-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.vehicle-details-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin: 0 0 32px 0;
+  text-align: center;
+}
+
+.vehicle-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 18px;
+  font-weight: 500;
+  color: #1A1A1A;
+  margin: 0;
+  padding: 12px 0;
+  border-bottom: 2px solid #F5F5F5;
+}
+
+.detail-input {
+  height: 48px;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #1A1A1A;
+  background-color: #FFFFFF;
+  border: 2px solid #E0E0E0;
+  border-radius: 4px;
+  transition: border-color 0.2s ease;
+}
+
+.detail-input:focus {
+  outline: none;
+  border-color: #0033FF;
+}
+
+.detail-input select {
+  cursor: pointer;
+}
+
+/* Vehicle Actions */
+.vehicle-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid #E0E0E0;
+}
+
+.edit-button,
+.save-button,
+.cancel-button,
+.create-advert-button {
+  height: 48px;
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.edit-button {
+  background-color: #FFFFFF;
+  color: #0033FF;
+  border: 2px solid #0033FF;
+}
+
+.edit-button:hover {
+  background-color: #F5F5FF;
+}
+
+.save-button {
+  background-color: #10B981;
+  color: #FFFFFF;
+  border: 2px solid #10B981;
+}
+
+.save-button:hover {
+  background-color: #059669;
+  border-color: #059669;
+}
+
+.cancel-button {
+  background-color: #FFFFFF;
+  color: #666666;
+  border: 2px solid #E0E0E0;
+}
+
+.cancel-button:hover {
+  background-color: #F5F5F5;
+  border-color: #CCCCCC;
+}
+
+.create-advert-button {
+  background-color: #0033FF;
+  color: #FFFFFF;
+  border: 2px solid #0033FF;
+  min-width: 200px;
+}
+
+.create-advert-button:hover {
+  background-color: #0029CC;
+  border-color: #0029CC;
+}
+
+.create-advert-button:active {
+  background-color: #001F99;
+  border-color: #001F99;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .form-section {
+    padding: 24px 16px;
+  }
+
+  .form-container {
+    padding: 24px;
+  }
+
+  .form-title {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .submit-button {
+    width: 100%;
+  }
+
+  .back-to-top-button {
+    bottom: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .back-to-top-text {
+    display: none;
+  }
+
+  .vehicle-details-section {
+    padding: 32px 16px;
+  }
+
+  .vehicle-details-title {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .vehicle-details-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .vehicle-actions {
+    flex-direction: column;
+  }
+
+  .edit-button,
+  .save-button,
+  .cancel-button,
+  .create-advert-button {
+    width: 100%;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+  
+  .back-to-top-button,
+  .form-input,
+  .submit-button {
+    transition: none;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.form-input:focus-visible,
+.submit-button:focus-visible,
+.back-to-top-button:focus-visible,
+.edit-button:focus-visible,
+.save-button:focus-visible,
+.cancel-button:focus-visible,
+.create-advert-button:focus-visible {
+  outline: 2px solid #0033FF;
+  outline-offset: 2px;
+}
+
+
+/* Publish Vehicle Button for Trade Dealers */
+.publish-vehicle-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+}
+
+.publish-vehicle-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+}
+
+.publish-vehicle-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

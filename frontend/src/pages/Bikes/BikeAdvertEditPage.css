@@ -1,0 +1,791 @@
+.bike-advert-edit-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.bike-advert-edit-page.loading,
+.bike-advert-edit-page.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+
+.loading-spinner {
+  text-align: center;
+}
+
+.loading-spinner .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e3e3e3;
+  border-top: 4px solid #1a4ba0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Popup Overlay */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.popup-content {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.popup-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #1a4ba0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.popup-close:hover {
+  text-decoration: underline;
+}
+
+.popup-content h2 {
+  margin: 0 0 24px 0;
+  font-size: 24px;
+  color: #333;
+  font-weight: 600;
+}
+
+.popup-checklist {
+  margin-bottom: 24px;
+}
+
+.popup-checklist > p {
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  color: #333;
+}
+
+.checkmark {
+  color: #333;
+  font-weight: bold;
+}
+
+.photo-icon {
+  font-size: 18px;
+}
+
+.popup-note {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.popup-ok-button {
+  width: 100%;
+  background: #1a4ba0;
+  color: white;
+  border: none;
+  padding: 16px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.popup-ok-button:hover {
+  background: #153d85;
+}
+
+/* Header */
+.advert-header {
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  padding: 20px 0;
+}
+
+.advert-header .container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #1a4ba0;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #153d85;
+  text-decoration: underline;
+}
+
+.advert-header h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+  font-weight: 600;
+}
+
+.advert-info {
+  text-align: right;
+}
+
+.user-email {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.advert-id {
+  margin: 4px 0 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.advert-content {
+  padding: 24px 0;
+}
+
+/* Photo Section */
+.photo-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Upload Progress */
+.upload-progress {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.upload-progress p {
+  margin: 8px 0 0 0;
+  color: #1a4ba0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #1a4ba0;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.upload-button.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.photo-upload-area {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  background: #fafafa;
+  margin-bottom: 16px;
+}
+
+.empty-photos .camera-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-photos p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.upload-button {
+  background: white;
+  color: #1a4ba0;
+  padding: 12px 24px;
+  border-radius: 24px;
+  border: 2px solid #1a4ba0;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.upload-button:hover {
+  background: #1a4ba0;
+  color: white;
+}
+
+.photo-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e8f4fd;
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: #333;
+  font-size: 14px;
+}
+
+.info-icon {
+  font-size: 16px;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+}
+
+.photo-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.photo-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-photo {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.add-more-photos {
+  aspect-ratio: 1;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #fafafa;
+}
+
+.add-more-photos:hover {
+  border-color: #1a4ba0;
+}
+
+.add-icon {
+  font-size: 24px;
+  color: #666;
+}
+
+/* Vehicle Details Section */
+.vehicle-details-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.vehicle-details-section h2 {
+  margin: 0 0 8px 0;
+  font-size: 22px;
+  color: #333;
+  font-weight: 600;
+}
+
+.vehicle-subtitle {
+  color: #666;
+  margin: 0 0 16px 0;
+  font-size: 14px;
+}
+
+.vehicle-actions {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.edit-link,
+.attention-link {
+  color: #1a4ba0;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.edit-link:hover,
+.attention-link:hover {
+  text-decoration: underline;
+}
+
+.price-section {
+  border-top: 1px solid #eee;
+  padding-top: 24px;
+}
+
+.price-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.currency {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+.price-input {
+  font-size: 28px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  width: 150px;
+  color: #333;
+}
+
+.price-input:focus {
+  outline: none;
+  border-bottom: 2px solid #1a4ba0;
+}
+
+.price-input.error {
+  border-bottom: 2px solid #dc3545;
+}
+
+.edit-price-link {
+  color: #1a4ba0;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.edit-price-link:hover {
+  text-decoration: underline;
+}
+
+.price-note,
+.finance-note {
+  color: #666;
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+.find-out-more {
+  color: #1a4ba0;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.find-out-more:hover {
+  text-decoration: underline;
+}
+
+/* Specifications Section */
+.specifications-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.specifications-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+}
+
+.spec-actions {
+  margin-bottom: 16px;
+}
+
+.mileage-note {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.mileage-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.mileage-icon {
+  font-size: 18px;
+}
+
+.mileage-text {
+  font-weight: 500;
+  color: #333;
+}
+
+.edit-mileage {
+  color: #1a4ba0;
+  text-decoration: none;
+  font-size: 14px;
+  margin-left: auto;
+}
+
+.edit-mileage:hover {
+  text-decoration: underline;
+}
+
+.spec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.spec-item:nth-child(odd) {
+  padding-right: 16px;
+}
+
+.spec-item:nth-child(even) {
+  padding-left: 16px;
+  border-left: 1px solid #eee;
+}
+
+.spec-item label {
+  color: #333;
+  font-weight: 400;
+}
+
+.spec-item span {
+  color: #666;
+}
+
+/* Description Section */
+.description-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.description-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+}
+
+.section-note {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.description-textarea {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 120px;
+  margin-bottom: 8px;
+}
+
+.description-textarea:focus {
+  outline: none;
+  border-color: #1a4ba0;
+}
+
+.description-textarea.error {
+  border-color: #dc3545;
+}
+
+.add-description-link {
+  color: #1a4ba0;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.add-description-link:hover {
+  text-decoration: underline;
+}
+
+/* Additional Sections */
+.additional-sections {
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.section-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.section-item:last-child {
+  border-bottom: none;
+}
+
+.section-item:hover {
+  background: #f8f9fa;
+}
+
+.section-icon {
+  font-size: 18px;
+  margin-right: 12px;
+}
+
+.section-text {
+  flex: 1;
+  color: #333;
+  font-size: 14px;
+}
+
+.section-arrow {
+  color: #666;
+  font-size: 18px;
+}
+
+/* Actions Section */
+.actions-section {
+  padding: 24px 0;
+}
+
+.validation-message {
+  color: #dc3545;
+  font-size: 14px;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  background: #fff5f5;
+  border: 1px solid #ffcccc;
+  border-radius: 8px;
+  max-width: 300px;
+}
+
+.publish-button {
+  width: 100%;
+  max-width: 300px;
+  background: #1a4ba0;
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.publish-button:hover:not(:disabled) {
+  background: #153d85;
+}
+
+.publish-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #999;
+}
+
+/* Error Messages */
+.error-message {
+  color: #dc3545;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+/* Max Photos Reached Indicator */
+.max-photos-reached {
+  width: 150px;
+  height: 150px;
+  border: 2px dashed #28a745;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f0f9f4;
+  cursor: not-allowed;
+}
+
+.max-photos-reached .max-icon {
+  font-size: 2rem;
+  color: #28a745;
+  margin-bottom: 8px;
+}
+
+.max-photos-reached span {
+  font-size: 0.9rem;
+  color: #28a745;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+  
+  .advert-header .container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .advert-info {
+    text-align: left;
+  }
+  
+  .spec-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .spec-item:nth-child(even) {
+    padding-left: 0;
+    border-left: none;
+  }
+  
+  .spec-item:nth-child(odd) {
+    padding-right: 0;
+  }
+  
+  .popup-content {
+    padding: 24px;
+    margin: 16px;
+  }
+  
+  .popup-content h2 {
+    font-size: 20px;
+  }
+}
+
+
+/* Publish Vehicle Button for Trade Dealers - Blue Color */
+.publish-vehicle-button {
+  width: 100%;
+  max-width: 300px;
+  background: #1a4ba0;
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.publish-vehicle-button:hover:not(:disabled) {
+  background: #153d85;
+}
+
+.publish-vehicle-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #999;
+}
+
+/* Trade Info Text */
+.trade-info {
+  color: #666;
+  font-size: 14px;
+  margin-top: 12px;
+  text-align: center;
+  max-width: 300px;
+}
+
+/* Publish Error */
+.publish-error {
+  color: #dc3545;
+  font-size: 14px;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  background: #fff5f5;
+  border: 1px solid #ffcccc;
+  border-radius: 8px;
+  max-width: 300px;
+}

@@ -1,0 +1,1270 @@
+.new-cars-page {
+  min-height: 100vh;
+  background: white;
+}
+
+/* Hero Section */
+.new-hero {
+  background: #f5f5f5;
+  padding: 0 20px;
+  position: relative;
+}
+
+.new-hero-background {
+  background: linear-gradient(135deg, #0a1628 0%, #1a2942 100%);
+  max-width: 1400px;
+  margin: 0 auto;
+  border-radius: 0 0 24px 24px;
+  padding: 60px 20px 140px;
+  position: relative;
+}
+
+.new-hero-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.new-hero-label {
+  color: rgba(255,255,255,0.8);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.new-hero-title {
+  color: white;
+  font-size: 56px;
+  font-weight: 900;
+  margin: 0 0 60px 0;
+  letter-spacing: -1px;
+}
+
+.new-search-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  gap: 20px;
+  align-items: end;
+}
+
+.new-search-fields {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  flex: 1;
+}
+
+.new-search-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #666;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.new-search-field input,
+.new-search-field select {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.new-search-btn {
+  padding: 16px 32px;
+  background: #0066ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.new-search-btn:hover {
+  background: #0052cc;
+}
+
+/* Deals Section - Leasing Carousel Style */
+.new-deals {
+  padding: 80px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+}
+
+.new-deals h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 40px;
+}
+
+.deals-carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.carousel-prev,
+.carousel-next {
+  background: white;
+  border: 1px solid #e0e0e0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.3s;
+  z-index: 2;
+}
+
+.carousel-prev:hover,
+.carousel-next:hover {
+  background: #f5f5f5;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.deals-scroll {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.section-subtitle {
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+  margin: -20px 0 40px 0;
+}
+
+.loading-state,
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+.lease-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.3s;
+  cursor: pointer;
+}
+
+.lease-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.lease-image {
+  position: relative;
+  background: #f5f5f5;
+  padding: 0;
+  aspect-ratio: 16/10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.image-count {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 10;
+}
+
+.lease-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lease-details {
+  padding: 16px;
+  text-align: left;
+}
+
+.lease-prices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 12px;
+}
+
+.price-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-label {
+  font-size: 11px;
+  color: #666;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.price-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 2px;
+}
+
+.price-period {
+  font-size: 11px;
+  color: #999;
+}
+
+.lease-delivery {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.lease-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+.lease-spec {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.view-all-link {
+  background: none;
+  border: none;
+  color: #0066ff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 32px;
+  text-decoration: underline;
+}
+
+.view-all-link:hover {
+  color: #0052cc;
+}
+
+/* Award Section */
+.award-section {
+  background: #f5f5f5;
+  padding: 80px 20px;
+}
+
+.award-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.award-text h2 {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.award-text p {
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #0066ff;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.award-image {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 300px;
+}
+
+.award-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.award-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(10,22,40,0.95), transparent);
+  padding: 32px;
+  color: white;
+}
+
+.award-overlay h3 {
+  font-size: 24px;
+  margin: 0 0 8px 0;
+}
+
+.award-overlay p {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Promo Banner */
+.promo-banner {
+  background: #e60023;
+  margin: 40px 20px;
+  border-radius: 24px;
+  padding: 60px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+  color: white;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.promo-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  opacity: 0.8;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.promo-content h2 {
+  font-size: 36px;
+  font-weight: 900;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.promo-content p {
+  margin: 0 0 24px 0;
+  opacity: 0.9;
+}
+
+.promo-btn {
+  background: white;
+  color: #e60023;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 24px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.promo-terms {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 16px;
+}
+
+.promo-image img {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Brand Grid */
+.brand-grid-section {
+  padding: 60px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.brand-grid-section h3 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 40px;
+}
+
+.brand-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.brand-item {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+}
+
+.brand-item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.brand-item img {
+  height: 40px;
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+
+.brand-item span {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.brand-item small {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Savings Section */
+.savings-section {
+  background: #f5f5f5;
+  padding: 80px 20px;
+}
+
+.savings-card {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+
+.savings-text {
+  padding: 60px;
+}
+
+.savings-text h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.savings-text p {
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.outline-btn {
+  border: 2px solid #0066ff;
+  background: white;
+  color: #0066ff;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.savings-note {
+  font-size: 12px;
+  color: #999;
+  margin-top: 24px;
+}
+
+.savings-visual {
+  background: #f0f4f8;
+  padding: 60px;
+  position: relative;
+}
+
+.savings-stat {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  text-align: right;
+}
+
+.savings-stat span {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+}
+
+.savings-stat strong {
+  display: block;
+  font-size: 48px;
+  font-weight: 900;
+  color: #0a1628;
+  margin: 8px 0;
+}
+
+.savings-stat small {
+  display: block;
+  font-size: 12px;
+  color: #0066ff;
+  font-weight: 700;
+}
+
+.savings-visual img {
+  width: 100%;
+  margin-top: 60px;
+}
+
+/* Stock Section */
+.stock-section {
+  padding: 80px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stock-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.stock-number h2 {
+  font-size: 72px;
+  font-weight: 900;
+  color: #0a1628;
+  margin: 0 0 8px 0;
+}
+
+.stock-number p {
+  font-size: 14px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 24px;
+}
+
+.stock-number img {
+  width: 100%;
+  border-radius: 12px;
+}
+
+.stock-text h3 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.stock-text p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* Benefits Section - Professional */
+.benefits-section-pro {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 100px 20px;
+}
+
+.benefits-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.benefits-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.benefits-header h2 {
+  font-size: 42px;
+  font-weight: 800;
+  color: #0a1628;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.5px;
+}
+
+.benefits-header p {
+  font-size: 18px;
+  color: #666;
+  margin: 0;
+}
+
+.benefits-grid-pro {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+
+.benefit-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.benefit-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+}
+
+.benefit-icon-pro {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  color: white;
+}
+
+.benefit-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0a1628;
+  margin: 0 0 16px 0;
+  line-height: 1.3;
+}
+
+.benefit-card p {
+  color: #666;
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Reviews Section */
+.reviews-section {
+  background: #f5f5f5;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.reviews-section h3 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.reviews-section > p {
+  color: #666;
+  margin-bottom: 40px;
+}
+
+.reviews-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.review-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: left;
+}
+
+.review-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.review-card h4 {
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  min-height: 60px;
+}
+
+.review-stars {
+  padding: 0 16px 16px;
+  color: #ffa500;
+}
+
+.star-filled {
+  color: #ffa500;
+}
+
+.star-empty {
+  color: #e0e0e0;
+}
+
+/* FAQ Section */
+.faq-section {
+  padding: 80px 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.faq-section h3 {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.faq-list {
+  border-top: 1px solid #e0e0e0;
+}
+
+.faq-item {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.faq-item button {
+  width: 100%;
+  padding: 20px 0;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faq-item button span {
+  font-size: 24px;
+  color: #0066ff;
+}
+
+.faq-answer {
+  padding: 0 0 20px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Newsletter Section */
+.newsletter-section {
+  padding: 80px 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.newsletter-section h3 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.newsletter-section > p {
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.newsletter-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.newsletter-form input {
+  flex: 1;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.newsletter-form button {
+  padding: 16px 32px;
+  background: #0066ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.newsletter-terms {
+  font-size: 12px;
+  color: #999;
+  text-align: left;
+}
+
+/* Responsive - Large Tablet */
+@media (max-width: 1200px) {
+  .deals-scroll {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .reviews-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Responsive - Tablet */
+@media (max-width: 1024px) {
+  .new-hero-background {
+    padding: 50px 20px 120px;
+  }
+  
+  .new-hero-title {
+    font-size: 42px;
+    margin-bottom: 40px;
+  }
+  
+  .new-search-card {
+    flex-direction: column;
+    padding: 24px;
+    gap: 16px;
+  }
+  
+  .new-search-fields {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .new-search-btn {
+    width: 100%;
+  }
+  
+  .deals-scroll {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .brand-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .benefits-grid-pro {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  
+  .award-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .promo-banner {
+    grid-template-columns: 1fr;
+    padding: 40px;
+    gap: 30px;
+  }
+  
+  .promo-image {
+    text-align: center;
+  }
+  
+  .savings-card {
+    grid-template-columns: 1fr;
+  }
+  
+  .stock-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .reviews-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+  .new-hero {
+    padding: 0;
+    background: linear-gradient(135deg, #0a1628 0%, #1a2942 100%);
+  }
+
+  .new-hero-background {
+    padding: 30px 16px 30px;
+    border-radius: 0;
+    background: transparent;
+    max-width: 100%;
+  }
+  
+  .new-hero-container {
+    padding: 0;
+  }
+  
+  .new-hero-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+    line-height: 1.2;
+    padding: 0;
+    text-align: center;
+  }
+  
+  .new-hero-label {
+    font-size: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  .new-search-card {
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    margin: 0;
+  }
+  
+  .new-search-fields {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  
+  .new-search-field {
+    text-align: left;
+  }
+  
+  .new-search-field:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  
+  .new-search-field label {
+    font-size: 11px;
+    margin-bottom: 6px;
+    text-align: left;
+  }
+  
+  .new-search-field input,
+  .new-search-field select {
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 8px;
+    width: 100%;
+  }
+  
+  .new-search-btn {
+    padding: 14px 20px;
+    font-size: 15px;
+    border-radius: 8px;
+    margin-top: 8px;
+    width: 100%;
+  }
+  
+  .new-deals {
+    padding: 50px 16px;
+  }
+  
+  .new-deals h2 {
+    font-size: 26px;
+    margin-bottom: 30px;
+  }
+  
+  .deals-carousel {
+    flex-direction: column;
+  }
+  
+  .carousel-prev,
+  .carousel-next {
+    display: none;
+  }
+  
+  .deals-scroll {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .lease-card {
+    max-width: 100%;
+  }
+  
+  .lease-prices {
+    gap: 12px;
+  }
+  
+  .price-value {
+    font-size: 24px;
+  }
+  
+  .award-section {
+    padding: 50px 16px;
+  }
+  
+  .award-text h2 {
+    font-size: 28px;
+  }
+  
+  .promo-banner {
+    margin: 30px 16px;
+    padding: 30px 20px;
+    border-radius: 16px;
+  }
+  
+  .promo-content h2 {
+    font-size: 26px;
+  }
+  
+  .promo-btn {
+    padding: 14px 24px;
+    font-size: 15px;
+    width: 100%;
+  }
+  
+  .brand-grid-section {
+    padding: 40px 16px;
+  }
+  
+  .brand-grid-section h3 {
+    font-size: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .brand-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .brand-item {
+    padding: 20px;
+  }
+  
+  .savings-section {
+    padding: 50px 16px;
+  }
+  
+  .savings-text {
+    padding: 30px 20px;
+  }
+  
+  .savings-text h2 {
+    font-size: 26px;
+  }
+  
+  .savings-visual {
+    padding: 30px 20px;
+  }
+  
+  .savings-stat strong {
+    font-size: 36px;
+  }
+  
+  .stock-section {
+    padding: 50px 16px;
+  }
+  
+  .stock-number h2 {
+    font-size: 48px;
+  }
+  
+  .stock-text h3 {
+    font-size: 26px;
+  }
+  
+  .benefits-section-pro {
+    padding: 60px 16px;
+  }
+  
+  .benefits-header h2 {
+    font-size: 28px;
+  }
+  
+  .benefits-header p {
+    font-size: 16px;
+  }
+  
+  .benefits-grid-pro {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .benefit-card {
+    padding: 30px 24px;
+  }
+  
+  .benefit-icon-pro {
+    width: 70px;
+    height: 70px;
+    border-radius: 16px;
+  }
+  
+  .reviews-section {
+    padding: 50px 16px;
+  }
+  
+  .reviews-section h3 {
+    font-size: 24px;
+  }
+  
+  .reviews-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .faq-section {
+    padding: 50px 16px;
+  }
+  
+  .faq-section h3 {
+    font-size: 24px;
+  }
+  
+  .faq-item button {
+    font-size: 15px;
+    padding: 16px 0;
+  }
+  
+  .newsletter-section {
+    padding: 50px 16px;
+  }
+  
+  .newsletter-section h3 {
+    font-size: 24px;
+  }
+  
+  .newsletter-form {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .newsletter-form input {
+    padding: 14px;
+  }
+  
+  .newsletter-form button {
+    padding: 14px 24px;
+  }
+}
+
+/* Responsive - Small Mobile */
+@media (max-width: 480px) {
+  .new-hero {
+    padding: 0;
+  }
+
+  .new-hero-background {
+    padding: 20px 12px 24px;
+  }
+  
+  .new-hero-title {
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+  
+  .new-hero-label {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+  }
+  
+  .new-search-card {
+    padding: 14px;
+  }
+  
+  .new-search-fields {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  
+  .new-search-field:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  
+  .new-search-field input,
+  .new-search-field select {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  
+  .new-search-btn {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  
+  .new-deals h2 {
+    font-size: 22px;
+  }
+  
+  .price-value {
+    font-size: 22px;
+  }
+  
+  .lease-title {
+    font-size: 14px;
+  }
+  
+  .award-text h2 {
+    font-size: 24px;
+  }
+  
+  .promo-content h2 {
+    font-size: 22px;
+  }
+  
+  .brand-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .brand-item {
+    padding: 16px;
+  }
+  
+  .brand-item img {
+    height: 30px;
+  }
+  
+  .brand-item span {
+    font-size: 13px;
+  }
+  
+  .savings-text h2,
+  .stock-text h3 {
+    font-size: 22px;
+  }
+  
+  .stock-number h2 {
+    font-size: 40px;
+  }
+  
+  .benefits-header h2 {
+    font-size: 24px;
+  }
+  
+  .benefit-card h3 {
+    font-size: 18px;
+  }
+  
+  .reviews-section h3,
+  .faq-section h3,
+  .newsletter-section h3 {
+    font-size: 20px;
+  }
+}

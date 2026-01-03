@@ -1,0 +1,370 @@
+.vehicle-detail-page {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 20px 0;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.breadcrumb {
+  margin-bottom: 20px;
+}
+
+.back-button {
+  background: rgb(38, 17, 160);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  font-weight: 500;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Summary Card - matching the image exactly */
+.summary-card {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+}
+
+.summary-card h2 {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.summary-card p {
+  color: #6c757d;
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+}
+
+.summary-table {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #dee2e6;
+  background: white;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-row.total-row {
+  background: #f8f9fa;
+  font-weight: 600;
+  border-top: 2px solid #dee2e6;
+}
+
+.summary-row .label {
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.summary-row .value {
+  color: #212529;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.total-row .label,
+.total-row .value {
+  font-weight: 600;
+  color: #212529;
+}
+
+/* Payment Method Card */
+.payment-method-card {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+}
+
+.payment-method-card h2 {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Payment Options */
+.payment-option {
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.payment-option.selected {
+  border-color: #007bff;
+}
+
+.payment-option-header {
+  padding: 16px;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.payment-option-header input[type="radio"] {
+  margin: 0;
+}
+
+.payment-option-header label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 0;
+}
+
+.payment-icon {
+  font-size: 1.2rem;
+}
+
+.secure-notice {
+  padding: 12px 16px;
+  background: #e7f3ff;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #0056b3;
+}
+
+.secure-icon {
+  font-size: 1rem;
+}
+
+/* Card Form */
+.card-form {
+  padding: 20px 16px;
+  background: white;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-group {
+  flex: 1;
+  position: relative;
+}
+
+.form-group.half {
+  flex: 0.5;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+.card-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.card-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.card-icons {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.card-brand {
+  font-size: 1.2rem;
+}
+
+/* Terms Section */
+.terms-section {
+  margin: 24px 0;
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: #495057;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.checkbox-label .link {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.checkbox-label .link:hover {
+  color: #0056b3;
+}
+
+/* Buy Button */
+.buy-button {
+  width: 100%;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.buy-button:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.buy-button:active {
+  transform: translateY(0);
+}
+
+/* Loading and Error States */
+.loading-card,
+.error-card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-card h2 {
+  color: #dc3545;
+  margin-bottom: 15px;
+}
+
+.retry-button,
+.back-button-secondary {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  margin: 0 5px;
+  transition: all 0.2s ease;
+}
+
+.retry-button {
+  background: #007bff;
+  color: white;
+}
+
+.retry-button:hover {
+  background: #0056b3;
+}
+
+.back-button-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.back-button-secondary:hover {
+  background: #545b62;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 15px;
+  }
+  
+  .summary-card,
+  .payment-method-card {
+    padding: 16px;
+  }
+  
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .form-group.half {
+    flex: 1;
+  }
+  
+  .summary-row {
+    padding: 10px 12px;
+  }
+}

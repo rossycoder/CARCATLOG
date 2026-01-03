@@ -1,0 +1,202 @@
+.trade-verify-email-page {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 60px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.trade-verify-email-container {
+  max-width: 600px;
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  padding: 60px 40px;
+  text-align: center;
+}
+
+.verify-status {
+  padding: 40px 20px;
+}
+
+/* Verifying State */
+.verify-status.verifying h2 {
+  font-size: 28px;
+  color: #1a73e8;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+.verify-status.verifying p {
+  font-size: 16px;
+  color: #666;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1a73e8;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 30px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Success State */
+.verify-status.success .success-icon {
+  width: 80px;
+  height: 80px;
+  background: #27ae60;
+  color: white;
+  font-size: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-weight: bold;
+}
+
+.verify-status.success h2 {
+  font-size: 32px;
+  color: #27ae60;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+.verify-status.success p {
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.redirect-message {
+  color: #7f8c8d !important;
+  font-size: 15px !important;
+  margin-top: 20px;
+  margin-bottom: 24px;
+}
+
+/* Error State */
+.verify-status.error .error-icon {
+  width: 80px;
+  height: 80px;
+  background: #e74c3c;
+  color: white;
+  font-size: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-weight: bold;
+}
+
+.verify-status.error h2 {
+  font-size: 32px;
+  color: #e74c3c;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+.verify-status.error p {
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-secondary {
+  display: inline-block;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  margin: 8px;
+}
+
+.btn-primary {
+  background: #1a73e8;
+  color: white;
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.2);
+}
+
+.btn-primary:hover {
+  background: #1557b0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+}
+
+.btn-secondary {
+  background: white;
+  color: #1a73e8;
+  border: 2px solid #1a73e8;
+}
+
+.btn-secondary:hover {
+  background: #f0f7ff;
+}
+
+.error-actions {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Footer */
+.verify-footer {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.verify-footer a {
+  color: #7f8c8d;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.verify-footer a:hover {
+  color: #1a73e8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .trade-verify-email-page {
+    padding: 30px 15px;
+  }
+
+  .trade-verify-email-container {
+    padding: 40px 24px;
+  }
+
+  .verify-status.success h2,
+  .verify-status.error h2 {
+    font-size: 26px;
+  }
+
+  .error-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    margin: 6px 0;
+  }
+}

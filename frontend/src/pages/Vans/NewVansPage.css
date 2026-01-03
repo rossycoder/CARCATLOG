@@ -1,0 +1,455 @@
+.new-vans-page {
+  min-height: 100vh;
+}
+
+/* Hero Section */
+.new-vans-hero {
+  background: #f5f5f5;
+  padding: 0 20px;
+}
+
+.new-vans-hero-background {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+  max-width: 1400px;
+  margin: 0 auto;
+  border-radius: 0 0 24px 24px;
+  padding: 60px 20px;
+  text-align: center;
+  color: white;
+}
+
+.new-vans-hero .hero-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.hero-label {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.new-vans-hero h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+}
+
+/* Search Card */
+.search-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.search-fields {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.search-field label {
+  display: block;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.search-field input,
+.search-field select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #000;
+}
+
+.search-btn {
+  width: 100%;
+  padding: 14px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-btn:hover {
+  background: #1d4ed8;
+}
+
+/* New Vans Section */
+.new-vans-section {
+  padding: 60px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.new-vans-section h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  color: #1e3a5f;
+  margin-bottom: 8px;
+}
+
+.section-subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 32px;
+}
+
+/* Carousel Container */
+.vans-carousel-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.vans-carousel-wrapper {
+  overflow: hidden;
+  flex: 1;
+  margin: 0 16px;
+}
+
+.vans-carousel {
+  display: flex;
+  transition: transform 0.4s ease;
+}
+
+/* Carousel Arrows */
+.carousel-arrow {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  background: white;
+  font-size: 28px;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.carousel-arrow:hover:not(.disabled) {
+  border-color: #1e3a5f;
+  color: #1e3a5f;
+  background: #f8f9fa;
+}
+
+.carousel-arrow.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Van Carousel Card */
+.van-carousel-card {
+  flex: 0 0 25%;
+  padding: 0 8px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.van-carousel-card > div {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.van-carousel-card:hover > div {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.van-card-image {
+  height: 180px;
+  background: #f0f0f0;
+  overflow: hidden;
+  position: relative;
+}
+
+.van-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-count {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 1;
+}
+
+.no-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  background: #e9ecef;
+}
+
+.van-card-pricing {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.price-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.price-label {
+  font-size: 12px;
+  color: #666;
+}
+
+.price-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+.price-term {
+  font-size: 12px;
+  color: #666;
+}
+
+.delivery-info {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #007bff;
+  font-weight: 500;
+}
+
+.van-card-details {
+  padding: 16px;
+}
+
+.van-card-details h3 {
+  font-size: 1rem;
+  color: #1e3a5f;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.van-specs-text {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Legacy grid styles (fallback) */
+.vans-scroll {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.van-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.van-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.van-image {
+  height: 180px;
+  background: #f0f0f0;
+  overflow: hidden;
+}
+
+.van-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.van-details {
+  padding: 16px;
+}
+
+.van-details h3 {
+  font-size: 1rem;
+  color: #1e3a5f;
+  margin-bottom: 8px;
+}
+
+.van-specs {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.van-price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+.view-all-link {
+  display: block;
+  margin: 0 auto;
+  padding: 14px 32px;
+  background: transparent;
+  color: #2563eb;
+  border: 2px solid #2563eb;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-all-link:hover {
+  background: #2563eb;
+  color: white;
+}
+
+.loading-state, .no-results {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+/* Benefits Section */
+.benefits-section {
+  padding: 60px 20px;
+  background: #f8f9fa;
+}
+
+.benefits-section h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  color: #1e3a5f;
+  margin-bottom: 40px;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.benefit-card {
+  text-align: center;
+  padding: 30px 20px;
+  background: white;
+  border-radius: 12px;
+}
+
+.benefit-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.benefit-card h3 {
+  font-size: 1.1rem;
+  color: #1e3a5f;
+  margin-bottom: 8px;
+}
+
+.benefit-card p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+  .van-carousel-card {
+    flex: 0 0 50%;
+  }
+  
+  .vans-scroll {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .benefits-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .new-vans-hero {
+    padding: 0 16px;
+  }
+
+  .new-vans-hero-background {
+    padding: 40px 16px;
+    border-radius: 0 0 16px 16px;
+  }
+  
+  .new-vans-hero h1 {
+    font-size: 1.8rem;
+  }
+  
+  .search-fields {
+    grid-template-columns: 1fr;
+  }
+  
+  .van-carousel-card {
+    flex: 0 0 100%;
+  }
+  
+  .carousel-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+  }
+  
+  .vans-carousel-wrapper {
+    margin: 0 8px;
+  }
+  
+  .vans-scroll {
+    grid-template-columns: 1fr;
+  }
+  
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
+}

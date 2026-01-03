@@ -1,0 +1,125 @@
+.about-autotrader {
+  background-color: #f8f9fa;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.about-logo h2 {
+  font-size: 1.5rem;
+  color: #1f8300;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.about-text h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #242d3d;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.about-text p {
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.trustpilot-widget {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.trustpilot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.trustpilot-logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #00b67a;
+}
+
+.trustpilot-badge {
+  background-color: #00b67a;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.trustpilot-stars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.star {
+  font-size: 1.5rem;
+  color: #ddd;
+}
+
+.star.filled {
+  color: #00b67a;
+}
+
+.star.half {
+  background: linear-gradient(90deg, #00b67a 50%, #ddd 50%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.rating-text {
+  margin-left: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #242d3d;
+}
+
+.review-count {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.trustpilot-link {
+  color: #1f8300;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.trustpilot-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1024px) {
+  .about-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-text h3 {
+    font-size: 1.75rem;
+  }
+
+  .trustpilot-widget {
+    padding: 24px;
+  }
+}

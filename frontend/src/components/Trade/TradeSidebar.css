@@ -1,0 +1,96 @@
+.trade-sidebar {
+  width: 260px;
+  background: #2c3e50;
+  color: white;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+
+.trade-sidebar-header {
+  padding: 30px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trade-sidebar-header h2 {
+  font-size: 18px;
+  margin: 0 0 8px 0;
+  color: white;
+}
+
+.dealer-email {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.trade-sidebar-nav {
+  flex: 1;
+  padding: 20px 0;
+}
+
+.trade-sidebar-nav a {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: all 0.3s;
+  font-size: 15px;
+}
+
+.trade-sidebar-nav a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.trade-sidebar-nav a.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border-left: 3px solid #3498db;
+}
+
+.trade-sidebar-nav .icon {
+  margin-right: 12px;
+  font-size: 18px;
+}
+
+.trade-sidebar-footer {
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  transition: background 0.3s;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.logout-btn .icon {
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .trade-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+}

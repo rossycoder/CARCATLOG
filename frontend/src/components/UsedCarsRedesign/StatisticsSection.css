@@ -1,0 +1,62 @@
+.statistics-section {
+  background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+  padding: 80px 20px;
+  text-align: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.statistics-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('/images/dummy/red-car.png') center/contain no-repeat;
+  opacity: 0.1;
+}
+
+.statistics-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.statistics-number {
+  font-size: 72px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.statistics-label {
+  font-size: 24px;
+  margin-bottom: 8px;
+  opacity: 0.95;
+}
+
+.statistics-subtitle {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .statistics-section {
+    padding: 60px 20px;
+  }
+
+  .statistics-number {
+    font-size: 48px;
+  }
+
+  .statistics-label {
+    font-size: 18px;
+  }
+
+  .statistics-subtitle {
+    font-size: 16px;
+  }
+}

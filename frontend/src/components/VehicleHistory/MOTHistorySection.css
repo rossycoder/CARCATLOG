@@ -1,0 +1,285 @@
+.mot-history-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.mot-history-section h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
+}
+
+.mot-loading,
+.mot-error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.mot-current-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 24px;
+}
+
+.status-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.status-badge.valid {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.expired,
+.status-badge.invalid {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.expiry-info {
+  color: #666;
+  font-size: 14px;
+}
+
+.mot-tests-list {
+  margin-top: 20px;
+}
+
+.tests-header {
+  padding: 12px 0;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 16px;
+}
+
+.tests-count {
+  font-weight: 600;
+  color: #495057;
+  font-size: 16px;
+}
+
+.mot-test-item {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.mot-test-item:hover {
+  border-color: #0066cc;
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
+}
+
+.mot-test-item.passed {
+  border-left: 4px solid #28a745;
+}
+
+.mot-test-item.failed {
+  border-left: 4px solid #dc3545;
+}
+
+.test-header {
+  padding: 16px;
+  background: #f8f9fa;
+}
+
+.test-main-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.test-result-badge {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.test-result-badge.passed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.test-result-badge.failed {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.test-date {
+  color: #495057;
+  font-weight: 500;
+}
+
+.test-secondary-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.test-mileage {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.test-expand {
+  color: #0066cc;
+  font-size: 12px;
+}
+
+.test-details {
+  padding: 20px;
+  background: white;
+  border-top: 1px solid #dee2e6;
+}
+
+.test-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #6c757d;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #212529;
+  font-weight: 500;
+}
+
+.test-comments,
+.test-defects,
+.test-advisories {
+  margin-top: 20px;
+}
+
+.test-comments h4,
+.test-defects h4,
+.test-advisories h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #212529;
+}
+
+.comment-item,
+.defect-item,
+.advisory-item {
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.comment-item.fail,
+.comment-item.dangerous,
+.defect-item.fail,
+.defect-item.dangerous {
+  background: #fff5f5;
+  border-left: 3px solid #dc3545;
+}
+
+.comment-item.major,
+.defect-item.major {
+  background: #fff8e1;
+  border-left: 3px solid #ff9800;
+}
+
+.comment-item.minor,
+.comment-item.advisory,
+.defect-item.advisory,
+.advisory-item {
+  background: #f0f7ff;
+  border-left: 3px solid #0066cc;
+}
+
+.comment-type,
+.defect-type,
+.advisory-icon {
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.comment-text,
+.defect-text,
+.advisory-text {
+  flex: 1;
+  font-size: 14px;
+  color: #495057;
+  line-height: 1.5;
+}
+
+.no-mot-history {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.mot-info-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #dee2e6;
+}
+
+.mot-disclaimer {
+  font-size: 13px;
+  color: #6c757d;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mot-history-section {
+    padding: 16px;
+  }
+
+  .mot-current-status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .test-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .test-main-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

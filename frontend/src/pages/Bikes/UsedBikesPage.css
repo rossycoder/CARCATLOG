@@ -1,0 +1,449 @@
+.used-bikes-page {
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+/* Hero Section */
+.used-bikes-hero {
+  background: #f9fafb;
+  padding: 0 1.5rem;
+}
+
+.used-bikes-hero-background {
+  background: linear-gradient(135deg, #0b1f3f 0%, #1a3a5c 50%, #2563eb 100%);
+  max-width: 1400px;
+  margin: 0 auto;
+  border-radius: 0 0 24px 24px;
+  padding: 2.5rem 2rem 5rem 2rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.used-bikes-hero-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.1;
+  z-index: 0;
+}
+
+.hero-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  display: flex;
+ 
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4rem;
+  padding-top: 1rem;
+}
+
+.hero-text {
+  width: 100%;
+  text-align: center;
+}
+
+.hero-label {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 1.25rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.used-bikes-hero h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.used-bikes-hero p {
+  font-size: 1.125rem;
+  opacity: 0.95;
+  margin-bottom: 0;
+  font-weight: 400;
+}
+
+/* Search Card */
+.search-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  max-width: 600px;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.search-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.search-field label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.search-field input,
+.search-field select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  background-color: #ffffff;
+}
+
+.search-field input:focus,
+.search-field select:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.search-btn {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.search-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
+
+/* Featured Bikes */
+.featured-bikes {
+  padding: 4rem 1.5rem;
+  background-color: #ffffff;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.featured-bikes h2 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2.5rem;
+  color: #111827;
+}
+
+.bikes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.bike-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.bike-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.2);
+  border-color: #2563eb;
+}
+
+.bike-image {
+  height: 200px;
+  background: #f3f4f6;
+  overflow: hidden;
+}
+
+.bike-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.bike-card:hover .bike-image img {
+  transform: scale(1.05);
+}
+
+.no-image {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.bike-details {
+  padding: 1.25rem;
+}
+
+.bike-details h3 {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #111827;
+  line-height: 1.4;
+}
+
+.bike-specs {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.75rem;
+}
+
+.bike-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.view-all-btn {
+  display: block;
+  margin: 0 auto;
+  padding: 0.875rem 2rem;
+  background: #2563eb;
+  color: white;
+  border: 2px solid #2563eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-all-btn:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.loading, .no-bikes {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/* Browse Brands */
+.browse-brands {
+  padding: 4rem 1.5rem;
+  background: #f9fafb;
+}
+
+.browse-brands h2 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #111827;
+}
+
+.brands-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.brand-btn {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 2px solid #2563eb;
+  border-radius: 24px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #2563eb;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.brand-btn:hover {
+  background: #2563eb;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* Why Used */
+.why-used {
+  padding: 4rem 1.5rem;
+  background-color: #ffffff;
+}
+
+.why-used h2 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2.5rem;
+  color: #111827;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.benefit-card {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  transition: all 0.3s;
+}
+
+.benefit-card:hover {
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+}
+
+.benefit-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.benefit-card h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #111827;
+}
+
+.benefit-card p {
+  font-size: 0.9375rem;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .bikes-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .used-bikes-hero {
+    padding: 0 1rem;
+  }
+
+  .used-bikes-hero-background {
+    padding: 3rem 1.5rem;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .hero-content {
+    gap: 2.5rem;
+    padding-top: 0;
+  }
+
+  .search-card {
+    max-width: 100%;
+    margin-top: 0;
+  }
+
+  .used-bikes-hero h1 {
+    font-size: 2rem;
+  }
+
+  .used-bikes-hero p {
+    font-size: 1rem;
+    margin-bottom: 0;
+  }
+
+  .search-card {
+    padding: 1.5rem;
+  }
+
+  .search-fields {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .bikes-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .featured-bikes,
+  .browse-brands,
+  .why-used {
+    padding: 3rem 1rem;
+  }
+
+  .featured-bikes h2,
+  .browse-brands h2,
+  .why-used h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .used-bikes-hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .hero-label {
+    font-size: 0.75rem;
+    padding: 0.375rem 1rem;
+  }
+
+  .search-card {
+    padding: 1.25rem;
+  }
+
+  .bike-image {
+    height: 180px;
+  }
+}
