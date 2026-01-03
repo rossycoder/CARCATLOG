@@ -3,6 +3,11 @@
 @import './styles/components.css';
 @import './styles/blueTheme.css';
 
+/* Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Legacy Variables for Backward Compatibility */
 :root {
   --primary-color: var(--color-primary);
