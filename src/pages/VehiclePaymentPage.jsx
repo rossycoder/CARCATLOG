@@ -205,7 +205,8 @@ const VehiclePaymentPage = () => {
       console.log('⚠️  This will charge £4.95 to the customer card!');
       
       // Create Stripe checkout session
-      const response = await fetch('/api/payments/create-checkout-session', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_URL}/payments/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
