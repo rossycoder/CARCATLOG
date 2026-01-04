@@ -32,7 +32,7 @@ const PaymentSuccessPage = () => {
       // Call both APIs in parallel to get complete vehicle data
       const [historyResponse, dvlaResponse] = await Promise.allSettled([
         checkVehicleHistory(registration, true),
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/dvla/lookup`, {
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/vehicles/dvla-lookup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ registrationNumber: registration })
