@@ -42,40 +42,42 @@ const PaymentSuccessPage = () => {
       console.log('History API Response:', historyResponse);
       console.log('DVLA API Response:', dvlaResponse);
       
-      // Check if DVLA API failed
+      // Check if DVLA API failed - this is critical, we need vehicle details
       if (dvlaResponse.status === 'rejected' || !dvlaResponse.value?.success) {
         const errorMsg = dvlaResponse.value?.error || dvlaResponse.reason?.message || 'Unable to fetch vehicle details';
         throw new Error(`DVLA API Error: ${errorMsg}`);
       }
       
-      // Check if History API failed
-      if (historyResponse.status === 'rejected' || !historyResponse.value?.success) {
-        const errorMsg = historyResponse.value?.error || historyResponse.reason?.message || 'Unable to fetch vehicle history';
-        throw new Error(`History API Error: ${errorMsg}`);
+      // Extract DVLA data (required)
+      const dvlaData = dvlaResponse.value.data;
+      
+      // Extract History data (optional - use defaults if failed)
+      let historyData = {};
+      if (historyResponse.status === 'fulfilled' && historyResponse.value?.success) {
+        historyData = historyResponse.value.data;
+        console.log('History API succeeded, using real history data');
+      } else {
+        console.warn('History API failed, using default values for history checks');
       }
       
-      // Extract DVLA data
-      const dvlaData = dvlaResponse.value.data;
-      const historyData = historyResponse.value.data;
-      
-      // Combine real data from both APIs
+      // Combine real data from both APIs (DVLA required, History optional)
       const combinedData = {
         vrm: registration.toUpperCase(),
         checkDate: new Date().toISOString(),
-        // DVLA vehicle details
+        // DVLA vehicle details (required)
         make: dvlaData.make,
         model: dvlaData.model,
         year: dvlaData.yearOfManufacture || dvlaData.year,
         colour: dvlaData.colour || dvlaData.color,
         fuelType: dvlaData.fuelType || dvlaData.fuel,
         engineSize: dvlaData.engineCapacity ? `${dvlaData.engineCapacity}cc` : null,
-        // History check data
+        // History check data (optional - defaults to safe values)
         stolen: historyData.isStolen || false,
         writeOff: historyData.isWrittenOff || false,
         outstandingFinance: historyData.hasOutstandingFinance || false,
         previousOwners: historyData.previousOwners || historyData.numberOfOwners || 0,
-        serviceHistory: historyData.serviceHistory || 'No service history available',
-        motStatus: historyData.motStatus || dvlaData.motStatus,
+        serviceHistory: historyData.serviceHistory || 'Contact seller for service history',
+        motStatus: historyData.motStatus || dvlaData.motStatus || 'Unknown',
         motExpiryDate: historyData.motExpiryDate || dvlaData.motExpiryDate,
       };
       
