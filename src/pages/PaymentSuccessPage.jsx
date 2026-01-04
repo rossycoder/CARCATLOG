@@ -10,7 +10,6 @@ const PaymentSuccessPage = () => {
   
   const sessionId = searchParams.get('session_id');
   const registration = searchParams.get('registration') || '';
-  const channel = searchParams.get('channel') || 'cars';
   
   const [isLoading, setIsLoading] = useState(true);
   const [vehicleData, setVehicleData] = useState(null);
@@ -28,7 +27,7 @@ const PaymentSuccessPage = () => {
   const generateVehicleReport = async () => {
     try {
       setIsLoading(true);
-      console.log('Generating vehicle report for:', registration);
+      console.log('Fetching real vehicle data for:', registration);
       
       // Call both APIs in parallel to get complete vehicle data
       const [historyResponse, dvlaResponse] = await Promise.allSettled([
@@ -43,87 +42,49 @@ const PaymentSuccessPage = () => {
       console.log('History API Response:', historyResponse);
       console.log('DVLA API Response:', dvlaResponse);
       
-      // Combine data from both APIs
-      let combinedData = {
-        vrm: registration,
+      // Check if DVLA API failed
+      if (dvlaResponse.status === 'rejected' || !dvlaResponse.value?.success) {
+        const errorMsg = dvlaResponse.value?.error || dvlaResponse.reason?.message || 'Unable to fetch vehicle details';
+        throw new Error(`DVLA API Error: ${errorMsg}`);
+      }
+      
+      // Check if History API failed
+      if (historyResponse.status === 'rejected' || !historyResponse.value?.success) {
+        const errorMsg = historyResponse.value?.error || historyResponse.reason?.message || 'Unable to fetch vehicle history';
+        throw new Error(`History API Error: ${errorMsg}`);
+      }
+      
+      // Extract DVLA data
+      const dvlaData = dvlaResponse.value.data;
+      const historyData = historyResponse.value.data;
+      
+      // Combine real data from both APIs
+      const combinedData = {
+        vrm: registration.toUpperCase(),
         checkDate: new Date().toISOString(),
+        // DVLA vehicle details
+        make: dvlaData.make,
+        model: dvlaData.model,
+        year: dvlaData.yearOfManufacture || dvlaData.year,
+        colour: dvlaData.colour || dvlaData.color,
+        fuelType: dvlaData.fuelType || dvlaData.fuel,
+        engineSize: dvlaData.engineCapacity ? `${dvlaData.engineCapacity}cc` : null,
+        // History check data
+        stolen: historyData.isStolen || false,
+        writeOff: historyData.isWrittenOff || false,
+        outstandingFinance: historyData.hasOutstandingFinance || false,
+        previousOwners: historyData.previousOwners || historyData.numberOfOwners || 0,
+        serviceHistory: historyData.serviceHistory || 'No service history available',
+        motStatus: historyData.motStatus || dvlaData.motStatus,
+        motExpiryDate: historyData.motExpiryDate || dvlaData.motExpiryDate,
       };
       
-      // Add history data if available
-      if (historyResponse.status === 'fulfilled' && historyResponse.value?.success) {
-        const historyData = historyResponse.value.data;
-        combinedData = {
-          ...combinedData,
-          stolen: historyData.isStolen || false,
-          writeOff: historyData.isWrittenOff || false,
-          outstandingFinance: historyData.hasOutstandingFinance || false,
-          previousOwners: historyData.previousOwners || historyData.numberOfOwners || 0,
-          serviceHistory: historyData.serviceHistory || 'Contact seller',
-        };
-      }
+      console.log('Combined real vehicle data:', combinedData);
+      setVehicleData(combinedData);
       
-      // Add DVLA vehicle details if available
-      if (dvlaResponse.status === 'fulfilled' && dvlaResponse.value?.success) {
-        const dvlaData = dvlaResponse.value.data;
-        combinedData = {
-          ...combinedData,
-          make: dvlaData.make,
-          model: dvlaData.model,
-          year: dvlaData.yearOfManufacture || dvlaData.year,
-          colour: dvlaData.colour || dvlaData.color,
-          fuelType: dvlaData.fuelType || dvlaData.fuel,
-          engineSize: dvlaData.engineCapacity ? `${dvlaData.engineCapacity}cc` : null,
-          mileage: dvlaData.mileage,
-        };
-      }
-      
-      // Check if we have complete data
-      if (combinedData.make && combinedData.model) {
-        console.log('Using real API data');
-        setVehicleData(combinedData);
-      } else {
-        // Fallback to demo data if APIs don't return complete vehicle details
-        console.log('API returned incomplete data, showing demo data');
-        setVehicleData({
-          vrm: registration,
-          make: 'Triumph',
-          model: 'Bonneville America 865',
-          year: '2012',
-          colour: 'Blue',
-          fuelType: 'Petrol',
-          engineSize: '865cc',
-          mileage: 28500,
-          previousOwners: 2,
-          serviceHistory: 'Full service history',
-          stolen: false,
-          writeOff: false,
-          outstandingFinance: false,
-          checkDate: new Date().toISOString(),
-          _isDemoData: true
-        });
-      }
     } catch (err) {
       console.error('Error generating vehicle report:', err);
-      
-      // Show demo data for development when APIs are not available
-      console.log('API error, showing demo data');
-      setVehicleData({
-        vrm: registration,
-        make: 'Triumph',
-        model: 'Bonneville America 865',
-        year: '2012',
-        colour: 'Blue',
-        fuelType: 'Petrol',
-        engineSize: '865cc',
-        mileage: 28500,
-        previousOwners: 2,
-        serviceHistory: 'Full service history',
-        stolen: false,
-        writeOff: false,
-        outstandingFinance: false,
-        checkDate: new Date().toISOString(),
-        _isDemoData: true
-      });
+      setError(err.message || 'Failed to generate vehicle report. Please try again or contact support.');
     } finally {
       setIsLoading(false);
     }
@@ -172,11 +133,20 @@ const PaymentSuccessPage = () => {
       <div className="success-page">
         <div className="container">
           <div className="error-card">
-            <h2>Report Generation Error</h2>
+            <h2>⚠️ Unable to Generate Report</h2>
             <p>{error}</p>
-            <button onClick={handleNewCheck} className="new-check-button">
-              Start New Check
-            </button>
+            <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
+              Your payment was successful, but we encountered an issue fetching the vehicle data. 
+              Please contact our support team with your registration number: <strong>{registration}</strong>
+            </p>
+            <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              <button onClick={() => window.location.reload()} className="download-button">
+                Try Again
+              </button>
+              <button onClick={handleNewCheck} className="new-check-button">
+                Check Another Vehicle
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -201,11 +171,6 @@ const PaymentSuccessPage = () => {
               <span className="registration">Registration: <strong>{registration}</strong></span>
               <span className="date">Generated: {new Date().toLocaleDateString()}</span>
             </div>
-            {vehicleData?._isDemoData && (
-              <div className="demo-notice">
-                <p><strong>Demo Report:</strong> This is sample data for demonstration. In production, this would show real vehicle history from CheckCardDetails API.</p>
-              </div>
-            )}
           </div>
 
           <div className="report-content">
