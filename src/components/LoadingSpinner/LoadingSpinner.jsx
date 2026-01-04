@@ -8,9 +8,6 @@ const LoadingSpinner = ({ size = 'medium', text = '', inline = false }) => {
     <div className={`loading-spinner-container ${containerClass}`}>
       <div className={`loading-spinner ${sizeClass}`}>
         <div className="spinner-ring"></div>
-        <div className="spinner-ring"></div>
-        <div className="spinner-ring"></div>
-        <div className="spinner-ring"></div>
       </div>
       {text && <span className="spinner-text">{text}</span>}
     </div>
