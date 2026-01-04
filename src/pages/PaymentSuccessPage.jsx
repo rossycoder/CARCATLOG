@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { checkVehicleHistory } from '../services/vehicleHistoryService';
 import { generateVehicleHistoryPDF } from '../utils/pdfGenerator';
@@ -30,43 +30,82 @@ const PaymentSuccessPage = () => {
       setIsLoading(true);
       console.log('Generating vehicle report for:', registration);
       
-      // Demo data to show for development
-      const demoData = {
+      // Call both APIs in parallel to get complete vehicle data
+      const [historyResponse, dvlaResponse] = await Promise.allSettled([
+        checkVehicleHistory(registration, true),
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/dvla/lookup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ registrationNumber: registration })
+        }).then(res => res.json())
+      ]);
+      
+      console.log('History API Response:', historyResponse);
+      console.log('DVLA API Response:', dvlaResponse);
+      
+      // Combine data from both APIs
+      let combinedData = {
         vrm: registration,
-        make: 'Triumph',
-        model: 'Bonneville America 865',
-        year: '2012',
-        colour: 'Blue',
-        fuelType: 'Petrol',
-        engineSize: '865cc',
-        mileage: 28500,
-        previousOwners: 2,
-        serviceHistory: 'Full service history',
-        stolen: false,
-        writeOff: false,
-        outstandingFinance: false,
         checkDate: new Date().toISOString(),
-        _isDemoData: true
       };
       
-      // Call the vehicle history API to generate the report
-      const response = await checkVehicleHistory(registration, true); // Force refresh
+      // Add history data if available
+      if (historyResponse.status === 'fulfilled' && historyResponse.value?.success) {
+        const historyData = historyResponse.value.data;
+        combinedData = {
+          ...combinedData,
+          stolen: historyData.isStolen || false,
+          writeOff: historyData.isWrittenOff || false,
+          outstandingFinance: historyData.hasOutstandingFinance || false,
+          previousOwners: historyData.previousOwners || historyData.numberOfOwners || 0,
+          serviceHistory: historyData.serviceHistory || 'Contact seller',
+        };
+      }
       
-      console.log('API Response:', response);
+      // Add DVLA vehicle details if available
+      if (dvlaResponse.status === 'fulfilled' && dvlaResponse.value?.success) {
+        const dvlaData = dvlaResponse.value.data;
+        combinedData = {
+          ...combinedData,
+          make: dvlaData.make,
+          model: dvlaData.model,
+          year: dvlaData.yearOfManufacture || dvlaData.year,
+          colour: dvlaData.colour || dvlaData.color,
+          fuelType: dvlaData.fuelType || dvlaData.fuel,
+          engineSize: dvlaData.engineCapacity ? `${dvlaData.engineCapacity}cc` : null,
+          mileage: dvlaData.mileage,
+        };
+      }
       
-      // Check if response has complete vehicle details
-      if (response.success && response.data && response.data.make) {
+      // Check if we have complete data
+      if (combinedData.make && combinedData.model) {
         console.log('Using real API data');
-        setVehicleData(response.data);
+        setVehicleData(combinedData);
       } else {
-        // If API doesn't return complete data, show demo data for development
+        // Fallback to demo data if APIs don't return complete vehicle details
         console.log('API returned incomplete data, showing demo data');
-        setVehicleData(demoData);
+        setVehicleData({
+          vrm: registration,
+          make: 'Triumph',
+          model: 'Bonneville America 865',
+          year: '2012',
+          colour: 'Blue',
+          fuelType: 'Petrol',
+          engineSize: '865cc',
+          mileage: 28500,
+          previousOwners: 2,
+          serviceHistory: 'Full service history',
+          stolen: false,
+          writeOff: false,
+          outstandingFinance: false,
+          checkDate: new Date().toISOString(),
+          _isDemoData: true
+        });
       }
     } catch (err) {
       console.error('Error generating vehicle report:', err);
       
-      // Show demo data for development when API is not available
+      // Show demo data for development when APIs are not available
       console.log('API error, showing demo data');
       setVehicleData({
         vrm: registration,
@@ -184,11 +223,11 @@ const PaymentSuccessPage = () => {
                 </div>
                 <div className="detail-item">
                   <span className="label">Year:</span>
-                  <span className="value">{vehicleData?.year || 'N/A'}</span>
+                  <span className="value">{vehicleData?.year}</span>
                 </div>
                 <div className="detail-item">
                   <span className="label">Colour:</span>
-                  <span className="value">{vehicleData?.colour || 'N/A'}</span>
+                  <span className="value">{vehicleData?.colour}</span>
                 </div>
                 <div className="detail-item">
                   <span className="label">Fuel Type:</span>
