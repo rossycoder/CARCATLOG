@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { register as registerDealer } from '../../services/tradeDealerService';
-import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner';
 import './TradeRegisterPage.css';
 
 const TradeRegisterPage = () => {
@@ -406,11 +405,7 @@ const TradeRegisterPage = () => {
               className="btn-primary" 
               disabled={loading}
             >
-              {loading ? (
-                <LoadingSpinner size="small" text="Registering..." inline />
-              ) : (
-                'Register'
-              )}
+              {loading ? 'Registering...' : 'Register'}
             </button>
             
             <div className="terms-notice">

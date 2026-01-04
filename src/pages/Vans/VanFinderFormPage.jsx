@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { useTradeDealerContext } from '../../context/TradeDealerContext';
-import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner';
 import './VanFinderFormPage.css';
 
 const VanFinderFormPage = () => {
@@ -356,11 +355,7 @@ const VanFinderFormPage = () => {
               type="submit"
               className="submit-button"
             >
-              {isLoading ? (
-                <LoadingSpinner size="small" text="Finding your van..." inline />
-              ) : (
-                'Find my van'
-              )}
+              {isLoading ? 'Finding your van...' : 'Find my van'}
             </button>
           </form>
         </div>

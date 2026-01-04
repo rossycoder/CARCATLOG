@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { carService } from '../../services/carService';
 import CarCard from '../CarCard';
-import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import './PostcodeSearch.css';
 
 function PostcodeSearch() {
@@ -89,7 +88,7 @@ function PostcodeSearch() {
               className="btn btn-primary"
               disabled={loading}
             >
-              {loading ? <LoadingSpinner size="small" text="Searching..." inline /> : 'Search'}
+              {loading ? 'Searching...' : 'Search'}
             </button>
             <button 
               type="button" 
