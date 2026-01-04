@@ -89,7 +89,18 @@ const PaymentSuccessPage = () => {
 
   const handleDownloadReport = () => {
     try {
+      console.log('=== PDF Download Debug ===');
+      console.log('vehicleData exists:', !!vehicleData);
+      console.log('vehicleData:', JSON.stringify(vehicleData, null, 2));
+      console.log('registration:', registration);
+      
+      if (!vehicleData) {
+        alert('Vehicle data not available. Please refresh the page.');
+        return;
+      }
+      
       generateVehicleHistoryPDF(vehicleData, registration);
+      console.log('PDF generation completed successfully');
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF. Please try again.');
