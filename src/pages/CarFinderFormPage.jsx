@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import advertService from '../services/advertService';
 import { useTradeDealerContext } from '../context/TradeDealerContext';
+import LoadingSpinner from '../components/LoadingSpinner/LoadingSpinner';
 import './CarFinderFormPage.css';
 
 // Helper to format DVLA response to vehicle details
@@ -312,10 +313,7 @@ const CarFinderFormPage = () => {
               className="submit-button"
             >
               {isLoading ? (
-                <>
-                  <span className="spinner"></span>
-                  <span>Finding your car...</span>
-                </>
+                <LoadingSpinner size="small" text="Finding your car..." inline />
               ) : (
                 'Find my car'
               )}

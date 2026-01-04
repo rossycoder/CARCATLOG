@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { useTradeDealerContext } from '../../context/TradeDealerContext';
+import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner';
 import './BikeFinderFormPage.css';
 
 const BikeFinderFormPage = () => {
@@ -354,10 +355,7 @@ const BikeFinderFormPage = () => {
               className="submit-button"
             >
               {isLoading ? (
-                <>
-                  <span className="spinner"></span>
-                  <span>Finding your bike...</span>
-                </>
+                <LoadingSpinner size="small" text="Finding your bike..." inline />
               ) : (
                 'Find my bike'
               )}
