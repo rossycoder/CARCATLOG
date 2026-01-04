@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { checkVehicleHistory } from '../services/vehicleHistoryService';
+import { generateVehicleHistoryPDF } from '../utils/pdfGenerator';
 import './PaymentSuccessPage.css';
 
 const PaymentSuccessPage = () => {
@@ -87,8 +88,12 @@ const PaymentSuccessPage = () => {
   };
 
   const handleDownloadReport = () => {
-    // TODO: Implement PDF download functionality
-    alert('PDF download functionality will be implemented in the next phase');
+    try {
+      generateVehicleHistoryPDF(vehicleData, registration);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again.');
+    }
   };
 
   if (isLoading) {
