@@ -62,12 +62,14 @@ function SearchResultsPage() {
     const radiusParam = params.get('radius') || location.state?.radius || 25;
     const makeParam = params.get('make') || location.state?.make;
     const modelParam = params.get('model') || location.state?.model;
+    const openFilterParam = params.get('openFilter'); // Check if filter should auto-open
 
     console.log('SearchResultsPage mounted with params:', {
       postcodeParam,
       radiusParam,
       makeParam,
       modelParam,
+      openFilterParam,
       urlSearch: location.search,
       locationState: location.state
     });
@@ -76,6 +78,11 @@ function SearchResultsPage() {
       setPostcode(postcodeParam);
       setRadius(parseInt(radiusParam) || 25);
       performSearch(postcodeParam, parseInt(radiusParam) || 25, makeParam, modelParam);
+      
+      // Auto-open filter if requested
+      if (openFilterParam === 'true') {
+        setTimeout(() => setShowFilterModal(true), 500);
+      }
     } else {
       // Load all cars if no postcode provided
       loadAllCars(makeParam, modelParam);

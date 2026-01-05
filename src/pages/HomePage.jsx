@@ -98,6 +98,7 @@ const HomePage = () => {
     const params = new URLSearchParams();
     
     params.append('postcode', postcode.trim());
+    params.append('openFilter', 'true'); // Flag to auto-open filter
     if (make && make !== 'Any') {
       params.append('make', make);
     }
