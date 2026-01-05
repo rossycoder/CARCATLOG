@@ -79,6 +79,10 @@ function SearchResultsPage() {
     } else {
       // Load all cars if no postcode provided
       loadAllCars(makeParam, modelParam);
+      // Auto-open filter modal if no search params
+      if (!makeParam && !modelParam) {
+        setTimeout(() => setShowFilterModal(true), 300);
+      }
     }
   }, [location]);
 

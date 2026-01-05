@@ -40,8 +40,8 @@ const UsedCarsPage = () => {
   };
 
   const handleFilterClick = () => {
-    // Navigate to car search page
-    navigate('/car-search?channel=cars');
+    // Navigate to search results page
+    navigate('/search-results');
   };
 
   return (

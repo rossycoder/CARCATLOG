@@ -1,13 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { carService } from '../services/carService';
 import './FilterSidebar.css';
 
 const FilterSidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [validationErrors, setValidationErrors] = useState({});
+  const [filterOptions, setFilterOptions] = useState({
+    makes: [],
+    models: [],
+    fuelTypes: [],
+    transmissions: [],
+    bodyTypes: [],
+    colours: [],
+    yearRange: { min: 2000, max: new Date().getFullYear() }
+  });
   const [filters, setFilters] = useState({
     sort: 'relevance',
     distance: 'national',
+    postcode: '',
     make: '',
     model: '',
     priceFrom: '',
@@ -31,6 +43,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       setFilters({
         sort: searchParams.get('sort') || 'relevance',
         distance: searchParams.get('distance') || 'national',
+        postcode: searchParams.get('postcode') || '',
         make: searchParams.get('make') || '',
         model: searchParams.get('model') || '',
         priceFrom: searchParams.get('priceFrom') || '',
@@ -50,14 +63,66 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     }
   }, [isOpen, searchParams]);
 
+  // Fetch filter options from database on mount
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      try {
+        const options = await carService.getFilterOptions();
+        setFilterOptions(options);
+      } catch (error) {
+        console.error('Error fetching filter options:', error);
+      }
+    };
+    
+    fetchFilterOptions();
+  }, []);
+
   const handleChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
+    // Clear validation error for this field when user makes changes
+    if (validationErrors[field]) {
+      setValidationErrors(prev => ({ ...prev, [field]: null }));
+    }
+  };
+
+  const validateFilters = () => {
+    const errors = {};
+    
+    // Validate price range
+    if (filters.priceFrom && filters.priceTo) {
+      const priceFrom = parseFloat(filters.priceFrom);
+      const priceTo = parseFloat(filters.priceTo);
+      
+      if (isNaN(priceFrom) || priceFrom < 0) {
+        errors.priceFrom = 'Please enter a valid positive number';
+      }
+      if (isNaN(priceTo) || priceTo < 0) {
+        errors.priceTo = 'Please enter a valid positive number';
+      }
+      if (!errors.priceFrom && !errors.priceTo && priceFrom > priceTo) {
+        errors.priceTo = 'Maximum price must be greater than or equal to minimum price';
+      }
+    } else if (filters.priceFrom) {
+      const priceFrom = parseFloat(filters.priceFrom);
+      if (isNaN(priceFrom) || priceFrom < 0) {
+        errors.priceFrom = 'Please enter a valid positive number';
+      }
+    } else if (filters.priceTo) {
+      const priceTo = parseFloat(filters.priceTo);
+      if (isNaN(priceTo) || priceTo < 0) {
+        errors.priceTo = 'Please enter a valid positive number';
+      }
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleClearAll = () => {
     setFilters({
       sort: 'relevance',
       distance: 'national',
+      postcode: '',
       make: '',
       model: '',
       priceFrom: '',
@@ -77,9 +142,13 @@ const FilterSidebar = ({ isOpen, onClose }) => {
   };
 
   const handleApply = () => {
+    // Validate filters before applying
+    if (!validateFilters()) {
+      return;
+    }
+    
     // Build query params from filters
     const params = new URLSearchParams();
-    params.append('channel', 'cars');
     
     Object.entries(filters).forEach(([key, value]) => {
       if (value && value !== 'relevance' && value !== 'national') {
@@ -87,8 +156,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       }
     });
 
-    // Navigate to car search page
-    navigate(`/car-search?${params.toString()}`);
+    // Navigate to search results page
+    navigate(`/search-results?${params.toString()}`);
     onClose();
   };
 
@@ -150,6 +219,24 @@ const FilterSidebar = ({ isOpen, onClose }) => {
             </select>
           </div>
 
+          {/* Postcode */}
+          <div className="filter-section">
+            <label className="filter-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              Postcode
+            </label>
+            <input
+              type="text"
+              className="filter-input"
+              placeholder="e.g. M1 1AE"
+              value={filters.postcode}
+              onChange={(e) => handleChange('postcode', e.target.value.toUpperCase())}
+            />
+          </div>
+
           {/* Make and Model */}
           <div className="filter-section">
             <label className="filter-label">
@@ -158,13 +245,16 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               </svg>
               Make
             </label>
-            <input
-              type="text"
-              className="filter-input"
-              placeholder="Search make"
+            <select
+              className="filter-select"
               value={filters.make}
               onChange={(e) => handleChange('make', e.target.value)}
-            />
+            >
+              <option value="">Any</option>
+              {filterOptions.makes.map(make => (
+                <option key={make} value={make}>{make}</option>
+              ))}
+            </select>
           </div>
 
           <div className="filter-section">
@@ -174,13 +264,16 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               </svg>
               Model
             </label>
-            <input
-              type="text"
-              className="filter-input"
-              placeholder="Search model"
+            <select
+              className="filter-select"
               value={filters.model}
               onChange={(e) => handleChange('model', e.target.value)}
-            />
+            >
+              <option value="">Any</option>
+              {filterOptions.models.map(model => (
+                <option key={model} value={model}>{model}</option>
+              ))}
+            </select>
           </div>
 
           {/* Price */}
@@ -192,21 +285,31 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               Price
             </label>
             <div className="range-inputs">
-              <input
-                type="text"
-                className="filter-input"
-                placeholder="From"
-                value={filters.priceFrom}
-                onChange={(e) => handleChange('priceFrom', e.target.value)}
-              />
+              <div className="input-with-error">
+                <input
+                  type="text"
+                  className={`filter-input ${validationErrors.priceFrom ? 'error' : ''}`}
+                  placeholder="From"
+                  value={filters.priceFrom}
+                  onChange={(e) => handleChange('priceFrom', e.target.value)}
+                />
+                {validationErrors.priceFrom && (
+                  <span className="validation-error">{validationErrors.priceFrom}</span>
+                )}
+              </div>
               <span className="range-separator">to</span>
-              <input
-                type="text"
-                className="filter-input"
-                placeholder="To"
-                value={filters.priceTo}
-                onChange={(e) => handleChange('priceTo', e.target.value)}
-              />
+              <div className="input-with-error">
+                <input
+                  type="text"
+                  className={`filter-input ${validationErrors.priceTo ? 'error' : ''}`}
+                  placeholder="To"
+                  value={filters.priceTo}
+                  onChange={(e) => handleChange('priceTo', e.target.value)}
+                />
+                {validationErrors.priceTo && (
+                  <span className="validation-error">{validationErrors.priceTo}</span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -226,7 +329,10 @@ const FilterSidebar = ({ isOpen, onClose }) => {
                 onChange={(e) => handleChange('yearFrom', e.target.value)}
               >
                 <option value="">From</option>
-                {Array.from({ length: 30 }, (_, i) => 2024 - i).map(year => (
+                {Array.from(
+                  { length: filterOptions.yearRange.max - filterOptions.yearRange.min + 1 }, 
+                  (_, i) => filterOptions.yearRange.max - i
+                ).map(year => (
                   <option key={year} value={year}>{year}</option>
                 ))}
               </select>
@@ -237,7 +343,10 @@ const FilterSidebar = ({ isOpen, onClose }) => {
                 onChange={(e) => handleChange('yearTo', e.target.value)}
               >
                 <option value="">To</option>
-                {Array.from({ length: 30 }, (_, i) => 2024 - i).map(year => (
+                {Array.from(
+                  { length: filterOptions.yearRange.max - filterOptions.yearRange.min + 1 }, 
+                  (_, i) => filterOptions.yearRange.max - i
+                ).map(year => (
                   <option key={year} value={year}>{year}</option>
                 ))}
               </select>
@@ -286,8 +395,9 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               onChange={(e) => handleChange('gearbox', e.target.value)}
             >
               <option value="">Any</option>
-              <option value="manual">Manual</option>
-              <option value="automatic">Automatic</option>
+              {filterOptions.transmissions.map(transmission => (
+                <option key={transmission} value={transmission}>{transmission}</option>
+              ))}
             </select>
           </div>
 
@@ -305,13 +415,9 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               onChange={(e) => handleChange('bodyType', e.target.value)}
             >
               <option value="">Any</option>
-              <option value="hatchback">Hatchback</option>
-              <option value="saloon">Saloon</option>
-              <option value="estate">Estate</option>
-              <option value="suv">SUV</option>
-              <option value="coupe">Coupe</option>
-              <option value="convertible">Convertible</option>
-              <option value="mpv">MPV</option>
+              {filterOptions.bodyTypes.map(bodyType => (
+                <option key={bodyType} value={bodyType}>{bodyType}</option>
+              ))}
             </select>
           </div>
 
@@ -329,15 +435,9 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               onChange={(e) => handleChange('colour', e.target.value)}
             >
               <option value="">Any</option>
-              <option value="black">Black</option>
-              <option value="white">White</option>
-              <option value="silver">Silver</option>
-              <option value="grey">Grey</option>
-              <option value="blue">Blue</option>
-              <option value="red">Red</option>
-              <option value="green">Green</option>
-              <option value="yellow">Yellow</option>
-              <option value="orange">Orange</option>
+              {filterOptions.colours.map(colour => (
+                <option key={colour} value={colour}>{colour}</option>
+              ))}
             </select>
           </div>
 
@@ -397,10 +497,9 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               onChange={(e) => handleChange('fuelType', e.target.value)}
             >
               <option value="">Any</option>
-              <option value="petrol">Petrol</option>
-              <option value="diesel">Diesel</option>
-              <option value="electric">Electric</option>
-              <option value="hybrid">Hybrid</option>
+              {filterOptions.fuelTypes.map(fuelType => (
+                <option key={fuelType} value={fuelType}>{fuelType}</option>
+              ))}
             </select>
           </div>
 

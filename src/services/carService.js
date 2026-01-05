@@ -60,4 +60,10 @@ export const carService = {
     console.log('API response:', response);
     return response.data.count;
   },
+
+  // Get filter options from database
+  getFilterOptions: async () => {
+    const response = await api.get('/vehicles/filter-options');
+    return response.data.data;
+  },
 };

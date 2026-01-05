@@ -88,8 +88,25 @@ const HomePage = () => {
   };
 
   const handleMoreOptions = () => {
-    // Navigate to car search page
-    navigate('/car-search?channel=cars');
+    // Validate postcode is entered
+    if (!postcode.trim()) {
+      setError('Please enter a postcode first');
+      return;
+    }
+    
+    // Build query params with current search values
+    const params = new URLSearchParams();
+    
+    params.append('postcode', postcode.trim());
+    if (make && make !== 'Any') {
+      params.append('make', make);
+    }
+    if (model && model !== 'Any') {
+      params.append('model', model);
+    }
+    
+    // Navigate to search results page
+    navigate(`/search-results?${params.toString()}`);
   };
 
   return (
@@ -199,7 +216,7 @@ const HomePage = () => {
               <p className="welcome-subtitle">
                 Your next car adventure starts right here!
               </p>
-              <h2>About CarCatALog</h2>
+            
               <p>
                 CarCatALog is the UK's newest online vehicle listing platform, created to offer a transparent, honest, and cost-effective alternative to traditional automotive marketplaces. We believe buying and selling vehicles should be simple, fair, and accessible to everyone.
               </p>

@@ -1086,12 +1086,12 @@
   }
   
   .hero-section-with-search .container {
-    min-height: 600px;
-    padding: var(--spacing-3) var(--spacing-3) var(--spacing-6);
+    min-height: 750px;
+    padding: var(--spacing-3) var(--spacing-3) var(--spacing-8);
     border-radius: var(--radius-xl);
     background-image: url('/images/brands/background1.jpeg');
     background-size: cover;
-    background-position: center center;
+    background-position: center 30%;
     background-repeat: no-repeat;
     align-items: flex-end;
   }
@@ -1100,9 +1100,9 @@
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      rgba(0,0,0,0.05) 30%,
-      rgba(255,255,255,0.4) 65%,
-      rgba(255,255,255,0.85) 85%,
+      rgba(0,0,0,0.02) 40%,
+      rgba(255,255,255,0.3) 70%,
+      rgba(255,255,255,0.8) 88%,
       rgba(255,255,255,1) 100%
     );
   }
@@ -1342,8 +1342,21 @@
 /* Responsive - Small Mobile */
 @media (max-width: 480px) {
   .hero-section-with-search .container {
-    min-height: 350px;
+    min-height: 650px;
     border-radius: var(--radius-lg);
+    background-position: center 25%;
+    padding: var(--spacing-3) var(--spacing-3) var(--spacing-6);
+  }
+  
+  .hero-background-overlay {
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0,0,0,0.02) 45%,
+      rgba(255,255,255,0.35) 72%,
+      rgba(255,255,255,0.85) 90%,
+      rgba(255,255,255,1) 100%
+    );
   }
   
   .search-container-hero {
