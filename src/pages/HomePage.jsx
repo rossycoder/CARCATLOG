@@ -192,17 +192,17 @@ const HomePage = () => {
               <h1 className="welcome-title">
                 <strong>Welcome</strong>
               </h1>
-              <p className="welcome-subtitle">
-                Your next car adventure starts right here!
+              <p>
+                CarCatALog is the UK's newest online vehicle listing platform, created to offer a transparent, honest, and cost-effective alternative to traditional automotive marketplaces. We believe buying and selling vehicles should be simple, fair, and accessible to everyone.
               </p>
-              <p className="welcome-description">
-                Discover an exciting new way to buy and sell vehicles with a platform built for speed, simplicity, and total confidence. Browse a growing selection of cars from trusted sellers, compare deals in <strong>seconds</strong>, and find the perfect match for your lifestyle.
+              <p>
+                We specialise in cars, bikes, and vans, supporting both private sellers and buyers as well as the motor trade. Our platform is designed to make listing and searching vehicles straightforward, without the high costs and unnecessary complexity found on other UK sites.
               </p>
-              <p className="welcome-description">
-                Whether you're hunting for your first car, upgrading to something special, or listing your own vehicle for sale, we're here to make every step smooth, transparent, and enjoyable.
+              <p>
+                For motor traders, CarCatALog offers dedicated trade subscription packages, complete with a secure login and live dashboard to manage listings efficiently. Our trade solutions are built to deliver real value, helping dealers of all sizes reach the right audience while keeping costs under control.
               </p>
-              <p className="welcome-description">
-                Jump in, explore, and drive your journey forward—your ideal car is waiting.
+              <p>
+                At CarCatALog, transparency and value come first. We're building a modern vehicle marketplace that puts users first and sets a new standard for how vehicles are bought and sold online in the UK.
               </p>
             </div>
             <div className="welcome-car-animation">
@@ -221,6 +221,7 @@ const HomePage = () => {
         </div>
       </section>
 
+     
       {/* Advertising Promotion Section */}
       <section className="advertising-section">
         <div className="container">

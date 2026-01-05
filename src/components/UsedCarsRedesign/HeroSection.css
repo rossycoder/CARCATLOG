@@ -119,16 +119,22 @@
 .more-options {
   font-size: 14px;
   color: #0066ff;
-  background: none;
-  border: none;
+  background: white;
+  border: 2px solid #e0e0e0;
   font-weight: 600;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
-  padding: 0;
+  padding: 12px 16px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
 }
 
 .more-options:hover {
-  text-decoration: underline;
+  border-color: #0066ff;
+  background: #f0f7ff;
 }
 
 .redesign-more-options {

@@ -8,6 +8,26 @@
   margin: 0 auto;
 }
 
+.value-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.value-main-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.value-subtitle {
+  font-size: 1.25rem;
+  color: #666;
+  margin: 0;
+  font-weight: 400;
+}
+
 .value-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -51,6 +71,18 @@
 
   .value-proposition {
     padding: 60px 20px;
+  }
+
+  .value-header {
+    margin-bottom: 40px;
+  }
+
+  .value-main-title {
+    font-size: 2rem;
+  }
+
+  .value-subtitle {
+    font-size: 1.1rem;
   }
 }
 

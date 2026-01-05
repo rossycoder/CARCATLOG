@@ -1,30 +1,43 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './UsedCarsPage.css';
 import HeroSection from '../components/UsedCarsRedesign/HeroSection';
 import FeaturedContent from '../components/UsedCarsRedesign/FeaturedContent';
 import StatisticsSection from '../components/UsedCarsRedesign/StatisticsSection';
-import PromotionalContent from '../components/UsedCarsRedesign/PromotionalContent';
 import ValueProposition from '../components/UsedCarsRedesign/ValueProposition';
 import PostcodeSearch from '../components/PostcodeSearch/PostcodeSearch';
+import FilterSidebar from '../components/FilterSidebar/FilterSidebar';
 import {
   heroContent,
   featuredSections,
   statistics,
-  promotionalContent,
   benefits
 } from '../data/usedCarsRedesignData';
 
 const UsedCarsPage = () => {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
   useEffect(() => {
     document.title = 'Used Cars for Sale | CarCatALog';
     window.scrollTo(0, 0);
   }, []);
+
+  const handleApplyFilters = (filters) => {
+    console.log('Filters applied:', filters);
+    // Handle filter application logic here
+  };
 
   return (
     <div className="used-cars-page-redesign">
       <HeroSection 
         headline={heroContent.headline}
         subheadline={heroContent.subheadline}
+        onFilterClick={() => setIsFilterOpen(true)}
+      />
+      
+      <FilterSidebar 
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onApplyFilters={handleApplyFilters}
       />
       
     
@@ -60,15 +73,6 @@ const UsedCarsPage = () => {
         carCount={statistics.carCount}
         label={statistics.label}
         subtitle={statistics.subtitle}
-      />
-      
-      <PromotionalContent 
-        image={promotionalContent.image}
-        title={promotionalContent.title}
-        subtitle={promotionalContent.subtitle}
-        price={promotionalContent.price}
-        features={promotionalContent.features}
-        cta={promotionalContent.cta}
       />
       
       <ValueProposition benefits={benefits} />

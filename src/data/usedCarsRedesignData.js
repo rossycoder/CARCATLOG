@@ -118,7 +118,7 @@ export const statistics = {
 };
 
 export const heroContent = {
-  headline: 'Meet your perfect car',
+  headline: 'Find your perfect car',
   subheadline: 'Search thousands of quality used cars',
   searchPlaceholders: {
     make: 'Make',

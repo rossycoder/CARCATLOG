@@ -41,7 +41,7 @@ function HeroValuationSection() {
     <section className="hero-valuation-section">
       <div className="hero-valuation-container">
         <p className="hero-label">Value my car</p>
-        <h1 className="hero-title">In the know, in 10 seconds</h1>
+        <h1 className="hero-title">Receive your vehicle valuation in seconds</h1>
         
         <div className="valuation-form-wrapper">
           <form className="valuation-form" onSubmit={handleSubmit}>
@@ -55,6 +55,7 @@ function HeroValuationSection() {
                 onChange={(e) => setRegistration(e.target.value.toUpperCase())}
                 className={errors.registration ? 'error' : ''}
                 aria-label="Vehicle registration"
+                autoComplete="off"
               />
               {errors.registration && (
                 <span className="error-message">{errors.registration}</span>
@@ -66,11 +67,13 @@ function HeroValuationSection() {
               <input
                 id="mileage"
                 type="text"
+                inputMode="numeric"
                 placeholder="e.g. 10000"
                 value={mileage}
                 onChange={(e) => setMileage(e.target.value)}
                 className={errors.mileage ? 'error' : ''}
                 aria-label="Vehicle mileage"
+                autoComplete="off"
               />
               {errors.mileage && (
                 <span className="error-message">{errors.mileage}</span>

@@ -885,14 +885,25 @@
   }
   
   .hero-section-with-search .container {
-    min-height: 450px;
+    min-height: 500px;
     padding: var(--spacing-4) var(--spacing-4) var(--spacing-10);
     background-position: center center;
+  }
+  
+  .hero-background-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.05) 0%,
+      rgba(0,0,0,0.1) 30%,
+      rgba(255,255,255,0.4) 65%,
+      rgba(255,255,255,0.9) 85%,
+      rgba(255,255,255,1) 100%
+    );
   }
 
   .search-container-hero {
     padding: var(--spacing-4);
-    transform: translateY(var(--spacing-3));
+    transform: translateY(0);
   }
 
   .search-field-group {
@@ -1042,17 +1053,30 @@
   }
   
   .hero-section-with-search .container {
-    min-height: 380px;
+    min-height: 550px;
     padding: var(--spacing-3) var(--spacing-3) var(--spacing-8);
     border-radius: var(--radius-xl);
     background-size: cover;
-    background-position: center 40%;
+    background-position: center center;
+    align-items: flex-end;
+  }
+  
+  .hero-background-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.1) 0%,
+      rgba(0,0,0,0.15) 40%,
+      rgba(255,255,255,0.3) 70%,
+      rgba(255,255,255,0.95) 90%,
+      rgba(255,255,255,1) 100%
+    );
   }
 
   .search-container-hero {
-    padding: var(--spacing-3);
-    border-radius: var(--radius-lg);
-    transform: translateY(var(--spacing-2));
+    padding: var(--spacing-4);
+    border-radius: var(--radius-xl);
+    transform: translateY(0);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
   }
   
   .search-field label {
@@ -2541,4 +2565,72 @@ ners Section */
 .advertising-section {
   padding: var(--section-padding-lg) var(--spacing-5);
   background: var(--color-neutral-100);
+}
+
+/* About CarCatALog Section */
+.about-carcatalog-section {
+  padding: var(--section-padding-lg) var(--spacing-5);
+  background: var(--color-neutral-50);
+}
+
+.about-carcatalog-section .container {
+  max-width: var(--container-lg);
+  margin: 0 auto;
+}
+
+.about-carcatalog-section h2 {
+  text-align: center;
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-8);
+  font-family: var(--font-family-heading);
+}
+
+.about-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+.about-content p {
+  font-size: var(--font-size-lg);
+  color: var(--color-neutral-700);
+  line-height: var(--line-height-relaxed);
+  text-align: justify;
+}
+
+@media (max-width: 968px) {
+  .about-carcatalog-section {
+    padding: var(--spacing-12) var(--spacing-4);
+  }
+  
+  .about-carcatalog-section h2 {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--spacing-6);
+  }
+  
+  .about-content p {
+    font-size: var(--font-size-base);
+    text-align: left;
+  }
+}
+
+@media (max-width: 640px) {
+  .about-carcatalog-section {
+    padding: var(--spacing-10) var(--spacing-3);
+  }
+  
+  .about-carcatalog-section h2 {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--spacing-5);
+  }
+  
+  .about-content {
+    gap: var(--spacing-4);
+  }
+  
+  .about-content p {
+    font-size: var(--font-size-sm);
+  }
 }

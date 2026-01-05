@@ -3,6 +3,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1rem;
+  min-height: 100vh;
 }
 
 .postcode-search-form-container {
@@ -11,6 +12,7 @@
   padding: 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
+  position: relative;
 }
 
 .postcode-search-form-container h2 {
@@ -176,8 +178,23 @@
 }
 
 @media (max-width: 768px) {
+  .postcode-search {
+    padding: 1rem;
+    min-height: auto;
+  }
+
+  .postcode-search-form-container {
+    padding: 1.5rem;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
+  }
+
+  .form-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    -webkit-appearance: none;
+    appearance: none;
   }
 
   .form-actions {

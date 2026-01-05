@@ -1,0 +1,209 @@
+.about-page {
+  min-height: 100vh;
+  background: white;
+}
+
+.about-hero {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  padding: var(--spacing-16) var(--spacing-5);
+  text-align: center;
+}
+
+.about-hero h1 {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--spacing-4) 0;
+  font-family: var(--font-family-heading);
+}
+
+.about-hero-subtitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  max-width: 800px;
+  margin: 0 auto;
+  opacity: 0.95;
+  line-height: var(--line-height-relaxed);
+}
+
+.about-content-section {
+  padding: var(--spacing-16) var(--spacing-5);
+}
+
+.about-content-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.about-section {
+  margin-bottom: var(--spacing-12);
+}
+
+.about-section:last-child {
+  margin-bottom: 0;
+}
+
+.about-intro {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-800);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-6);
+}
+
+.about-section h2 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin: 0 0 var(--spacing-5) 0;
+  font-family: var(--font-family-heading);
+}
+
+.about-section p {
+  font-size: var(--font-size-lg);
+  color: var(--color-neutral-700);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-5);
+}
+
+.about-section p:last-child {
+  margin-bottom: 0;
+}
+
+.about-benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--spacing-5) 0;
+}
+
+.about-benefits-list li {
+  font-size: var(--font-size-lg);
+  color: var(--color-neutral-700);
+  line-height: var(--line-height-relaxed);
+  padding-left: var(--spacing-8);
+  margin-bottom: var(--spacing-3);
+  position: relative;
+}
+
+.about-benefits-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xl);
+}
+
+.about-closing {
+  font-size: var(--font-size-xl);
+  color: var(--color-primary);
+  text-align: center;
+  padding: var(--spacing-8);
+  background: var(--color-primary-lighter);
+  border-radius: var(--radius-xl);
+  margin-top: var(--spacing-8);
+}
+
+.about-closing strong {
+  font-weight: var(--font-weight-bold);
+}
+
+/* Responsive Styles */
+@media (max-width: 968px) {
+  .about-hero {
+    padding: var(--spacing-12) var(--spacing-4);
+  }
+
+  .about-hero h1 {
+    font-size: var(--font-size-4xl);
+  }
+
+  .about-hero-subtitle {
+    font-size: var(--font-size-lg);
+  }
+
+  .about-content-section {
+    padding: var(--spacing-12) var(--spacing-4);
+  }
+
+  .about-section {
+    margin-bottom: var(--spacing-10);
+  }
+
+  .about-intro {
+    font-size: var(--font-size-lg);
+  }
+
+  .about-section h2 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .about-section p {
+    font-size: var(--font-size-base);
+  }
+
+  .about-benefits-list li {
+    font-size: var(--font-size-base);
+  }
+
+  .about-closing {
+    font-size: var(--font-size-lg);
+    padding: var(--spacing-6);
+  }
+}
+
+@media (max-width: 640px) {
+  .about-hero {
+    padding: var(--spacing-10) var(--spacing-3);
+  }
+
+  .about-hero h1 {
+    font-size: var(--font-size-3xl);
+  }
+
+  .about-hero-subtitle {
+    font-size: var(--font-size-base);
+  }
+
+  .about-content-section {
+    padding: var(--spacing-10) var(--spacing-3);
+  }
+
+  .about-section {
+    margin-bottom: var(--spacing-8);
+  }
+
+  .about-intro {
+    font-size: var(--font-size-base);
+  }
+
+  .about-section h2 {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .about-section p {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .about-benefits-list {
+    margin: var(--spacing-4) 0;
+  }
+
+  .about-benefits-list li {
+    font-size: var(--font-size-sm);
+    padding-left: var(--spacing-6);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .about-benefits-list li::before {
+    font-size: var(--font-size-lg);
+  }
+
+  .about-closing {
+    font-size: var(--font-size-base);
+    padding: var(--spacing-5);
+    margin-top: var(--spacing-6);
+  }
+}

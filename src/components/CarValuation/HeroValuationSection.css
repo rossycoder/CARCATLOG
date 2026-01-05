@@ -1,5 +1,5 @@
 .hero-valuation-section {
-  background-color: #1a1f3a;
+  background-color: #4BA9EA;
   color: white;
   padding: 60px 20px 80px;
   text-align: center;
@@ -68,6 +68,8 @@
   position: relative;
   z-index: 3;
   cursor: text;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .form-group input:focus {
@@ -97,7 +99,7 @@
 
 .cta-button {
   padding: 14px 32px;
-  background-color: #0046ff;
+  background-color: #4BA9EA;
   color: white;
   border: none;
   border-radius: 50px;
@@ -110,7 +112,7 @@
 }
 
 .cta-button:hover {
-  background-color: #0039cc;
+  background-color: #3a8bc7;
 }
 
 .hero-tagline {

@@ -17,6 +17,10 @@ const ValueProposition = ({ benefits }) => {
   return (
     <section className="value-proposition">
       <div className="value-container">
+        <div className="value-header">
+          <h2 className="value-main-title">Buy with confidence</h2>
+          <p className="value-subtitle">Our Dealers offer complete peace of mind</p>
+        </div>
         <div className="value-grid">
           {benefits.map((benefit) => (
             <div key={benefit.id} className="value-item">

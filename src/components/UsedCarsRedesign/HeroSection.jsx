@@ -4,7 +4,7 @@ import './HeroSection.css';
 import { carBrands } from '../../data/carBrands';
 import { carService } from '../../services/carService';
 
-const HeroSection = ({ headline, subheadline }) => {
+const HeroSection = ({ headline, subheadline, onFilterClick }) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useState({
     postcode: '',
@@ -15,7 +15,6 @@ const HeroSection = ({ headline, subheadline }) => {
     minYear: '',
     maxYear: ''
   });
-  const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [carCount, setCarCount] = useState(0);
   const [loadingCount, setLoadingCount] = useState(true);
 
@@ -121,9 +120,12 @@ const HeroSection = ({ headline, subheadline }) => {
                   <button 
                     type="button"
                     className="more-options"
-                    onClick={() => setShowMoreOptions(!showMoreOptions)}
+                    onClick={() => onFilterClick && onFilterClick()}
                   >
-                    {showMoreOptions ? 'Less options' : 'More options'}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '6px' }}>
+                      <path d="M3 6h18M7 12h10M11 18h2"/>
+                    </svg>
+                    Filter & Sort
                   </button>
                   <button type="submit" className="redesign-search-btn">
                     <span className="search-icon">🔍</span>
@@ -131,58 +133,6 @@ const HeroSection = ({ headline, subheadline }) => {
                   </button>
                 </div>
               </div>
-              
-              {showMoreOptions && (
-                <div className="redesign-more-options">
-                  <div className="redesign-search-field">
-                    <label>Min Price</label>
-                    <input 
-                      type="number" 
-                      name="minPrice"
-                      placeholder="£ Min" 
-                      value={searchParams.minPrice}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="redesign-search-field">
-                    <label>Max Price</label>
-                    <input 
-                      type="number" 
-                      name="maxPrice"
-                      placeholder="£ Max" 
-                      value={searchParams.maxPrice}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="redesign-search-field">
-                    <label>Min Year</label>
-                    <input 
-                      type="number" 
-                      name="minYear"
-                      placeholder="From" 
-                      value={searchParams.minYear}
-                      onChange={handleInputChange}
-                      min="1900"
-                      max={new Date().getFullYear()}
-                    />
-                  </div>
-                  
-                  <div className="redesign-search-field">
-                    <label>Max Year</label>
-                    <input 
-                      type="number" 
-                      name="maxYear"
-                      placeholder="To" 
-                      value={searchParams.maxYear}
-                      onChange={handleInputChange}
-                      min="1900"
-                      max={new Date().getFullYear()}
-                    />
-                  </div>
-                </div>
-              )}
             </form>
           </div>
         </div>

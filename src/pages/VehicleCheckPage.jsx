@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createCheckoutSession } from '../services/paymentService';
+import { generateVehicleHistoryPDF } from '../utils/pdfGenerator';
 import './VehicleCheckPage.css';
 
 const VehicleCheckPage = () => {
@@ -34,6 +35,27 @@ const VehicleCheckPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleViewSampleReport = () => {
+    // Sample data for EK14 TWX
+    const sampleVehicleData = {
+      make: 'FORD',
+      model: 'FIESTA',
+      year: 2014,
+      colour: 'Blue',
+      fuelType: 'Petrol',
+      engineSize: '1.0L',
+      stolen: false,
+      writeOff: false,
+      outstandingFinance: false,
+      mileage: 45000,
+      previousOwners: 2,
+      serviceHistory: 'Full Service History'
+    };
+
+    // Generate PDF with sample data
+    generateVehicleHistoryPDF(sampleVehicleData, 'EK14TWX');
   };
 
   return (
@@ -214,7 +236,9 @@ const VehicleCheckPage = () => {
           </div>
           
           <div className="cta-section">
-            <button className="sample-report-button">View sample report</button>
+            <button className="sample-report-button" onClick={handleViewSampleReport}>
+              View sample report
+            </button>
           </div>
         </div>
       </section>
@@ -270,7 +294,7 @@ const VehicleCheckPage = () => {
           <div className="pricing-content">
             <div className="pricing-left">
               <div className="peace-card">
-                <h3>Peace before purchase</h3>
+                <h3>Peace of mind before purchase</h3>
                 <p>A vehicle check offers an instant history report, eliminating surprise elements should you opt to purchase.</p>
                 <ul className="peace-features">
                   <li>

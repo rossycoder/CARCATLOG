@@ -33,6 +33,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage'
 import ContactPage from './pages/ContactPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import AboutPage from './pages/AboutPage'
 
 // Terms and Conditions Pages
 import AdvertisingTermsPage from './pages/TermsAndConditions/AdvertisingTermsPage'
@@ -129,6 +130,7 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/about" element={<AboutPage />} />
               
               {/* Terms and Conditions Routes */}
               <Route path="/terms-and-conditions/advertising" element={<AdvertisingTermsPage />} />
