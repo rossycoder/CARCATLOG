@@ -73,6 +73,7 @@
 
 .redesign-search-field {
   text-align: left;
+  position: relative;
 }
 
 .redesign-search-field label {
@@ -93,6 +94,18 @@
   color: #1a1a1a;
   background: white;
   transition: border-color 0.3s;
+}
+
+.redesign-search-field input.error {
+  border-color: #dc3545;
+}
+
+.redesign-search-field .error-message {
+  display: block;
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
 }
 
 .redesign-search-field input:focus,

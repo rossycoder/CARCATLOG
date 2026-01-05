@@ -17,6 +17,7 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
   });
   const [carCount, setCarCount] = useState(0);
   const [loadingCount, setLoadingCount] = useState(true);
+  const [postcodeError, setPostcodeError] = useState('');
 
   // Fetch car count on component mount
   useEffect(() => {
@@ -48,6 +49,10 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
       ...prev,
       [name]: value
     }));
+    // Clear error when user starts typing in postcode
+    if (name === 'postcode' && postcodeError) {
+      setPostcodeError('');
+    }
   };
 
   const handleSearch = (e) => {
@@ -55,9 +60,12 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
     
     // Validate postcode is entered
     if (!searchParams.postcode.trim()) {
-      alert('Please enter a postcode to search');
+      setPostcodeError('Please enter a postcode to search');
       return;
     }
+    
+    // Clear error
+    setPostcodeError('');
     
     // Build query string from search params
     const queryParams = new URLSearchParams();
@@ -92,7 +100,11 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
                     placeholder="e.g. SW1A 1AA" 
                     value={searchParams.postcode}
                     onChange={handleInputChange}
+                    className={postcodeError ? 'error' : ''}
                   />
+                  {postcodeError && (
+                    <span className="error-message">{postcodeError}</span>
+                  )}
                 </div>
                 
                 <div className="redesign-search-field">
@@ -128,7 +140,7 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
                     className="more-options-link"
                     onClick={() => {
                       if (!searchParams.postcode.trim()) {
-                        alert('Please enter a postcode first');
+                        setPostcodeError('Please enter a postcode first');
                         return;
                       }
                       onFilterClick && onFilterClick();
