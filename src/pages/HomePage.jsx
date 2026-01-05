@@ -165,16 +165,18 @@ const HomePage = () => {
                 </div>
               </div>
               <div className="search-button-group">
-                <button 
-                  className="more-options-btn"
+                <a 
+                  className="more-options-link"
                   onClick={handleMoreOptions}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
+                  onKeyPress={(e) => e.key === 'Enter' && handleMoreOptions()}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M3 6h18M7 12h10M11 18h2"/>
                   </svg>
                   More options
-                </button>
+                </a>
                 <button 
                   className="search-button" 
                   onClick={handleSearch}
@@ -184,7 +186,7 @@ const HomePage = () => {
                     <circle cx="11" cy="11" r="8"/>
                     <path d="m21 21-4.35-4.35"/>
                   </svg>
-                  {loading ? 'Loading...' : `Search ${totalCars.toLocaleString()} ${totalCars === 1 ? 'car' : 'cars'}`}
+                  {loading ? 'Loading...' : `Search`}
                 </button>
               </div>
               {showMoreOptions && (
