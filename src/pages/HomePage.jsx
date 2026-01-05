@@ -240,8 +240,8 @@ const HomePage = () => {
               <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80" alt="Couple loading car" />
             </div>
             <div className="value-right">
-              <h2>We know what your car is really worth</h2>
-              <p>Join the millions who value their car with CarCatALog. It's completely free and within seconds we will give you a live valuation of what your car is worth.</p>
+              <h2>We can help provide you with an accurate current market valuation for your vehicle</h2>
+              <p>CarCatALog provides real-time vehicle valuations in seconds. Obtain an accurate, data-driven valuation of your vehicle. Our valuation delivers precise vehicle valuations powered by real-time market data.</p>
               <button className="btn-outline-primary" onClick={() => navigate('/valuation')}>Value your car</button>
             </div>
           </div>
@@ -266,13 +266,7 @@ const HomePage = () => {
             <div className="essential-card">
               <div className="essential-icon">🛡️</div>
               <h3>Security advice</h3>
-              <p>Guidance on staying safe when buying or selling a car.
-</p>
-            </div>
-            <div className="essential-card">
-              <div className="essential-icon">💰</div>
-              <h3>Car finance & loans</h3>
-              <p>See what you could borrow and explore finance options that fit your needs.</p>
+              <p>Guidance on staying safe when buying or selling a car.</p>
             </div>
             <div className="essential-card clickable-card" onClick={() => navigate('/valuation')}>
               <div className="essential-icon">🏷️</div>

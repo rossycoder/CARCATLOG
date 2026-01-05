@@ -40,6 +40,20 @@
   text-align: center;
 }
 
+.brand-logo-container {
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.brand-logo-img {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+  max-width: 200px;
+}
+
 .brand-heading {
   font-size: 2rem;
   font-weight: 700;

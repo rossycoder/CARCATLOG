@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { AuthProvider } from './context/AuthContext'
 import { TradeDealerProvider } from './context/TradeDealerContext'
 import Header from './components/Header'
@@ -76,11 +77,23 @@ import ProtectedTradeRoute from './components/Trade/ProtectedTradeRoute'
 
 import './App.css'
 
+// Scroll to top component
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <Router>
       <AuthProvider>
         <TradeDealerProvider>
+          <ScrollToTop />
           <div className="App">
             <Header />
             <main>

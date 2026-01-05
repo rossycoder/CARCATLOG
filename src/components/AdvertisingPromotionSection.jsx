@@ -49,12 +49,13 @@ const AdvertisingPromotionSection = () => {
           <h2 className="advertising-heading">
             Advertise on
           </h2>
-          <h2 className="brand-heading">
-            <span className="brand-car">Car</span>
-            <span className="brand-cat">Cat</span>
-            <span className="brand-a">A</span>
-            <span className="brand-log">Log</span>
-          </h2>
+          <div className="brand-logo-container">
+            <img 
+              src="/images/brands/logo.jpeg" 
+              alt="CarCatALog" 
+              className="brand-logo-img"
+            />
+          </div>
           
           <div className="benefits-list">
             {advertisingBenefits.map((benefit) => (
@@ -93,12 +94,13 @@ const AdvertisingPromotionSection = () => {
           <h2 className="promises-heading">
             Our Promise
           </h2>
-          <h2 className="brand-heading">
-            <span className="brand-car">Car</span>
-            <span className="brand-cat">Cat</span>
-            <span className="brand-a">A</span>
-            <span className="brand-log">Log</span>
-          </h2>
+          <div className="brand-logo-container">
+            <img 
+              src="/images/brands/logo.jpeg" 
+              alt="CarCatALog" 
+              className="brand-logo-img"
+            />
+          </div>
           
           <div className="promises-list">
             {platformPromises.map((promise) => (
