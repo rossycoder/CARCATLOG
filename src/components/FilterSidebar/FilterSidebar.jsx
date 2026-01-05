@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { carService } from '../services/carService';
+import { carService } from '../../services/carService';
 import './FilterSidebar.css';
 
 const FilterSidebar = ({ isOpen, onClose }) => {
