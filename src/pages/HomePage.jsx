@@ -4,7 +4,6 @@ import { FaFacebookF, FaYoutube, FaInstagram, FaTiktok } from 'react-icons/fa';
 
 import { getFeaturedBrands, getAllBrands } from '../data/carBrands';
 import AdvertisingPromotionSection from '../components/AdvertisingPromotionSection';
-import FilterSidebar from '../components/FilterSidebar/FilterSidebar';
 import { carService } from '../services/carService';
 import './HomePage.css';
 
@@ -15,7 +14,6 @@ const HomePage = () => {
   const [model, setModel] = useState('Any');
   const [radius, setRadius] = useState(25);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [error, setError] = useState('');
   const [totalCars, setTotalCars] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -89,6 +87,11 @@ const HomePage = () => {
     setModel('Any'); // Reset model when make changes
   };
 
+  const handleMoreOptions = () => {
+    // Navigate to car search page
+    navigate('/car-search?channel=cars');
+  };
+
   return (
     <div className="home-page">
       {/* Hero Section with Background Image and Search Bar */}
@@ -146,7 +149,7 @@ const HomePage = () => {
               <div className="search-button-group">
                 <button 
                   className="more-options-btn"
-                  onClick={() => setIsFilterOpen(true)}
+                  onClick={handleMoreOptions}
                   type="button"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -352,11 +355,6 @@ const HomePage = () => {
         
         </div>
       </section>
-      
-      <FilterSidebar 
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-      />
     </div>
   );
 };

@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import './FilterSidebar.css';
 
-const FilterSidebar = ({ isOpen, onClose, onApplyFilters }) => {
+const FilterSidebar = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     sort: 'relevance',
     distance: 'national',
-    makeModel: '',
-    reserveWithAutotrader: false,
+    make: '',
+    model: '',
     priceFrom: '',
     priceTo: '',
     yearFrom: '',
@@ -19,10 +22,33 @@ const FilterSidebar = ({ isOpen, onClose, onApplyFilters }) => {
     doors: '',
     seats: '',
     fuelType: '',
-    batteryRange: '',
-    chargingTime: '',
     engineSize: ''
   });
+
+  // Load filters from URL params when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setFilters({
+        sort: searchParams.get('sort') || 'relevance',
+        distance: searchParams.get('distance') || 'national',
+        make: searchParams.get('make') || '',
+        model: searchParams.get('model') || '',
+        priceFrom: searchParams.get('priceFrom') || '',
+        priceTo: searchParams.get('priceTo') || '',
+        yearFrom: searchParams.get('yearFrom') || '',
+        yearTo: searchParams.get('yearTo') || '',
+        mileageFrom: searchParams.get('mileageFrom') || '',
+        mileageTo: searchParams.get('mileageTo') || '',
+        gearbox: searchParams.get('gearbox') || '',
+        bodyType: searchParams.get('bodyType') || '',
+        colour: searchParams.get('colour') || '',
+        doors: searchParams.get('doors') || '',
+        seats: searchParams.get('seats') || '',
+        fuelType: searchParams.get('fuelType') || '',
+        engineSize: searchParams.get('engineSize') || ''
+      });
+    }
+  }, [isOpen, searchParams]);
 
   const handleChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
@@ -32,8 +58,8 @@ const FilterSidebar = ({ isOpen, onClose, onApplyFilters }) => {
     setFilters({
       sort: 'relevance',
       distance: 'national',
-      makeModel: '',
-      reserveWithAutotrader: false,
+      make: '',
+      model: '',
       priceFrom: '',
       priceTo: '',
       yearFrom: '',
@@ -46,14 +72,23 @@ const FilterSidebar = ({ isOpen, onClose, onApplyFilters }) => {
       doors: '',
       seats: '',
       fuelType: '',
-      batteryRange: '',
-      chargingTime: '',
       engineSize: ''
     });
   };
 
   const handleApply = () => {
-    onApplyFilters(filters);
+    // Build query params from filters
+    const params = new URLSearchParams();
+    params.append('channel', 'cars');
+    
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value !== 'relevance' && value !== 'national') {
+        params.append(key, value);
+      }
+    });
+
+    // Navigate to car search page
+    navigate(`/car-search?${params.toString()}`);
     onClose();
   };
 
@@ -61,15 +96,11 @@ const FilterSidebar = ({ isOpen, onClose, onApplyFilters }) => {
 
   return (
     <>
-      <div className="filter-overlay" onClick={onClose}></div>
-      <div className="filter-sidebar">
+      <div className={`filter-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}></div>
+      <div className={`filter-sidebar ${isOpen ? 'open' : ''}`}>
         <div className="filter-header">
           <h2>Filter and sort</h2>
-          <button className="close-button" onClick={onClose}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6L6 18M6 6l12 12"/>
-            </svg>
-          </button>
+          <button className="close-button" onClick={onClose}>×</button>
         </div>
 
         <div className="filter-content">
@@ -125,27 +156,31 @@ const FilterSidebar = ({ isOpen, onClose, onApplyFilters }) => {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 17h14v-5H5v5zm0 0v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2M5 17V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10"/>
               </svg>
-              Make and model
+              Make
             </label>
             <input
               type="text"
               className="filter-input"
-              placeholder="Search make or model"
-              value={filters.makeModel}
-              onChange={(e) => handleChange('makeModel', e.target.value)}
+              placeholder="Search make"
+              value={filters.make}
+              onChange={(e) => handleChange('make', e.target.value)}
             />
           </div>
 
-          {/* Reserve with Autotrader */}
-          <div className="filter-section checkbox-section">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={filters.reserveWithAutotrader}
-                onChange={(e) => handleChange('reserveWithAutotrader', e.target.checked)}
-              />
-              <span>Reserve online with the option to finance or part exchange</span>
+          <div className="filter-section">
+            <label className="filter-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 17h14v-5H5v5zm0 0v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2M5 17V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10"/>
+              </svg>
+              Model
             </label>
+            <input
+              type="text"
+              className="filter-input"
+              placeholder="Search model"
+              value={filters.model}
+              onChange={(e) => handleChange('model', e.target.value)}
+            />
           </div>
 
           {/* Price */}
@@ -369,49 +404,6 @@ const FilterSidebar = ({ isOpen, onClose, onApplyFilters }) => {
             </select>
           </div>
 
-          {/* Battery range */}
-          <div className="filter-section">
-            <label className="filter-label">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="1" y="6" width="18" height="12" rx="2"/>
-                <path d="M19 10v4"/>
-              </svg>
-              Battery range
-            </label>
-            <select 
-              className="filter-select"
-              value={filters.batteryRange}
-              onChange={(e) => handleChange('batteryRange', e.target.value)}
-            >
-              <option value="">Any</option>
-              <option value="100">100+ miles</option>
-              <option value="150">150+ miles</option>
-              <option value="200">200+ miles</option>
-              <option value="250">250+ miles</option>
-              <option value="300">300+ miles</option>
-            </select>
-          </div>
-
-          {/* Charging time */}
-          <div className="filter-section">
-            <label className="filter-label">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-              </svg>
-              Charging time
-            </label>
-            <select 
-              className="filter-select"
-              value={filters.chargingTime}
-              onChange={(e) => handleChange('chargingTime', e.target.value)}
-            >
-              <option value="">Any</option>
-              <option value="rapid">Rapid (under 1 hour)</option>
-              <option value="fast">Fast (1-4 hours)</option>
-              <option value="slow">Slow (4+ hours)</option>
-            </select>
-          </div>
-
           {/* Engine size */}
           <div className="filter-section">
             <label className="filter-label">
@@ -438,11 +430,11 @@ const FilterSidebar = ({ isOpen, onClose, onApplyFilters }) => {
         </div>
 
         <div className="filter-footer">
-          <button className="clear-all-button" onClick={handleClearAll}>
+          <button className="clear-button" onClick={handleClearAll}>
             Clear all
           </button>
-          <button className="apply-button" onClick={handleApply}>
-            Search 404,184 cars
+          <button className="search-button" onClick={handleApply}>
+            Search cars
           </button>
         </div>
       </div>

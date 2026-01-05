@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './UsedCarsPage.css';
 import HeroSection from '../components/UsedCarsRedesign/HeroSection';
 import FeaturedContent from '../components/UsedCarsRedesign/FeaturedContent';
 import StatisticsSection from '../components/UsedCarsRedesign/StatisticsSection';
 import ValueProposition from '../components/UsedCarsRedesign/ValueProposition';
 import PostcodeSearch from '../components/PostcodeSearch/PostcodeSearch';
-import FilterSidebar from '../components/FilterSidebar/FilterSidebar';
 import { carService } from '../services/carService';
 import {
   heroContent,
@@ -15,7 +15,7 @@ import {
 } from '../data/usedCarsRedesignData';
 
 const UsedCarsPage = () => {
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const navigate = useNavigate();
   const [carCount, setCarCount] = useState(statistics.carCount);
   const [loading, setLoading] = useState(true);
 
@@ -39,9 +39,9 @@ const UsedCarsPage = () => {
     }
   };
 
-  const handleApplyFilters = (filters) => {
-    console.log('Filters applied:', filters);
-    // Handle filter application logic here
+  const handleFilterClick = () => {
+    // Navigate to car search page
+    navigate('/car-search?channel=cars');
   };
 
   return (
@@ -49,13 +49,7 @@ const UsedCarsPage = () => {
       <HeroSection 
         headline={heroContent.headline}
         subheadline={heroContent.subheadline}
-        onFilterClick={() => setIsFilterOpen(true)}
-      />
-      
-      <FilterSidebar 
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-        onApplyFilters={handleApplyFilters}
+        onFilterClick={handleFilterClick}
       />
       
     
