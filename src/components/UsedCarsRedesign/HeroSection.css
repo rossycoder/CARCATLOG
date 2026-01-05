@@ -73,7 +73,6 @@
 
 .redesign-search-field {
   text-align: left;
-  position: relative;
 }
 
 .redesign-search-field label {
@@ -103,9 +102,9 @@
 .redesign-search-field .error-message {
   display: block;
   color: #dc3545;
-  font-size: 12px;
-  margin-top: 4px;
-  font-weight: 500;
+  font-size: 11px;
+  margin-top: 2px;
+  line-height: 1;
 }
 
 .redesign-search-field input:focus,
