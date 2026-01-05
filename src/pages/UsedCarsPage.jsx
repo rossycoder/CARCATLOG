@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './UsedCarsPage.css';
 import HeroSection from '../components/UsedCarsRedesign/HeroSection';
 import FeaturedContent from '../components/UsedCarsRedesign/FeaturedContent';
@@ -6,6 +6,7 @@ import StatisticsSection from '../components/UsedCarsRedesign/StatisticsSection'
 import ValueProposition from '../components/UsedCarsRedesign/ValueProposition';
 import PostcodeSearch from '../components/PostcodeSearch/PostcodeSearch';
 import FilterSidebar from '../components/FilterSidebar/FilterSidebar';
+import { carService } from '../services/carService';
 import {
   heroContent,
   featuredSections,
@@ -15,11 +16,28 @@ import {
 
 const UsedCarsPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [carCount, setCarCount] = useState(statistics.carCount);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.title = 'Used Cars for Sale | CarCatALog';
     window.scrollTo(0, 0);
+    fetchCarCount();
   }, []);
+
+  const fetchCarCount = async () => {
+    try {
+      setLoading(true);
+      const count = await carService.getCarCount();
+      setCarCount(count);
+      console.log('Real car count from database:', count);
+    } catch (err) {
+      console.error('Error fetching car count:', err);
+      // Keep the default count from statistics if fetch fails
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleApplyFilters = (filters) => {
     console.log('Filters applied:', filters);
@@ -70,9 +88,10 @@ const UsedCarsPage = () => {
       <FeaturedContent sections={featuredSections} />
       
       <StatisticsSection 
-        carCount={statistics.carCount}
+        carCount={carCount}
         label={statistics.label}
         subtitle={statistics.subtitle}
+        loading={loading}
       />
       
       <ValueProposition benefits={benefits} />

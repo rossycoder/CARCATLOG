@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { carService } from '../services/carService';
+import FilterSidebar from '../components/FilterSidebar/FilterSidebar';
 import './SearchResultsPage.css';
 
 function SearchResultsPage() {
@@ -437,7 +438,7 @@ function SearchResultsPage() {
               className="filter-sort-btn"
               onClick={() => setShowFilterModal(true)}
             >
-              ≡ Filter and sort
+              ⚙️ More options
             </button>
             <button 
               className={`save-search-btn ${searchSaved ? 'saved' : ''}`}
@@ -462,142 +463,6 @@ function SearchResultsPage() {
           </p>
         </div>
       </div>
-
-      {/* Filter Modal */}
-      {showFilterModal && (
-        <div className="filter-modal-overlay" onClick={() => setShowFilterModal(false)}>
-          <div className="filter-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Filter and Sort</h2>
-              <button className="close-btn" onClick={() => setShowFilterModal(false)}>×</button>
-            </div>
-            
-            <div className="modal-content">
-              {/* Price Filter */}
-              <div className="filter-section">
-                <h3>Price</h3>
-                <div className="filter-inputs">
-                  <input
-                    type="number"
-                    placeholder="Min price"
-                    value={filters.minPrice}
-                    onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
-                  />
-                  <span>to</span>
-                  <input
-                    type="number"
-                    placeholder="Max price"
-                    value={filters.maxPrice}
-                    onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              {/* Year Filter */}
-              <div className="filter-section">
-                <h3>Year</h3>
-                <div className="filter-inputs">
-                  <input
-                    type="number"
-                    placeholder="Min year"
-                    value={filters.minYear}
-                    onChange={(e) => setFilters(prev => ({ ...prev, minYear: e.target.value }))}
-                  />
-                  <span>to</span>
-                  <input
-                    type="number"
-                    placeholder="Max year"
-                    value={filters.maxYear}
-                    onChange={(e) => setFilters(prev => ({ ...prev, maxYear: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              {/* Mileage Filter */}
-              <div className="filter-section">
-                <h3>Maximum Mileage</h3>
-                <input
-                  type="number"
-                  placeholder="Max mileage"
-                  value={filters.maxMileage}
-                  onChange={(e) => setFilters(prev => ({ ...prev, maxMileage: e.target.value }))}
-                />
-              </div>
-
-              {/* Transmission Filter */}
-              <div className="filter-section">
-                <h3>Transmission</h3>
-                <select
-                  value={filters.transmission}
-                  onChange={(e) => setFilters(prev => ({ ...prev, transmission: e.target.value }))}
-                >
-                  <option value="All">All</option>
-                  <option value="Automatic">Automatic</option>
-                  <option value="Manual">Manual</option>
-                </select>
-              </div>
-
-              {/* Fuel Type Filter */}
-              <div className="filter-section">
-                <h3>Fuel Type</h3>
-                <select
-                  value={filters.fuelType}
-                  onChange={(e) => setFilters(prev => ({ ...prev, fuelType: e.target.value }))}
-                >
-                  <option value="All">All</option>
-                  <option value="Petrol">Petrol</option>
-                  <option value="Diesel">Diesel</option>
-                  <option value="Electric">Electric</option>
-                  <option value="Hybrid">Hybrid</option>
-                </select>
-              </div>
-
-              {/* Sort By */}
-              <div className="filter-section">
-                <h3>Sort By</h3>
-                <select
-                  value={filters.sortBy}
-                  onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
-                >
-                  <option value="distance">Distance (nearest first)</option>
-                  <option value="price-low">Price (low to high)</option>
-                  <option value="price-high">Price (high to low)</option>
-                  <option value="mileage-low">Mileage (low to high)</option>
-                  <option value="year-new">Year (newest first)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button 
-                className="btn-secondary"
-                onClick={() => {
-                  setFilters({
-                    make: 'All',
-                    minPrice: '',
-                    maxPrice: '',
-                    minYear: '',
-                    maxYear: '',
-                    maxMileage: '',
-                    transmission: 'All',
-                    fuelType: 'All',
-                    sortBy: 'distance'
-                  });
-                  setActiveFilter('All');
-                }}
-              >
-                Clear All
-              </button>
-              <button 
-                className="btn-primary"
-                onClick={() => setShowFilterModal(false)}
-              >
-                Apply Filters
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Main Content */}
       <div className="container-wide">
@@ -691,6 +556,11 @@ function SearchResultsPage() {
           </div>
         )}
       </div>
+      
+      <FilterSidebar 
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+      />
     </div>
   );
 }

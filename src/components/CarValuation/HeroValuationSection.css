@@ -1,5 +1,5 @@
 .hero-valuation-section {
-  background-color: #4BA9EA;
+  background-color: #7EC8F5;
   color: white;
   padding: 60px 20px 80px;
   text-align: center;
@@ -14,7 +14,8 @@
   font-size: 16px;
   font-weight: 500;
   margin-bottom: 12px;
-  opacity: 0.9;
+  opacity: 0.95;
+  color: white;
 }
 
 .hero-title {
@@ -22,6 +23,7 @@
   font-weight: 700;
   margin-bottom: 40px;
   line-height: 1.2;
+  color: white;
 }
 
 .valuation-form-wrapper {
@@ -62,23 +64,31 @@
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 16px;
-  background-color: white;
-  color: #1a1f3a;
+  background-color: white !important;
+  color: #1a1f3a !important;
   transition: border-color 0.3s ease;
   position: relative;
   z-index: 3;
   cursor: text;
   -webkit-appearance: none;
+  -moz-appearance: none;
   appearance: none;
+  -webkit-text-fill-color: #1a1f3a !important;
+  opacity: 1 !important;
 }
 
 .form-group input:focus {
   outline: none;
   border-color: #2563eb;
+  background-color: white !important;
+  color: #1a1f3a !important;
+  -webkit-text-fill-color: #1a1f3a !important;
 }
 
 .form-group input::placeholder {
-  color: #9ca3af;
+  color: #9ca3af !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #9ca3af !important;
 }
 
 .form-group input.error {
@@ -99,7 +109,7 @@
 
 .cta-button {
   padding: 14px 32px;
-  background-color: #4BA9EA;
+  background-color: #7EC8F5;
   color: white;
   border: none;
   border-radius: 50px;
@@ -112,13 +122,14 @@
 }
 
 .cta-button:hover {
-  background-color: #3a8bc7;
+  background-color: #5BB5ED;
 }
 
 .hero-tagline {
   font-size: 16px;
-  opacity: 0.9;
+  opacity: 0.95;
   margin: 0;
+  color: white;
 }
 
 /* Responsive - Tablet */
@@ -141,16 +152,19 @@
   .hero-label {
     font-size: 14px;
     margin-bottom: 10px;
+    color: white;
   }
 
   .hero-title {
     font-size: 28px;
     margin-bottom: 28px;
+    color: white;
   }
 
   .valuation-form-wrapper {
     padding: 20px;
     border-radius: 10px;
+    background-color: white;
   }
 
   .valuation-form {
@@ -160,11 +174,15 @@
   .form-group label {
     font-size: 13px;
     margin-bottom: 6px;
+    color: #1a1f3a;
   }
   
   .form-group input {
     padding: 12px 14px;
     font-size: 15px;
+    background-color: white !important;
+    color: #1a1f3a !important;
+    -webkit-text-fill-color: #1a1f3a !important;
   }
 
   .cta-button {
@@ -176,6 +194,7 @@
 
   .hero-tagline {
     font-size: 14px;
+    color: white;
   }
 }
 
@@ -187,24 +206,34 @@
   
   .hero-label {
     font-size: 13px;
+    color: white;
   }
   
   .hero-title {
     font-size: 24px;
     margin-bottom: 24px;
+    color: white;
   }
   
   .valuation-form-wrapper {
     padding: 16px;
+    background-color: white;
   }
   
   .valuation-form {
     gap: 12px;
   }
   
+  .form-group label {
+    color: #1a1f3a;
+  }
+  
   .form-group input {
     padding: 10px 12px;
     font-size: 14px;
+    background-color: white !important;
+    color: #1a1f3a !important;
+    -webkit-text-fill-color: #1a1f3a !important;
   }
   
   .cta-button {
@@ -215,5 +244,6 @@
   
   .hero-tagline {
     font-size: 13px;
+    color: white;
   }
 }

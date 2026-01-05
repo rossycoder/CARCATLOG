@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaFacebookF, FaYoutube, FaInstagram, FaTiktok, FaPinterestP } from 'react-icons/fa';
-import { SiGiphy } from 'react-icons/si';
+import { FaFacebookF, FaYoutube, FaInstagram, FaTiktok } from 'react-icons/fa';
 
 import { getFeaturedBrands, getAllBrands } from '../data/carBrands';
 import AdvertisingPromotionSection from '../components/AdvertisingPromotionSection';
+import FilterSidebar from '../components/FilterSidebar/FilterSidebar';
 import { carService } from '../services/carService';
 import './HomePage.css';
 
@@ -15,6 +15,7 @@ const HomePage = () => {
   const [model, setModel] = useState('Any');
   const [radius, setRadius] = useState(25);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [error, setError] = useState('');
   const [totalCars, setTotalCars] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -143,16 +144,16 @@ const HomePage = () => {
                 </div>
               </div>
               <div className="search-button-group">
-                <a 
-                  href="#" 
-                  className="more-options-link"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowMoreOptions(!showMoreOptions);
-                  }}
+                <button 
+                  className="more-options-btn"
+                  onClick={() => setIsFilterOpen(true)}
+                  type="button"
                 >
-                  {showMoreOptions ? 'Less options' : 'More options'}
-                </a>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 6h18M7 12h10M11 18h2"/>
+                  </svg>
+                  More options
+                </button>
                 <button 
                   className="search-button" 
                   onClick={handleSearch}
@@ -190,8 +191,12 @@ const HomePage = () => {
           <div className="welcome-content-wrapper">
             <div className="welcome-text-content">
               <h1 className="welcome-title">
-                <strong>Welcome</strong>
+                <strong>Welcome!</strong>
               </h1>
+              <p className="welcome-subtitle">
+                Your next car adventure starts right here!
+              </p>
+              <h2>About CarCatALog</h2>
               <p>
                 CarCatALog is the UK's newest online vehicle listing platform, created to offer a transparent, honest, and cost-effective alternative to traditional automotive marketplaces. We believe buying and selling vehicles should be simple, fair, and accessible to everyone.
               </p>
@@ -211,7 +216,7 @@ const HomePage = () => {
               </div>
               <div className="animated-car-container">
                 <img 
-                  src="/images/brands/blue car.PNG" 
+                  src="/images/brands/cars.jpeg" 
                   alt="Dream Car" 
                   className="animated-car"
                 />
@@ -347,6 +352,11 @@ const HomePage = () => {
         
         </div>
       </section>
+      
+      <FilterSidebar 
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+      />
     </div>
   );
 };
