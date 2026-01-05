@@ -126,8 +126,13 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
                   <button 
                     type="button"
                     className="more-options-link"
-                    onClick={() => searchParams.postcode.trim() && onFilterClick && onFilterClick()}
-                    disabled={!searchParams.postcode.trim()}
+                    onClick={() => {
+                      if (!searchParams.postcode.trim()) {
+                        alert('Please enter a postcode first');
+                        return;
+                      }
+                      onFilterClick && onFilterClick();
+                    }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
@@ -137,7 +142,6 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
                   <button 
                     type="submit" 
                     className="redesign-search-btn"
-                    disabled={!searchParams.postcode.trim()}
                   >
                     <span className="search-icon">🔍</span>
                     Search {loadingCount ? '...' : carCount.toLocaleString()} cars
