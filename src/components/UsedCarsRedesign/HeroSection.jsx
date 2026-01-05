@@ -53,6 +53,12 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
   const handleSearch = (e) => {
     e.preventDefault();
     
+    // Validate postcode is entered
+    if (!searchParams.postcode.trim()) {
+      alert('Please enter a postcode to search');
+      return;
+    }
+    
     // Build query string from search params
     const queryParams = new URLSearchParams();
     
@@ -119,15 +125,20 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
                 <div className="redesign-search-actions">
                   <button 
                     type="button"
-                    className="more-options"
-                    onClick={() => onFilterClick && onFilterClick()}
+                    className="more-options-link"
+                    onClick={() => searchParams.postcode.trim() && onFilterClick && onFilterClick()}
+                    disabled={!searchParams.postcode.trim()}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '6px' }}>
-                      <path d="M3 6h18M7 12h10M11 18h2"/>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                     </svg>
-                    Filter & Sort
+                    More options
                   </button>
-                  <button type="submit" className="redesign-search-btn">
+                  <button 
+                    type="submit" 
+                    className="redesign-search-btn"
+                    disabled={!searchParams.postcode.trim()}
+                  >
                     <span className="search-icon">🔍</span>
                     Search {loadingCount ? '...' : carCount.toLocaleString()} cars
                   </button>

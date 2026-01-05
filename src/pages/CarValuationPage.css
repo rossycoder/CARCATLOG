@@ -1,9 +1,0 @@
-.car-valuation-page {
-  min-height: 100vh;
-  background-color: white;
-}
-
-/* Ensure smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}

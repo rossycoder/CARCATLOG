@@ -11,7 +11,6 @@ import SellYourCarPage from './pages/SellYourCarPage'
 import CarAdvertisingPricesPage from './pages/CarAdvertisingPricesPage'
 import AdvertPaymentSuccessPage from './pages/AdvertPaymentSuccessPage'
 import CarFinderFormPage from './pages/CarFinderFormPage'
-import CarValuationPage from './pages/CarValuationPage'
 
 import VehicleLookupPage from './pages/VehicleLookupPage'
 import VehicleCheckPage from './pages/VehicleCheckPage'
@@ -107,7 +106,6 @@ function App() {
               <Route path="/advertising-prices" element={<CarAdvertisingPricesPage />} />
               <Route path="/sell-my-car/advert-payment-success" element={<AdvertPaymentSuccessPage />} />
               <Route path="/find-your-car" element={<CarFinderFormPage />} />
-              <Route path="/car-valuation" element={<CarValuationPage />} />
 
               <Route path="/vehicle-lookup" element={<VehicleLookupPage />} />
               <Route path="/vehicle-check" element={<VehicleCheckPage />} />

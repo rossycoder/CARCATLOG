@@ -239,10 +239,8 @@ const ValuationPage = () => {
       <div className="valuation-hero">
         <div className="hero-content">
           <h1>Value my car</h1>
-          <p className="hero-subtitle">In the know, in 10 seconds</p>
-          <p className="hero-description">
-            Join the millions who value their car with Autotrader.
-          </p>
+          <p className="hero-subtitle">Recieve your vehicle valuation in seconds </p>
+         
         </div>
       </div>
 
