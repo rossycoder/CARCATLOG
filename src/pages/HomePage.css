@@ -156,7 +156,7 @@
   background: var(--color-primary);
   color: white;
   border: none;
-  padding: var(--spacing-3) var(--spacing-6);
+  padding: var(--spacing-3) var(--spacing-5);
   border-radius: var(--radius-lg);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
