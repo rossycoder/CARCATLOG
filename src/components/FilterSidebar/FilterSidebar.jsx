@@ -67,10 +67,12 @@ const FilterSidebar = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
+        console.log('[FilterSidebar] Fetching filter options...');
         const options = await carService.getFilterOptions();
+        console.log('[FilterSidebar] Received filter options:', options);
         setFilterOptions(options);
       } catch (error) {
-        console.error('Error fetching filter options:', error);
+        console.error('[FilterSidebar] Error fetching filter options:', error);
       }
     };
     
@@ -147,14 +149,19 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       return;
     }
     
+    console.log('[FilterSidebar] Applying filters:', filters);
+    
     // Build query params from filters
     const params = new URLSearchParams();
     
     Object.entries(filters).forEach(([key, value]) => {
       if (value && value !== 'relevance' && value !== 'national') {
         params.append(key, value);
+        console.log(`[FilterSidebar] Adding param: ${key} = ${value}`);
       }
     });
+
+    console.log('[FilterSidebar] Final URL params:', params.toString());
 
     // Navigate to search results page
     navigate(`/search-results?${params.toString()}`);
@@ -250,7 +257,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.make}
               onChange={(e) => handleChange('make', e.target.value)}
             >
-              <option value="">Any</option>
+              <option value="">Select Make</option>
               {filterOptions.makes.map(make => (
                 <option key={make} value={make}>{make}</option>
               ))}
@@ -269,7 +276,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.model}
               onChange={(e) => handleChange('model', e.target.value)}
             >
-              <option value="">Any</option>
+              <option value="">Select Model</option>
               {filterOptions.models.map(model => (
                 <option key={model} value={model}>{model}</option>
               ))}
@@ -394,7 +401,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.gearbox}
               onChange={(e) => handleChange('gearbox', e.target.value)}
             >
-              <option value="">Any</option>
+              <option value="">Select Gearbox</option>
               {filterOptions.transmissions.map(transmission => (
                 <option key={transmission} value={transmission}>{transmission}</option>
               ))}
@@ -414,7 +421,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.bodyType}
               onChange={(e) => handleChange('bodyType', e.target.value)}
             >
-              <option value="">Any</option>
+              <option value="">Select Body Type</option>
               {filterOptions.bodyTypes.map(bodyType => (
                 <option key={bodyType} value={bodyType}>{bodyType}</option>
               ))}
@@ -434,7 +441,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.colour}
               onChange={(e) => handleChange('colour', e.target.value)}
             >
-              <option value="">Any</option>
+              <option value="">Select Colour</option>
               {filterOptions.colours.map(colour => (
                 <option key={colour} value={colour}>{colour}</option>
               ))}
@@ -454,7 +461,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.doors}
               onChange={(e) => handleChange('doors', e.target.value)}
             >
-              <option value="">Any</option>
+              <option value="">Select Doors</option>
               <option value="2">2</option>
               <option value="3">3</option>
               <option value="4">4</option>
@@ -475,7 +482,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.seats}
               onChange={(e) => handleChange('seats', e.target.value)}
             >
-              <option value="">Any</option>
+              <option value="">Select Seats</option>
               <option value="2">2</option>
               <option value="4">4</option>
               <option value="5">5</option>
@@ -496,7 +503,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.fuelType}
               onChange={(e) => handleChange('fuelType', e.target.value)}
             >
-              <option value="">Any</option>
+              <option value="">Select Fuel Type</option>
               {filterOptions.fuelTypes.map(fuelType => (
                 <option key={fuelType} value={fuelType}>{fuelType}</option>
               ))}
@@ -517,7 +524,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.engineSize}
               onChange={(e) => handleChange('engineSize', e.target.value)}
             >
-              <option value="">Any</option>
+              <option value="">Select Engine Size</option>
               <option value="1.0">Up to 1.0L</option>
               <option value="1.5">1.0L - 1.5L</option>
               <option value="2.0">1.5L - 2.0L</option>
