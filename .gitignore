@@ -26,5 +26,8 @@ Thumbs.db
 # Kiro specs and configuration
 .kiro/
 
+# Backend folder (separate repo)
+backend/
+
 # Test coverage
 coverage/

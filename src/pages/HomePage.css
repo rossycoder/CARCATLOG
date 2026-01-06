@@ -1098,14 +1098,14 @@
   }
   
   .hero-section-with-search .container {
-    min-height: 800px;
-    padding: var(--spacing-3) var(--spacing-3) var(--spacing-8);
-    border-radius: var(--radius-xl);
+    min-height: 750px; /* Ensuring sufficient space for the image */
+    padding: var(--spacing-3) var(--spacing-3) var(--spacing-6); /* Adjusting padding to show more image */
+    border-radius: var(--radius-lg);
     background-image: url('/images/brands/background1.jpeg');
     background-size: cover;
-    background-position: center 20%;
+    background-position: center 15%; /* Fine-tune background position for better visibility */
     background-repeat: no-repeat;
-    align-items: flex-end;
+    align-items: flex-end; /* Adjusting positioning of the content */
   }
   
   .hero-background-overlay {
@@ -1125,70 +1125,34 @@
     transform: translateY(0);
     box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.08);
   }
-  
-  .search-field label {
-    font-size: var(--font-size-xs);
-    margin-bottom: 4px;
-  }
-  
-  .search-field input,
-  .search-field select {
-    padding: var(--spacing-2) var(--spacing-3);
-    font-size: var(--font-size-sm);
-  }
-  
-  .search-button {
-    padding: var(--spacing-2-5) var(--spacing-4);
-    font-size: var(--font-size-sm);
-  }
-  
-  .more-options-btn {
-    padding: var(--spacing-2-5) var(--spacing-4);
-    font-size: var(--font-size-sm);
+
+  .search-field-group {
+    gap: var(--spacing-2); /* Adjusting gap between fields */
+    margin-bottom: var(--spacing-3);
   }
   
   .search-button-group {
-    flex-direction: column;
     gap: var(--spacing-2);
   }
   
-  .search-button-group .more-options-btn,
-  .search-button-group .search-button {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .more-options-link {
-    font-size: var(--font-size-xs);
-  }
-  
-  .welcome-hero-section {
-    padding: var(--spacing-8) var(--spacing-4);
-    margin-top: var(--spacing-6);
-  }
-  
   .welcome-title {
-    font-size: var(--font-size-2xl);
+    font-size: 1.75rem; /* Adjust font size for mobile */
   }
   
   .welcome-subtitle {
-    font-size: var(--font-size-lg);
-  }
-  
-  .welcome-description {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
   }
   
   .car-dream-text {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
   }
   
   .animated-car-container {
-    height: 180px;
+    height: 150px;
   }
   
   .animated-car {
-    max-width: 300px;
+    max-width: 250px;
   }
   
   .discover-more-section {
