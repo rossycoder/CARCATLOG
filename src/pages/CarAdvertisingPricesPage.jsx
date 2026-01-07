@@ -268,6 +268,7 @@ const CarAdvertisingPricesPage = () => {
           phoneNumber: null, email: null, postcode: null, allowEmailContact: false
         },
         vehicleType: 'car',
+        vehicleValue: priceRange, // ADD THIS - it's required by the backend!
         sellerType: sellerType
       };
       
