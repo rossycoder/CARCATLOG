@@ -66,4 +66,19 @@ export const carService = {
     const response = await api.get('/vehicles/filter-options');
     return response.data.data;
   },
+
+  // Search cars with comprehensive filters
+  searchCars: async (filters = {}) => {
+    const params = new URLSearchParams();
+    
+    // Add all filter parameters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value !== '' && value !== 'relevance' && value !== 'national') {
+        params.append(key, value);
+      }
+    });
+    
+    const response = await api.get(`/vehicles/search?${params.toString()}`);
+    return response.data;
+  },
 };
