@@ -15,9 +15,34 @@ const CarAdvertisingPricesPage = () => {
   const [priceRange, setPriceRange] = useState('under-1000');
 
   const advertId = locationState.state?.advertId;
-  const advertData = locationState.state?.advertData;
-  const vehicleData = locationState.state?.vehicleData;
+  const [advertData, setAdvertData] = useState(locationState.state?.advertData);
+  const [vehicleData, setVehicleData] = useState(locationState.state?.vehicleData);
   const contactDetails = locationState.state?.contactDetails;
+  const [isLoadingAdvert, setIsLoadingAdvert] = useState(false);
+
+  // Fetch advert data if not passed via state (to get photos)
+  useEffect(() => {
+    if (advertId && !advertData) {
+      console.log('📸 Fetching advert data for advertId:', advertId);
+      setIsLoadingAdvert(true);
+      advertService.getAdvert(advertId)
+        .then(response => {
+          if (response.success && response.data) {
+            console.log('📸 Fetched advert data with', response.data.advertData?.photos?.length || 0, 'photos');
+            setAdvertData(response.data.advertData);
+            setVehicleData(response.data.vehicleData);
+          }
+        })
+        .catch(error => {
+          console.error('Failed to fetch advert data:', error);
+        })
+        .finally(() => {
+          setIsLoadingAdvert(false);
+        });
+    } else if (advertData) {
+      console.log('📸 Using advertData from navigation state with', advertData.photos?.length || 0, 'photos');
+    }
+  }, [advertId]);
 
   // Private seller pricing tiers (prices in GBP)
   const privatePricingTiers = {
@@ -271,6 +296,9 @@ const CarAdvertisingPricesPage = () => {
         vehicleValue: priceRange, // ADD THIS - it's required by the backend!
         sellerType: sellerType
       };
+      
+      console.log('📸 Sending payment request with', advertData?.photos?.length || 0, 'photos');
+      console.log('📸 Photo URLs:', advertData?.photos?.map(p => p.url).slice(0, 3), '...');
       
       const response = await fetch(`${API_BASE_URL}/payments/create-car-checkout-session`, {
         method: 'POST',
