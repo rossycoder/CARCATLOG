@@ -76,13 +76,13 @@ const VehicleDetailPage = () => {
     // Combine data with DVLA taking priority for overlapping fields
     const vehicleData = {
       vrm: registration.toUpperCase(),
-      make: dvlaVehicle?.make || historyVehicle?.make || 'Triumph',
-      model: dvlaVehicle?.model || historyVehicle?.model || 'Bonneville America 865',
-      bodyType: dvlaVehicle?.bodyType || historyVehicle?.bodyType || 'Custom Cruiser',
-      colour: dvlaVehicle?.colour || dvlaVehicle?.color || historyVehicle?.colour || 'Blue',
+      make: dvlaVehicle?.make || historyVehicle?.make || 'Unknown',
+      model: dvlaVehicle?.model || historyVehicle?.model || 'Unknown',
+      bodyType: dvlaVehicle?.bodyType || historyVehicle?.bodyType || 'Unknown',
+      colour: dvlaVehicle?.colour || dvlaVehicle?.color || historyVehicle?.colour || 'Unknown',
       firstRegistered: dvlaVehicle?.yearOfManufacture || dvlaVehicle?.year || 
-                      historyVehicle?.firstRegistered || 'May 2012',
-      fuelType: dvlaVehicle?.fuelType || historyVehicle?.fuelType || 'Petrol',
+                      historyVehicle?.firstRegistered || 'Unknown',
+      fuelType: dvlaVehicle?.fuelType || historyVehicle?.fuelType || 'Unknown',
       engineSize: dvlaVehicle?.engineCapacity ? 
                   `${(dvlaVehicle.engineCapacity / 1000).toFixed(1)}L` : 
                   (historyVehicle?.engineSize || '865cc'),

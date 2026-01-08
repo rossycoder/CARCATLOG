@@ -12,9 +12,9 @@ const MOTHistorySection = ({ vrm }) => {
     if (vrm) {
       fetchMOTHistory();
     } else {
-      console.warn('MOTHistorySection - No VRM provided, using test VRM');
-      // Use a test VRM for development
-      fetchMOTHistory('AB12CDE');
+      console.warn('MOTHistorySection - No VRM provided');
+      setIsLoading(false);
+      setError('No vehicle registration provided');
     }
   }, [vrm]);
 

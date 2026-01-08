@@ -125,13 +125,13 @@ const VehiclePaymentPage = () => {
         const mergedData = {
           vrm: registration,
           // Prioritize DVLA data for basic vehicle info as it's more authoritative
-          make: vehicleInfo?.make || historyInfo?.make || 'Triumph',
-          model: vehicleInfo?.model || historyInfo?.model || 'Bonneville America 865', 
-          bodyType: vehicleInfo?.bodyType || historyInfo?.bodyType || historyInfo?.body_type || 'Custom Cruiser',
-          colour: vehicleInfo?.colour || vehicleInfo?.color || historyInfo?.colour || historyInfo?.color || 'Blue',
-          firstRegistered: vehicleInfo?.yearOfManufacture || vehicleInfo?.year || historyInfo?.firstRegistered || historyInfo?.first_registered || historyInfo?.year || 'May 2012',
-          fuelType: vehicleInfo?.fuelType || historyInfo?.fuelType || 'Petrol',
-          engineSize: vehicleInfo?.engineCapacity ? `${(vehicleInfo.engineCapacity / 1000).toFixed(1)}L` : (historyInfo?.engineSize || '865cc'),
+          make: vehicleInfo?.make || historyInfo?.make || 'Unknown',
+          model: vehicleInfo?.model || historyInfo?.model || 'Unknown', 
+          bodyType: vehicleInfo?.bodyType || historyInfo?.bodyType || historyInfo?.body_type || 'Unknown',
+          colour: vehicleInfo?.colour || vehicleInfo?.color || historyInfo?.colour || historyInfo?.color || 'Unknown',
+          firstRegistered: vehicleInfo?.yearOfManufacture || vehicleInfo?.year || historyInfo?.firstRegistered || historyInfo?.first_registered || historyInfo?.year || 'Unknown',
+          fuelType: vehicleInfo?.fuelType || historyInfo?.fuelType || 'Unknown',
+          engineSize: vehicleInfo?.engineCapacity ? `${(vehicleInfo.engineCapacity / 1000).toFixed(1)}L` : (historyInfo?.engineSize || 'Unknown'),
           transmission: historyInfo?.transmission || 'Manual',
           co2Emissions: vehicleInfo?.co2Emissions || '155',
           taxStatus: vehicleInfo?.taxStatus || 'Untaxed',
@@ -151,47 +151,15 @@ const VehiclePaymentPage = () => {
         console.log('Vehicle data merged successfully:', mergedData);
         setVehicleData(mergedData);
       } else {
-        // If both APIs fail, create comprehensive fallback data
-        console.log('Both API calls failed, using comprehensive fallback data');
-        setVehicleData({
-          vrm: registration,
-          make: 'Triumph',
-          model: 'Bonneville America 865',
-          bodyType: 'Custom Cruiser',
-          colour: 'Blue',
-          firstRegistered: 'May 2012',
-          fuelType: 'Petrol',
-          engineSize: '865cc',
-          
-          _dataSource: {
-            dvla: false,
-            history: false,
-            fallback: true
-          },
-          _completeness: 'fallback'
-        });
+        // Both APIs failed - show error
+        console.error('Both DVLA and History APIs failed');
+        setError('Unable to fetch vehicle data. Please check the registration number and try again.');
+        setVehicleData(null);
       }
     } catch (err) {
       console.error('Unexpected error in fetchVehicleData:', err);
-      
-      // Use fallback data for unexpected errors
-      setVehicleData({
-        vrm: registration,
-        make: 'Triumph',
-        model: 'Bonneville America 865',
-        bodyType: 'Custom Cruiser',
-        colour: 'Blue',
-        firstRegistered: 'May 2012',
-        fuelType: 'Petrol',
-        engineSize: '865cc',
-        
-        _dataSource: {
-          dvla: false,
-          history: false,
-          fallback: true
-        },
-        _completeness: 'error'
-      });
+      setError('An unexpected error occurred. Please try again.');
+      setVehicleData(null);
     } finally {
       setIsLoading(false);
     }
@@ -320,23 +288,23 @@ const VehiclePaymentPage = () => {
               </div>
               <div className="summary-row">
                 <span className="label">Make</span>
-                <span className="value">{vehicleData?.make || 'Triumph'}</span>
+                <span className="value">{vehicleData?.make || 'N/A'}</span>
               </div>
               <div className="summary-row">
                 <span className="label">Model</span>
-                <span className="value">{vehicleData?.model || 'Bonneville America 865'}</span>
+                <span className="value">{vehicleData?.model || 'N/A'}</span>
               </div>
               <div className="summary-row">
                 <span className="label">Body type</span>
-                <span className="value">{vehicleData?.bodyType || 'Custom Cruiser'}</span>
+                <span className="value">{vehicleData?.bodyType || 'N/A'}</span>
               </div>
               <div className="summary-row">
                 <span className="label">Colour</span>
-                <span className="value">{vehicleData?.colour || 'Blue'}</span>
+                <span className="value">{vehicleData?.colour || 'N/A'}</span>
               </div>
               <div className="summary-row">
                 <span className="label">First registered</span>
-                <span className="value">{vehicleData?.firstRegistered || 'May 2012'}</span>
+                <span className="value">{vehicleData?.firstRegistered || 'N/A'}</span>
               </div>
               <div className="summary-row total-row">
                 <span className="label">Total to pay:</span>

@@ -115,7 +115,7 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
           <span className="stat-icon">👤</span>
           <div className="stat-details">
             <span className="stat-label">Owners</span>
-            <span className="stat-value">{historyData.previousOwners || historyData.numberOfOwners || 4}</span>
+            <span className="stat-value">{historyData.previousOwners || historyData.numberOfOwners || 'N/A'}</span>
           </div>
         </div>
 
@@ -123,7 +123,7 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
           <span className="stat-icon">🔑</span>
           <div className="stat-details">
             <span className="stat-label">Keys</span>
-            <span className="stat-value">{historyData.numberOfKeys || historyData.keys || 1}</span>
+            <span className="stat-value">{historyData.numberOfKeys || historyData.keys || 'N/A'}</span>
           </div>
         </div>
 
