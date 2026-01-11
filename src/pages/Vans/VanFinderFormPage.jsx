@@ -139,76 +139,33 @@ const VanFinderFormPage = () => {
     
     setIsLoading(true);
     
-    // Simulate API delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const mockVehicleData = generateMockVanData(
-      formData.registrationNumber,
-      formData.mileage
-    );
-    
-    setVehicleDetails(mockVehicleData);
-    
-    // Scroll to vehicle details
-    setTimeout(() => {
-      document.getElementById('vehicle-details')?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-    
-    setIsLoading(false);
-  };
-
-  // Generate mock van data based on registration pattern
-  const generateMockVanData = (registration, mileage) => {
-    // Extract year from registration (UK format: AB12CDE - 12 = 2012)
-    const yearMatch = registration.match(/[A-Z]{2}(\d{2})/i);
-    let year = 2020;
-    if (yearMatch) {
-      const regYear = parseInt(yearMatch[1]);
-      year = regYear >= 50 ? 1950 + regYear : 2000 + regYear;
+    try {
+      // Call DVLA lookup API
+      const vanService = await import('../../services/vanService');
+      const response = await vanService.lookupVanByRegistration(
+        formData.registrationNumber,
+        formData.mileage
+      );
+      
+      if (response.success && response.data) {
+        setVehicleDetails(response.data);
+        
+        // Scroll to vehicle details
+        setTimeout(() => {
+          document.getElementById('vehicle-details')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        throw new Error(response.message || 'Failed to lookup vehicle');
+      }
+    } catch (error) {
+      console.error('Error looking up van:', error);
+      setErrors({
+        ...errors,
+        registrationNumber: error.message || 'Unable to find vehicle details. Please check the registration number and try again.'
+      });
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Mock van makes and models
-    const makes = ['Ford', 'Mercedes-Benz', 'Volkswagen', 'Renault', 'Peugeot', 'Citroen', 'Vauxhall', 'Fiat'];
-    const models = {
-      'Ford': ['Transit', 'Transit Custom', 'Transit Connect', 'Ranger'],
-      'Mercedes-Benz': ['Sprinter', 'Vito', 'Citan'],
-      'Volkswagen': ['Transporter', 'Crafter', 'Caddy'],
-      'Renault': ['Master', 'Trafic', 'Kangoo'],
-      'Peugeot': ['Boxer', 'Expert', 'Partner'],
-      'Citroen': ['Relay', 'Dispatch', 'Berlingo'],
-      'Vauxhall': ['Movano', 'Vivaro', 'Combo'],
-      'Fiat': ['Ducato', 'Talento', 'Doblo']
-    };
-    
-    const randomMake = makes[Math.floor(Math.random() * makes.length)];
-    const makeModels = models[randomMake];
-    const randomModel = makeModels[Math.floor(Math.random() * makeModels.length)];
-    
-    const colors = ['White', 'Silver', 'Black', 'Blue', 'Red', 'Grey'];
-    const fuelTypes = ['Diesel', 'Petrol', 'Electric'];
-    const vanTypes = ['Panel Van', 'Chassis Cab', 'Crew Van', 'Tipper', 'Dropside', 'Luton'];
-    
-    // Calculate estimated value based on year and mileage
-    const baseValue = 18000;
-    const yearDepreciation = (2024 - year) * 1200;
-    const mileageDepreciation = Math.floor(parseInt(mileage) / 10000) * 500;
-    const estimatedValue = Math.max(baseValue - yearDepreciation - mileageDepreciation, 3000);
-    
-    return {
-      registration: registration.toUpperCase(),
-      mileage: mileage,
-      make: randomMake,
-      model: randomModel,
-      year: year.toString(),
-      color: colors[Math.floor(Math.random() * colors.length)],
-      fuelType: fuelTypes[Math.floor(Math.random() * fuelTypes.length)],
-      vanType: vanTypes[Math.floor(Math.random() * vanTypes.length)],
-      payloadCapacity: [750, 1000, 1200, 1500, 2000][Math.floor(Math.random() * 5)],
-      previousOwners: Math.floor(Math.random() * 4 + 1).toString(),
-      motDue: `${String(Math.floor(Math.random() * 12 + 1)).padStart(2, '0')}/${String(Math.floor(Math.random() * 28 + 1)).padStart(2, '0')}/2026`,
-      taxDue: '01/04/2025',
-      estimatedValue: estimatedValue
-    };
   };
 
   const scrollToTop = () => {

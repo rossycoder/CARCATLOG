@@ -100,5 +100,74 @@ export const vanService = {
   deleteVan: async (id) => {
     const response = await api.delete(`/vans/${id}`);
     return response.data;
+  },
+
+  // Get filter options from database
+  getFilterOptions: async () => {
+    const response = await api.get('/vans/filter-options');
+    return response.data.data;
+  },
+
+  // Search vans with comprehensive filters
+  searchVans: async (filterParams) => {
+    const params = new URLSearchParams();
+    
+    Object.entries(filterParams).forEach(([key, value]) => {
+      if (value) {
+        params.append(key, value);
+      }
+    });
+    
+    const response = await api.get(`/vans/search-filtered?${params.toString()}`);
+    return response.data;
+  },
+
+  // DVLA vehicle lookup (works for vans too)
+  dvlaLookup: async (registrationNumber, mileage) => {
+    const response = await api.post('/vehicles/dvla-lookup', {
+      registrationNumber,
+      mileage
+    });
+    return response.data;
+  },
+
+  // Lookup van by registration number
+  lookupVanByRegistration: async (registrationNumber, mileage) => {
+    try {
+      const response = await api.post('/vehicles/dvla-lookup', {
+        registrationNumber,
+        mileage
+      });
+      
+      if (response.data.success && response.data.data) {
+        // Map DVLA data to van-specific format
+        const dvlaData = response.data.data;
+        return {
+          success: true,
+          data: {
+            registration: dvlaData.registrationNumber || registrationNumber.toUpperCase(),
+            mileage: mileage,
+            make: dvlaData.make || 'Unknown',
+            model: dvlaData.model || 'Unknown',
+            year: dvlaData.year || dvlaData.yearOfManufacture || new Date().getFullYear(),
+            color: dvlaData.color || dvlaData.colour || 'Not specified',
+            fuelType: dvlaData.fuelType || 'Diesel',
+            vanType: dvlaData.vanType || dvlaData.bodyType || 'Panel Van',
+            payloadCapacity: dvlaData.payloadCapacity || dvlaData.grossWeight || 'Unknown',
+            previousOwners: dvlaData.previousOwners || 'Unknown',
+            motDue: dvlaData.motExpiryDate || dvlaData.motDue || 'Unknown',
+            taxDue: dvlaData.taxDueDate || dvlaData.taxDue || 'Unknown',
+            taxStatus: dvlaData.taxStatus || 'Unknown',
+            motStatus: dvlaData.motStatus || 'Unknown'
+          }
+        };
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Error looking up van:', error);
+      throw error;
+    }
   }
 };
+
+export const lookupVanByRegistration = vanService.lookupVanByRegistration;

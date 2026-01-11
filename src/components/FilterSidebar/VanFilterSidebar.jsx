@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { carService } from '../../services/carService';
+import { vanService } from '../../services/vanService';
 import './FilterSidebar.css';
 
-const FilterSidebar = ({ isOpen, onClose }) => {
+const VanFilterSidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [validationErrors, setValidationErrors] = useState({});
@@ -11,8 +11,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     makes: [],
     models: [],
     fuelTypes: [],
-    transmissions: [],
-    bodyTypes: [],
+    vanTypes: [],
     colours: [],
     yearRange: { min: 2000, max: new Date().getFullYear() }
   });
@@ -28,13 +27,9 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     yearTo: '',
     mileageFrom: '',
     mileageTo: '',
-    gearbox: '',
-    bodyType: '',
+    vanType: '',
     colour: '',
-    doors: '',
-    seats: '',
-    fuelType: '',
-    engineSize: ''
+    fuelType: ''
   });
 
   // Load filters from URL params when modal opens
@@ -52,13 +47,9 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         yearTo: searchParams.get('yearTo') || '',
         mileageFrom: searchParams.get('mileageFrom') || '',
         mileageTo: searchParams.get('mileageTo') || '',
-        gearbox: searchParams.get('gearbox') || '',
-        bodyType: searchParams.get('bodyType') || '',
+        vanType: searchParams.get('vanType') || '',
         colour: searchParams.get('colour') || '',
-        doors: searchParams.get('doors') || '',
-        seats: searchParams.get('seats') || '',
-        fuelType: searchParams.get('fuelType') || '',
-        engineSize: searchParams.get('engineSize') || ''
+        fuelType: searchParams.get('fuelType') || ''
       });
     }
   }, [isOpen, searchParams]);
@@ -67,12 +58,12 @@ const FilterSidebar = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        console.log('[FilterSidebar] Fetching filter options...');
-        const options = await carService.getFilterOptions();
-        console.log('[FilterSidebar] Received filter options:', options);
+        console.log('[VanFilterSidebar] Fetching filter options...');
+        const options = await vanService.getFilterOptions();
+        console.log('[VanFilterSidebar] Received filter options:', options);
         setFilterOptions(options);
       } catch (error) {
-        console.error('[FilterSidebar] Error fetching filter options:', error);
+        console.error('[VanFilterSidebar] Error fetching filter options:', error);
       }
     };
     
@@ -81,7 +72,6 @@ const FilterSidebar = ({ isOpen, onClose }) => {
 
   const handleChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
-    // Clear validation error for this field when user makes changes
     if (validationErrors[field]) {
       setValidationErrors(prev => ({ ...prev, [field]: null }));
     }
@@ -90,7 +80,6 @@ const FilterSidebar = ({ isOpen, onClose }) => {
   const validateFilters = () => {
     const errors = {};
     
-    // Validate price range
     if (filters.priceFrom && filters.priceTo) {
       const priceFrom = parseFloat(filters.priceFrom);
       const priceTo = parseFloat(filters.priceTo);
@@ -133,38 +122,31 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       yearTo: '',
       mileageFrom: '',
       mileageTo: '',
-      gearbox: '',
-      bodyType: '',
+      vanType: '',
       colour: '',
-      doors: '',
-      seats: '',
-      fuelType: '',
-      engineSize: ''
+      fuelType: ''
     });
   };
 
   const handleApply = () => {
-    // Validate filters before applying
     if (!validateFilters()) {
       return;
     }
     
-    console.log('[FilterSidebar] Applying filters:', filters);
+    console.log('[VanFilterSidebar] Applying filters:', filters);
     
-    // Build query params from filters
     const params = new URLSearchParams();
     
     Object.entries(filters).forEach(([key, value]) => {
       if (value && value !== 'relevance' && value !== 'national') {
         params.append(key, value);
-        console.log(`[FilterSidebar] Adding param: ${key} = ${value}`);
+        console.log(`[VanFilterSidebar] Adding param: ${key} = ${value}`);
       }
     });
 
-    console.log('[FilterSidebar] Final URL params:', params.toString());
+    console.log('[VanFilterSidebar] Final URL params:', params.toString());
 
-    // Navigate to search results page
-    navigate(`/search-results?${params.toString()}`);
+    navigate(`/vans/search-results?${params.toString()}`);
     onClose();
   };
 
@@ -408,42 +390,22 @@ const FilterSidebar = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Gearbox */}
-          <div className="filter-section">
-            <label className="filter-label">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2v20M8 6h8M8 12h8M8 18h8"/>
-              </svg>
-              Gearbox
-            </label>
-            <select 
-              className="filter-select"
-              value={filters.gearbox}
-              onChange={(e) => handleChange('gearbox', e.target.value)}
-            >
-              <option value="">Select Gearbox</option>
-              {filterOptions.transmissions.map(transmission => (
-                <option key={transmission} value={transmission}>{transmission}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Body type */}
+          {/* Van Type */}
           <div className="filter-section">
             <label className="filter-label">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 17h14v-5H5v5zm0 0v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/>
               </svg>
-              Body type
+              Van Type
             </label>
             <select 
               className="filter-select"
-              value={filters.bodyType}
-              onChange={(e) => handleChange('bodyType', e.target.value)}
+              value={filters.vanType}
+              onChange={(e) => handleChange('vanType', e.target.value)}
             >
-              <option value="">Select Body Type</option>
-              {filterOptions.bodyTypes.map(bodyType => (
-                <option key={bodyType} value={bodyType}>{bodyType}</option>
+              <option value="">Select Van Type</option>
+              {filterOptions.vanTypes?.map(vanType => (
+                <option key={vanType} value={vanType}>{vanType}</option>
               ))}
             </select>
           </div>
@@ -468,48 +430,6 @@ const FilterSidebar = ({ isOpen, onClose }) => {
             </select>
           </div>
 
-          {/* Doors */}
-          <div className="filter-section">
-            <label className="filter-label">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-              </svg>
-              Doors
-            </label>
-            <select 
-              className="filter-select"
-              value={filters.doors}
-              onChange={(e) => handleChange('doors', e.target.value)}
-            >
-              <option value="">Select Doors</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
-          </div>
-
-          {/* Seats */}
-          <div className="filter-section">
-            <label className="filter-label">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 9v6h14V9M5 15v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/>
-              </svg>
-              Seats
-            </label>
-            <select 
-              className="filter-select"
-              value={filters.seats}
-              onChange={(e) => handleChange('seats', e.target.value)}
-            >
-              <option value="">Select Seats</option>
-              <option value="2">2</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="7">7</option>
-            </select>
-          </div>
-
           {/* Fuel type */}
           <div className="filter-section">
             <label className="filter-label">
@@ -529,30 +449,6 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               ))}
             </select>
           </div>
-
-          {/* Engine size */}
-          <div className="filter-section">
-            <label className="filter-label">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="4" y="4" width="16" height="16" rx="2"/>
-                <path d="M9 9h6v6H9z"/>
-              </svg>
-              Engine size
-            </label>
-            <select 
-              className="filter-select"
-              value={filters.engineSize}
-              onChange={(e) => handleChange('engineSize', e.target.value)}
-            >
-              <option value="">Select Engine Size</option>
-              <option value="1.0">Up to 1.0L</option>
-              <option value="1.5">1.0L - 1.5L</option>
-              <option value="2.0">1.5L - 2.0L</option>
-              <option value="2.5">2.0L - 2.5L</option>
-              <option value="3.0">2.5L - 3.0L</option>
-              <option value="3.0+">3.0L+</option>
-            </select>
-          </div>
         </div>
 
         <div className="filter-footer">
@@ -560,7 +456,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
             Clear all
           </button>
           <button className="search-button" onClick={handleApply}>
-            Search cars
+            Search vans
           </button>
         </div>
       </div>
@@ -568,4 +464,4 @@ const FilterSidebar = ({ isOpen, onClose }) => {
   );
 };
 
-export default FilterSidebar;
+export default VanFilterSidebar;

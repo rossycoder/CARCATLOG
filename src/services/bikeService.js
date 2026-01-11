@@ -98,5 +98,74 @@ export const bikeService = {
   deleteBike: async (id) => {
     const response = await api.delete(`/bikes/${id}`);
     return response.data;
+  },
+
+  // Get filter options from database
+  getFilterOptions: async () => {
+    const response = await api.get('/bikes/filter-options');
+    return response.data.data;
+  },
+
+  // Search bikes with comprehensive filters
+  searchBikes: async (filterParams) => {
+    const params = new URLSearchParams();
+    
+    Object.entries(filterParams).forEach(([key, value]) => {
+      if (value) {
+        params.append(key, value);
+      }
+    });
+    
+    const response = await api.get(`/bikes/search-filtered?${params.toString()}`);
+    return response.data;
+  },
+
+  // DVLA vehicle lookup (works for bikes too)
+  dvlaLookup: async (registrationNumber, mileage) => {
+    const response = await api.post('/vehicles/dvla-lookup', {
+      registrationNumber,
+      mileage
+    });
+    return response.data;
+  },
+
+  // Lookup bike by registration number
+  lookupBikeByRegistration: async (registrationNumber, mileage) => {
+    try {
+      const response = await api.post('/vehicles/dvla-lookup', {
+        registrationNumber,
+        mileage
+      });
+      
+      if (response.data.success && response.data.data) {
+        // Map DVLA data to bike-specific format
+        const dvlaData = response.data.data;
+        return {
+          success: true,
+          data: {
+            registration: dvlaData.registrationNumber || registrationNumber.toUpperCase(),
+            mileage: mileage,
+            make: dvlaData.make || 'Unknown',
+            model: dvlaData.model || 'Unknown',
+            year: dvlaData.year || dvlaData.yearOfManufacture || new Date().getFullYear(),
+            color: dvlaData.color || dvlaData.colour || 'Not specified',
+            fuelType: dvlaData.fuelType || 'Petrol',
+            engineSize: dvlaData.engineSize ? `${dvlaData.engineSize}L` : (dvlaData.engineCapacity ? `${dvlaData.engineCapacity}cc` : 'Unknown'),
+            bikeType: dvlaData.bikeType || 'Other',
+            previousOwners: dvlaData.previousOwners || 'Unknown',
+            motDue: dvlaData.motExpiryDate || dvlaData.motDue || 'Unknown',
+            taxDue: dvlaData.taxDueDate || dvlaData.taxDue || 'Unknown',
+            taxStatus: dvlaData.taxStatus || 'Unknown',
+            motStatus: dvlaData.motStatus || 'Unknown'
+          }
+        };
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Error looking up bike:', error);
+      throw error;
+    }
   }
 };
+
+export const lookupBikeByRegistration = bikeService.lookupBikeByRegistration;

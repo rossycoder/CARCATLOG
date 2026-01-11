@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { vanService } from '../../services/vanService';
+import VanFilterSidebar from '../../components/FilterSidebar/VanFilterSidebar';
 import './VanSearchResultsPage.css';
 
 function VanSearchResultsPage() {
@@ -13,6 +14,7 @@ function VanSearchResultsPage() {
   const [postcode, setPostcode] = useState('');
   const [radius, setRadius] = useState(25);
   const [savedVans, setSavedVans] = useState(new Set());
+  const [searchSaved, setSearchSaved] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   
   const [filters, setFilters] = useState({
@@ -25,6 +27,8 @@ function VanSearchResultsPage() {
     vanType: 'All',
     sortBy: 'distance'
   });
+
+  const [activeFilter, setActiveFilter] = useState('All');
 
   useEffect(() => {
     const saved = localStorage.getItem('savedVans');
@@ -43,19 +47,67 @@ function VanSearchResultsPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const postcodeParam = params.get('postcode');
-    const radiusParam = params.get('radius') || 25;
-    const makeParam = params.get('make');
-    const conditionParam = params.get('condition');
+    
+    // Check if we have any filter parameters
+    const hasFilters = Array.from(params.keys()).length > 0;
+    
+    console.log('VanSearchResultsPage mounted with params:', Object.fromEntries(params));
 
-    if (postcodeParam) {
-      setPostcode(postcodeParam);
-      setRadius(parseInt(radiusParam) || 25);
-      performSearch(postcodeParam, parseInt(radiusParam) || 25, makeParam, conditionParam);
+    if (hasFilters) {
+      // Perform filtered search
+      performFilteredSearch(params);
     } else {
-      loadAllVans(makeParam, conditionParam);
+      // Load all vans if no filters provided
+      loadAllVans();
+      // Auto-open filter modal if no search params
+      setTimeout(() => setShowFilterModal(true), 300);
     }
-  }, [location]);
+  }, [location.search]);
+
+  const performFilteredSearch = async (params) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // Convert URLSearchParams to object
+      const filterParams = {};
+      for (const [key, value] of params.entries()) {
+        filterParams[key] = value;
+      }
+      
+      console.log('[VanSearchResultsPage] Performing filtered search with:', filterParams);
+      const response = await vanService.searchVans(filterParams);
+      
+      console.log('[VanSearchResultsPage] Search response:', response);
+      
+      if (response.success) {
+        const vans = response.vans || [];
+        const total = response.total || 0;
+        
+        console.log('[VanSearchResultsPage] Found vans:', total);
+        
+        // Transform to match expected format
+        const transformedData = {
+          postcode: filterParams.postcode || 'All UK',
+          radius: filterParams.distance || 0,
+          count: total,
+          results: vans,
+          showingAllVans: false
+        };
+        
+        console.log('[VanSearchResultsPage] Setting filtered results:', transformedData);
+        setSearchResults(transformedData);
+        setFilteredResults(transformedData);
+      } else {
+        setError(response.error || 'Search failed');
+      }
+    } catch (err) {
+      console.error('[VanSearchResultsPage] Search error:', err);
+      setError(err.response?.data?.error || err.message || 'An error occurred while searching');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const performSearch = async (searchPostcode, searchRadius, make, condition) => {
     setLoading(true);
@@ -94,16 +146,13 @@ function VanSearchResultsPage() {
     }
   };
 
-  const loadAllVans = async (make, condition) => {
+  const loadAllVans = async () => {
     setLoading(true);
     setError('');
 
     try {
-      const filterParams = {};
-      if (make && make !== 'Any') filterParams.make = make;
-      if (condition) filterParams.condition = condition;
+      const response = await vanService.getVans({});
       
-      const response = await vanService.getVans(filterParams);
       const vans = response.data?.vans || response.data || [];
       const total = response.data?.pagination?.total || vans.length;
       
@@ -111,13 +160,16 @@ function VanSearchResultsPage() {
         postcode: 'All UK',
         radius: 0,
         count: total,
-        results: vans.map(van => ({ ...van, distance: 0 }))
+        results: vans.map(van => ({ ...van, distance: 0 })),
+        showingAllVans: false
       };
       
+      console.log('Loaded vans:', total);
       setSearchResults(transformedData);
       setFilteredResults(transformedData);
     } catch (err) {
       setError('Failed to load vans');
+      console.error('Error loading vans:', err);
     } finally {
       setLoading(false);
     }
@@ -171,6 +223,23 @@ function VanSearchResultsPage() {
     setFilteredResults({ ...searchResults, results, count: results.length });
   }, [filters, searchResults]);
 
+  const handleFilterPillClick = (filterType) => {
+    setActiveFilter(filterType);
+    
+    if (filterType === 'All') {
+      setFilters({
+        make: 'All',
+        minPrice: '',
+        maxPrice: '',
+        minYear: '',
+        maxYear: '',
+        maxMileage: '',
+        vanType: 'All',
+        sortBy: 'distance'
+      });
+    }
+  };
+
   const handleSaveVan = (vanId) => {
     setSavedVans(prev => {
       const newSet = new Set(prev);
@@ -183,6 +252,32 @@ function VanSearchResultsPage() {
     });
   };
 
+  const handleSaveSearch = () => {
+    setSearchSaved(!searchSaved);
+    if (!searchSaved) {
+      const savedSearches = JSON.parse(localStorage.getItem('savedVanSearches') || '[]');
+      savedSearches.push({
+        postcode,
+        radius,
+        filters,
+        date: new Date().toISOString()
+      });
+      localStorage.setItem('savedVanSearches', JSON.stringify(savedSearches));
+      alert('Search saved successfully!');
+    } else {
+      alert('Search removed from saved searches');
+    }
+  };
+
+  const handleNewSearch = () => {
+    navigate('/vans');
+  };
+
+  const handleRadiusChange = (newRadius) => {
+    setRadius(newRadius);
+    performSearch(postcode, newRadius);
+  };
+
   const handleVanClick = (vanId) => {
     navigate(`/vans/${vanId}`);
   };
@@ -192,14 +287,9 @@ function VanSearchResultsPage() {
     return [...new Set(searchResults.results.map(van => van.make))].sort();
   };
 
-  const getUniqueVanTypes = () => {
-    if (!searchResults) return [];
-    return [...new Set(searchResults.results.map(van => van.vanType).filter(Boolean))].sort();
-  };
-
   if (loading) {
     return (
-      <div className="van-search-results">
+      <div className="search-results-page">
         <div className="container">
           <div className="loading-state">
             <div className="spinner"></div>
@@ -212,14 +302,14 @@ function VanSearchResultsPage() {
 
   if (error) {
     return (
-      <div className="van-search-results">
+      <div className="search-results-page">
         <div className="container">
           <div className="error-state">
             <h2>⚠️ Search Error</h2>
             <p>{error}</p>
-            <button onClick={() => navigate('/vans')} className="btn-primary">
-              Back to Vans
-            </button>
+            <a href="/vans" className="back-link">
+              ← Back to Vans
+            </a>
           </div>
         </div>
       </div>
@@ -227,30 +317,71 @@ function VanSearchResultsPage() {
   }
 
   return (
-    <div className="van-search-results">
-      {/* Filter Bar */}
-      <div className="filter-bar">
+    <div className="search-results-page">
+      {/* Top Filter Bar - Autotrader Style */}
+      <div className="top-filter-bar">
         <div className="container-wide">
           <div className="filter-pills">
             <button 
-              className={`filter-pill ${filters.make === 'All' ? 'active' : ''}`}
-              onClick={() => setFilters(prev => ({ ...prev, make: 'All' }))}
+              className={`filter-pill ${activeFilter === 'All' ? 'active' : ''}`}
+              onClick={() => handleFilterPillClick('All')}
             >
               All
             </button>
-            {getUniqueMakes().slice(0, 4).map(make => (
+            {getUniqueMakes().slice(0, 3).map(make => (
               <button 
                 key={make}
-                className={`filter-pill ${filters.make === make ? 'active' : ''}`}
-                onClick={() => setFilters(prev => ({ ...prev, make }))}
+                className={`filter-pill ${activeFilter === make ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveFilter(make);
+                  setFilters(prev => ({ ...prev, make }));
+                }}
               >
                 {make}
               </button>
             ))}
+            <button 
+              className={`filter-pill ${activeFilter === 'Price' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveFilter('Price');
+                setShowFilterModal(true);
+              }}
+            >
+              Price
+            </button>
+            <button 
+              className={`filter-pill ${activeFilter === 'Year' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveFilter('Year');
+                setShowFilterModal(true);
+              }}
+            >
+              Year
+            </button>
+            <button 
+              className={`filter-pill ${activeFilter === 'Mileage' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveFilter('Mileage');
+                setShowFilterModal(true);
+              }}
+            >
+              Mileage
+            </button>
           </div>
-          <button className="filter-btn" onClick={() => setShowFilterModal(true)}>
-            ≡ Filter and sort
-          </button>
+          <div className="filter-actions">
+            <button 
+              className="filter-sort-btn"
+              onClick={() => setShowFilterModal(true)}
+            >
+             Filter and Sort
+            </button>
+            <button 
+              className={`save-search-btn ${searchSaved ? 'saved' : ''}`}
+              onClick={handleSaveSearch}
+            >
+              Save search {searchSaved ? '♥' : '♡'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -258,128 +389,21 @@ function VanSearchResultsPage() {
       <div className="results-header">
         <div className="container-wide">
           <p className="results-count">
-            <span className="count-number">{filteredResults?.count || 0}</span> vans
-            {postcode && ` near ${postcode}`}
+            <span className="count-number">{filteredResults?.count || 0}</span> results
+            {searchResults?.showingAllVans ? (
+              <span className="fallback-notice"> - Showing all available vans in our database</span>
+            ) : (
+              postcode && ` near ${postcode}`
+            )} ⓘ
           </p>
         </div>
       </div>
 
-      {/* Filter Modal */}
-      {showFilterModal && (
-        <div className="filter-modal-overlay" onClick={() => setShowFilterModal(false)}>
-          <div className="filter-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Filter and Sort</h2>
-              <button className="close-btn" onClick={() => setShowFilterModal(false)}>×</button>
-            </div>
-            
-            <div className="modal-content">
-              <div className="filter-section">
-                <h3>Van Type</h3>
-                <select
-                  value={filters.vanType}
-                  onChange={(e) => setFilters(prev => ({ ...prev, vanType: e.target.value }))}
-                >
-                  <option value="All">All Types</option>
-                  {getUniqueVanTypes().map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="filter-section">
-                <h3>Price</h3>
-                <div className="filter-inputs">
-                  <input
-                    type="number"
-                    placeholder="Min price"
-                    value={filters.minPrice}
-                    onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
-                  />
-                  <span>to</span>
-                  <input
-                    type="number"
-                    placeholder="Max price"
-                    value={filters.maxPrice}
-                    onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div className="filter-section">
-                <h3>Year</h3>
-                <div className="filter-inputs">
-                  <input
-                    type="number"
-                    placeholder="Min year"
-                    value={filters.minYear}
-                    onChange={(e) => setFilters(prev => ({ ...prev, minYear: e.target.value }))}
-                  />
-                  <span>to</span>
-                  <input
-                    type="number"
-                    placeholder="Max year"
-                    value={filters.maxYear}
-                    onChange={(e) => setFilters(prev => ({ ...prev, maxYear: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div className="filter-section">
-                <h3>Maximum Mileage</h3>
-                <input
-                  type="number"
-                  placeholder="Max mileage"
-                  value={filters.maxMileage}
-                  onChange={(e) => setFilters(prev => ({ ...prev, maxMileage: e.target.value }))}
-                />
-              </div>
-
-              <div className="filter-section">
-                <h3>Sort By</h3>
-                <select
-                  value={filters.sortBy}
-                  onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
-                >
-                  <option value="distance">Distance (nearest first)</option>
-                  <option value="price-low">Price (low to high)</option>
-                  <option value="price-high">Price (high to low)</option>
-                  <option value="mileage-low">Mileage (low to high)</option>
-                  <option value="year-new">Year (newest first)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button 
-                className="btn-secondary"
-                onClick={() => {
-                  setFilters({
-                    make: 'All',
-                    minPrice: '',
-                    maxPrice: '',
-                    minYear: '',
-                    maxYear: '',
-                    maxMileage: '',
-                    vanType: 'All',
-                    sortBy: 'distance'
-                  });
-                }}
-              >
-                Clear All
-              </button>
-              <button className="btn-primary" onClick={() => setShowFilterModal(false)}>
-                Apply Filters
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Results Grid */}
+      {/* Main Content */}
       <div className="container-wide">
-        {filteredResults?.count === 0 ? (
-          <div className="no-results">
+        {/* Results Grid */}
+        {searchResults?.count === 0 ? (
+          <div className="no-results-state">
             <div className="no-results-icon">🚐</div>
             <h2>No Vans Found</h2>
             <p>
@@ -387,18 +411,29 @@ function VanSearchResultsPage() {
                 ? `We couldn't find any vans within ${radius} miles of ${postcode}`
                 : 'No vans match your search criteria'}
             </p>
-            <button onClick={() => navigate('/vans')} className="btn-primary">
-              Back to Vans
-            </button>
+            <div className="no-results-actions">
+              {postcode && (
+                <button 
+                  onClick={() => handleRadiusChange(radius + 25)} 
+                  className="btn-primary"
+                >
+                  Increase Radius to {radius + 25} miles
+                </button>
+              )}
+              <button onClick={handleNewSearch} className="btn-secondary">
+                {postcode ? 'Try Different Postcode' : 'Back to Vans'}
+              </button>
+            </div>
           </div>
         ) : (
-          <div className="results-grid">
+          <div className="results-grid-autotrader">
             {filteredResults?.results.map((van) => (
               <div 
                 key={van._id} 
-                className="van-listing-card"
+                className="car-listing-card"
                 onClick={() => handleVanClick(van._id)}
               >
+                {/* Save Button */}
                 <button 
                   className={`save-btn ${savedVans.has(van._id) ? 'saved' : ''}`}
                   onClick={(e) => {
@@ -409,30 +444,46 @@ function VanSearchResultsPage() {
                   {savedVans.has(van._id) ? '♥' : '♡'}
                 </button>
                 
-                <div className="van-image-wrapper">
+                {/* Van Image */}
+                <div className="car-image-wrapper">
                   <img 
                     src={van.images?.[0] || '/images/dummy/placeholder-van.jpg'} 
                     alt={`${van.make} ${van.model}`}
+                    className="car-image"
                   />
+                  <div className="image-counter">
+                    {van.images?.length || 1}/{van.images?.length || 1}
+                  </div>
                 </div>
                 
-                <div className="van-details">
-                  <h3>{van.make} {van.model}</h3>
-                  <p className="van-subtitle">{van.year} {van.vanType && `• ${van.vanType}`}</p>
+                {/* Van Details */}
+                <div className="car-details">
+                  <h3 className="car-name">{van.make} {van.model}</h3>
+                  <p className="car-subtitle">
+                    {van.year} {van.registrationNumber || 'REPLICA'}
+                  </p>
                   
-                  <div className="van-specs">
-                    <span>{van.mileage?.toLocaleString() || '0'} miles</span>
-                    <span>•</span>
-                    <span>{van.fuelType || 'Diesel'}</span>
+                  <div className="car-specs">
+                    <span className="spec">{van.mileage?.toLocaleString() || '0'} miles</span>
+                    <span className="spec-dot">•</span>
+                    <span className="spec">{van.fuelType || 'Diesel'}</span>
+                    {van.vanType && (
+                      <>
+                        <span className="spec-dot">•</span>
+                        <span className="spec">{van.vanType}</span>
+                      </>
+                    )}
                   </div>
                   
-                  <div className="van-price">£{van.price?.toLocaleString() || '0'}</div>
+                  <div className="car-price">
+                    £{van.price?.toLocaleString() || '0'}
+                  </div>
                   
-                  <div className="van-location">
-                    <span>📍</span>
+                  <div className="car-location">
+                    <span className="location-icon">📍</span>
                     <span>
                       {van.locationName || van.postcode?.split(' ')[0] || 'Location'}
-                      {van.distance > 0 && ` (${van.distance.toFixed(0)} miles)`}
+                      {van.distance > 0 && ` (${(van.distance || 0).toFixed(0)} miles)`}
                     </span>
                   </div>
                 </div>
@@ -441,6 +492,11 @@ function VanSearchResultsPage() {
           </div>
         )}
       </div>
+      
+      <VanFilterSidebar 
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+      />
     </div>
   );
 }

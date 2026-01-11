@@ -66,6 +66,9 @@ const Header = () => {
   const isBikesPage = location.pathname.startsWith('/bikes');
   const isVansPage = location.pathname.startsWith('/vans');
 
+  // Determine logo link based on current page
+  const logoLink = isBikesPage ? '/bikes' : isVansPage ? '/vans' : '/';
+
   return (
     <header className="header">
       {/* TOP NAVIGATION - Desktop Only */}
@@ -92,7 +95,7 @@ const Header = () => {
         </div>
 
         {/* CENTER - LOGO */}
-        <Link to="/" className="logo" onClick={closeMenu}>
+        <Link to={logoLink} className="logo" onClick={closeMenu}>
           <img 
             src="/images/brands/logo.jpeg" 
             alt="CarCatALog" 

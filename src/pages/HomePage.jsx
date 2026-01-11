@@ -39,17 +39,29 @@ const HomePage = () => {
     }
   };
 
+  const validatePostcode = (postcode) => {
+    // UK postcode regex pattern
+    const postcodeRegex = /^[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}$/i;
+    return postcodeRegex.test(postcode.trim());
+  };
+
   const handleSearch = () => {
-    // Clear previous error
-    setError('');
-    
     const trimmedPostcode = postcode.trim();
     
     // Validate postcode - it's required
     if (!trimmedPostcode) {
-      setError('Please enter the postcode');
+      setError('Please enter a postcode');
       return;
     }
+    
+    // Validate postcode format
+    if (!validatePostcode(trimmedPostcode)) {
+      setError('Please enter a valid UK postcode (e.g. SW1A 1AA)');
+      return;
+    }
+    
+    // Clear error if validation passes
+    setError('');
     
     // Build query string for URL
     const queryParams = new URLSearchParams();
@@ -88,16 +100,27 @@ const HomePage = () => {
   };
 
   const handleMoreOptions = () => {
+    // Clear previous error
+    setError('');
+    
+    const trimmedPostcode = postcode.trim();
+    
     // Validate postcode is entered
-    if (!postcode.trim()) {
+    if (!trimmedPostcode) {
       setError('Please enter a postcode first');
+      return;
+    }
+    
+    // Validate postcode format
+    if (!validatePostcode(trimmedPostcode)) {
+      setError('Please enter a valid UK postcode (e.g. SW1A 1AA)');
       return;
     }
     
     // Build query params with current search values
     const params = new URLSearchParams();
     
-    params.append('postcode', postcode.trim());
+    params.append('postcode', trimmedPostcode);
     params.append('openFilter', 'true'); // Flag to auto-open filter
     if (make && make !== 'Any') {
       params.append('make', make);
@@ -127,7 +150,11 @@ const HomePage = () => {
                       type="text" 
                       placeholder="e.g. SW1A 1AA" 
                       value={postcode}
-                      onChange={(e) => setPostcode(e.target.value.toUpperCase())}
+                      onChange={(e) => {
+                        setPostcode(e.target.value.toUpperCase());
+                        if (error) setError(''); // Clear error when user types
+                      }}
+                      className={error ? 'input-error' : ''}
                     />
                     <button 
                       className="location-icon-btn" 
@@ -320,18 +347,27 @@ const HomePage = () => {
           <div className="partners-grid">
             <div className="partner-card">
               <div className="partner-image">
-                <img src="/images/dummy/1.jpeg" alt="Partner 1" />
+                <img src="/images/dummy/1.jpeg" alt="Plates For Cars" />
               </div>
+              <a href="https://www.platesforcars.co.uk" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.platesforcars.co.uk
+              </a>
             </div>
             <div className="partner-card">
               <div className="partner-image">
-                <img src="/images/dummy/2.jpeg" alt="Partner 2" />
+                <img src="/images/dummy/2.jpeg" alt="Euro Car Parts" />
               </div>
+              <a href="https://www.eurocarparts.com" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.eurocarparts.com
+              </a>
             </div>
-            <div className="partner-card">
+            <div className="partner-card partner-card-extended">
               <div className="partner-image">
-                <img src="/images/dummy/3.jpeg" alt="Partner 3" />
+                <img src="/images/dummy/3.jpeg" alt="Kwik Fit" />
               </div>
+              <a href="https://www.kwik-fit.com" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.kwik-fit.com
+              </a>
             </div>
           </div>
         </div>

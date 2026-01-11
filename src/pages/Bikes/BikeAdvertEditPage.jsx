@@ -59,7 +59,7 @@ const BikeAdvertEditPage = () => {
     } catch (error) {
       console.error('Error loading advert:', error);
       // If advert doesn't exist, redirect back
-      navigate('/bikes/find-your-bike');
+      navigate('/bikes/sell-your-bike');
     } finally {
       setIsLoading(false);
     }
@@ -253,8 +253,8 @@ const BikeAdvertEditPage = () => {
         <div className="error-message">
           <h2>Advert not found</h2>
           <p>The advert you're looking for doesn't exist or you don't have permission to edit it.</p>
-          <button onClick={() => navigate('/bikes/find-your-bike')} className="back-button">
-            Back to Find Your Bike
+          <button onClick={() => navigate('/bikes/sell-your-bike')} className="back-button">
+            Back to Sell Your Bike
           </button>
         </div>
       </div>
@@ -304,9 +304,9 @@ const BikeAdvertEditPage = () => {
         <div className="container">
           <button 
             className="back-link" 
-            onClick={() => navigate('/bikes/find-your-bike')}
+            onClick={() => navigate('/bikes/sell-your-bike')}
           >
-            ← Back to Find Your Bike
+            ← Back to Sell Your Bike
           </button>
           <h1>Your bike advert - Incomplete</h1>
           <div className="advert-info">
@@ -423,9 +423,11 @@ const BikeAdvertEditPage = () => {
               {errors.price && (
                 <p className="error-message">{errors.price}</p>
               )}
-              <p className="price-note">
-                Our current valuation for your bike is £{vehicleData.estimatedValue?.toLocaleString() || '5,000'}
-              </p>
+              {vehicleData.estimatedValue && (
+                <p className="price-note">
+                  Our current valuation for your bike is £{vehicleData.estimatedValue.toLocaleString()}
+                </p>
+              )}
               <p className="finance-note">
                 We'll also display a monthly finance price on qualifying vehicles
               </p>
@@ -446,34 +448,34 @@ const BikeAdvertEditPage = () => {
             
             <div className="mileage-display">
               <span className="mileage-icon">🛣️</span>
-              <span className="mileage-text">{vehicleData.mileage?.toLocaleString() || '15,000'} miles</span>
+              <span className="mileage-text">{vehicleData.mileage?.toLocaleString() || 'Not available'} miles</span>
               <a href="#" className="edit-mileage">Edit mileage</a>
             </div>
             
             <div className="spec-grid">
               <div className="spec-item">
                 <label>MOT Due</label>
-                <span>{vehicleData.motDue || '05/06/2026'}</span>
+                <span>{vehicleData.motDue || 'Not available'}</span>
               </div>
               <div className="spec-item">
                 <label>Fuel type</label>
-                <span>{vehicleData.fuelType || 'Petrol'}</span>
+                <span>{vehicleData.fuelType || 'Not specified'}</span>
               </div>
               <div className="spec-item">
                 <label>Bike type</label>
-                <span>{vehicleData.bikeType || 'Sport'}</span>
+                <span>{vehicleData.bikeType || 'Not specified'}</span>
               </div>
               <div className="spec-item">
                 <label>Engine</label>
-                <span>{vehicleData.engineSize || '600cc'}</span>
+                <span>{vehicleData.engineSize || 'Not specified'}</span>
               </div>
               <div className="spec-item">
                 <label>Color</label>
-                <span>{vehicleData.color || 'Black'}</span>
+                <span>{vehicleData.color || 'Not specified'}</span>
               </div>
               <div className="spec-item">
                 <label>Previous Owners</label>
-                <span>{vehicleData.previousOwners || '1'}</span>
+                <span>{vehicleData.previousOwners || 'Not available'}</span>
               </div>
             </div>
           </section>

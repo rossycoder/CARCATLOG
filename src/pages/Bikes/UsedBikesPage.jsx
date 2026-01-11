@@ -27,6 +27,7 @@ const UsedBikesPage = () => {
   const [postcode, setPostcode] = useState('');
   const [radius, setRadius] = useState(25);
   const [selectedMake, setSelectedMake] = useState('');
+  const [postcodeError, setPostcodeError] = useState('');
 
   useEffect(() => {
     document.title = 'Used Bikes for Sale | CarCatALog';
@@ -49,10 +50,60 @@ const UsedBikesPage = () => {
     }
   };
 
+  const validatePostcode = (postcode) => {
+    // UK postcode regex pattern
+    const postcodeRegex = /^[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}$/i;
+    return postcodeRegex.test(postcode.trim());
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
+    
+    const trimmedPostcode = postcode.trim();
+    
+    // Validate postcode is entered
+    if (!trimmedPostcode) {
+      setPostcodeError('Please enter a postcode to search');
+      return;
+    }
+    
+    // Validate postcode format
+    if (!validatePostcode(trimmedPostcode)) {
+      setPostcodeError('Please enter a valid UK postcode (e.g. M1 1AE)');
+      return;
+    }
+    
+    // Clear error
+    setPostcodeError('');
+    
     const params = new URLSearchParams();
-    if (postcode) params.append('postcode', postcode);
+    if (postcode) params.append('postcode', trimmedPostcode);
+    if (radius) params.append('radius', radius);
+    if (selectedMake) params.append('make', selectedMake);
+    params.append('condition', 'used');
+    navigate(`/bikes/search-results?${params.toString()}`);
+  };
+
+  const handleMoreOptions = () => {
+    const trimmedPostcode = postcode.trim();
+    
+    // Validate postcode for more options too
+    if (!trimmedPostcode) {
+      setPostcodeError('Please enter a postcode first');
+      return;
+    }
+    
+    // Validate postcode format
+    if (!validatePostcode(trimmedPostcode)) {
+      setPostcodeError('Please enter a valid UK postcode (e.g. M1 1AE)');
+      return;
+    }
+    
+    // Clear error
+    setPostcodeError('');
+    
+    const params = new URLSearchParams();
+    if (postcode) params.append('postcode', trimmedPostcode);
     if (radius) params.append('radius', radius);
     if (selectedMake) params.append('make', selectedMake);
     params.append('condition', 'used');
@@ -86,10 +137,17 @@ const UsedBikesPage = () => {
                   <label>Postcode</label>
                   <input
                     type="text"
-                    placeholder="Enter postcode"
+                    placeholder="e.g. SW1A 1AA"
                     value={postcode}
-                    onChange={(e) => setPostcode(e.target.value)}
+                    onChange={(e) => {
+                      setPostcode(e.target.value);
+                      if (postcodeError) setPostcodeError('');
+                    }}
+                    className={postcodeError ? 'input-error' : ''}
                   />
+                  {postcodeError && (
+                    <div className="field-error-message">{postcodeError}</div>
+                  )}
                 </div>
                 <div className="search-field">
                   <label>Radius</label>
@@ -100,8 +158,20 @@ const UsedBikesPage = () => {
                     <option value="100">100 miles</option>
                   </select>
                 </div>
+                <div className="search-actions">
+                  <button 
+                    type="button"
+                    className="more-options-link"
+                    onClick={handleMoreOptions}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    More options
+                  </button>
+                  <button type="submit" className="search-btn">🔍 Search used bikes</button>
+                </div>
               </div>
-              <button type="submit" className="search-btn">🔍 Search used bikes</button>
             </form>
           </div>
         </div>

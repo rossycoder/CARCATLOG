@@ -30,22 +30,7 @@ export const checkVehicleHistory = async (vrm, forceRefresh = false) => {
     return response.data;
   } catch (error) {
     console.error('Error checking vehicle history:', error);
-    
-    // Return mock data for demonstration purposes when API fails
-    console.log('Using mock vehicle history data for demonstration');
-    return {
-      success: true,
-      data: {
-        vrm: vrm.toUpperCase(),
-        checkDate: new Date().toISOString(),
-        isStolen: false,
-        hasOutstandingFinance: false,
-        hasAccidentHistory: false,
-        checkStatus: 'success',
-        apiProvider: 'mock',
-        testMode: true
-      }
-    };
+    throw error; // Throw error instead of returning mock data
   }
 };
 

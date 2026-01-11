@@ -81,4 +81,13 @@ export const carService = {
     const response = await api.get(`/vehicles/search?${params.toString()}`);
     return response.data;
   },
+
+  // DVLA vehicle lookup
+  dvlaLookup: async (registrationNumber, mileage) => {
+    const response = await api.post('/vehicles/dvla-lookup', {
+      registrationNumber,
+      mileage
+    });
+    return response.data;
+  },
 };

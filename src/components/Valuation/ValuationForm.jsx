@@ -76,7 +76,7 @@ const ValuationForm = ({ onSubmit, loading = false, dvlaData = null, heroTitle =
   };
 
   const handleVrmChange = (e) => {
-    const value = e.target.value.toUpperCase();
+    const value = e.target.value.toUpperCase().replace(/\s/g, '');
     setVrm(value);
     if (errors.vrm) {
       setErrors({ ...errors, vrm: null });

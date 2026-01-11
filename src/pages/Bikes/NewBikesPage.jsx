@@ -42,11 +42,10 @@ const NewBikesPage = () => {
   const navigate = useNavigate();
   const [newBikes, setNewBikes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchFilters, setSearchFilters] = useState({
-    make: '',
-    maxPrice: '',
-    postcode: ''
-  });
+  const [postcode, setPostcode] = useState('');
+  const [make, setMake] = useState('');
+  const [model, setModel] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     document.title = 'New Bikes for Sale | CarCatALog';
@@ -65,17 +64,82 @@ const NewBikesPage = () => {
     }
   };
 
-  const handleSearch = () => {
+  const validatePostcode = (postcode) => {
+    // UK postcode regex pattern
+    const postcodeRegex = /^[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}$/i;
+    return postcodeRegex.test(postcode.trim());
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    
+    // Clear previous error
+    setError('');
+    
+    const trimmedPostcode = postcode.trim();
+    
+    // Validate postcode - it's required
+    if (!trimmedPostcode) {
+      setError('Please enter a postcode');
+      return;
+    }
+    
+    // Validate postcode format
+    if (!validatePostcode(trimmedPostcode)) {
+      setError('Please enter a valid UK postcode (e.g. M1 1AE)');
+      return;
+    }
+    
+    // Build query string for URL
     const params = new URLSearchParams();
-    if (searchFilters.make) params.append('make', searchFilters.make);
-    if (searchFilters.maxPrice) params.append('maxPrice', searchFilters.maxPrice);
-    if (searchFilters.postcode) params.append('postcode', searchFilters.postcode);
+    params.append('postcode', trimmedPostcode);
+    params.append('radius', '25');
     params.append('condition', 'new');
+    if (make) params.append('make', make);
+    if (model) params.append('model', model);
+    
     navigate(`/bikes/search-results?${params.toString()}`);
   };
 
-  const handleFilterChange = (field, value) => {
-    setSearchFilters(prev => ({ ...prev, [field]: value }));
+  const handleMoreOptions = () => {
+    // Clear previous error
+    setError('');
+    
+    const trimmedPostcode = postcode.trim();
+    
+    // Validate postcode is entered
+    if (!trimmedPostcode) {
+      setError('Please enter a postcode first');
+      return;
+    }
+    
+    // Validate postcode format
+    if (!validatePostcode(trimmedPostcode)) {
+      setError('Please enter a valid UK postcode (e.g. M1 1AE)');
+      return;
+    }
+    
+    // Build query params with current search values
+    const params = new URLSearchParams();
+    
+    params.append('postcode', trimmedPostcode);
+    params.append('openFilter', 'true'); // Flag to auto-open filter
+    params.append('condition', 'new');
+    if (make) {
+      params.append('make', make);
+    }
+    if (model) {
+      params.append('model', model);
+    }
+    
+    // Navigate to search results page
+    navigate(`/bikes/search-results?${params.toString()}`);
+  };
+
+  const handleMakeChange = (e) => {
+    const selectedMake = e.target.value;
+    setMake(selectedMake);
+    setModel(''); // Reset model when make changes
   };
 
   return (
@@ -83,50 +147,72 @@ const NewBikesPage = () => {
       {/* Hero Section */}
       <section className="new-bikes-hero">
         <div className="new-bikes-hero-background">
+          <div className="new-bikes-hero-overlay"></div>
           <div className="hero-container">
-            <span className="hero-label">New Bikes</span>
-            <h1>Nothing beats brand new</h1>
+            <div className="new-bikes-hero-text">
+              <span className="hero-label">New Bikes</span>
+              <h1>Nothing beats brand new</h1>
+            </div>
             
-            <div className="search-card">
-              <div className="search-fields">
-                <div className="search-field">
-                  <label>Max Price</label>
-                  <select 
-                    value={searchFilters.maxPrice}
-                    onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                  >
-                    <option value="">Any Price</option>
-                    <option value="5000">Up to £5,000</option>
-                    <option value="10000">Up to £10,000</option>
-                    <option value="15000">Up to £15,000</option>
-                    <option value="20000">Up to £20,000</option>
-                    <option value="30000">Up to £30,000</option>
-                  </select>
+            {/* Search Form */}
+            <form className="new-bikes-search-form" onSubmit={handleSearch}>
+              <div className="new-bikes-search-main">
+                <div className="new-bikes-search-field new-bikes-search-postcode">
+                  <label>Postcode *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. M11AE"
+                    value={postcode}
+                    onChange={(e) => setPostcode(e.target.value.toUpperCase())}
+                    className={error ? 'error' : ''}
+                  />
+                  {error && (
+                    <div className="field-error-message">
+                      {error}
+                    </div>
+                  )}
                 </div>
-                <div className="search-field">
+                <div className="new-bikes-search-field">
                   <label>Make</label>
-                  <select
-                    value={searchFilters.make}
-                    onChange={(e) => handleFilterChange('make', e.target.value)}
+                  <select 
+                    value={make}
+                    onChange={handleMakeChange}
                   >
-                    <option value="">Any Make</option>
+                    <option value="">Any</option>
                     {BIKE_BRANDS.map(brand => (
                       <option key={brand} value={brand}>{brand}</option>
                     ))}
                   </select>
                 </div>
-                <div className="search-field">
-                  <label>Postcode</label>
-                  <input 
-                    type="text" 
-                    placeholder="Enter postcode"
-                    value={searchFilters.postcode}
-                    onChange={(e) => handleFilterChange('postcode', e.target.value)}
-                  />
+                <div className="new-bikes-search-field">
+                  <label>Model</label>
+                  <select 
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                  >
+                    <option value="">Any</option>
+                  </select>
                 </div>
               </div>
-              <button className="search-btn" onClick={handleSearch}>🔍 Search new bikes</button>
-            </div>
+
+              <div className="new-bikes-search-buttons">
+                <a 
+                  className="new-bikes-more-options-link"
+                  onClick={handleMoreOptions}
+                  role="button"
+                  tabIndex={0}
+                  onKeyPress={(e) => e.key === 'Enter' && handleMoreOptions()}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 6h18M7 12h10M11 18h2"/>
+                  </svg>
+                  More options
+                </a>
+                <button type="submit" className="new-bikes-search-btn">
+                  🔍 Search new bikes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </section>

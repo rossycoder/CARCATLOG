@@ -521,12 +521,16 @@ const VanAdvertEditPage = () => {
                 </button>
               </div>
               
-              <p className="price-note">
-                Our current valuation for your van is £{vehicleData.estimatedValue?.toLocaleString() || '15,000'}
-              </p>
-              <button className="sell-price-button">
-                Sell for this much
-              </button>
+              {vehicleData.estimatedValue && (
+                <>
+                  <p className="price-note">
+                    Our current valuation for your van is £{vehicleData.estimatedValue.toLocaleString()}
+                  </p>
+                  <button className="sell-price-button">
+                    Sell for this much
+                  </button>
+                </>
+              )}
             </div>
           </section>
 
@@ -543,34 +547,34 @@ const VanAdvertEditPage = () => {
             
             <div className="mileage-display">
               <span className="mileage-icon">🛣️</span>
-              <span className="mileage-text">{vehicleData.mileage?.toLocaleString() || '50,000'} miles</span>
+              <span className="mileage-text">{vehicleData.mileage?.toLocaleString() || 'Not available'} miles</span>
               <a href="#" className="edit-mileage">Edit mileage</a>
             </div>
             
             <div className="spec-grid">
               <div className="spec-item">
                 <label>MOT Due</label>
-                <span>{vehicleData.motDue || '05/06/2026'}</span>
+                <span>{vehicleData.motDue || 'Not available'}</span>
               </div>
               <div className="spec-item">
                 <label>Fuel type</label>
-                <span>{vehicleData.fuelType || 'Diesel'}</span>
+                <span>{vehicleData.fuelType || 'Not specified'}</span>
               </div>
               <div className="spec-item">
                 <label>Van type</label>
-                <span>{vehicleData.vanType || 'Panel Van'}</span>
+                <span>{vehicleData.vanType || 'Not specified'}</span>
               </div>
               <div className="spec-item">
                 <label>Payload</label>
-                <span>{vehicleData.payloadCapacity ? `${vehicleData.payloadCapacity} kg` : 'N/A'}</span>
+                <span>{vehicleData.payloadCapacity ? `${vehicleData.payloadCapacity} kg` : 'Not available'}</span>
               </div>
               <div className="spec-item">
                 <label>Color</label>
-                <span>{vehicleData.color || 'White'}</span>
+                <span>{vehicleData.color || 'Not specified'}</span>
               </div>
               <div className="spec-item">
                 <label>Year</label>
-                <span>{vehicleData.year || '2020'}</span>
+                <span>{vehicleData.year || 'Not available'}</span>
               </div>
             </div>
           </section>

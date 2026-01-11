@@ -60,18 +60,27 @@ const UsedCarsPage = () => {
           <div className="partners-grid">
             <div className="partner-card">
               <div className="partner-image">
-                <img src="/images/dummy/1.jpeg" alt="Partner 1" />
+                <img src="/images/dummy/1.jpeg" alt="Plates For Cars" />
               </div>
+              <a href="https://www.platesforcars.co.uk" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.platesforcars.co.uk
+              </a>
             </div>
             <div className="partner-card">
               <div className="partner-image">
-                <img src="/images/dummy/2.jpeg" alt="Partner 2" />
+                <img src="/images/dummy/2.jpeg" alt="Euro Car Parts" />
               </div>
+              <a href="https://www.eurocarparts.com" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.eurocarparts.com
+              </a>
             </div>
-            <div className="partner-card">
+            <div className="partner-card partner-card-extended">
               <div className="partner-image">
-                <img src="/images/dummy/3.jpeg" alt="Partner 3" />
+                <img src="/images/dummy/3.jpeg" alt="Kwik Fit" />
               </div>
+              <a href="https://www.kwik-fit.com" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.kwik-fit.com
+              </a>
             </div>
           </div>
         </div>

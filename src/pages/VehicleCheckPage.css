@@ -136,12 +136,35 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   transition: border-color 0.3s;
+  background: white !important;
+  color: #1f2937 !important;
+  -webkit-text-fill-color: #1f2937 !important;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .registration-input:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  background: white !important;
+  color: #1f2937 !important;
+  -webkit-text-fill-color: #1f2937 !important;
+}
+
+/* Mobile text visibility fixes */
+@media (max-width: 768px) {
+  .registration-input,
+  .price-input {
+    font-size: 16px !important;
+    letter-spacing: 1px !important;
+    font-weight: 600 !important;
+    background: white !important;
+    color: #1f2937 !important;
+    -webkit-text-fill-color: #1f2937 !important;
+    min-height: 52px;
+  }
 }
 
 .check-button {

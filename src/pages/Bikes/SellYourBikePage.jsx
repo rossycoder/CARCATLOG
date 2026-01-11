@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import './SellYourBikePage.css';
 
@@ -27,10 +27,22 @@ const GuideCard = ({ icon, title, description }) => (
 
 const SellYourBikePage = () => {
   const navigate = useNavigate();
-  const [registration, setRegistration] = useState('');
-  const [mileage, setMileage] = useState('');
+  const location = useLocation();
+  
+  // Get passed state from navigation (from advertising prices page)
+  const passedRegistration = location.state?.registrationNumber || '';
+  const passedMileage = location.state?.mileage || '';
+  
+  const [registration, setRegistration] = useState(passedRegistration);
+  const [mileage, setMileage] = useState(passedMileage);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update form when passed state changes
+  useEffect(() => {
+    if (passedRegistration) setRegistration(passedRegistration);
+    if (passedMileage) setMileage(passedMileage);
+  }, [passedRegistration, passedMileage]);
 
   // Validation functions
   const validateRegistration = (value) => {
@@ -155,41 +167,40 @@ const SellYourBikePage = () => {
   const sellSteps = [
     { 
       icon: "📸", 
-      title: "Take great photos", 
-      description: "Taking good-quality photos means that the buyers have an accurate image of the bike, and there won't be any issues after the sale." 
+      title: "Take high quality photos", 
+      description: "Use clear, high-quality images to show the bike accurately. This helps buyers understand the vehicle's condition." 
     },
     { 
-      icon: "📋", 
-      title: "Keep it snappy", 
-      description: "There are a few documents you'll need to make sure you have before you sell your bike, including V5C and service history." 
+      icon: "📝", 
+      title: "Have documents ready", 
+      description: "Make sure you have all required paperwork ready before listing your bike. Having the correct documents helps the sale go smoothly and avoids delays or complications." 
     },
     { 
       icon: "✅", 
-      title: "Be honest", 
-      description: "Make sure your bike description is accurate. Mention any faults, like scratches or modifications, so buyers know what they're getting." 
+      title: "Honesty is key", 
+      description: "Ensure your vehicle description is accurate and complete. Clearly mention any faults, such as scratches or wear, so buyers know exactly what to expect before purchasing." 
     },
-  ];
-
+  ]
   const guides = [
     {
       icon: "🏍️",
       title: "Preparing your bike",
-      description: "From keeping it clean to sorting repairs, here's how to get your motorcycle ready for sale."
+      description: "Thoroughly clean your bike inside and out before listing it to create a strong first impression."
     },
     {
       icon: "📝",
-      title: "Creating your advert",
-      description: "Good-quality adverts lead to a fast sale. Read our tips to create an effective bike advert."
+      title: "Your advert",
+      description: "A well-written, high-quality advert attracts more buyers and helps your bike sell faster."
     },
     {
       icon: "💳",
-      title: "Taking payment",
-      description: "Cash, bank transfer, cheque? Learn the best way to accept payment and keep yourself secure."
+      title: "Your payment",
+      description: "An instant bank transfer is the safest payment method. Make sure the funds have fully cleared before handing over your bike."
     },
     {
       icon: "🛡️",
-      title: "Avoiding scams",
-      description: "Learn how to stay safe online and protect yourself from fraud when selling your motorcycle."
+      title: "Watch for  Scams",
+      description: "Stay alert and check online for the most common scams to protect yourself during the selling process."
     }
   ];
 
@@ -205,7 +216,7 @@ const SellYourBikePage = () => {
                 Reach thousands of bike buyers
               </h1>
               <p className="hero-subtitle">
-                Get the best price for your motorcycle. List it on the UK's largest marketplace and connect with serious buyers.
+              Get the best price for you motorcycle. List on the UK's newest platform for a price cheaper than other current sites,
               </p>
             </div>
             
@@ -266,14 +277,7 @@ const SellYourBikePage = () => {
                   onClick={handleSellMyBike}
                   disabled={isLoading}
                 >
-                  {isLoading ? (
-                    <>
-                      <span className="spinner"></span>
-                      <span>Finding your bike...</span>
-                    </>
-                  ) : (
-                    'Sell My Bike'
-                  )}
+                  {isLoading ? 'Finding your bike...' : 'Sell My Bike'}
                 </button>
                 
                 <a href="/bikes/advertising-prices" className="advertising-link">
@@ -285,62 +289,26 @@ const SellYourBikePage = () => {
         </div>
       </section>
 
-      {/* Section 2: Place an advert on CarCatALog */}
-      <section className="advert-section">
-        <div className="advert-container">
-          <h2 className="advert-main-title">Place an advert on CarCatALog</h2>
-          
-          <div className="advert-content-wrapper">
-            <div className="advert-left-panel">
-              <div className="advert-logo-wrapper">
-                <img 
-                  src="/images/brands/logo.jpeg" 
-                  alt="CarCatALog Logo" 
-                  className="advert-logo-image"
-                />
-              </div>
-              
-              <div className="advert-text-content">
-                <h3 className="advert-title">Advertise on CarCatALog</h3>
-                <p className="advert-description">
-                  With the UK's largest audience of motorcycle buyers, it's highly likely someone is currently searching our website for the bike that's sat in your garage. Speak with potential buyers directly to answer any questions and negotiate price.
-                </p>
-                
-                <h3 className="advert-subtitle">Sell fast for free</h3>
-              </div>
-              
-              <div className="advert-dots">
-                <span className="dot active"></span>
-                <span className="dot"></span>
-              </div>
-            </div>
-            
-            <div className="advert-right-panel">
-              <div className="advert-stat-box">
-                <div className="advert-stat-number">86</div>
-                <div className="advert-stat-label">million</div>
-                <p className="advert-stat-description">
-                  The number of cross-platform visits to our website each month
-                </p>
-              </div>
-              
-              <div className="advert-bike-image">
-                <img
-                  src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=600&q=80"
-                  alt="Motorcycle"
-                  onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/600x300/dc2626/ffffff?text=Motorcycle" }}
-                />
-              </div>
+      {/* Section 2: Advertising Card */}
+      <section className="advertising-card-section">
+        <div className="advertising-card-container">
+          <h2 className="advertising-section-title">Place an advert on CarCatALog</h2>
+          <div className="advertising-card-with-image">
+            <div className="advertising-card-image">
+              <img 
+                src="/images/brands/bikes.png" 
+                alt="Place an advert on CarCatALog" 
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Section 3: How to sell your bike, fast */}
+      {/* Section 3: Tips to selling your bike */}
       <section className="steps-section">
         <div className="steps-container">
           <h2 className="section-title">
-            How to sell your bike, fast
+            Tips to sell you bike,quickly 
           </h2>
           <div className="steps-grid">
             {sellSteps.map((step, index) => (
@@ -354,7 +322,7 @@ const SellYourBikePage = () => {
       <section className="guides-cards-section">
         <div className="guides-cards-container">
           <h2 className="section-title">
-            Guides to selling your bike
+            Tips to sell you  bike,quickly 
           </h2>
           <div className="guides-cards-grid">
             {guides.map((guide, index) => (

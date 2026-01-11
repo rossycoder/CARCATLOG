@@ -8,7 +8,7 @@
 /* Hero Section */
 .sell-your-van-page .hero-section {
   background: #f5f5f5;
-  padding: 0 20px;
+  padding: 20px;
   position: relative;
 }
 
@@ -21,7 +21,7 @@
   background-image: url('https://images.unsplash.com/photo-1527786356703-4b100091cd2c?w=1920&q=80');
   background-size: cover;
   background-position: center 30%;
-  border-radius: 0 0 24px 24px;
+  border-radius: 24px;
   overflow: hidden;
 }
 
@@ -140,11 +140,19 @@
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   transition: border-color 0.2s ease;
+  background: white !important;
+  -webkit-text-fill-color: #191919 !important;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .form-input:focus {
   outline: none;
   border-color: #0066ff;
+  background: white !important;
+  color: #191919 !important;
+  -webkit-text-fill-color: #191919 !important;
 }
 
 .form-input.error {
@@ -153,6 +161,25 @@
 
 .form-input::placeholder {
   color: #999999;
+}
+
+/* Mobile text visibility fixes */
+@media (max-width: 768px) {
+  .form-input {
+    font-size: 16px !important;
+    letter-spacing: 0.5px !important;
+    background: white !important;
+    color: #191919 !important;
+    -webkit-text-fill-color: #191919 !important;
+    min-height: 52px;
+  }
+  
+  /* Fix for registration input specifically on mobile */
+  #registration {
+    letter-spacing: 1px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+  }
 }
 
 .error-message {
@@ -680,12 +707,12 @@
 /* Responsive - Mobile */
 @media (max-width: 768px) {
   .sell-your-van-page .hero-section {
-    padding: 0 16px;
+    padding: 16px;
   }
 
   .sell-your-van-page .hero-section-background {
     min-height: auto;
-    border-radius: 0 0 16px 16px;
+    border-radius: 16px;
   }
   
   .hero-content {

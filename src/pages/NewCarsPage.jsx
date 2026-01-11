@@ -23,6 +23,7 @@ const NewCarsPage = () => {
     maxPrice: '',
     postcode: ''
   });
+  const [postcodeError, setPostcodeError] = useState('');
 
   useEffect(() => {
     document.title = 'New Cars for Sale | CarCatalog';
@@ -50,6 +51,12 @@ const NewCarsPage = () => {
   };
 
   const handleSearch = () => {
+    // Validate postcode is entered
+    if (!searchFilters.postcode.trim()) {
+      setPostcodeError('Please enter a postcode to search');
+      return;
+    }
+
     const params = new URLSearchParams();
     if (searchFilters.make) params.append('make', searchFilters.make);
     if (searchFilters.maxPrice) params.append('maxPrice', searchFilters.maxPrice);
@@ -60,6 +67,10 @@ const NewCarsPage = () => {
 
   const handleFilterChange = (field, value) => {
     setSearchFilters(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing in postcode field
+    if (field === 'postcode' && postcodeError) {
+      setPostcodeError('');
+    }
   };
 
   return (
@@ -69,7 +80,7 @@ const NewCarsPage = () => {
         <div className="new-hero-background">
           <div className="new-hero-container">
             <span className="new-hero-label">New Cars</span>
-            <h1 className="new-hero-title">Nothing beats brand new</h1>
+            <h1 className="new-hero-title">Nothing like that smell of a new car</h1>
             
             <div className="new-search-card">
               <div className="new-search-fields">
@@ -105,8 +116,12 @@ const NewCarsPage = () => {
                     type="text" 
                     placeholder="Enter postcode"
                     value={searchFilters.postcode}
-                    onChange={(e) => handleFilterChange('postcode', e.target.value)}
+                    onChange={(e) => handleFilterChange('postcode', e.target.value.toUpperCase())}
+                    className={postcodeError ? 'input-error' : ''}
                   />
+                  {postcodeError && (
+                    <div className="field-error-message">{postcodeError}</div>
+                  )}
                 </div>
               </div>
               <button className="new-search-btn" onClick={handleSearch}>🔍 Search new</button>
@@ -168,24 +183,6 @@ const NewCarsPage = () => {
         )}
       </section>
 
-      {/* Award Section */}
-      <section className="award-section">
-        <div className="award-content">
-          <div className="award-text">
-            <h2>Award winning cars.<br/>As chosen by you.</h2>
-            <p>From the most reliable to best for new drivers. See the winners of our annual Drivers' Choice Awards.</p>
-            <button className="link-btn">See the winners →</button>
-          </div>
-          <div className="award-image">
-            <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800" alt="Award" />
-            <div className="award-overlay">
-              <h3>Drivers' Choice Awards 2025</h3>
-              <p>The best cars on the market, voted by actual owners.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Promo Banner */}
       <section className="promo-banner">
         <div className="promo-content">
@@ -200,7 +197,6 @@ const NewCarsPage = () => {
         </div>
       </section>
 
-    
       {/* Partners Section */}
       <section className="partners-section">
         <div className="container">
@@ -208,55 +204,28 @@ const NewCarsPage = () => {
           <div className="partners-grid">
             <div className="partner-card">
               <div className="partner-image">
-                <img src="/images/dummy/1.jpeg" alt="Partner 1" />
+                <img src="/images/dummy/1.jpeg" alt="Plates For Cars" />
               </div>
+              <a href="https://www.platesforcars.co.uk" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.platesforcars.co.uk
+              </a>
             </div>
             <div className="partner-card">
               <div className="partner-image">
-                <img src="/images/dummy/2.jpeg" alt="Partner 2" />
+                <img src="/images/dummy/2.jpeg" alt="Euro Car Parts" />
               </div>
+              <a href="https://www.eurocarparts.com" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.eurocarparts.com
+              </a>
             </div>
-            <div className="partner-card">
+            <div className="partner-card partner-card-extended">
               <div className="partner-image">
-                <img src="/images/dummy/3.jpeg" alt="Partner 3" />
+                <img src="/images/dummy/3.jpeg" alt="Kwik Fit" />
               </div>
+              <a href="https://www.kwik-fit.com" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.kwik-fit.com
+              </a>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Savings Section */}
-      <section className="savings-section">
-        <div className="savings-card">
-          <div className="savings-text">
-            <h2>APP</h2>
-            <p>We've negotiated big discounts so you don't have to. Check out the latest reduced price new cars.</p>
-            <button className="outline-btn">View deals</button>
-            <p className="savings-note">*Average saving based on available stock</p>
-          </div>
-          <div className="savings-visual">
-            <div className="savings-stat">
-              <span>Average saving</span>
-              <strong>£3,042</strong>
-              <small>on new BMW stock</small>
-            </div>
-            <img src="https://images.unsplash.com/photo-1556189250-72ba95452e5d?auto=format&fit=crop&q=80&w=800" alt="BMW" />
-          </div>
-        </div>
-      </section>
-
-      {/* Stock Section */}
-      <section className="stock-section">
-        <div className="stock-content">
-          <div className="stock-number">
-            <h2>24,704</h2>
-            <p>New cars available</p>
-            <img src="https://images.unsplash.com/photo-1503376763036-066120622c74?auto=format&fit=crop&q=80&w=800" alt="Car" />
-          </div>
-          <div className="stock-text">
-            <h3>In stock and available now</h3>
-            <p>Don't want to wait? We have thousands of brand new cars in stock and ready to drive away.</p>
-            <button className="outline-btn">View stock</button>
           </div>
         </div>
       </section>

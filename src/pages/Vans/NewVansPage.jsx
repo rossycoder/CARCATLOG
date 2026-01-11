@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { vanService } from '../../services/vanService';
 import './NewVansPage.css';
@@ -7,19 +7,41 @@ const VAN_BRANDS = [
   'Ford', 'Mercedes-Benz', 'Volkswagen', 'Renault', 'Peugeot', 'Citroen', 'Vauxhall', 'Fiat'
 ];
 
+const FEATURED_VANS = [
+  {
+    id: 1,
+    name: 'Ford Transit Custom',
+    image: 'https://images.unsplash.com/photo-1527786356703-4b100091cd2c?w=400&h=300&fit=crop',
+    description: 'The UK\'s best-selling van for good reason'
+  },
+  {
+    id: 2,
+    name: 'Mercedes-Benz Sprinter',
+    image: 'https://images.unsplash.com/photo-1562519819-016930ada31b?w=400&h=300&fit=crop',
+    description: 'Premium quality and exceptional reliability'
+  },
+  {
+    id: 3,
+    name: 'Volkswagen Transporter',
+    image: 'https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=400&h=300&fit=crop',
+    description: 'Iconic design with modern technology'
+  },
+  {
+    id: 4,
+    name: 'Renault Trafic',
+    image: 'https://images.unsplash.com/photo-1527786356703-4b100091cd2c?w=400&h=300&fit=crop',
+    description: 'Versatile and efficient for any business'
+  }
+];
+
 const NewVansPage = () => {
   const navigate = useNavigate();
   const [newVans, setNewVans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const carouselRef = useRef(null);
-  const [searchFilters, setSearchFilters] = useState({
-    make: '',
-    maxPrice: '',
-    postcode: ''
-  });
-
-  const VANS_PER_VIEW = 4;
+  const [postcode, setPostcode] = useState('');
+  const [make, setMake] = useState('');
+  const [model, setModel] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     document.title = 'New Vans for Sale | CarCatALog';
@@ -29,11 +51,8 @@ const NewVansPage = () => {
 
   const fetchNewVans = async () => {
     try {
-      const result = await vanService.getVans({ condition: 'new', limit: 10, status: 'active' });
-      const vans = result.data?.vans || result.data || [];
-      // Filter only new vans (not used/old)
-      const filteredVans = vans.filter(van => van.condition === 'new');
-      setNewVans(filteredVans.slice(0, 10)); // Limit to 10 vans
+      const result = await vanService.getVans({ condition: 'new', limit: 8 });
+      setNewVans(result.data || []);
     } catch (error) {
       console.error('Error fetching new vans:', error);
     } finally {
@@ -41,171 +60,209 @@ const NewVansPage = () => {
     }
   };
 
-  const handleSearch = () => {
+  const validatePostcode = (postcode) => {
+    // UK postcode regex pattern
+    const postcodeRegex = /^[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}$/i;
+    return postcodeRegex.test(postcode.trim());
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    
+    // Clear previous error
+    setError('');
+    
+    const trimmedPostcode = postcode.trim();
+    
+    // Validate postcode - it's required
+    if (!trimmedPostcode) {
+      setError('Please enter a postcode');
+      return;
+    }
+    
+    // Validate postcode format
+    if (!validatePostcode(trimmedPostcode)) {
+      setError('Please enter a valid UK postcode (e.g. M1 1AE)');
+      return;
+    }
+    
+    // Build query string for URL
     const params = new URLSearchParams();
-    if (searchFilters.make) params.append('make', searchFilters.make);
-    if (searchFilters.maxPrice) params.append('maxPrice', searchFilters.maxPrice);
-    if (searchFilters.postcode) params.append('postcode', searchFilters.postcode);
+    params.append('postcode', trimmedPostcode);
+    params.append('radius', '25');
     params.append('condition', 'new');
+    if (make) params.append('make', make);
+    if (model) params.append('model', model);
+    
     navigate(`/vans/search-results?${params.toString()}`);
   };
 
-  const handleFilterChange = (field, value) => {
-    setSearchFilters(prev => ({ ...prev, [field]: value }));
+  const handleMoreOptions = () => {
+    // Clear previous error
+    setError('');
+    
+    const trimmedPostcode = postcode.trim();
+    
+    // Validate postcode is entered
+    if (!trimmedPostcode) {
+      setError('Please enter a postcode first');
+      return;
+    }
+    
+    // Validate postcode format
+    if (!validatePostcode(trimmedPostcode)) {
+      setError('Please enter a valid UK postcode (e.g. M1 1AE)');
+      return;
+    }
+    
+    // Build query params with current search values
+    const params = new URLSearchParams();
+    
+    params.append('postcode', trimmedPostcode);
+    params.append('openFilter', 'true'); // Flag to auto-open filter
+    params.append('condition', 'new');
+    if (make) {
+      params.append('make', make);
+    }
+    if (model) {
+      params.append('model', model);
+    }
+    
+    // Navigate to search results page
+    navigate(`/vans/search-results?${params.toString()}`);
   };
 
-  const handlePrevious = () => {
-    setCurrentIndex(prev => Math.max(0, prev - 1));
+  const handleMakeChange = (e) => {
+    const selectedMake = e.target.value;
+    setMake(selectedMake);
+    setModel(''); // Reset model when make changes
   };
-
-  const handleNext = () => {
-    const maxIndex = Math.max(0, newVans.length - VANS_PER_VIEW);
-    setCurrentIndex(prev => Math.min(maxIndex, prev + 1));
-  };
-
-  const canGoPrevious = currentIndex > 0;
-  const canGoNext = currentIndex < newVans.length - VANS_PER_VIEW;
 
   return (
     <div className="new-vans-page">
       {/* Hero Section */}
       <section className="new-vans-hero">
         <div className="new-vans-hero-background">
+          <div className="new-vans-hero-overlay"></div>
           <div className="hero-container">
-            <span className="hero-label">New Vans</span>
-            <h1>Nothing beats brand new</h1>
+            <div className="new-vans-hero-text">
+              <span className="hero-label">New Vans</span>
+              <h1>Nothing beats brand new</h1>
+            </div>
             
-            <div className="search-card">
-              <div className="search-fields">
-                <div className="search-field">
-                  <label>Max Price</label>
-                  <select 
-                    value={searchFilters.maxPrice}
-                    onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                  >
-                    <option value="">Any Price</option>
-                    <option value="20000">Up to £20,000</option>
-                    <option value="30000">Up to £30,000</option>
-                    <option value="40000">Up to £40,000</option>
-                    <option value="50000">Up to £50,000</option>
-                    <option value="75000">Up to £75,000</option>
-                  </select>
+            {/* Search Form */}
+            <form className="new-vans-search-form" onSubmit={handleSearch}>
+              <div className="new-vans-search-main">
+                <div className="new-vans-search-field new-vans-search-postcode">
+                  <label>Postcode *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. M11AE"
+                    value={postcode}
+                    onChange={(e) => setPostcode(e.target.value.toUpperCase())}
+                    className={error ? 'error' : ''}
+                  />
+                  {error && (
+                    <div className="field-error-message">
+                      {error}
+                    </div>
+                  )}
                 </div>
-                <div className="search-field">
+                <div className="new-vans-search-field">
                   <label>Make</label>
-                  <select
-                    value={searchFilters.make}
-                    onChange={(e) => handleFilterChange('make', e.target.value)}
+                  <select 
+                    value={make}
+                    onChange={handleMakeChange}
                   >
-                    <option value="">Any Make</option>
+                    <option value="">Any</option>
                     {VAN_BRANDS.map(brand => (
                       <option key={brand} value={brand}>{brand}</option>
                     ))}
                   </select>
                 </div>
-                <div className="search-field">
-                  <label>Postcode</label>
-                  <input 
-                    type="text" 
-                    placeholder="Enter postcode"
-                    value={searchFilters.postcode}
-                    onChange={(e) => handleFilterChange('postcode', e.target.value)}
-                  />
+                <div className="new-vans-search-field">
+                  <label>Model</label>
+                  <select 
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                  >
+                    <option value="">Any</option>
+                  </select>
                 </div>
               </div>
-              <button className="search-btn" onClick={handleSearch}>🔍 Search new vans</button>
-            </div>
+
+              <div className="new-vans-search-buttons">
+                <a 
+                  className="new-vans-more-options-link"
+                  onClick={handleMoreOptions}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && handleMoreOptions()}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 6h18M7 12h10M11 18h2"/>
+                  </svg>
+                  More options
+                </a>
+                <button type="submit" className="new-vans-search-btn">
+                  🔍 Search new vans
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </section>
 
-      {/* New Vans Carousel Section */}
+      {/* New Vans Available */}
       <section className="new-vans-section">
-        <h2>Buying? Thought about leasing?</h2>
-        <p className="section-subtitle">Explore our latest collection of brand new vans</p>
-        
+        <h2>Brand New Vans Available Now</h2>
+        <p className="section-subtitle">Explore our latest collection of new vans</p>
         {loading ? (
           <div className="loading-state">Loading new vans...</div>
         ) : newVans.length > 0 ? (
-          <div className="vans-carousel-container">
-            {/* Left Arrow */}
-            <button 
-              className={`carousel-arrow carousel-arrow-left ${!canGoPrevious ? 'disabled' : ''}`}
-              onClick={handlePrevious}
-              disabled={!canGoPrevious}
-            >
-              ‹
-            </button>
-
-            {/* Carousel */}
-            <div className="vans-carousel-wrapper">
-              <div 
-                className="vans-carousel"
-                ref={carouselRef}
-                style={{ transform: `translateX(-${currentIndex * (100 / VANS_PER_VIEW)}%)` }}
-              >
-                {newVans.map(van => (
-                  <div 
-                    key={van._id} 
-                    className="van-carousel-card"
-                    onClick={() => navigate(`/vans/${van._id}`)}
-                  >
-                    <div className="van-card-image">
-                      {van.images && van.images.length > 0 ? (
-                        <>
-                          <span className="image-count">📷 {van.images.length}</span>
-                          <img src={van.images[0]} alt={`${van.make} ${van.model}`} />
-                        </>
-                      ) : (
-                        <div className="no-image-placeholder">
-                          <span>🚐</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="van-card-pricing">
-                      <div className="price-main">
-                        <span className="price-label">From</span>
-                        <span className="price-value">£{van.price?.toLocaleString()}</span>
-                        <span className="price-term">Purchase price</span>
-                      </div>
-                      {van.year && (
-                        <div className="delivery-info">
-                          {van.year} model
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="van-card-details">
-                      <h3>{van.make} {van.model}</h3>
-                      <p className="van-specs-text">
-                        {van.vanType || 'Van'} • {van.fuelType || 'Diesel'} • {van.transmission || 'Manual'}
-                      </p>
-                    </div>
+          <>
+            <div className="vans-scroll">
+              {newVans.map(van => (
+                <div 
+                  key={van._id} 
+                  className="van-card"
+                  onClick={() => navigate(`/vans/${van._id}`)}
+                >
+                  <div className="van-image">
+                    {van.images && van.images.length > 0 && (
+                      <img src={van.images[0]} alt={`${van.make} ${van.model}`} />
+                    )}
                   </div>
-                ))}
-              </div>
+                  <div className="van-details">
+                    <h3>{van.make} {van.model}</h3>
+                    <p className="van-specs">{van.year} • {van.vanType || 'Panel Van'}</p>
+                    <p className="van-price">£{van.price?.toLocaleString()}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-
-            {/* Right Arrow */}
-            <button 
-              className={`carousel-arrow carousel-arrow-right ${!canGoNext ? 'disabled' : ''}`}
-              onClick={handleNext}
-              disabled={!canGoNext}
-            >
-              ›
+            
+          </>
+        ) : (
+          <div className="featured-vans-section">
+            <p className="coming-soon-text">New vans coming soon! Check out these popular models:</p>
+            <div className="featured-vans-grid">
+              {FEATURED_VANS.map(van => (
+                <div key={van.id} className="featured-van-card">
+                  <div className="featured-van-image">
+                    <img src={van.image} alt={van.name} />
+                  </div>
+                  <div className="featured-van-details">
+                    <h3>{van.name}</h3>
+                    <p className="featured-van-desc">{van.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button className="view-all-link" onClick={() => navigate('/vans/search-results')}>
+              Browse all vans →
             </button>
           </div>
-        ) : (
-          <div className="no-results">
-            <p>No new vans available at the moment. Check back soon!</p>
-          </div>
-        )}
-
-        {newVans.length > 0 && (
-          <button className="view-all-link" onClick={() => navigate('/vans/search-results?condition=new')}>
-            View all new vans →
-          </button>
         )}
       </section>
 
@@ -217,7 +274,7 @@ const NewVansPage = () => {
             <div className="benefit-card">
               <span className="benefit-icon">⚡</span>
               <h3>Latest Technology</h3>
-              <p>Cutting-edge safety features, fuel efficiency, and connectivity.</p>
+              <p>Modern safety features, fuel efficiency, and connectivity.</p>
             </div>
             <div className="benefit-card">
               <span className="benefit-icon">🛡️</span>
@@ -232,7 +289,7 @@ const NewVansPage = () => {
             <div className="benefit-card">
               <span className="benefit-icon">💳</span>
               <h3>Finance Options</h3>
-              <p>Flexible financing plans to suit your business budget.</p>
+              <p>Flexible financing plans to suit your business needs.</p>
             </div>
           </div>
         </div>

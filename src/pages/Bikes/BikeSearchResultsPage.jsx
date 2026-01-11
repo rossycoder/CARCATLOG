@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { bikeService } from '../../services/bikeService';
+import BikeFilterSidebar from '../../components/FilterSidebar/BikeFilterSidebar';
 import './BikeSearchResultsPage.css';
 
 function BikeSearchResultsPage() {
@@ -13,6 +14,7 @@ function BikeSearchResultsPage() {
   const [postcode, setPostcode] = useState('');
   const [radius, setRadius] = useState(25);
   const [savedBikes, setSavedBikes] = useState(new Set());
+  const [searchSaved, setSearchSaved] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   
   const [filters, setFilters] = useState({
@@ -24,6 +26,8 @@ function BikeSearchResultsPage() {
     maxMileage: '',
     sortBy: 'distance'
   });
+
+  const [activeFilter, setActiveFilter] = useState('All');
 
   useEffect(() => {
     const saved = localStorage.getItem('savedBikes');
@@ -42,19 +46,67 @@ function BikeSearchResultsPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const postcodeParam = params.get('postcode');
-    const radiusParam = params.get('radius') || 25;
-    const makeParam = params.get('make');
-    const conditionParam = params.get('condition');
+    
+    // Check if we have any filter parameters
+    const hasFilters = Array.from(params.keys()).length > 0;
+    
+    console.log('BikeSearchResultsPage mounted with params:', Object.fromEntries(params));
 
-    if (postcodeParam) {
-      setPostcode(postcodeParam);
-      setRadius(parseInt(radiusParam) || 25);
-      performSearch(postcodeParam, parseInt(radiusParam) || 25, makeParam, conditionParam);
+    if (hasFilters) {
+      // Perform filtered search
+      performFilteredSearch(params);
     } else {
-      loadAllBikes(makeParam, conditionParam);
+      // Load all bikes if no filters provided
+      loadAllBikes();
+      // Auto-open filter modal if no search params
+      setTimeout(() => setShowFilterModal(true), 300);
     }
-  }, [location]);
+  }, [location.search]);
+
+  const performFilteredSearch = async (params) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // Convert URLSearchParams to object
+      const filterParams = {};
+      for (const [key, value] of params.entries()) {
+        filterParams[key] = value;
+      }
+      
+      console.log('[BikeSearchResultsPage] Performing filtered search with:', filterParams);
+      const response = await bikeService.searchBikes(filterParams);
+      
+      console.log('[BikeSearchResultsPage] Search response:', response);
+      
+      if (response.success) {
+        const bikes = response.bikes || [];
+        const total = response.total || 0;
+        
+        console.log('[BikeSearchResultsPage] Found bikes:', total);
+        
+        // Transform to match expected format
+        const transformedData = {
+          postcode: filterParams.postcode || 'All UK',
+          radius: filterParams.distance || 0,
+          count: total,
+          results: bikes,
+          showingAllBikes: false
+        };
+        
+        console.log('[BikeSearchResultsPage] Setting filtered results:', transformedData);
+        setSearchResults(transformedData);
+        setFilteredResults(transformedData);
+      } else {
+        setError(response.error || 'Search failed');
+      }
+    } catch (err) {
+      console.error('[BikeSearchResultsPage] Search error:', err);
+      setError(err.response?.data?.error || err.message || 'An error occurred while searching');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const performSearch = async (searchPostcode, searchRadius, make, condition) => {
     setLoading(true);
@@ -93,30 +145,30 @@ function BikeSearchResultsPage() {
     }
   };
 
-  const loadAllBikes = async (make, condition) => {
+  const loadAllBikes = async () => {
     setLoading(true);
     setError('');
 
     try {
-      const filterParams = {};
-      if (make && make !== 'Any') filterParams.make = make;
-      if (condition) filterParams.condition = condition;
+      const response = await bikeService.getBikes({});
       
-      const response = await bikeService.getBikes(filterParams);
-      const bikes = response.data || [];
-      const total = response.pagination?.total || bikes.length;
+      const bikes = response.data?.bikes || response.data || [];
+      const total = response.data?.pagination?.total || bikes.length;
       
       const transformedData = {
         postcode: 'All UK',
         radius: 0,
         count: total,
-        results: bikes.map(bike => ({ ...bike, distance: 0 }))
+        results: bikes.map(bike => ({ ...bike, distance: 0 })),
+        showingAllBikes: false
       };
       
+      console.log('Loaded bikes:', total);
       setSearchResults(transformedData);
       setFilteredResults(transformedData);
     } catch (err) {
       setError('Failed to load bikes');
+      console.error('Error loading bikes:', err);
     } finally {
       setLoading(false);
     }
@@ -166,6 +218,22 @@ function BikeSearchResultsPage() {
     setFilteredResults({ ...searchResults, results, count: results.length });
   }, [filters, searchResults]);
 
+  const handleFilterPillClick = (filterType) => {
+    setActiveFilter(filterType);
+    
+    if (filterType === 'All') {
+      setFilters({
+        make: 'All',
+        minPrice: '',
+        maxPrice: '',
+        minYear: '',
+        maxYear: '',
+        maxMileage: '',
+        sortBy: 'distance'
+      });
+    }
+  };
+
   const handleSaveBike = (bikeId) => {
     setSavedBikes(prev => {
       const newSet = new Set(prev);
@@ -176,6 +244,32 @@ function BikeSearchResultsPage() {
       }
       return newSet;
     });
+  };
+
+  const handleSaveSearch = () => {
+    setSearchSaved(!searchSaved);
+    if (!searchSaved) {
+      const savedSearches = JSON.parse(localStorage.getItem('savedBikeSearches') || '[]');
+      savedSearches.push({
+        postcode,
+        radius,
+        filters,
+        date: new Date().toISOString()
+      });
+      localStorage.setItem('savedBikeSearches', JSON.stringify(savedSearches));
+      alert('Search saved successfully!');
+    } else {
+      alert('Search removed from saved searches');
+    }
+  };
+
+  const handleNewSearch = () => {
+    navigate('/bikes');
+  };
+
+  const handleRadiusChange = (newRadius) => {
+    setRadius(newRadius);
+    performSearch(postcode, newRadius);
   };
 
   const handleBikeClick = (bikeId) => {
@@ -189,7 +283,7 @@ function BikeSearchResultsPage() {
 
   if (loading) {
     return (
-      <div className="bike-search-results">
+      <div className="search-results-page">
         <div className="container">
           <div className="loading-state">
             <div className="spinner"></div>
@@ -202,14 +296,14 @@ function BikeSearchResultsPage() {
 
   if (error) {
     return (
-      <div className="bike-search-results">
+      <div className="search-results-page">
         <div className="container">
           <div className="error-state">
             <h2>⚠️ Search Error</h2>
             <p>{error}</p>
-            <button onClick={() => navigate('/bikes')} className="btn-primary">
-              Back to Bikes
-            </button>
+            <a href="/bikes" className="back-link">
+              ← Back to Bikes
+            </a>
           </div>
         </div>
       </div>
@@ -218,30 +312,71 @@ function BikeSearchResultsPage() {
 
 
   return (
-    <div className="bike-search-results">
-      {/* Filter Bar */}
-      <div className="filter-bar">
+    <div className="search-results-page">
+      {/* Top Filter Bar - Autotrader Style */}
+      <div className="top-filter-bar">
         <div className="container-wide">
           <div className="filter-pills">
             <button 
-              className={`filter-pill ${filters.make === 'All' ? 'active' : ''}`}
-              onClick={() => setFilters(prev => ({ ...prev, make: 'All' }))}
+              className={`filter-pill ${activeFilter === 'All' ? 'active' : ''}`}
+              onClick={() => handleFilterPillClick('All')}
             >
               All
             </button>
-            {getUniqueMakes().slice(0, 4).map(make => (
+            {getUniqueMakes().slice(0, 3).map(make => (
               <button 
                 key={make}
-                className={`filter-pill ${filters.make === make ? 'active' : ''}`}
-                onClick={() => setFilters(prev => ({ ...prev, make }))}
+                className={`filter-pill ${activeFilter === make ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveFilter(make);
+                  setFilters(prev => ({ ...prev, make }));
+                }}
               >
                 {make}
               </button>
             ))}
+            <button 
+              className={`filter-pill ${activeFilter === 'Price' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveFilter('Price');
+                setShowFilterModal(true);
+              }}
+            >
+              Price
+            </button>
+            <button 
+              className={`filter-pill ${activeFilter === 'Year' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveFilter('Year');
+                setShowFilterModal(true);
+              }}
+            >
+              Year
+            </button>
+            <button 
+              className={`filter-pill ${activeFilter === 'Mileage' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveFilter('Mileage');
+                setShowFilterModal(true);
+              }}
+            >
+              Mileage
+            </button>
           </div>
-          <button className="filter-btn" onClick={() => setShowFilterModal(true)}>
-            ≡ Filter and sort
-          </button>
+          <div className="filter-actions">
+            <button 
+              className="filter-sort-btn"
+              onClick={() => setShowFilterModal(true)}
+            >
+             Filter and Sort
+            </button>
+            <button 
+              className={`save-search-btn ${searchSaved ? 'saved' : ''}`}
+              onClick={handleSaveSearch}
+            >
+              Save search {searchSaved ? '♥' : '♡'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -249,114 +384,21 @@ function BikeSearchResultsPage() {
       <div className="results-header">
         <div className="container-wide">
           <p className="results-count">
-            <span className="count-number">{filteredResults?.count || 0}</span> bikes
-            {postcode && ` near ${postcode}`}
+            <span className="count-number">{filteredResults?.count || 0}</span> results
+            {searchResults?.showingAllBikes ? (
+              <span className="fallback-notice"> - Showing all available bikes in our database</span>
+            ) : (
+              postcode && ` near ${postcode}`
+            )} ⓘ
           </p>
         </div>
       </div>
 
-      {/* Filter Modal */}
-      {showFilterModal && (
-        <div className="filter-modal-overlay" onClick={() => setShowFilterModal(false)}>
-          <div className="filter-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Filter and Sort</h2>
-              <button className="close-btn" onClick={() => setShowFilterModal(false)}>×</button>
-            </div>
-            
-            <div className="modal-content">
-              <div className="filter-section">
-                <h3>Price</h3>
-                <div className="filter-inputs">
-                  <input
-                    type="number"
-                    placeholder="Min price"
-                    value={filters.minPrice}
-                    onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
-                  />
-                  <span>to</span>
-                  <input
-                    type="number"
-                    placeholder="Max price"
-                    value={filters.maxPrice}
-                    onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div className="filter-section">
-                <h3>Year</h3>
-                <div className="filter-inputs">
-                  <input
-                    type="number"
-                    placeholder="Min year"
-                    value={filters.minYear}
-                    onChange={(e) => setFilters(prev => ({ ...prev, minYear: e.target.value }))}
-                  />
-                  <span>to</span>
-                  <input
-                    type="number"
-                    placeholder="Max year"
-                    value={filters.maxYear}
-                    onChange={(e) => setFilters(prev => ({ ...prev, maxYear: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div className="filter-section">
-                <h3>Maximum Mileage</h3>
-                <input
-                  type="number"
-                  placeholder="Max mileage"
-                  value={filters.maxMileage}
-                  onChange={(e) => setFilters(prev => ({ ...prev, maxMileage: e.target.value }))}
-                />
-              </div>
-
-              <div className="filter-section">
-                <h3>Sort By</h3>
-                <select
-                  value={filters.sortBy}
-                  onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
-                >
-                  <option value="distance">Distance (nearest first)</option>
-                  <option value="price-low">Price (low to high)</option>
-                  <option value="price-high">Price (high to low)</option>
-                  <option value="mileage-low">Mileage (low to high)</option>
-                  <option value="year-new">Year (newest first)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button 
-                className="btn-secondary"
-                onClick={() => {
-                  setFilters({
-                    make: 'All',
-                    minPrice: '',
-                    maxPrice: '',
-                    minYear: '',
-                    maxYear: '',
-                    maxMileage: '',
-                    sortBy: 'distance'
-                  });
-                }}
-              >
-                Clear All
-              </button>
-              <button className="btn-primary" onClick={() => setShowFilterModal(false)}>
-                Apply Filters
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Results Grid */}
+      {/* Main Content */}
       <div className="container-wide">
-        {filteredResults?.count === 0 ? (
-          <div className="no-results">
+        {/* Results Grid */}
+        {searchResults?.count === 0 ? (
+          <div className="no-results-state">
             <div className="no-results-icon">🏍️</div>
             <h2>No Bikes Found</h2>
             <p>
@@ -364,18 +406,29 @@ function BikeSearchResultsPage() {
                 ? `We couldn't find any bikes within ${radius} miles of ${postcode}`
                 : 'No bikes match your search criteria'}
             </p>
-            <button onClick={() => navigate('/bikes')} className="btn-primary">
-              Back to Bikes
-            </button>
+            <div className="no-results-actions">
+              {postcode && (
+                <button 
+                  onClick={() => handleRadiusChange(radius + 25)} 
+                  className="btn-primary"
+                >
+                  Increase Radius to {radius + 25} miles
+                </button>
+              )}
+              <button onClick={handleNewSearch} className="btn-secondary">
+                {postcode ? 'Try Different Postcode' : 'Back to Bikes'}
+              </button>
+            </div>
           </div>
         ) : (
-          <div className="results-grid">
+          <div className="results-grid-autotrader">
             {filteredResults?.results.map((bike) => (
               <div 
                 key={bike._id} 
-                className="bike-listing-card"
+                className="car-listing-card"
                 onClick={() => handleBikeClick(bike._id)}
               >
+                {/* Save Button */}
                 <button 
                   className={`save-btn ${savedBikes.has(bike._id) ? 'saved' : ''}`}
                   onClick={(e) => {
@@ -386,30 +439,40 @@ function BikeSearchResultsPage() {
                   {savedBikes.has(bike._id) ? '♥' : '♡'}
                 </button>
                 
-                <div className="bike-image-wrapper">
+                {/* Bike Image */}
+                <div className="car-image-wrapper">
                   <img 
                     src={bike.images?.[0] || '/images/dummy/placeholder-bike.jpg'} 
                     alt={`${bike.make} ${bike.model}`}
+                    className="car-image"
                   />
+                  <div className="image-counter">
+                    {bike.images?.length || 1}/{bike.images?.length || 1}
+                  </div>
                 </div>
                 
-                <div className="bike-details">
-                  <h3>{bike.make} {bike.model}</h3>
-                  <p className="bike-subtitle">{bike.year}</p>
+                {/* Bike Details */}
+                <div className="car-details">
+                  <h3 className="car-name">{bike.make} {bike.model}</h3>
+                  <p className="car-subtitle">
+                    {bike.year} {bike.registrationNumber || 'REPLICA'}
+                  </p>
                   
-                  <div className="bike-specs">
-                    <span>{bike.mileage?.toLocaleString() || '0'} miles</span>
-                    <span>•</span>
-                    <span>{bike.fuelType || 'Petrol'}</span>
+                  <div className="car-specs">
+                    <span className="spec">{bike.mileage?.toLocaleString() || '0'} miles</span>
+                    <span className="spec-dot">•</span>
+                    <span className="spec">{bike.fuelType || 'Petrol'}</span>
                   </div>
                   
-                  <div className="bike-price">£{bike.price?.toLocaleString() || '0'}</div>
+                  <div className="car-price">
+                    £{bike.price?.toLocaleString() || '0'}
+                  </div>
                   
-                  <div className="bike-location">
-                    <span>📍</span>
+                  <div className="car-location">
+                    <span className="location-icon">📍</span>
                     <span>
                       {bike.locationName || bike.postcode?.split(' ')[0] || 'Location'}
-                      {bike.distance > 0 && ` (${bike.distance.toFixed(0)} miles)`}
+                      {bike.distance > 0 && ` (${(bike.distance || 0).toFixed(0)} miles)`}
                     </span>
                   </div>
                 </div>
@@ -418,6 +481,11 @@ function BikeSearchResultsPage() {
           </div>
         )}
       </div>
+      
+      <BikeFilterSidebar 
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+      />
     </div>
   );
 }

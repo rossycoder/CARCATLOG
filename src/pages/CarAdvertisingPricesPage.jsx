@@ -14,18 +14,20 @@ const CarAdvertisingPricesPage = () => {
   const [mileage, setMileage] = useState('');
   const [sellerType, setSellerType] = useState('private');
   const [priceRange, setPriceRange] = useState('under-1000');
+  const [quickFormErrors, setQuickFormErrors] = useState({
+    registration: '',
+    mileage: ''
+  });
 
   const advertId = locationState.state?.advertId;
   const [advertData, setAdvertData] = useState(locationState.state?.advertData);
   const [vehicleData, setVehicleData] = useState(locationState.state?.vehicleData);
   const contactDetails = locationState.state?.contactDetails;
-  const [isLoadingAdvert, setIsLoadingAdvert] = useState(false);
 
   // Fetch advert data if not passed via state (to get photos)
   useEffect(() => {
     if (advertId && !advertData) {
       console.log('📸 Fetching advert data for advertId:', advertId);
-      setIsLoadingAdvert(true);
       advertService.getAdvert(advertId)
         .then(response => {
           if (response.success && response.data) {
@@ -36,14 +38,11 @@ const CarAdvertisingPricesPage = () => {
         })
         .catch(error => {
           console.error('Failed to fetch advert data:', error);
-        })
-        .finally(() => {
-          setIsLoadingAdvert(false);
         });
     } else if (advertData) {
       console.log('📸 Using advertData from navigation state with', advertData.photos?.length || 0, 'photos');
     }
-  }, [advertId]);
+  }, [advertId, advertData]);
 
   // Private seller pricing tiers (prices in GBP)
   const privatePricingTiers = {
@@ -335,10 +334,36 @@ const CarAdvertisingPricesPage = () => {
   };
 
   const handleCreateAd = () => {
-    const params = new URLSearchParams();
-    if (registration) params.append('registration', registration);
-    if (mileage) params.append('mileage', mileage);
-    navigate(`/find-your-car?${params.toString()}`);
+    // Validate inputs
+    const errors = {
+      registration: '',
+      mileage: ''
+    };
+
+    if (!registration.trim()) {
+      errors.registration = 'Registration is required';
+    }
+
+    if (!mileage.trim()) {
+      errors.mileage = 'Mileage is required';
+    } else if (isNaN(mileage) || parseInt(mileage) <= 0) {
+      errors.mileage = 'Please enter a valid mileage';
+    }
+
+    setQuickFormErrors(errors);
+
+    // If there are errors, don't navigate
+    if (errors.registration || errors.mileage) {
+      return;
+    }
+
+    // Navigate with state
+    navigate(`/find-your-car`, {
+      state: {
+        registrationNumber: registration,
+        mileage: mileage
+      }
+    });
   };
 
   return (
@@ -572,20 +597,37 @@ const CarAdvertisingPricesPage = () => {
               <input 
                 type="text" 
                 placeholder="e.g. AB12 CDE"
-                className="registration-input"
+                className={`registration-input ${quickFormErrors.registration ? 'input-error' : ''}`}
                 value={registration}
-                onChange={(e) => setRegistration(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setRegistration(value.toUpperCase());
+                  if (quickFormErrors.registration) {
+                    setQuickFormErrors(prev => ({ ...prev, registration: '' }));
+                  }
+                }}
               />
+              {quickFormErrors.registration && (
+                <span className="error-message-quick">{quickFormErrors.registration}</span>
+              )}
             </div>
             <div className="input-group">
               <label className="input-label">Current mileage</label>
               <input 
                 type="text" 
                 placeholder="e.g. 50000"
-                className="mileage-input"
+                className={`mileage-input ${quickFormErrors.mileage ? 'input-error' : ''}`}
                 value={mileage}
-                onChange={(e) => setMileage(e.target.value)}
+                onChange={(e) => {
+                  setMileage(e.target.value.replace(/[^0-9]/g, ''));
+                  if (quickFormErrors.mileage) {
+                    setQuickFormErrors(prev => ({ ...prev, mileage: '' }));
+                  }
+                }}
               />
+              {quickFormErrors.mileage && (
+                <span className="error-message-quick">{quickFormErrors.mileage}</span>
+              )}
             </div>
             <button className="create-ad-btn" onClick={handleCreateAd}>
               Create your ad

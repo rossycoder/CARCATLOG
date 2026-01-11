@@ -7,11 +7,14 @@ const BikeAdvertisingPricesPage = () => {
   const navigate = useNavigate();
   const locationState = useLocation();
   const { user } = useAuth();
-  const [selectedPackage, setSelectedPackage] = useState(null);
   const [processingPackageId, setProcessingPackageId] = useState(null);
   const [error, setError] = useState(null);
   const [registration, setRegistration] = useState('');
   const [mileage, setMileage] = useState('');
+  const [quickFormErrors, setQuickFormErrors] = useState({
+    registration: '',
+    mileage: ''
+  });
 
   // Get data from navigation state (from BikeSellerContactPage)
   const advertId = locationState.state?.advertId;
@@ -169,11 +172,36 @@ const BikeAdvertisingPricesPage = () => {
   };
 
   const handleCreateAd = () => {
-    const params = new URLSearchParams();
-    if (registration) params.append('registration', registration);
-    if (mileage) params.append('mileage', mileage);
-    
-    navigate(`/bikes/sell-your-bike?${params.toString()}`);
+    // Validate inputs
+    const errors = {
+      registration: '',
+      mileage: ''
+    };
+
+    if (!registration.trim()) {
+      errors.registration = 'Registration is required';
+    }
+
+    if (!mileage.trim()) {
+      errors.mileage = 'Mileage is required';
+    } else if (isNaN(mileage) || parseInt(mileage) <= 0) {
+      errors.mileage = 'Please enter a valid mileage';
+    }
+
+    setQuickFormErrors(errors);
+
+    // If there are errors, don't navigate
+    if (errors.registration || errors.mileage) {
+      return;
+    }
+
+    // Navigate with state
+    navigate(`/bikes/sell-your-bike`, {
+      state: {
+        registrationNumber: registration,
+        mileage: mileage
+      }
+    });
   };
 
   return (
@@ -330,20 +358,37 @@ const BikeAdvertisingPricesPage = () => {
               <input 
                 type="text" 
                 placeholder="e.g. AB12 CDE"
-                className="registration-input"
+                className={`registration-input ${quickFormErrors.registration ? 'input-error' : ''}`}
                 value={registration}
-                onChange={(e) => setRegistration(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setRegistration(value.toUpperCase());
+                  if (quickFormErrors.registration) {
+                    setQuickFormErrors(prev => ({ ...prev, registration: '' }));
+                  }
+                }}
               />
+              {quickFormErrors.registration && (
+                <span className="error-message-quick">{quickFormErrors.registration}</span>
+              )}
             </div>
             <div className="input-group">
               <label className="input-label">Current mileage</label>
               <input 
                 type="text" 
                 placeholder="e.g. 15000"
-                className="mileage-input"
+                className={`mileage-input ${quickFormErrors.mileage ? 'input-error' : ''}`}
                 value={mileage}
-                onChange={(e) => setMileage(e.target.value)}
+                onChange={(e) => {
+                  setMileage(e.target.value.replace(/[^0-9]/g, ''));
+                  if (quickFormErrors.mileage) {
+                    setQuickFormErrors(prev => ({ ...prev, mileage: '' }));
+                  }
+                }}
               />
+              {quickFormErrors.mileage && (
+                <span className="error-message-quick">{quickFormErrors.mileage}</span>
+              )}
             </div>
             <button className="create-ad-btn" onClick={handleCreateAd}>
               Create your ad

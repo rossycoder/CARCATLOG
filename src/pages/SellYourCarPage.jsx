@@ -131,41 +131,41 @@ const SellYourCarPage = () => {
   const sellSteps = [
     { 
       icon: "📸", 
-      title: "Take great photos", 
-      description: "Taking good-quality photos means that the buyers have an accurate image of the car, and there won't be any issues after the sale." 
+      title: "Take high quality photos", 
+      description: "Use clear, high-quality images to show the car accurately. This helps buyers understand the vehicle's condition." 
     },
     { 
       icon: "📋", 
-      title: "Keep it snappy", 
-      description: "There are a few documents you'll need to make sure you have before you sell your car." 
+      title: "Have documents ready", 
+      description: "Make sure you have all required paperwork ready before listing your car. Having the correct documents helps the sale go smoothly and avoids delays or complications." 
     },
     { 
       icon: "✅", 
-      title: "Be honest", 
-      description: "Make sure your vehicle description is accurate. Mention any faults, like scratches, so buyers know what they're getting ahead of time." 
-    },
+      title: "Honesty is key", 
+      description: "Ensure your vehicle description is accurate and complete. Clearly mention any faults, such as scratches or wear, so buyers know exactly what to expect before purchasing." 
+    }
   ];
 
   const guides = [
     {
       icon: "🚗",
       title: "Preparing your car",
-      description: "From keeping it clean to sorting repairs, here's how to get your car ready for sale."
+      description: "A well-written, high-quality advert attracts more buyers and helps your car sell faster." 
     },
     {
       icon: "📝",
       title: "Creating your advert",
-      description: "Good-quality adverts lead to a fast sale. Read our tips to create an effective advert."
+      description: "A well-written, high-quality advert attracts more buyers and helps your car sell faster." 
     },
     {
       icon: "💳",
       title: "Taking payment",
-      description: "Cash, bank transfer, cheque? Learn the best way to accept payment and keep yourself secure."
+        description: "Instant bank transfer is the safest method of payment. Ensure funds have cleared prior to handing over your car." 
     },
     {
       icon: "🛡️",
       title: "Avoiding scams",
-      description: "Learn how to stay safe online and protect yourself from fraud."
+      description: "Ensure you check online for most common scams to watch out for." 
     }
   ];
 
@@ -179,7 +179,7 @@ const SellYourCarPage = () => {
           <div className="hero-header-content">
             <p className="hero-label">Sell your car</p>
             <h1 className="hero-main-title">
-              More buyers than any other site*
+              Advertise your car on UK's Newest vehicle listing platform
             </h1>
           </div>
         </div>
@@ -204,57 +204,11 @@ const SellYourCarPage = () => {
         </div>
       </section>
 
-   
-      {/* Section 3: Place an advert on CarCatALog */}
-      <section className="advert-section">
-        <div className="advert-container">
-          <h2 className="advert-main-title">Place an advert on CarCatALog</h2>
-          
-          <div className="advert-content-wrapper">
-            <div className="advert-left-panel">
-              <div className="advert-logo-wrapper">
-                <img 
-                  src="/images/brands/logo.jpeg" 
-                  alt="CarCatALog Logo" 
-                  className="advert-logo-image"
-                />
-              </div>
-              
-              <div className="advert-text-content">
-                <h3 className="advert-title">Advertise on CarCatALog</h3>
-                <p className="advert-description">
-                  With the UK's largest audience of car buyers, it's highly likely someone is currently searching our website for the car that's sat on your driveway. Speak with potential buyers directly to answers any questions and negotiate price.
-                </p>
-                
-                <h3 className="advert-subtitle">Sell fast for free</h3>
-              </div>
-              
-              <div className="advert-dots">
-                <span className="dot active"></span>
-                <span className="dot"></span>
-              </div>
-            </div>
-            
-            <div className="advert-right-panel">
-              <div className="advert-stat-box">
-                <div className="advert-stat-number">86</div>
-                <div className="advert-stat-label">million</div>
-                <p className="advert-stat-description">
-                  The number of cross-platform visits to our website each month***
-                </p>
-              </div>
-              
-            
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 4: How to sell your car, fast */}
+      {/* Section 4: Tips to selling your car */}
       <section className="steps-section">
         <div className="steps-container">
           <h2 className="section-title">
-            How to sell your car, fast
+             Tips to sell you car,quickly 
           </h2>
           <div className="steps-grid">
             {sellSteps.map((step, index) => (
@@ -268,7 +222,7 @@ const SellYourCarPage = () => {
       <section className="guides-cards-section">
         <div className="guides-cards-container">
           <h2 className="section-title">
-            Guides to selling your car
+            Tips to sell you car
           </h2>
           <div className="guides-cards-grid">
             {guides.map((guide, index) => (

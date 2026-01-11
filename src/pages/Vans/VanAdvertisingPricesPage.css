@@ -300,7 +300,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 15px;
+  gap: 24px !important;
   max-width: 800px;
   margin: 0 auto;
   flex-wrap: wrap;
@@ -310,35 +310,53 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  flex: 1;
+  min-width: 180px;
 }
 
 .van-advertising-prices-page .input-label {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 8px;
-  font-weight: 500;
+  font-size: 0.95rem !important;
+  color: #333 !important;
+  margin-bottom: 10px !important;
+  font-weight: 600 !important;
 }
 
 .van-advertising-prices-page .registration-input,
 .van-advertising-prices-page .mileage-input {
   width: 280px;
-  padding: 18px 20px;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 18px 20px !important;
+  border: 3px solid #ccc !important;
+  border-radius: 10px;
+  font-size: 1.1rem !important;
+  font-weight: 500;
   outline: none;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
   background: white;
 }
 
 .van-advertising-prices-page .registration-input:focus,
 .van-advertising-prices-page .mileage-input:focus {
-  border-color: #2196F3;
+  border-color: #2196F3 !important;
+  box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1);
+  transform: translateY(-2px);
 }
 
 .van-advertising-prices-page .registration-input::placeholder,
 .van-advertising-prices-page .mileage-input::placeholder {
   color: #999;
+  font-weight: 400;
+}
+
+.van-advertising-prices-page .registration-input.input-error,
+.van-advertising-prices-page .mileage-input.input-error {
+  border-color: #ef4444 !important;
+}
+
+.van-advertising-prices-page .error-message-quick {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-top: 6px;
+  display: block;
 }
 
 .van-advertising-prices-page .create-ad-btn {

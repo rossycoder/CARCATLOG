@@ -112,8 +112,8 @@ export const trustIndicators = {
 };
 
 export const statistics = {
-  carCount: 429693,
-  label: 'cars available nationwide',
+  carCount: 0,
+  
   subtitle: 'Find your perfect car today'
 };
 

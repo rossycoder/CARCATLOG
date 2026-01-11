@@ -139,76 +139,33 @@ const BikeFinderFormPage = () => {
     
     setIsLoading(true);
     
-    // Simulate API delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const mockVehicleData = generateMockBikeData(
-      formData.registrationNumber,
-      formData.mileage
-    );
-    
-    setVehicleDetails(mockVehicleData);
-    
-    // Scroll to vehicle details
-    setTimeout(() => {
-      document.getElementById('vehicle-details')?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-    
-    setIsLoading(false);
-  };
-
-  // Generate mock bike data based on registration pattern
-  const generateMockBikeData = (registration, mileage) => {
-    // Extract year from registration (UK format: AB12CDE - 12 = 2012)
-    const yearMatch = registration.match(/[A-Z]{2}(\d{2})/i);
-    let year = 2020;
-    if (yearMatch) {
-      const regYear = parseInt(yearMatch[1]);
-      year = regYear >= 50 ? 1950 + regYear : 2000 + regYear;
+    try {
+      // Call DVLA lookup API
+      const bikeService = await import('../../services/bikeService');
+      const response = await bikeService.lookupBikeByRegistration(
+        formData.registrationNumber,
+        formData.mileage
+      );
+      
+      if (response.success && response.data) {
+        setVehicleDetails(response.data);
+        
+        // Scroll to vehicle details
+        setTimeout(() => {
+          document.getElementById('vehicle-details')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        throw new Error(response.message || 'Failed to lookup vehicle');
+      }
+    } catch (error) {
+      console.error('Error looking up bike:', error);
+      setErrors({
+        ...errors,
+        registrationNumber: error.message || 'Unable to find vehicle details. Please check the registration number and try again.'
+      });
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Mock motorcycle makes and models
-    const makes = ['Honda', 'Yamaha', 'Kawasaki', 'Suzuki', 'BMW', 'Ducati', 'Triumph', 'Harley-Davidson'];
-    const models = {
-      'Honda': ['CBR600RR', 'CB500F', 'Africa Twin', 'Gold Wing', 'Rebel 500'],
-      'Yamaha': ['YZF-R1', 'MT-07', 'Tracer 900', 'XSR700', 'Tenere 700'],
-      'Kawasaki': ['Ninja ZX-6R', 'Z900', 'Versys 650', 'Vulcan S', 'Z650'],
-      'Suzuki': ['GSX-R750', 'SV650', 'V-Strom 650', 'Hayabusa', 'GSX-S1000'],
-      'BMW': ['S1000RR', 'R1250GS', 'F900R', 'R nineT', 'G310R'],
-      'Ducati': ['Panigale V4', 'Monster', 'Multistrada', 'Scrambler', 'Diavel'],
-      'Triumph': ['Street Triple', 'Tiger 900', 'Bonneville', 'Speed Triple', 'Trident 660'],
-      'Harley-Davidson': ['Street Glide', 'Iron 883', 'Fat Boy', 'Road King', 'Sportster S']
-    };
-    
-    const randomMake = makes[Math.floor(Math.random() * makes.length)];
-    const makeModels = models[randomMake];
-    const randomModel = makeModels[Math.floor(Math.random() * makeModels.length)];
-    
-    const colors = ['Black', 'White', 'Red', 'Blue', 'Green', 'Orange', 'Silver'];
-    const fuelTypes = ['Petrol'];
-    const bikeTypes = ['Sport', 'Naked', 'Adventure', 'Cruiser', 'Touring', 'Scrambler'];
-    
-    // Calculate estimated value based on year and mileage
-    const baseValue = 8000;
-    const yearDepreciation = (2024 - year) * 500;
-    const mileageDepreciation = Math.floor(parseInt(mileage) / 5000) * 300;
-    const estimatedValue = Math.max(baseValue - yearDepreciation - mileageDepreciation, 1500);
-    
-    return {
-      registration: registration.toUpperCase(),
-      mileage: mileage,
-      make: randomMake,
-      model: randomModel,
-      year: year.toString(),
-      color: colors[Math.floor(Math.random() * colors.length)],
-      fuelType: fuelTypes[0],
-      engineSize: ['125cc', '300cc', '500cc', '650cc', '750cc', '900cc', '1000cc', '1200cc'][Math.floor(Math.random() * 8)],
-      bikeType: bikeTypes[Math.floor(Math.random() * bikeTypes.length)],
-      previousOwners: Math.floor(Math.random() * 4 + 1).toString(),
-      motDue: `${String(Math.floor(Math.random() * 12 + 1)).padStart(2, '0')}/${String(Math.floor(Math.random() * 28 + 1)).padStart(2, '0')}/2026`,
-      taxDue: '01/04/2025',
-      estimatedValue: estimatedValue
-    };
   };
 
   const scrollToTop = () => {

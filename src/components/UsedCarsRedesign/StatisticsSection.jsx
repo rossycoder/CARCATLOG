@@ -1,4 +1,3 @@
-import React from 'react';
 import './StatisticsSection.css';
 
 const StatisticsSection = ({ carCount, label, subtitle, loading }) => {

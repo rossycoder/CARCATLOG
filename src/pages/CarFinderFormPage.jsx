@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import advertService from '../services/advertService';
+import { carService } from '../services/carService';
 import { useTradeDealerContext } from '../context/TradeDealerContext';
 import './CarFinderFormPage.css';
 
@@ -30,12 +31,17 @@ const formatVehicleDetails = (dvlaData, registration, mileage) => {
 
 const CarFinderFormPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { dealer, isAuthenticated } = useTradeDealerContext();
   const isTradeDealer = isAuthenticated && dealer;
   
+  // Get passed state from navigation
+  const passedRegistration = location.state?.registrationNumber || '';
+  const passedMileage = location.state?.mileage || '';
+  
   const [formData, setFormData] = useState({
-    registrationNumber: '',
-    mileage: ''
+    registrationNumber: passedRegistration,
+    mileage: passedMileage
   });
   
   const [errors, setErrors] = useState({
@@ -48,8 +54,13 @@ const CarFinderFormPage = () => {
   const [vehicleDetails, setVehicleDetails] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Load saved form data from localStorage
+  // Load saved form data from localStorage or use passed state
   useEffect(() => {
+    // If we have passed state, use it and don't load from localStorage
+    if (passedRegistration || passedMileage) {
+      return;
+    }
+    
     const savedData = localStorage.getItem('carFinderFormData');
     if (savedData) {
       try {
@@ -59,7 +70,7 @@ const CarFinderFormPage = () => {
         console.error('Failed to parse saved form data');
       }
     }
-  }, []);
+  }, [passedRegistration, passedMileage]);
 
   // Save form data to localStorage
   useEffect(() => {
@@ -128,11 +139,12 @@ const CarFinderFormPage = () => {
   };
 
   const handleRegistrationChange = (e) => {
-    const value = e.target.value.toUpperCase();
-    setFormData(prev => ({ ...prev, registrationNumber: value }));
+    const value = e.target.value;
+    const upperValue = value.toUpperCase();
+    setFormData(prev => ({ ...prev, registrationNumber: upperValue }));
     
     // Real-time validation
-    const error = validateRegistration(value);
+    const error = validateRegistration(upperValue);
     setErrors(prev => ({ ...prev, registrationNumber: error }));
   };
 
@@ -163,82 +175,40 @@ const CarFinderFormPage = () => {
     
     setIsLoading(true);
     
-    // Use mock data directly (DVLA API not configured)
-    // Simulate API delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const mockVehicleData = generateMockVehicleData(
-      formData.registrationNumber,
-      formData.mileage
-    );
-    
-    setVehicleDetails(mockVehicleData);
-    
-    // Scroll to vehicle details
-    setTimeout(() => {
-      document.getElementById('vehicle-details')?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-    
-    setIsLoading(false);
-  };
-
-  // Generate mock vehicle data based on registration pattern
-  const generateMockVehicleData = (registration, mileage) => {
-    // Extract year from registration (UK format: AB12CDE - 12 = 2012)
-    const yearMatch = registration.match(/[A-Z]{2}(\d{2})/i);
-    let year = 2020;
-    if (yearMatch) {
-      const regYear = parseInt(yearMatch[1]);
-      year = regYear >= 50 ? 1950 + regYear : 2000 + regYear;
+    try {
+      // Call DVLA API through backend
+      console.log('Looking up vehicle from DVLA API...');
+      const response = await carService.dvlaLookup(
+        formData.registrationNumber,
+        formData.mileage
+      );
+      
+      if (response.success && response.data) {
+        // Format the DVLA response
+        const vehicleData = formatVehicleDetails(
+          response.data,
+          formData.registrationNumber,
+          formData.mileage
+        );
+        
+        setVehicleDetails(vehicleData);
+        
+        // Scroll to vehicle details
+        setTimeout(() => {
+          document.getElementById('vehicle-details')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        throw new Error('Failed to retrieve vehicle details');
+      }
+    } catch (error) {
+      console.error('DVLA lookup error:', error);
+      setErrors({
+        ...errors,
+        registrationNumber: 'Unable to find vehicle details. Please check the registration number and try again.'
+      });
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Mock makes and models
-    const makes = ['BMW', 'Audi', 'Mercedes-Benz', 'Volkswagen', 'Ford', 'Toyota', 'Honda'];
-    const models = {
-      'BMW': ['3 Series', '5 Series', 'X3', 'X5', 'M3'],
-      'Audi': ['A3', 'A4', 'A6', 'Q5', 'Q7'],
-      'Mercedes-Benz': ['C-Class', 'E-Class', 'GLC', 'GLE', 'A-Class'],
-      'Volkswagen': ['Golf', 'Polo', 'Tiguan', 'Passat', 'T-Roc'],
-      'Ford': ['Focus', 'Fiesta', 'Kuga', 'Puma', 'Mustang'],
-      'Toyota': ['Corolla', 'Yaris', 'RAV4', 'C-HR', 'Camry'],
-      'Honda': ['Civic', 'CR-V', 'Jazz', 'HR-V', 'Accord']
-    };
-    
-    const randomMake = makes[Math.floor(Math.random() * makes.length)];
-    const makeModels = models[randomMake];
-    const randomModel = makeModels[Math.floor(Math.random() * makeModels.length)];
-    
-    const colors = ['Black', 'White', 'Silver', 'Blue', 'Red', 'Grey'];
-    const fuelTypes = ['Petrol', 'Diesel', 'Hybrid'];
-    const transmissions = ['Manual', 'Automatic'];
-    const bodyTypes = ['Saloon', 'Hatchback', 'SUV', 'Estate', 'Coupe'];
-    
-    // Calculate estimated value based on year and mileage
-    const baseValue = 25000;
-    const yearDepreciation = (2024 - year) * 1500;
-    const mileageDepreciation = Math.floor(parseInt(mileage) / 10000) * 500;
-    const estimatedValue = Math.max(baseValue - yearDepreciation - mileageDepreciation, 3000);
-    
-    return {
-      registration: registration.toUpperCase(),
-      mileage: mileage,
-      make: randomMake,
-      model: randomModel,
-      year: year.toString(),
-      color: colors[Math.floor(Math.random() * colors.length)],
-      fuelType: fuelTypes[Math.floor(Math.random() * fuelTypes.length)],
-      transmission: transmissions[Math.floor(Math.random() * transmissions.length)],
-      engineSize: ['1.6L', '2.0L', '2.5L', '3.0L'][Math.floor(Math.random() * 4)],
-      doors: ['3', '4', '5'][Math.floor(Math.random() * 3)],
-      bodyType: bodyTypes[Math.floor(Math.random() * bodyTypes.length)],
-      previousOwners: Math.floor(Math.random() * 4 + 1).toString(),
-      motDue: `${String(Math.floor(Math.random() * 12 + 1)).padStart(2, '0')}/${String(Math.floor(Math.random() * 28 + 1)).padStart(2, '0')}/2026`,
-      taxDue: '01/04/2025',
-      co2Emissions: `${Math.floor(Math.random() * 100 + 100)}g/km`,
-      euroStatus: 'Euro 6',
-      seats: '5',
-      estimatedValue: estimatedValue
-    };
   };
 
   const scrollToTop = () => {
