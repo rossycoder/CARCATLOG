@@ -20,6 +20,12 @@
   color: #666;
 }
 
+.mot-info-text {
+  font-size: 14px;
+  color: #999;
+  margin-top: 8px;
+}
+
 .mot-current-status {
   display: flex;
   align-items: center;

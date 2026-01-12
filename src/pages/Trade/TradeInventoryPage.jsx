@@ -9,9 +9,10 @@ const TradeInventoryPage = () => {
   const { dealer } = useTradeDealerContext();
   const [vehicles, setVehicles] = useState([]);
   const [bikes, setBikes] = useState([]);
+  const [vans, setVans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
-  const [vehicleType, setVehicleType] = useState('all'); // 'all', 'cars', 'bikes'
+  const [vehicleType, setVehicleType] = useState('all'); // 'all', 'cars', 'bikes', 'vans'
   const [viewMode, setViewMode] = useState('grid'); // grid or list
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
@@ -46,10 +47,11 @@ const TradeInventoryPage = () => {
   const fetchAllInventory = async () => {
     setLoading(true);
     try {
-      // Fetch both cars and bikes
-      const [carsData, bikesData] = await Promise.all([
+      // Fetch cars, bikes, and vans
+      const [carsData, bikesData, vansData] = await Promise.all([
         tradeInventoryService.getInventory({ status: filter === 'all' ? undefined : filter }),
-        tradeInventoryService.getBikeInventory({ status: filter === 'all' ? undefined : filter })
+        tradeInventoryService.getBikeInventory({ status: filter === 'all' ? undefined : filter }),
+        tradeInventoryService.getVanInventory({ status: filter === 'all' ? undefined : filter })
       ]);
       
       if (carsData.success) {
@@ -57,6 +59,9 @@ const TradeInventoryPage = () => {
       }
       if (bikesData.success) {
         setBikes((bikesData.data?.bikes || bikesData.bikes || []).map(b => ({ ...b, vehicleType: 'bike' })));
+      }
+      if (vansData.success) {
+        setVans((vansData.data?.vans || vansData.vans || []).map(v => ({ ...v, vehicleType: 'van' })));
       }
     } catch (error) {
       console.error('Failed to fetch inventory:', error);
@@ -71,6 +76,8 @@ const TradeInventoryPage = () => {
     try {
       if (type === 'bike') {
         await tradeInventoryService.deleteBike(id);
+      } else if (type === 'van') {
+        await tradeInventoryService.deleteVan(id);
       } else {
         await tradeInventoryService.deleteVehicle(id);
       }
@@ -80,11 +87,12 @@ const TradeInventoryPage = () => {
     }
   };
 
-  // Combine cars and bikes based on filter
+  // Combine cars, bikes, and vans based on filter
   const getAllVehicles = () => {
     if (vehicleType === 'cars') return vehicles;
     if (vehicleType === 'bikes') return bikes;
-    return [...vehicles, ...bikes];
+    if (vehicleType === 'vans') return vans;
+    return [...vehicles, ...bikes, ...vans];
   };
 
   const allVehicles = getAllVehicles();
@@ -112,6 +120,7 @@ const TradeInventoryPage = () => {
     draft: allVehicles.filter(v => (v.advertStatus || v.status) === 'draft').length,
     cars: vehicles.length,
     bikes: bikes.length,
+    vans: vans.length,
   };
 
   return (
@@ -121,7 +130,7 @@ const TradeInventoryPage = () => {
         <div className="inventory-header">
           <div className="header-left">
             <h1>My Inventory</h1>
-            <p className="subtitle">{allVehicles.length} vehicle{allVehicles.length !== 1 ? 's' : ''} in total ({stats.cars} cars, {stats.bikes} bikes)</p>
+            <p className="subtitle">{allVehicles.length} vehicle{allVehicles.length !== 1 ? 's' : ''} in total ({stats.cars} cars, {stats.bikes} bikes, {stats.vans} vans)</p>
             {subscription && subscription.listingsLimit && (
               <div className="subscription-usage">
                 <div className="usage-bar-container">
@@ -236,6 +245,12 @@ const TradeInventoryPage = () => {
               >
                 🏍️ Bikes <span className="count">{stats.bikes}</span>
               </button>
+              <button 
+                className={vehicleType === 'vans' ? 'active' : ''} 
+                onClick={() => setVehicleType('vans')}
+              >
+                🚐 Vans <span className="count">{stats.vans}</span>
+              </button>
             </div>
           </div>
 
@@ -319,7 +334,7 @@ const TradeInventoryPage = () => {
                     alt={`${vehicle.make} ${vehicle.model}`} 
                   />
                   <span className={`type-badge ${vehicle.vehicleType}`}>
-                    {vehicle.vehicleType === 'bike' ? '🏍️' : '🚗'}
+                    {vehicle.vehicleType === 'bike' ? '🏍️' : vehicle.vehicleType === 'van' ? '🚐' : '🚗'}
                   </span>
                   <span className={`status-badge ${vehicle.advertStatus || vehicle.status}`}>
                     {(vehicle.advertStatus || vehicle.status) === 'active' && '✓ Active'}
@@ -365,13 +380,21 @@ const TradeInventoryPage = () => {
                   </div>
 
                   <div className="vehicle-actions">
-                    <Link to={vehicle.vehicleType === 'bike' ? `/trade/inventory/edit-bike/${vehicle._id}` : `/trade/inventory/edit/${vehicle._id}`} className="btn-action btn-edit">
+                    <Link to={
+                      vehicle.vehicleType === 'bike' ? `/trade/inventory/edit-bike/${vehicle._id}` : 
+                      vehicle.vehicleType === 'van' ? `/trade/inventory/edit-van/${vehicle._id}` :
+                      `/trade/inventory/edit/${vehicle._id}`
+                    } className="btn-action btn-edit">
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M12.146.146a.5.5 0 01.708 0l3 3a.5.5 0 010 .708l-10 10a.5.5 0 01-.168.11l-5 2a.5.5 0 01-.65-.65l2-5a.5.5 0 01.11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 2.793L10.5 3 4 9.5 3.1 11.9l2.4-.9 6.5-6.5z"/>
                       </svg>
                       Edit
                     </Link>
-                    <Link to={vehicle.vehicleType === 'bike' ? `/bikes/${vehicle._id}` : `/cars/${vehicle._id}`} className="btn-action btn-view" target="_blank">
+                    <Link to={
+                      vehicle.vehicleType === 'bike' ? `/bikes/${vehicle._id}` :
+                      vehicle.vehicleType === 'van' ? `/vans/${vehicle._id}` :
+                      `/cars/${vehicle._id}`
+                    } className="btn-action btn-view" target="_blank">
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M8 3C4.5 3 1.5 5.5 1 8c.5 2.5 3.5 5 7 5s6.5-2.5 7-5c-.5-2.5-3.5-5-7-5zm0 8.5c-2 0-3.5-1.5-3.5-3.5S6 4.5 8 4.5s3.5 1.5 3.5 3.5-1.5 3.5-3.5 3.5zm0-6C6.9 5.5 6 6.4 6 7.5S6.9 9.5 8 9.5s2-.9 2-2-.9-2-2-2z"/>
                       </svg>

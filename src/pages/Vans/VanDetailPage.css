@@ -427,3 +427,131 @@
 .seller-notice a:hover {
   text-decoration: underline;
 }
+
+/* Meet the Seller Section */
+.van-detail-page .meet-seller-section {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+}
+
+.van-detail-page .meet-seller-section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: #333;
+}
+
+.van-detail-page .seller-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.van-detail-page .seller-type-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.van-detail-page .trade-seller-details,
+.van-detail-page .private-seller-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.van-detail-page .dealer-logo-display {
+  width: 120px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.van-detail-page .dealer-logo-display img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.van-detail-page .dealer-business-name,
+.van-detail-page .private-seller-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.van-detail-page .dealer-location,
+.van-detail-page .private-seller-location {
+  font-size: 14px;
+  color: #666;
+}
+
+.van-detail-page .seller-contact-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.van-detail-page .message-seller-btn,
+.van-detail-page .call-seller-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.van-detail-page .message-seller-btn {
+  background: #2196F3;
+  color: white;
+}
+
+.van-detail-page .message-seller-btn:hover {
+  background: #1976d2;
+}
+
+.van-detail-page .call-seller-btn {
+  background: white;
+  color: #2196F3;
+  border: 2px solid #2196F3;
+}
+
+.van-detail-page .call-seller-btn:hover {
+  background: #e3f2fd;
+}
+
+.van-detail-page .seller-protection-notice {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.van-detail-page .seller-protection-notice a {
+  color: #2196F3;
+  text-decoration: none;
+}
+
+.van-detail-page .seller-protection-notice a:hover {
+  text-decoration: underline;
+}

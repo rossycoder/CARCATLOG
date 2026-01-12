@@ -1518,3 +1518,167 @@ sults Section */
     width: 100%;
   }
 }
+/* Vehicle
+ Found Card */
+.vehicle-found-card {
+  max-width: 700px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  padding: 40px;
+  border-top: 5px solid #4BA9EA;
+}
+
+.vehicle-found-card .back-link {
+  background: none;
+  border: none;
+  color: #4BA9EA;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 25px;
+  display: inline-block;
+  transition: all 0.3s;
+  padding: 0;
+}
+
+.vehicle-found-card .back-link:hover {
+  color: #3a8bc7;
+  transform: translateX(-3px);
+}
+
+.vehicle-found-card h2 {
+  font-size: 2rem;
+  color: #0f172a;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.vehicle-found-card h3 {
+  font-size: 1.5rem;
+  color: #475569;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+.vehicle-details-table {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row .label {
+  font-weight: 600;
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.detail-row .value {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 1.05rem;
+}
+
+.get-check-button {
+  width: 100%;
+  background: linear-gradient(135deg, #4BA9EA 0%, #3a8bc7 100%);
+  color: white;
+  border: none;
+  padding: 18px 30px;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 6px 20px rgba(75, 169, 234, 0.35);
+  margin-bottom: 20px;
+}
+
+.get-check-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(75, 169, 234, 0.45);
+}
+
+.not-right-vehicle {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-bottom: 30px;
+}
+
+.search-again-link {
+  background: none;
+  border: none;
+  color: #4BA9EA;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-size: 0.95rem;
+}
+
+.search-again-link:hover {
+  color: #3a8bc7;
+}
+
+.check-benefits {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+.benefit-item .check-icon {
+  color: #10b981;
+  font-weight: 900;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .vehicle-found-card {
+    padding: 30px 25px;
+  }
+  
+  .vehicle-found-card h2 {
+    font-size: 1.75rem;
+  }
+  
+  .vehicle-found-card h3 {
+    font-size: 1.25rem;
+  }
+  
+  .vehicle-details-table {
+    padding: 20px;
+  }
+  
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    padding: 12px 0;
+  }
+}

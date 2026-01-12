@@ -84,6 +84,27 @@ export const deleteBike = async (id) => {
   return response.data;
 };
 
+// Get van inventory for trade dealer
+export const getVanInventory = async (params = {}) => {
+  const response = await api.get('/vans/dealer', {
+    ...getAuthHeaders(),
+    params
+  });
+  return response.data;
+};
+
+// Publish van from sell flow (bypasses payment for trade dealers)
+export const publishVan = async (vanData) => {
+  const response = await api.post('/vans/publish', vanData, getAuthHeaders());
+  return response.data;
+};
+
+// Delete van
+export const deleteVan = async (id) => {
+  const response = await api.delete(`/vans/${id}`, getAuthHeaders());
+  return response.data;
+};
+
 // Alias for createVehicle
 export const addVehicle = createVehicle;
 
@@ -99,5 +120,8 @@ export default {
   publishVehicle,
   getBikeInventory,
   publishBike,
-  deleteBike
+  deleteBike,
+  getVanInventory,
+  publishVan,
+  deleteVan
 };

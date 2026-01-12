@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import VehicleHistorySection from '../components/VehicleHistory/VehicleHistorySection';
 import MOTHistorySection from '../components/VehicleHistory/MOTHistorySection';
-import MeetTheSellerSection from '../components/SellerInfo/MeetTheSellerSection';
 import LocationDisplay from '../components/Location/LocationDisplay';
 import './CarDetailPage.css';
 
@@ -128,7 +127,7 @@ const CarDetailPage = () => {
             <div className="location-info">
               <span className="location-label">From</span>
               <span className="location-value">
-                {car.locationName && `${car.locationName}, `}{car.postcode || car.sellerContact?.postcode} • {car.distance ? `${car.distance} miles away` : 'Location available'}
+                {car.locationName || 'Location available'}
               </span>
             </div>
 
@@ -253,28 +252,74 @@ const CarDetailPage = () => {
               distance={car.distance}
             />
 
-            {/* Vehicle History Section */}
+            {/* Vehicle History Section - Always show, component handles missing VRM */}
             <VehicleHistorySection 
               vrm={car.registrationNumber || car.vrm}
               historyCheckId={car.historyCheckId}
             />
 
-            {/* MOT History Section */}
+            {/* MOT History Section - Always show, component handles missing VRM */}
             <MOTHistorySection 
               vrm={car.registrationNumber || car.vrm}
             />
 
-            {/* Meet the Seller Section - Shows for both trade and private sellers */}
-            {car.sellerContact && (
-              <MeetTheSellerSection 
-                seller={{
-                  ...car.sellerContact,
-                  locationName: car.locationName
-                }}
-                distance={car.distance}
-                postcode={car.postcode || car.sellerContact.postcode}
-              />
-            )}
+            {/* Meet the Seller Section - After MOT History */}
+            <div className="meet-seller-section">
+              <h2>Meet the seller</h2>
+              
+              <div className="seller-details">
+                {/* Seller Type Badge */}
+                <span className="seller-type-badge">
+                  {car.sellerType === 'trade' || car.sellerContact?.type === 'trade' ? 'Trade' : 'Private'}
+                </span>
+                
+                {/* Trade Dealer - Show Logo and Business Info */}
+                {(car.sellerType === 'trade' || car.sellerContact?.type === 'trade') && (
+                  <div className="trade-seller-details">
+                    {car.dealerLogo && (
+                      <div className="dealer-logo-display">
+                        <img src={car.dealerLogo} alt={car.sellerContact?.businessName || 'Dealer'} />
+                      </div>
+                    )}
+                    {car.sellerContact?.businessName && (
+                      <div className="dealer-business-name">{car.sellerContact.businessName}</div>
+                    )}
+                    <div className="dealer-location">
+                      📍 {car.locationName || 'Location available'}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Private Seller */}
+                {(car.sellerType === 'private' || car.sellerContact?.type === 'private') && (
+                  <div className="private-seller-details">
+                    <div className="private-seller-label">Private Seller</div>
+                    <div className="private-seller-location">
+                      📍 {car.locationName || 'Location available'}
+                    </div>
+                  </div>
+                )}
+
+                {/* Contact Buttons */}
+                <div className="seller-contact-buttons">
+                  <button className="message-seller-btn">
+                    ✉️ Message seller
+                  </button>
+
+                  {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
+                    <button className="call-seller-btn">
+                      📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
+                    </button>
+                  )}
+                </div>
+
+                {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
+                  <div className="seller-protection-notice">
+                    Seller's number has been protected. <a href="#">Learn more</a>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Right Column - Contact Seller */}
@@ -284,10 +329,13 @@ const CarDetailPage = () => {
               
               <div className="seller-info">
                 <span className="seller-type">
-                  {car.sellerContact?.type === 'trade' ? 'Trade seller' : 'Private seller'}
+                  {car.sellerContact?.type === 'trade' || car.sellerType === 'trade' ? 'Trade seller' : 'Private seller'}
                 </span>
+                {car.sellerContact?.businessName && (
+                  <div className="business-name">{car.sellerContact.businessName}</div>
+                )}
                 <div className="seller-location">
-                  {car.locationName && `${car.locationName}, `}{car.postcode || car.sellerContact?.postcode} • {car.distance ? `${car.distance} miles away` : 'Location available'}
+                  {car.locationName}{car.distance ? ` • ${car.distance} miles away` : ''}
                 </div>
               </div>
 
@@ -295,9 +343,9 @@ const CarDetailPage = () => {
                 ✉️ Message
               </button>
 
-              {car.sellerContact?.phoneNumber && (
+              {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
                 <button className="phone-btn">
-                  📞 {car.sellerContact.phoneNumber}
+                  📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
                 </button>
               )}
 

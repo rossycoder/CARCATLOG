@@ -374,46 +374,132 @@
   font-size: 0.9rem;
 }
 
-/* Safety Section */
-.bike-detail-page .safety-section {
+/* Meet the Seller Section */
+.bike-detail-page .meet-seller-section {
   background: white;
   padding: 24px;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  border-left: 4px solid #2563eb;
 }
 
-.bike-detail-page .safety-section h2 {
-  font-size: 1.25rem;
+.bike-detail-page .meet-seller-section h2 {
+  font-size: 1.5rem;
   font-weight: 600;
-  margin: 0 0 16px 0;
+  margin: 0 0 20px 0;
   color: #1f2937;
 }
 
-.bike-detail-page .safety-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.bike-detail-page .seller-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.bike-detail-page .safety-list li {
-  padding: 10px 0;
-  color: #4b5563;
-  position: relative;
-  padding-left: 28px;
-  border-bottom: 1px solid #f1f5f9;
+.bike-detail-page .seller-type-badge {
+  display: inline-block;
+  background: #eff6ff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #2563eb;
+  font-weight: 500;
+  width: fit-content;
 }
 
-.bike-detail-page .safety-list li:last-child {
-  border-bottom: none;
+.bike-detail-page .trade-seller-details,
+.bike-detail-page .private-seller-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.bike-detail-page .safety-list li::before {
-  content: '✓';
-  position: absolute;
-  left: 0;
-  color: #059669;
-  font-weight: bold;
+.bike-detail-page .dealer-logo-display {
+  width: 120px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.bike-detail-page .dealer-logo-display img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.bike-detail-page .dealer-business-name,
+.bike-detail-page .private-seller-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.bike-detail-page .dealer-location,
+.bike-detail-page .private-seller-location {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.bike-detail-page .seller-contact-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.bike-detail-page .message-seller-btn,
+.bike-detail-page .call-seller-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.bike-detail-page .message-seller-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.bike-detail-page .message-seller-btn:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.bike-detail-page .call-seller-btn {
+  background: white;
+  color: #2563eb;
+  border: 2px solid #2563eb;
+}
+
+.bike-detail-page .call-seller-btn:hover {
+  background: #eff6ff;
+}
+
+.bike-detail-page .seller-protection-notice {
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-align: center;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.bike-detail-page .seller-protection-notice a {
+  color: #2563eb;
+  text-decoration: underline;
 }
 
 /* Right Column - Contact Card */

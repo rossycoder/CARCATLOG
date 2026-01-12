@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createCheckoutSession } from '../services/paymentService';
+import { checkVehicleHistory } from '../services/vehicleHistoryService';
+import { lookupVehicle } from '../services/dvlaService';
 import { generateVehicleHistoryPDF } from '../utils/pdfGenerator';
 import './VehicleCheckPage.css';
 
@@ -8,6 +10,8 @@ const VehicleCheckPage = () => {
   const [registrationNumber, setRegistrationNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [vehicleData, setVehicleData] = useState(null);
+  const [showVehicleFound, setShowVehicleFound] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -16,25 +20,78 @@ const VehicleCheckPage = () => {
     
     setIsLoading(true);
     setError(null);
+    setVehicleData(null);
+    setShowVehicleFound(false);
     
     try {
-      console.log('Creating payment session for vehicle:', registrationNumber);
-      const response = await createCheckoutSession(registrationNumber);
+      console.log('Fetching vehicle data for:', registrationNumber);
       
-      if (response.success) {
-        // Redirect to the payment page with the custom session ID
-        const paymentUrl = `/vehicle-check/payment/${response.data.customSessionId}?registration=${encodeURIComponent(registrationNumber.toUpperCase())}&channel=cars`;
-        navigate(paymentUrl);
+      // Fetch data from both APIs in parallel
+      const [dvlaResult, historyResult] = await Promise.allSettled([
+        lookupVehicle(registrationNumber, 0),
+        checkVehicleHistory(registrationNumber, false)
+      ]);
+      
+      console.log('DVLA Result:', dvlaResult);
+      console.log('History Result:', historyResult);
+      
+      // Process DVLA response
+      let vehicleInfo = null;
+      let dvlaSuccess = false;
+      if (dvlaResult.status === 'fulfilled' && dvlaResult.value?.success) {
+        vehicleInfo = dvlaResult.value.data || dvlaResult.value.vehicle;
+        dvlaSuccess = true;
+        console.log('DVLA lookup successful:', vehicleInfo);
       } else {
-        setError(response.error || 'Failed to create payment session');
+        console.log('DVLA lookup failed:', dvlaResult.reason?.message || 'Unknown error');
       }
+      
+      // Process Vehicle History response
+      let historyInfo = null;
+      let historySuccess = false;
+      if (historyResult.status === 'fulfilled' && historyResult.value?.success && historyResult.value?.data) {
+        historyInfo = historyResult.value.data;
+        historySuccess = true;
+        console.log('History lookup successful');
+      } else {
+        console.log('History lookup failed:', historyResult.reason?.message || 'Unknown error');
+      }
+      
+      // If both APIs failed, show error
+      if (!dvlaSuccess && !historySuccess) {
+        setError('Unable to fetch vehicle data. Please check the registration number and try again.');
+        return;
+      }
+      
+      // Merge data from both sources
+      const mergedData = {
+        vrm: registrationNumber.toUpperCase(),
+        make: vehicleInfo?.make || historyInfo?.make || 'Unknown',
+        model: vehicleInfo?.model || historyInfo?.model || 'Unknown',
+        bodyType: vehicleInfo?.bodyType || historyInfo?.bodyType || historyInfo?.body_type || 'Unknown',
+        colour: vehicleInfo?.colour || vehicleInfo?.color || historyInfo?.colour || historyInfo?.color || 'Unknown',
+        firstRegistered: vehicleInfo?.yearOfManufacture || vehicleInfo?.year || historyInfo?.firstRegistered || historyInfo?.first_registered || historyInfo?.year || 'Unknown',
+        fuelType: vehicleInfo?.fuelType || historyInfo?.fuelType || 'Unknown',
+        engineSize: vehicleInfo?.engineCapacity ? `${(vehicleInfo.engineCapacity / 1000).toFixed(1)}L` : (historyInfo?.engineSize || 'Unknown'),
+      };
+      
+      console.log('Merged vehicle data:', mergedData);
+      setVehicleData(mergedData);
+      setShowVehicleFound(true);
+      
     } catch (err) {
-      console.error('Error creating payment session:', err);
-      const errorMessage = err.response?.data?.error || err.message || 'Failed to create payment session';
+      console.error('Error fetching vehicle data:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to fetch vehicle data';
       setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGetCheck = () => {
+    // Navigate to payment page with vehicle data
+    const paymentUrl = `/vehicle-check/payment/new?registration=${encodeURIComponent(registrationNumber.toUpperCase())}`;
+    navigate(paymentUrl);
   };
 
   const handleViewSampleReport = () => {
@@ -97,13 +154,70 @@ const VehicleCheckPage = () => {
         </div>
       </section>
 
+      {/* Vehicle Found Section */}
+      {showVehicleFound && vehicleData && (
+        <section className="results-section">
+          <div className="container">
+            <div className="vehicle-found-card">
+              <button onClick={() => setShowVehicleFound(false)} className="back-link">
+                ← Back
+              </button>
+              <h2>We've found this vehicle</h2>
+              <h3>{vehicleData.make} {vehicleData.model} {vehicleData.firstRegistered}</h3>
+              
+              <div className="vehicle-details-table">
+                <div className="detail-row">
+                  <span className="label">Registration</span>
+                  <span className="value">{vehicleData.vrm}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Body type</span>
+                  <span className="value">{vehicleData.bodyType}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Colour</span>
+                  <span className="value">{vehicleData.colour}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">First registered</span>
+                  <span className="value">{vehicleData.firstRegistered}</span>
+                </div>
+              </div>
+
+              <button className="get-check-button" onClick={handleGetCheck}>
+                Get check
+              </button>
+
+              <p className="not-right-vehicle">
+                Not the right vehicle? <button onClick={() => setShowVehicleFound(false)} className="search-again-link">Search again</button>
+              </p>
+
+              <div className="check-benefits">
+                <div className="benefit-item">
+                  <span className="check-icon">✓</span>
+                  <span>Up to £30,000 data guarantee</span>
+                </div>
+                <div className="benefit-item">
+                  <span className="check-icon">✓</span>
+                  <span>27 point independent report</span>
+                </div>
+                <div className="benefit-item">
+                  <span className="check-icon">✓</span>
+                  <span>Over 15,000 checks completed per month</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Error Section */}
       {error && (
         <section className="results-section">
           <div className="container">
             <div className="error-card">
               <div className="error-header">
-                <h3>Unable to create payment session</h3>
+                <h3>Unable to fetch vehicle data</h3>
               </div>
               <div className="error-content">
                 <p>{error}</p>

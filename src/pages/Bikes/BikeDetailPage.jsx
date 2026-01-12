@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { bikeService } from '../../services/bikeService';
+import VehicleHistorySection from '../../components/VehicleHistory/VehicleHistorySection';
+import MOTHistorySection from '../../components/VehicleHistory/MOTHistorySection';
+import LocationDisplay from '../../components/Location/LocationDisplay';
 import './BikeDetailPage.css';
 
 const BikeDetailPage = () => {
@@ -149,7 +152,7 @@ const BikeDetailPage = () => {
             <div className="location-info">
               <span className="location-label">From</span>
               <span className="location-value">
-                {bike.locationName && `${bike.locationName}, `}{bike.postcode || 'Location available'}
+                {bike.locationName || 'Location available'}
               </span>
             </div>
 
@@ -255,27 +258,80 @@ const BikeDetailPage = () => {
               </div>
             )}
 
-            {/* Location Section */}
-            <div className="location-section">
-              <h2>Location</h2>
-              <div className="location-card">
-                <span className="location-icon">📍</span>
-                <div className="location-details">
-                  <span className="location-name">{bike.locationName || 'Location'}</span>
-                  <span className="location-postcode">{bike.postcode}</span>
-                </div>
-              </div>
-            </div>
+            {/* Location Display */}
+            <LocationDisplay 
+              sellerPostcode={bike.postcode || bike.sellerContact?.postcode}
+              sellerLocation={bike.locationName}
+              distance={bike.distance}
+            />
 
-            {/* Safety Tips */}
-            <div className="safety-section">
-              <h2>🛡️ Safety Tips</h2>
-              <ul className="safety-list">
-                <li>Always inspect the bike in person before purchasing</li>
-                <li>Check all documentation and service history</li>
-                <li>Verify the bike's identity and ownership</li>
-                <li>Consider getting a professional inspection</li>
-              </ul>
+            {/* Vehicle History Section - Always show, component handles missing VRM */}
+            <VehicleHistorySection 
+              vrm={bike.registrationNumber || bike.vrm}
+              historyCheckId={bike.historyCheckId}
+            />
+
+            {/* MOT History Section - Always show, component handles missing VRM */}
+            <MOTHistorySection 
+              vrm={bike.registrationNumber || bike.vrm}
+            />
+
+            {/* Meet the Seller Section - After MOT History */}
+            <div className="meet-seller-section">
+              <h2>Meet the seller</h2>
+              
+              <div className="seller-details">
+                {/* Seller Type Badge */}
+                <span className="seller-type-badge">
+                  {bike.sellerType === 'trade' || bike.sellerContact?.type === 'trade' ? 'Trade' : 'Private'}
+                </span>
+                
+                {/* Trade Dealer - Show Logo and Business Info */}
+                {(bike.sellerType === 'trade' || bike.sellerContact?.type === 'trade') && (
+                  <div className="trade-seller-details">
+                    {bike.dealerLogo && (
+                      <div className="dealer-logo-display">
+                        <img src={bike.dealerLogo} alt={bike.sellerContact?.businessName || 'Dealer'} />
+                      </div>
+                    )}
+                    {bike.sellerContact?.businessName && (
+                      <div className="dealer-business-name">{bike.sellerContact.businessName}</div>
+                    )}
+                    <div className="dealer-location">
+                      📍 {bike.locationName || 'Location available'}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Private Seller */}
+                {(bike.sellerType === 'private' || bike.sellerContact?.type === 'private') && (
+                  <div className="private-seller-details">
+                    <div className="private-seller-label">Private Seller</div>
+                    <div className="private-seller-location">
+                      📍 {bike.locationName || 'Location available'}
+                    </div>
+                  </div>
+                )}
+
+                {/* Contact Buttons */}
+                <div className="seller-contact-buttons">
+                  <button className="message-seller-btn">
+                    ✉️ Message seller
+                  </button>
+
+                  {(bike.sellerContact?.phoneNumber || bike.phoneNumber) && (
+                    <button className="call-seller-btn">
+                      📞 {bike.sellerContact?.phoneNumber || bike.phoneNumber}
+                    </button>
+                  )}
+                </div>
+
+                {(bike.sellerContact?.phoneNumber || bike.phoneNumber) && (
+                  <div className="seller-protection-notice">
+                    Seller's number has been protected. <a href="#">Learn more</a>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -286,10 +342,13 @@ const BikeDetailPage = () => {
               
               <div className="seller-info">
                 <span className="seller-type">
-                  {bike.sellerType === 'trade' ? 'Trade seller' : 'Private seller'}
+                  {bike.sellerContact?.type === 'trade' || bike.sellerType === 'trade' ? 'Trade seller' : 'Private seller'}
                 </span>
+                {bike.sellerContact?.businessName && (
+                  <div className="business-name">{bike.sellerContact.businessName}</div>
+                )}
                 <div className="seller-location">
-                  {bike.locationName && `${bike.locationName}, `}{bike.postcode || 'Location available'}
+                  {bike.locationName}{bike.distance ? ` • ${bike.distance} miles away` : ''}
                 </div>
               </div>
 
@@ -297,9 +356,11 @@ const BikeDetailPage = () => {
                 ✉️ Message
               </button>
 
-              <button className="phone-btn">
-                📞 Call Seller
-              </button>
+              {(bike.sellerContact?.phoneNumber || bike.phoneNumber) && (
+                <button className="phone-btn">
+                  📞 {bike.sellerContact?.phoneNumber || bike.phoneNumber}
+                </button>
+              )}
 
               <div className="seller-notice">
                 Seller's number has been protected. <a href="#">Learn more</a>

@@ -79,7 +79,15 @@ const VehicleValuationPage = () => {
       }
     } catch (err) {
       console.error('Valuation error:', err);
-      setError(err.response?.data?.error || 'Unable to get valuation. Please try again.');
+      
+      // Handle specific error codes
+      if (err.response?.data?.code === 'VALUATION_NOT_FOUND') {
+        setError('We could not find valuation data for this vehicle. Please check the details and try again.');
+      } else if (err.response?.data?.code === 'SERVICE_UNAVAILABLE') {
+        setError('The valuation service is temporarily unavailable. Please try again later.');
+      } else {
+        setError(err.response?.data?.error || 'Unable to get valuation. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

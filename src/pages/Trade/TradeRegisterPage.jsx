@@ -15,9 +15,11 @@ const TradeRegisterPage = () => {
     confirmPassword: '',
     businessAddress: '',
     businessRegistrationNumber: '',
-    vatNumber: ''
+    vatNumber: '',
+    logo: null
   });
   
+  const [logoPreview, setLogoPreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
@@ -100,6 +102,33 @@ const TradeRegisterPage = () => {
     }
   };
 
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setErrors(prev => ({ ...prev, logo: 'Please select an image file' }));
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors(prev => ({ ...prev, logo: 'Image size must be less than 5MB' }));
+        return;
+      }
+      
+      setFormData(prev => ({ ...prev, logo: file }));
+      setErrors(prev => ({ ...prev, logo: '' }));
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleBlur = (e) => {
     const { name } = e.target;
     setTouched(prev => ({ ...prev, [name]: true }));
@@ -129,17 +158,23 @@ const TradeRegisterPage = () => {
     setLoading(true);
 
     try {
-      const data = await registerDealer({
-        businessName: formData.businessName,
-        tradingName: formData.tradingName,
-        contactPerson: formData.contactPerson,
-        email: formData.email,
-        phone: formData.phone,
-        password: formData.password,
-        businessAddress: formData.businessAddress,
-        businessRegistrationNumber: formData.businessRegistrationNumber,
-        vatNumber: formData.vatNumber
-      });
+      // Create FormData for file upload
+      const submitData = new FormData();
+      submitData.append('businessName', formData.businessName);
+      submitData.append('tradingName', formData.tradingName);
+      submitData.append('contactPerson', formData.contactPerson);
+      submitData.append('email', formData.email);
+      submitData.append('phone', formData.phone);
+      submitData.append('password', formData.password);
+      submitData.append('businessAddress', formData.businessAddress);
+      submitData.append('businessRegistrationNumber', formData.businessRegistrationNumber);
+      submitData.append('vatNumber', formData.vatNumber);
+      
+      if (formData.logo) {
+        submitData.append('logo', formData.logo);
+      }
+
+      const data = await registerDealer(submitData);
 
       if (data.success) {
         setSuccess(true);
@@ -217,6 +252,46 @@ const TradeRegisterPage = () => {
               {touched.businessName && errors.businessName && (
                 <div className="field-error">{errors.businessName}</div>
               )}
+            </div>
+
+            <div className="form-group full-width">
+              <label htmlFor="logo">
+                Business Logo
+              </label>
+              <div className="logo-upload-container">
+                <input
+                  type="file"
+                  id="logo"
+                  name="logo"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                  style={{ display: 'none' }}
+                />
+                <label htmlFor="logo" className="logo-upload-label">
+                  {logoPreview ? (
+                    <div className="logo-preview">
+                      <img src={logoPreview} alt="Logo preview" />
+                      <span className="logo-change-text">Click to change</span>
+                    </div>
+                  ) : (
+                    <div className="logo-upload-placeholder">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                      <span>Click to upload logo</span>
+                      <span className="logo-hint">PNG, JPG up to 5MB</span>
+                    </div>
+                  )}
+                </label>
+              </div>
+              {errors.logo && (
+                <div className="field-error">{errors.logo}</div>
+              )}
+              <div className="field-hint">
+                This logo will appear on all your vehicle listings
+              </div>
             </div>
 
             <div className="form-row">

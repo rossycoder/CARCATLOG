@@ -67,10 +67,6 @@ const MOTHistorySection = ({ vrm }) => {
     return new Intl.NumberFormat('en-GB').format(mileage);
   };
 
-  if (!vrm) {
-    return null;
-  }
-
   if (isLoading) {
     return (
       <div className="mot-history-section">
@@ -83,12 +79,25 @@ const MOTHistorySection = ({ vrm }) => {
     );
   }
 
+  if (!vrm) {
+    return (
+      <div className="mot-history-section">
+        <h2>MOT History</h2>
+        <div className="mot-error">
+          <p>No vehicle registration number available for this vehicle.</p>
+          <p className="mot-info-text">MOT history requires a valid UK registration number.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (error || !motHistory) {
     return (
       <div className="mot-history-section">
         <h2>MOT History</h2>
         <div className="mot-error">
           <p>Unable to load MOT history at this time.</p>
+          <p className="mot-info-text">{error || 'Please try again later.'}</p>
         </div>
       </div>
     );

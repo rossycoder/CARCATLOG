@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix 403 Error - CarCatalog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .error-box {
+            background: #fee;
+            border-left: 4px solid #f44;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        
+        .error-box code {
+            background: #fdd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .solution-box {
+            background: #efe;
+            border-left: 4px solid #4a4;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .debug-info pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix 403 Forbidden Error</h1>
+        <p class="subtitle">Quick fix for authentication issues</p>
+        
+        <div class="error-box">
+            <strong>Error:</strong> <code>POST /api/trade/auth/login 403 (Forbidden)</code>
+        </div>
+        
+        <div class="solution-box">
+            <strong>Solution:</strong> Clear your browser's authentication storage
+        </div>
+        
+        <button onclick="clearAuthStorage()">
+            🗑️ Clear Authentication Storage
+        </button>
+        
+        <button onclick="clearAllStorage()" class="btn-secondary">
+            🧹 Clear All Storage (Nuclear Option)
+        </button>
+        
+        <button onclick="showDebugInfo()" class="btn-secondary">
+            🔍 Show Debug Info
+        </button>
+        
+        <button onclick="goToLogin()" class="btn-success">
+            ✅ Go to Login Page
+        </button>
+        
+        <div id="status" class="status"></div>
+        <div id="debug" class="debug-info"></div>
+    </div>
+    
+    <script>
+        function showStatus(message, type = 'success') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+        
+        function clearAuthStorage() {
+            // Clear auth tokens
+            localStorage.removeItem('token');
+            localStorage.removeItem('tradeToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('dealer');
+            
+            showStatus('✅ Authentication storage cleared! You can now try logging in again.', 'success');
+        }
+        
+        function clearAllStorage() {
+            if (confirm('This will clear ALL stored data. Are you sure?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                showStatus('✅ All storage cleared! Refresh the page and try again.', 'success');
+            }
+        }
+        
+        function showDebugInfo() {
+            const debug = document.getElementById('debug');
+            const info = {
+                'Token': localStorage.getItem('token') ? 'Present (length: ' + localStorage.getItem('token').length + ')' : 'None',
+                'Trade Token': localStorage.getItem('tradeToken') ? 'Present (length: ' + localStorage.getItem('tradeToken').length + ')' : 'None',
+                'User': localStorage.getItem('user') ? 'Present' : 'None',
+                'Dealer': localStorage.getItem('dealer') ? 'Present' : 'None',
+                'LocalStorage Items': localStorage.length,
+                'SessionStorage Items': sessionStorage.length,
+                'Current URL': window.location.href,
+                'User Agent': navigator.userAgent
+            };
+            
+            let output = '🔍 Debug Information:\n\n';
+            for (const [key, value] of Object.entries(info)) {
+                output += `${key}: ${value}\n`;
+            }
+            
+            debug.innerHTML = '<pre>' + output + '</pre>';
+            debug.style.display = 'block';
+            
+            showStatus('Debug info displayed below', 'info');
+        }
+        
+        function goToLogin() {
+            window.location.href = '/trade/login';
+        }
+        
+        // Auto-check on page load
+        window.addEventListener('load', () => {
+            const hasToken = localStorage.getItem('token') || localStorage.getItem('tradeToken');
+            if (hasToken) {
+                showStatus('⚠️ Found stored authentication tokens. Click "Clear Authentication Storage" to fix the issue.', 'info');
+            } else {
+                showStatus('ℹ️ No authentication tokens found. You can proceed to login.', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

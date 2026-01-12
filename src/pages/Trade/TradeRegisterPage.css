@@ -202,6 +202,108 @@
   font-style: italic;
 }
 
+/* Field Hint */
+.field-hint {
+  font-size: 11px;
+  color: #7f8c8d;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* Logo Upload Styles */
+.logo-upload-container {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.logo-upload-label {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logo-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  border: 2px dashed #d5d5d5;
+  border-radius: 8px;
+  background: #f8fafc;
+  transition: all 0.3s ease;
+}
+
+.logo-upload-placeholder:hover {
+  border-color: #1a73e8;
+  background: #e8f4ff;
+}
+
+.logo-upload-placeholder svg {
+  color: #7f8c8d;
+  margin-bottom: 12px;
+}
+
+.logo-upload-placeholder span {
+  display: block;
+  color: #2c3e50;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.logo-upload-placeholder .logo-hint {
+  font-size: 12px;
+  color: #7f8c8d;
+  font-weight: 400;
+}
+
+.logo-preview {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  border: 2px solid #d5d5d5;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.logo-preview:hover {
+  border-color: #1a73e8;
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.15);
+}
+
+.logo-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 200px;
+  object-fit: contain;
+  padding: 20px;
+}
+
+.logo-change-text {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(26, 115, 232, 0.9);
+  color: white;
+  text-align: center;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.logo-preview:hover .logo-change-text {
+  opacity: 1;
+}
+
 /* Form Error Message */
 .form-error-message {
   background: #ffeaea;

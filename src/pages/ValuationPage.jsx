@@ -285,7 +285,7 @@ const ValuationPage = () => {
                     <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-                <h3>With Autotrader, you're getting an independent valuation in seconds</h3>
+                <h3>With CarCATLog , you're getting an independent valuation in seconds</h3>
               </div>
 
               <div className="benefit-card">
@@ -325,10 +325,7 @@ const ValuationPage = () => {
         {/* Info Section */}
         <div className="info-section-modern">
           <h2>We know what your car is really worth</h2>
-          <p className="info-subtitle">
-            We're the UK's largest marketplace for buying and selling cars, so we know what people are really paying.
-          </p>
-
+         
           <div className="info-features">
             <div className="feature-item">
               <div className="feature-number">01</div>

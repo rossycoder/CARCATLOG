@@ -1,78 +1,44 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { loadStripe } from '@stripe/stripe-js';
-import { getSessionDetails } from '../services/paymentService';
 import { checkVehicleHistory } from '../services/vehicleHistoryService';
 import { lookupVehicle } from '../services/dvlaService';
 import './VehiclePaymentPage.css';
 
-// Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
 const VehiclePaymentPage = () => {
-  const { sessionId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
   const registration = searchParams.get('registration') || '';
-  const channel = searchParams.get('channel') || 'cars';
   
   const [isLoading, setIsLoading] = useState(true);
-  const [sessionData, setSessionData] = useState(null);
   const [vehicleData, setVehicleData] = useState(null);
   const [error, setError] = useState(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [dataLoadingProgress, setDataLoadingProgress] = useState({ dvla: false, history: false });
 
   useEffect(() => {
-    if (sessionId && registration) {
-      fetchSessionDetails();
+    if (registration) {
       fetchVehicleData();
     } else {
       setError('Invalid payment session or missing registration');
       setIsLoading(false);
     }
-  }, [sessionId, registration]);
-
-  const fetchSessionDetails = async () => {
-    try {
-      // For now, we'll create mock session data since we don't have the actual Stripe session ID
-      // In production, this would fetch real session details
-      setSessionData({
-        sessionId: sessionId,
-        vrm: registration,
-        amount: 495, // £4.95 in pence
-        currency: 'gbp',
-        paymentStatus: 'open'
-      });
-    } catch (err) {
-      console.error('Error fetching session details:', err);
-      setError('Failed to load payment session');
-    }
-  };
+  }, [registration]);
 
   const fetchVehicleData = async () => {
     try {
       setIsLoading(true);
       console.log('Fetching vehicle data for registration:', registration);
       
-      // Create promises for parallel API calls with timeout and progress tracking
+      // Create promises for parallel API calls with timeout
       const dvlaPromise = Promise.race([
-        lookupVehicle(registration, 0).then(result => {
-          setDataLoadingProgress(prev => ({ ...prev, dvla: true }));
-          return result;
-        }),
+        lookupVehicle(registration, 0),
         new Promise((_, reject) => 
           setTimeout(() => reject(new Error('DVLA API timeout')), 5000)
         )
       ]);
       
       const historyPromise = Promise.race([
-        checkVehicleHistory(registration, false).then(result => {
-          setDataLoadingProgress(prev => ({ ...prev, history: true }));
-          return result;
-        }),
+        checkVehicleHistory(registration, false),
         new Promise((_, reject) => 
           setTimeout(() => reject(new Error('History API timeout')), 5000)
         )
@@ -202,16 +168,6 @@ const VehiclePaymentPage = () => {
     }
   };
 
-  const handleDownloadPDF = () => {
-    // Simulate PDF download
-    const element = document.createElement('a');
-    element.href = 'data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVGl0bGUgKFZlaGljbGUgSGlzdG9yeSBSZXBvcnQpCi9Qcm9kdWNlciAoQ2FyQ2F0QUxvZykKL0NyZWF0aW9uRGF0ZSAoRDoyMDI0MTIwMzEyMDAwMFopCj4+CmVuZG9iagoyIDAgb2JqCjw8Ci9UeXBlIC9DYXRhbG9nCi9QYWdlcyAzIDAgUgo+PgplbmRvYmoKMyAwIG9iago8PAovVHlwZSAvUGFnZXMKL0tpZHMgWzQgMCBSXQovQ291bnQgMQo+PgplbmRvYmoKNCAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDMgMCBSCi9NZWRpYUJveCBbMCAwIDYxMiA3OTJdCi9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKNSAwIG9iago8PAovTGVuZ3RoIDQ0Cj4+CnN0cmVhbQpCVApxCjcyIDcyMCA3MiA3MjAgcmUKUwpRCkVUCmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAxMjQgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMjMwIDAwMDAwIG4gCjAwMDAwMDAzMzMgMDAwMDAgbiAKdHJhaWxlcgo8PAovU2l6ZSA2Ci9Sb290IDIgMCBSCj4+CnN0YXJ0eHJlZgo0MjcKJSVFT0Y=';
-    element.download = `Vehicle_Report_${registration}_${new Date().toISOString().split('T')[0]}.pdf`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  };
-
   const handleBack = () => {
     navigate('/vehicle-check');
   };
@@ -238,27 +194,6 @@ const VehiclePaymentPage = () => {
             <p>{error}</p>
             <button onClick={handleBack} className="back-button">
               Back to Vehicle Check
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Payment Success State - redirect to success page
-  if (paymentSuccess) {
-    return (
-      <div className="payment-page">
-        <div className="container">
-          <div className="success-header">
-            <div className="success-icon">✅</div>
-            <h1>Payment Successful!</h1>
-            <p>Your vehicle check report is ready</p>
-            <button className="download-pdf-button" onClick={handleDownloadPDF}>
-              📄 Download PDF Report
-            </button>
-            <button className="check-another-button" onClick={() => navigate('/vehicle-check')}>
-              Check Another Vehicle
             </button>
           </div>
         </div>
@@ -313,20 +248,17 @@ const VehiclePaymentPage = () => {
             </div>
           </div>
 
-          {/* Payment Method Section - matching the image exactly */}
-       
-            {/* Buy Button */}
-            <button 
-              className="buy-button"
-              onClick={handlePayment}
-              disabled={isProcessingPayment}
-            >
-              {isProcessingPayment ? 'Processing...' : 'Buy check'}
-            </button>
-          </div>
+          {/* Buy Button */}
+          <button 
+            className="buy-button"
+            onClick={handlePayment}
+            disabled={isProcessingPayment}
+          >
+            {isProcessingPayment ? 'Processing...' : 'Buy check'}
+          </button>
         </div>
       </div>
-  
+    </div>
   );
 };
 

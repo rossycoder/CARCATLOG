@@ -68,12 +68,7 @@ const TradeDashboard = () => {
             <h1>Dashboard</h1>
             <p className="welcome-text">Welcome back, {dealer?.contactPerson}!</p>
           </div>
-          <Link to="/find-your-car" className="btn-add-vehicle-header">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-            Add Vehicle
-          </Link>
+         
         </div>
 
         {/* Subscription Status Card */}

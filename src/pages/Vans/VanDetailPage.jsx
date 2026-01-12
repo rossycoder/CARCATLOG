@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import VehicleHistorySection from '../../components/VehicleHistory/VehicleHistorySection';
+import MOTHistorySection from '../../components/VehicleHistory/MOTHistorySection';
 import LocationDisplay from '../../components/Location/LocationDisplay';
 import './VanDetailPage.css';
 
@@ -125,7 +127,7 @@ const VanDetailPage = () => {
             <div className="location-info">
               <span className="location-label">From</span>
               <span className="location-value">
-                {van.locationName && `${van.locationName}, `}{van.postcode || van.sellerContact?.postcode} • {van.distance ? `${van.distance} miles away` : 'Location available'}
+                {van.locationName}{van.distance ? ` • ${van.distance} miles away` : ' • Location available'}
               </span>
             </div>
 
@@ -282,6 +284,75 @@ const VanDetailPage = () => {
               sellerLocation={van.locationName}
               distance={van.distance}
             />
+
+            {/* Vehicle History Section - Always show, component handles missing VRM */}
+            <VehicleHistorySection 
+              vrm={van.registrationNumber || van.vrm}
+              historyCheckId={van.historyCheckId}
+            />
+
+            {/* MOT History Section - Always show, component handles missing VRM */}
+            <MOTHistorySection 
+              vrm={van.registrationNumber || van.vrm}
+            />
+
+            {/* Meet the Seller Section - After MOT History */}
+            <div className="meet-seller-section">
+              <h2>Meet the seller</h2>
+              
+              <div className="seller-details">
+                {/* Seller Type Badge */}
+                <span className="seller-type-badge">
+                  {van.sellerType === 'trade' || van.sellerContact?.type === 'trade' ? 'Trade' : 'Private'}
+                </span>
+                
+                {/* Trade Dealer - Show Logo and Business Info */}
+                {(van.sellerType === 'trade' || van.sellerContact?.type === 'trade') && (
+                  <div className="trade-seller-details">
+                    {van.dealerLogo && (
+                      <div className="dealer-logo-display">
+                        <img src={van.dealerLogo} alt={van.sellerContact?.businessName || 'Dealer'} />
+                      </div>
+                    )}
+                    {van.sellerContact?.businessName && (
+                      <div className="dealer-business-name">{van.sellerContact.businessName}</div>
+                    )}
+                    <div className="dealer-location">
+                      📍 {van.locationName || 'Location available'}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Private Seller */}
+                {(van.sellerType === 'private' || van.sellerContact?.type === 'private') && (
+                  <div className="private-seller-details">
+                    <div className="private-seller-label">Private Seller</div>
+                    <div className="private-seller-location">
+                      📍 {van.locationName || 'Location available'}
+                    </div>
+                  </div>
+                )}
+
+                {/* Contact Buttons */}
+                <div className="seller-contact-buttons">
+                  <button className="message-seller-btn">
+                    ✉️ Message seller
+                  </button>
+
+                  {(van.sellerContact?.phoneNumber || van.phoneNumber) && (
+                    <button className="call-seller-btn">
+                      📞 {van.sellerContact?.phoneNumber || van.phoneNumber}
+                    </button>
+                  )}
+                </div>
+
+                {(van.sellerContact?.phoneNumber || van.phoneNumber) && (
+                  <div className="seller-protection-notice">
+                    Seller's number has been protected. <a href="#">Learn more</a>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Right Column - Contact Seller */}
@@ -291,13 +362,13 @@ const VanDetailPage = () => {
               
               <div className="seller-info">
                 <span className="seller-type">
-                  {van.sellerContact?.type === 'trade' ? 'Trade seller' : 'Private seller'}
+                  {van.sellerContact?.type === 'trade' || van.sellerType === 'trade' ? 'Trade seller' : 'Private seller'}
                 </span>
                 {van.sellerContact?.businessName && (
                   <div className="business-name">{van.sellerContact.businessName}</div>
                 )}
                 <div className="seller-location">
-                  {van.locationName && `${van.locationName}, `}{van.postcode || van.sellerContact?.postcode} • {van.distance ? `${van.distance} miles away` : 'Location available'}
+                  {van.locationName}{van.distance ? ` • ${van.distance} miles away` : ''}
                 </div>
               </div>
 
@@ -305,9 +376,9 @@ const VanDetailPage = () => {
                 ✉️ Message
               </button>
 
-              {van.sellerContact?.phoneNumber && (
+              {(van.sellerContact?.phoneNumber || van.phoneNumber) && (
                 <button className="phone-btn">
-                  📞 {van.sellerContact.phoneNumber}
+                  📞 {van.sellerContact?.phoneNumber || van.phoneNumber}
                 </button>
               )}
 

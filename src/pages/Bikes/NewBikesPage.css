@@ -339,70 +339,80 @@
 
 /* Benefits Section - Enhanced Visibility */
 .new-bikes-page .benefits-section {
-  padding: 80px 20px !important;
+  padding: 100px 20px !important;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
 }
 
+.new-bikes-page .benefits-section .container {
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+}
+
 .new-bikes-page .benefits-section h2 {
-  text-align: center;
-  margin-bottom: 48px !important;
-  font-size: 2.5rem !important;
+  text-align: center !important;
+  margin-bottom: 60px !important;
+  font-size: 3rem !important;
   font-weight: 800 !important;
   color: #0a1628 !important;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.5px !important;
 }
 
 .new-bikes-page .benefits-section .benefits-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 32px !important;
-  max-width: 1200px;
-  margin: 0 auto;
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 48px !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  width: 100% !important;
 }
 
 .new-bikes-page .benefits-section .benefit-card {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
+  justify-content: flex-start !important;
   text-align: center !important;
-  padding: 40px 28px !important;
+  padding: 70px 50px !important;
   background: white !important;
-  border-radius: 16px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+  border: 2px solid rgba(0, 0, 0, 0.05) !important;
+  min-height: 450px !important;
 }
 
 .new-bikes-page .benefits-section .benefit-card:hover {
-  transform: translateY(-8px) !important;
-  box-shadow: 0 12px 40px rgba(220, 38, 38, 0.15) !important;
+  transform: translateY(-12px) !important;
+  box-shadow: 0 20px 60px rgba(220, 38, 38, 0.2) !important;
+  border-color: rgba(220, 38, 38, 0.1) !important;
 }
 
 .new-bikes-page .benefits-section .benefit-icon {
-  font-size: 4.5rem !important;
+  font-size: 8rem !important;
   display: block !important;
   width: 100% !important;
-  margin-bottom: 20px !important;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  margin-bottom: 36px !important;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15)) !important;
   line-height: 1 !important;
   text-align: center !important;
 }
 
 .new-bikes-page .benefits-section .benefit-card h3 {
-  font-size: 1.5rem !important;
-  font-weight: 700 !important;
-  margin-bottom: 12px !important;
+  font-size: 2.25rem !important;
+  font-weight: 800 !important;
+  margin-bottom: 20px !important;
   color: #0a1628 !important;
-  line-height: 1.3 !important;
+  line-height: 1.2 !important;
   width: 100% !important;
   display: block !important;
   text-align: center !important;
 }
 
 .new-bikes-page .benefits-section .benefit-card p {
-  font-size: 1.125rem !important;
+  font-size: 1.375rem !important;
   color: #374151 !important;
-  line-height: 1.7 !important;
+  line-height: 1.8 !important;
   width: 100% !important;
   display: block !important;
   text-align: center !important;
@@ -410,6 +420,19 @@
 }
 
 /* Responsive */
+@media (min-width: 769px) {
+  .new-bikes-page .benefits-section .benefits-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) and (min-width: 481px) {
+  .new-bikes-page .benefits-section .benefits-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 28px !important;
+  }
+}
+
 @media (max-width: 992px) {
   .new-bikes-search-main {
     grid-template-columns: 1fr 1fr;
@@ -432,12 +455,38 @@
   .bikes-scroll {
     grid-template-columns: repeat(2, 1fr);
   }
-  .new-bikes-page .benefits-section .benefits-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 28px !important;
-  }
+  
   .featured-bikes-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .new-bikes-page .benefits-section {
+    padding: 60px 20px !important;
+  }
+
+  .new-bikes-page .benefits-section h2 {
+    font-size: 2rem !important;
+    margin-bottom: 36px !important;
+  }
+
+  .new-bikes-page .benefits-section .benefit-card {
+    padding: 36px 24px !important;
+  }
+
+  .new-bikes-page .benefits-section .benefit-icon {
+    font-size: 4rem !important;
+    margin-bottom: 16px !important;
+  }
+
+  .new-bikes-page .benefits-section .benefit-card h3 {
+    font-size: 1.375rem !important;
+    margin-bottom: 10px !important;
+  }
+
+  .new-bikes-page .benefits-section .benefit-card p {
+    font-size: 1.0625rem !important;
   }
 }
 
@@ -471,27 +520,77 @@
   .new-bikes-hero h1 {
     font-size: 28px;
   }
+  
   .bikes-scroll {
     grid-template-columns: 1fr;
   }
-  .new-bikes-page .benefits-section .benefits-grid {
+
+  .featured-bikes-grid {
     grid-template-columns: 1fr;
-    gap: 24px !important;
+  }
+  
+  .new-bikes-page .benefits-section {
+    padding: 50px 16px !important;
+  }
+
+  .new-bikes-page .benefits-section h2 {
+    font-size: 1.75rem !important;
+    margin-bottom: 32px !important;
+  }
+
+  .new-bikes-page .benefits-section .benefits-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
   }
   
   .new-bikes-page .benefits-section .benefit-card {
-    padding: 32px 24px !important;
+    padding: 32px 20px !important;
   }
 
   .new-bikes-page .benefits-section .benefit-icon {
-    font-size: 4rem !important;
+    font-size: 3.5rem !important;
+    margin-bottom: 14px !important;
   }
 
   .new-bikes-page .benefits-section .benefit-card h3 {
-    font-size: 1.375rem !important;
+    font-size: 1.25rem !important;
+    margin-bottom: 8px !important;
   }
 
   .new-bikes-page .benefits-section .benefit-card p {
-    font-size: 1.0625rem !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .new-bikes-page .benefits-section {
+    padding: 40px 12px !important;
+  }
+
+  .new-bikes-page .benefits-section h2 {
+    font-size: 1.5rem !important;
+    margin-bottom: 24px !important;
+  }
+
+  .new-bikes-page .benefits-section .benefits-grid {
+    gap: 16px !important;
+  }
+
+  .new-bikes-page .benefits-section .benefit-card {
+    padding: 28px 16px !important;
+  }
+
+  .new-bikes-page .benefits-section .benefit-icon {
+    font-size: 3rem !important;
+    margin-bottom: 12px !important;
+  }
+
+  .new-bikes-page .benefits-section .benefit-card h3 {
+    font-size: 1.125rem !important;
+  }
+
+  .new-bikes-page .benefits-section .benefit-card p {
+    font-size: 0.9375rem !important;
   }
 }
