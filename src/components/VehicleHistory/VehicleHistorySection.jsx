@@ -17,11 +17,29 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
   const fetchHistoryData = async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const result = await checkVehicleHistory(vrm);
       setHistoryData(result.data || result);
     } catch (err) {
       console.error('Error fetching history:', err);
-      setError(err.message);
+      
+      // Check if it's a 404 error
+      if (err.status === 404 || err.message.includes('404') || err.message.includes('not found')) {
+        setError({
+          message: err.message || 'No vehicle history found for this registration',
+          nextSteps: err.nextSteps || [
+            'Verify the registration number is correct',
+            'Request vehicle history documents from the seller'
+          ],
+          isNotFound: true
+        });
+      } else {
+        setError({
+          message: err.message || 'Unable to load vehicle history',
+          nextSteps: ['Try again later', 'Contact support if the problem persists'],
+          isNotFound: false
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -54,8 +72,23 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
     return (
       <div className="vehicle-history-section">
         <h2>This vehicle's history</h2>
-        <div className="history-error">
-          <p>Unable to load vehicle history at this time.</p>
+        <div className={`history-error ${error?.isNotFound ? 'history-not-found' : ''}`}>
+          <p>{error?.message || error || 'Unable to load vehicle history at this time.'}</p>
+          {error?.nextSteps && error.nextSteps.length > 0 && (
+            <div className="error-next-steps">
+              <p className="next-steps-title">What you can do:</p>
+              <ul>
+                {error.nextSteps.map((step, index) => (
+                  <li key={index}>{step}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {error?.isNotFound && (
+            <p className="history-info-text">
+              This vehicle may be new, recently imported, or the registration may be incorrect.
+            </p>
+          )}
         </div>
       </div>
     );

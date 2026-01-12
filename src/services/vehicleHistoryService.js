@@ -30,7 +30,15 @@ export const checkVehicleHistory = async (vrm, forceRefresh = false) => {
     return response.data;
   } catch (error) {
     console.error('Error checking vehicle history:', error);
-    throw error;
+    
+    // Extract error details from response
+    const errorData = error.response?.data || {};
+    const enhancedError = new Error(errorData.error || error.message || 'Failed to check vehicle history');
+    enhancedError.status = error.response?.status;
+    enhancedError.nextSteps = errorData.nextSteps || [];
+    enhancedError.timestamp = errorData.timestamp;
+    
+    throw enhancedError;
   }
 };
 

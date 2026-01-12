@@ -21,6 +21,7 @@ const MOTHistorySection = ({ vrm }) => {
   const fetchMOTHistory = async (testVrm = null) => {
     try {
       setIsLoading(true);
+      setError(null);
       let vrmToUse = testVrm || vrm;
       
       // Clean VRM: remove spaces and convert to uppercase
@@ -36,18 +37,32 @@ const MOTHistorySection = ({ vrm }) => {
       const response = await fetch(url);
       console.log('MOT API Response status:', response.status);
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('MOT API Error response:', errorText);
-        throw new Error('Failed to fetch MOT history');
-      }
-      
       const result = await response.json();
       console.log('MOT API Result:', result);
+      
+      if (!response.ok) {
+        // Handle 404 - vehicle not found
+        if (response.status === 404) {
+          setError({
+            message: result.error || 'No MOT history found for this vehicle',
+            nextSteps: result.nextSteps || [],
+            isNotFound: true
+          });
+          return;
+        }
+        
+        // Handle other errors
+        throw new Error(result.error || 'Failed to fetch MOT history');
+      }
+      
       setMotHistory(result.data || result);
     } catch (err) {
       console.error('Error fetching MOT history:', err);
-      setError(err.message);
+      setError({
+        message: err.message || 'Unable to load MOT history',
+        nextSteps: ['Try again later', 'Contact support if the problem persists'],
+        isNotFound: false
+      });
     } finally {
       setIsLoading(false);
     }
@@ -95,9 +110,23 @@ const MOTHistorySection = ({ vrm }) => {
     return (
       <div className="mot-history-section">
         <h2>MOT History</h2>
-        <div className="mot-error">
-          <p>Unable to load MOT history at this time.</p>
-          <p className="mot-info-text">{error || 'Please try again later.'}</p>
+        <div className={`mot-error ${error?.isNotFound ? 'mot-not-found' : ''}`}>
+          <p>{error?.message || error || 'Unable to load MOT history at this time.'}</p>
+          {error?.nextSteps && error.nextSteps.length > 0 && (
+            <div className="error-next-steps">
+              <p className="next-steps-title">What you can do:</p>
+              <ul>
+                {error.nextSteps.map((step, index) => (
+                  <li key={index}>{step}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {error?.isNotFound && (
+            <p className="mot-info-text">
+              This vehicle may be new, recently imported, or the registration may be incorrect.
+            </p>
+          )}
         </div>
       </div>
     );
