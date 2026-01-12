@@ -47,7 +47,12 @@ const TradeRegisterPage = () => {
         
       case 'phone':
         if (!value.trim()) error = 'Phone number is required';
-        else if (!/^[\d\s()+-\s]{10,20}$/.test(value.replace(/\s/g, ''))) error = 'Invalid phone number';
+        // UK phone format: +44 or 0 followed by 10 digits
+        // Remove spaces and check format
+        const cleanPhone = value.replace(/\s/g, '');
+        if (!/^(\+44|0)[0-9]{10}$/.test(cleanPhone)) {
+          error = 'Invalid UK phone number (e.g., 07123456789 or +447123456789)';
+        }
         break;
         
       case 'password':
@@ -164,7 +169,8 @@ const TradeRegisterPage = () => {
       submitData.append('tradingName', formData.tradingName);
       submitData.append('contactPerson', formData.contactPerson);
       submitData.append('email', formData.email);
-      submitData.append('phone', formData.phone);
+      // Clean phone number (remove spaces)
+      submitData.append('phone', formData.phone.replace(/\s/g, ''));
       submitData.append('password', formData.password);
       submitData.append('businessAddress', formData.businessAddress);
       submitData.append('businessRegistrationNumber', formData.businessRegistrationNumber);
@@ -186,7 +192,18 @@ const TradeRegisterPage = () => {
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
-      setErrors({ form: errorMessage });
+      
+      // Show validation errors if present
+      if (err.response?.data?.errors) {
+        const validationErrors = {};
+        err.response.data.errors.forEach(error => {
+          validationErrors.form = error;
+        });
+        setErrors(validationErrors);
+      } else {
+        setErrors({ form: errorMessage });
+      }
+      
       console.error('Registration error:', err);
     } finally {
       setLoading(false);
