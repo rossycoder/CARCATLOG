@@ -50,19 +50,25 @@ const TradeSubscriptionPage = () => {
       setLoading(true);
       setError(null);
 
-      // Create Stripe checkout session and redirect
+      // Create subscription directly (no Stripe checkout)
       const response = await tradeSubscriptionService.createCheckoutSession(planSlug);
       
-      if (response.checkoutUrl) {
-        // Redirect to Stripe checkout
-        window.location.href = response.checkoutUrl;
+      if (response.success) {
+        // Show success message
+        alert(`${response.message}\n\nYou can now access your dashboard and start listing vehicles!`);
+        
+        // Refresh subscription data
+        await fetchPlansAndSubscription();
+        
+        // Navigate to dashboard
+        navigate('/trade/dashboard');
       } else {
-        setError('Failed to create checkout session');
+        setError(response.message || 'Failed to activate subscription');
         setLoading(false);
       }
     } catch (err) {
       console.error('Error selecting plan:', err);
-      setError(err.response?.data?.message || 'Failed to process payment. Please try again.');
+      setError(err.response?.data?.message || 'Failed to activate subscription. Please try again.');
       setLoading(false);
     }
   };
