@@ -35,7 +35,12 @@ const TradeLoginPage = () => {
         // Redirect to subscription page to select a package
         navigate('/trade/subscription');
       } else {
-        setError(result.message || 'Invalid email or password');
+        // Check if it's an email verification error
+        if (result.code === 'EMAIL_NOT_VERIFIED') {
+          setError('Please verify your email before logging in. Check your inbox for the verification link.');
+        } else {
+          setError(result.message || 'Invalid email or password');
+        }
       }
     } catch (err) {
       setError('Login failed. Please try again.');

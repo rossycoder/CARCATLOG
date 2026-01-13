@@ -23,12 +23,27 @@ export const register = async (dealerData) => {
 
 // Login trade dealer
 export const login = async (email, password) => {
-  const response = await api.post(`${API_URL}/auth/login`, { email, password });
-  if (response.data.success && response.data.token) {
-    localStorage.setItem('tradeToken', response.data.token);
-    localStorage.setItem('tradeDealer', JSON.stringify(response.data.dealer));
+  try {
+    const response = await api.post(`${API_URL}/auth/login`, { email, password });
+    if (response.data.success && response.data.token) {
+      localStorage.setItem('tradeToken', response.data.token);
+      localStorage.setItem('tradeDealer', JSON.stringify(response.data.dealer));
+    }
+    return response.data;
+  } catch (error) {
+    // Extract error message and code from response
+    if (error.response?.data) {
+      return {
+        success: false,
+        message: error.response.data.message,
+        code: error.response.data.code
+      };
+    }
+    return {
+      success: false,
+      message: 'Login failed. Please try again.'
+    };
   }
-  return response.data;
 };
 
 // Logout
