@@ -26,8 +26,8 @@ Thumbs.db
 # Kiro specs and configuration
 .kiro/
 
-# Backend folder (separate repo)
-backend/
+# Backend folder (separate repo) - COMMENTED OUT TO ALLOW PUSHING
+# backend/
 
 # Test coverage
 coverage/

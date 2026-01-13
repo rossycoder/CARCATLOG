@@ -69,6 +69,47 @@
   color: #999;
 }
 
+/* Password Input with Toggle */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper .form-input {
+  padding-right: 48px;
+  width: 100%;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.2s;
+  border-radius: 4px;
+}
+
+.password-toggle-btn:hover {
+  color: #0066cc;
+  background: rgba(0, 102, 204, 0.05);
+}
+
+.password-toggle-btn:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+.password-toggle-btn svg {
+  display: block;
+}
+
 /* Checkbox */
 .checkbox-group {
   display: flex;
