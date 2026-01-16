@@ -247,16 +247,19 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   overflow: hidden;
+  max-width: fit-content;
 }
 
 .toggle-btn {
-  padding: 12px 40px;
+  padding: 12px 24px;
   border: none;
   background: white;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
   border-right: 1px solid #ccc;
+  min-width: 80px;
+  max-width: 120px;
 }
 
 .toggle-btn:last-child {
@@ -303,7 +306,7 @@
 
 /* Submit Button */
 .submit-button {
-  background: #1a4ba0;
+  background: #1a4ba0 !important;
   color: white;
   border: none;
   padding: 16px 32px;
@@ -314,14 +317,22 @@
   transition: background-color 0.2s;
 }
 
+.submit-button.publish-button {
+  background: #1a4ba0 !important;
+}
+
+.submit-button.publish-button:hover:not(:disabled) {
+  background: #153d85 !important;
+}
+
 .submit-button:disabled {
-  background: #999;
+  background: #999 !important;
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 .submit-button:hover:not(:disabled) {
-  background: #153d85;
+  background: #153d85 !important;
 }
 
 /* Back to Top */

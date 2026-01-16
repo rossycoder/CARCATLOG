@@ -99,6 +99,12 @@ const SellerContactDetailsPage = () => {
       newErrors.postcode = 'Please enter a valid UK postcode';
     }
 
+    console.log('📋 Form validation:', {
+      formData,
+      newErrors,
+      isValid: Object.keys(newErrors).length === 0
+    });
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -161,7 +167,13 @@ const SellerContactDetailsPage = () => {
       console.error('Error response:', error.response?.data);
       
       // Get the actual error message from the API response
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to publish vehicle';
+      const errorData = error.response?.data;
+      let errorMessage = errorData?.message || error.message || 'Failed to publish vehicle';
+      
+      // If there are specific validation errors, show them
+      if (errorData?.errors && Array.isArray(errorData.errors)) {
+        errorMessage += ':\n\n' + errorData.errors.join('\n');
+      }
       
       // Simple error message without redirecting
       alert(`Error: ${errorMessage}\n\nPlease try again.`);
@@ -224,9 +236,7 @@ const SellerContactDetailsPage = () => {
           </div>
           <div className="header-right">
             <p className="user-email">{formData.email}</p>
-            <p className="not-you">
-              Not you? <a href="#">Sign in</a>
-            </p>
+            
             <p className="advert-id">Advert ID: {shortAdvertId}</p>
           </div>
         </div>
@@ -273,9 +283,7 @@ const SellerContactDetailsPage = () => {
             {errors.phoneNumber && (
               <span className="error-message">{errors.phoneNumber}</span>
             )}
-            <a href="#" className="add-another-link">
-              Add another number
-            </a>
+          
           </div>
 
           {/* Email */}
@@ -319,12 +327,8 @@ const SellerContactDetailsPage = () => {
             </div>
           </div>
 
-          {/* Good to Know */}
-          <div className="good-to-know">
-            <strong>Good to know:</strong> We will block emails that contain
-            personal details to protect your privacy.{' '}
-            <a href="#">Learn more about replying to emails</a>
-          </div>
+       
+        
 
           {/* Postcode */}
           <div className="form-field">
@@ -348,13 +352,25 @@ const SellerContactDetailsPage = () => {
 
           {/* Validation Error Message */}
           {Object.values(errors).filter(Boolean).length > 0 && (
-            <div className="validation-message">
-              {errors.postcode || errors.phoneNumber || errors.email}
+            <div className="validation-message" style={{ 
+              background: '#fee', 
+              border: '1px solid #fcc', 
+              padding: '15px', 
+              borderRadius: '4px',
+              marginBottom: '20px',
+              color: '#c00'
+            }}>
+              <strong>Please fix the following errors:</strong>
+              <ul style={{ marginTop: '10px', marginBottom: '0', paddingLeft: '20px' }}>
+                {errors.phoneNumber && <li>{errors.phoneNumber}</li>}
+                {errors.email && <li>{errors.email}</li>}
+                {errors.postcode && <li>{errors.postcode}</li>}
+              </ul>
             </div>
           )}
 
-          {/* Debug Info - Remove after testing */}
-          {process.env.NODE_ENV === 'development' && (
+          {/* Debug Info - Only in development mode */}
+          {false && process.env.NODE_ENV === 'development' && (
             <div style={{ padding: '10px', background: '#f0f0f0', marginBottom: '10px', fontSize: '12px' }}>
               <strong>Debug Info:</strong><br/>
               loading: {loading ? 'YES' : 'NO'}<br/>
@@ -374,13 +390,6 @@ const SellerContactDetailsPage = () => {
           >
             {loading ? 'Loading...' : (isSubmitting ? 'Processing...' : (isTradeDealer ? 'Publish Vehicle' : 'Continue to package selection'))}
           </button>
-
-          {/* Trade dealer info */}
-          {isTradeDealer && (
-            <p className="trade-info">
-              As a trade dealer, your car will be published immediately without payment.
-            </p>
-          )}
         </div>
 
        

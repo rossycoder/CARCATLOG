@@ -76,16 +76,18 @@ const VehicleDetailPage = () => {
     // Combine data with DVLA taking priority for overlapping fields
     const vehicleData = {
       vrm: registration.toUpperCase(),
-      make: dvlaVehicle?.make || historyVehicle?.make || 'Unknown',
-      model: dvlaVehicle?.model || historyVehicle?.model || 'Unknown',
-      bodyType: dvlaVehicle?.bodyType || historyVehicle?.bodyType || 'Unknown',
-      colour: dvlaVehicle?.colour || dvlaVehicle?.color || historyVehicle?.colour || 'Unknown',
+      make: dvlaVehicle?.make || historyVehicle?.make || 'Make information unavailable',
+      model: (dvlaVehicle?.model && dvlaVehicle.model !== 'Unknown') ? dvlaVehicle.model : 
+             (historyVehicle?.model && historyVehicle.model !== 'Unknown') ? historyVehicle.model : 
+             'Model information unavailable',
+      bodyType: dvlaVehicle?.bodyType || historyVehicle?.bodyType || 'Body type unavailable',
+      colour: dvlaVehicle?.colour || dvlaVehicle?.color || historyVehicle?.colour || 'Colour unavailable',
       firstRegistered: dvlaVehicle?.yearOfManufacture || dvlaVehicle?.year || 
-                      historyVehicle?.firstRegistered || 'Unknown',
-      fuelType: dvlaVehicle?.fuelType || historyVehicle?.fuelType || 'Unknown',
+                      historyVehicle?.firstRegistered || 'Registration date unavailable',
+      fuelType: dvlaVehicle?.fuelType || historyVehicle?.fuelType || 'Fuel type unavailable',
       engineSize: dvlaVehicle?.engineCapacity ? 
                   `${(dvlaVehicle.engineCapacity / 1000).toFixed(1)}L` : 
-                  (historyVehicle?.engineSize || '865cc'),
+                  (historyVehicle?.engineSize || 'Engine size unavailable'),
       transmission: historyVehicle?.transmission || 'Manual',
       co2Emissions: dvlaVehicle?.co2Emissions || '155',
       taxStatus: dvlaVehicle?.taxStatus || 'Untaxed',

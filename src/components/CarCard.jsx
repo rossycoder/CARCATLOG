@@ -56,7 +56,7 @@ const CarCard = ({ car }) => {
         
         <img 
           src={currentImage} 
-          alt={`${car.make} ${car.model}`}
+          alt={`${car.make} ${car.model}${car.submodel ? ` ${car.submodel}` : ''}`}
           className="car-image"
         />
         
@@ -123,7 +123,7 @@ const CarCard = ({ car }) => {
       </div>
       
       <div className="car-content">
-        <h3 className="car-title">{car.make} {car.model}</h3>
+        <h3 className="car-title">{car.make} {car.model}{car.submodel ? ` ${car.submodel}` : ''}</h3>
         <p className="car-subtitle">{car.engineSize ? `${car.engineSize}L ` : ''}{car.fuelType} {car.transmission}</p>
         <p className="car-dealer">{car.sellerContact?.businessName || car.sellerContact?.city || 'Private seller'}</p>
         

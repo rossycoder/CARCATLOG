@@ -66,13 +66,15 @@ const VehicleCheckPage = () => {
       // Merge data from both sources
       const mergedData = {
         vrm: registrationNumber.toUpperCase(),
-        make: vehicleInfo?.make || historyInfo?.make || 'Unknown',
-        model: vehicleInfo?.model || historyInfo?.model || 'Unknown',
-        bodyType: vehicleInfo?.bodyType || historyInfo?.bodyType || historyInfo?.body_type || 'Unknown',
-        colour: vehicleInfo?.colour || vehicleInfo?.color || historyInfo?.colour || historyInfo?.color || 'Unknown',
-        firstRegistered: vehicleInfo?.yearOfManufacture || vehicleInfo?.year || historyInfo?.firstRegistered || historyInfo?.first_registered || historyInfo?.year || 'Unknown',
-        fuelType: vehicleInfo?.fuelType || historyInfo?.fuelType || 'Unknown',
-        engineSize: vehicleInfo?.engineCapacity ? `${(vehicleInfo.engineCapacity / 1000).toFixed(1)}L` : (historyInfo?.engineSize || 'Unknown'),
+        make: vehicleInfo?.make || historyInfo?.make || 'Make information unavailable',
+        model: (vehicleInfo?.model && vehicleInfo.model !== 'Unknown') ? vehicleInfo.model : 
+               (historyInfo?.model && historyInfo.model !== 'Unknown') ? historyInfo.model : 
+               'Model information unavailable',
+        bodyType: vehicleInfo?.bodyType || historyInfo?.bodyType || historyInfo?.body_type || 'Body type unavailable',
+        colour: vehicleInfo?.colour || vehicleInfo?.color || historyInfo?.colour || historyInfo?.color || 'Colour unavailable',
+        firstRegistered: vehicleInfo?.yearOfManufacture || vehicleInfo?.year || historyInfo?.firstRegistered || historyInfo?.first_registered || historyInfo?.year || 'Registration date unavailable',
+        fuelType: vehicleInfo?.fuelType || historyInfo?.fuelType || 'Fuel type unavailable',
+        engineSize: vehicleInfo?.engineCapacity ? `${(vehicleInfo.engineCapacity / 1000).toFixed(1)}L` : (historyInfo?.engineSize || 'Engine size unavailable'),
       };
       
       console.log('Merged vehicle data:', mergedData);

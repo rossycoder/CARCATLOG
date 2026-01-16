@@ -134,7 +134,7 @@ const VanDetailPage = () => {
             {/* Title and Price */}
             <div className="van-header">
               <h1 className="van-title">
-                {van.make} {van.model}
+                {van.make} {van.model}{van.submodel ? ` ${van.submodel}` : ''}
               </h1>
               <p className="van-subtitle">
                 {van.vanType} • {van.fuelType} • {van.transmission}

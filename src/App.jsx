@@ -205,7 +205,11 @@ function App() {
               />
               <Route 
                 path="/trade/subscription/success" 
-                element={<TradeSubscriptionSuccessPage />}
+                element={
+                  <ProtectedTradeRoute>
+                    <TradeSubscriptionSuccessPage />
+                  </ProtectedTradeRoute>
+                }
               />
             </Routes>
           </main>

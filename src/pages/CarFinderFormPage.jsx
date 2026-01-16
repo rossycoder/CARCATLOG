@@ -3,37 +3,109 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import advertService from '../services/advertService';
 import { carService } from '../services/carService';
 import { useTradeDealerContext } from '../context/TradeDealerContext';
+import { useAuth } from '../context/AuthContext';
 import './CarFinderFormPage.css';
 
-// Helper to format DVLA response to vehicle details
-const formatVehicleDetails = (dvlaData, registration, mileage) => {
+// Helper to format vehicle data from enhanced API response
+const formatVehicleDetails = (enhancedData, registration, mileage) => {
+  // Helper to extract value from {value, source} format or direct value
+  const getValue = (field) => {
+    if (field === null || field === undefined) return null;
+    if (typeof field === 'object' && field.value !== undefined) {
+      return field.value;
+    }
+    return field;
+  };
+
+  // Helper to check if value is valid (not null, undefined, or 'Unknown')
+  const isValidValue = (value) => {
+    return value !== null && value !== undefined && value !== 'Unknown' && value !== '';
+  };
+
+  // Create a descriptive model if not available
+  const getModelDisplay = () => {
+    const model = getValue(enhancedData.model);
+    if (isValidValue(model)) {
+      return model;
+    }
+    // If no model, create descriptive text from available data
+    const parts = [];
+    const engineSize = getValue(enhancedData.engineSize);
+    const fuelType = getValue(enhancedData.fuelType);
+    
+    if (engineSize) {
+      parts.push(`${(engineSize / 1000).toFixed(1)}L`);
+    }
+    if (isValidValue(fuelType)) {
+      parts.push(fuelType);
+    }
+    return parts.length > 0 ? parts.join(' ') : null;
+  };
+
+  // Get body type with better fallback
+  const getBodyType = () => {
+    const bodyType = getValue(enhancedData.bodyType);
+    if (isValidValue(bodyType) && bodyType !== 'M1') {
+      return bodyType;
+    }
+    return null;
+  };
+
+  // Get engine size display
+  const getEngineSize = () => {
+    const engineSize = getValue(enhancedData.engineSize);
+    if (engineSize) {
+      return `${(engineSize / 1000).toFixed(1)}L`;
+    }
+    return null;
+  };
+
+  const make = getValue(enhancedData.make);
+  const model = getModelDisplay();
+  const year = getValue(enhancedData.year);
+  const color = getValue(enhancedData.color);
+  const fuelType = getValue(enhancedData.fuelType);
+  const transmission = getValue(enhancedData.transmission);
+  const engineSize = getEngineSize();
+  const doors = getValue(enhancedData.doors);
+  const bodyType = getBodyType();
+  const seats = getValue(enhancedData.seats);
+  const previousOwners = getValue(enhancedData.previousOwners);
+  const gearbox = getValue(enhancedData.gearbox);
+  const emissionClass = getValue(enhancedData.emissionClass);
+
   return {
     registration: registration,
     mileage: mileage,
-    make: dvlaData.make || 'Unknown',
-    model: dvlaData.model || 'Unknown',
-    year: dvlaData.yearOfManufacture || dvlaData.year || 'Unknown',
-    color: dvlaData.colour || dvlaData.color || 'Unknown',
-    fuelType: dvlaData.fuelType || 'Unknown',
-    transmission: dvlaData.transmission || 'Manual',
-    engineSize: dvlaData.engineCapacity ? `${(dvlaData.engineCapacity / 1000).toFixed(1)}L` : 'Unknown',
-    doors: dvlaData.doors || '4',
-    bodyType: dvlaData.bodyType || dvlaData.typeApproval || 'Unknown',
-    previousOwners: dvlaData.previousOwners || '1',
-    motDue: dvlaData.motExpiryDate || 'Unknown',
-    taxDue: dvlaData.taxDueDate || 'Unknown',
-    co2Emissions: dvlaData.co2Emissions || 'Unknown',
-    euroStatus: dvlaData.euroStatus || 'Unknown',
-    seats: dvlaData.seats || '5',
-    estimatedValue: dvlaData.estimatedValue || null
+    make: isValidValue(make) ? make : null,
+    model: model || null,
+    year: isValidValue(year) ? year : null,
+    color: isValidValue(color) ? color : null,
+    fuelType: isValidValue(fuelType) ? fuelType : null,
+    transmission: isValidValue(transmission) ? transmission : 'Manual',
+    engineSize: engineSize || null,
+    doors: isValidValue(doors) ? doors : null,
+    bodyType: bodyType || null,
+    previousOwners: isValidValue(previousOwners) ? previousOwners : null,
+    seats: isValidValue(seats) ? seats : null,
+    gearbox: isValidValue(gearbox) ? gearbox : null,
+    emissionClass: isValidValue(emissionClass) ? emissionClass : null,
+    motDue: null,
+    taxDue: null,
+    co2Emissions: getValue(enhancedData.runningCosts?.co2Emissions) || null,
+    euroStatus: null,
+    estimatedValue: getValue(enhancedData.valuation?.dealerPrice) || null
   };
 };
 
 const CarFinderFormPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { dealer, isAuthenticated } = useTradeDealerContext();
-  const isTradeDealer = isAuthenticated && dealer;
+  const { dealer, isAuthenticated: isTradeAuthenticated } = useTradeDealerContext();
+  const { user } = useAuth();
+  const isTradeDealer = isTradeAuthenticated && dealer;
+  const isRegularUser = !!user;
+  const isAnyUserAuthenticated = isTradeDealer || isRegularUser;
   
   // Get passed state from navigation
   const passedRegistration = location.state?.registrationNumber || '';
@@ -176,21 +248,24 @@ const CarFinderFormPage = () => {
     setIsLoading(true);
     
     try {
-      // Call DVLA API through backend
-      console.log('Looking up vehicle from DVLA API...');
-      const response = await carService.dvlaLookup(
+      // Call enhanced vehicle service
+      console.log('Looking up vehicle from enhanced service...');
+      const response = await carService.enhancedLookup(
         formData.registrationNumber,
         formData.mileage
       );
       
       if (response.success && response.data) {
-        // Format the DVLA response
+        console.log('Enhanced API response:', response.data);
+        
+        // Format the enhanced response directly
         const vehicleData = formatVehicleDetails(
           response.data,
           formData.registrationNumber,
           formData.mileage
         );
         
+        console.log('Formatted vehicle data:', vehicleData);
         setVehicleDetails(vehicleData);
         
         // Scroll to vehicle details
@@ -201,7 +276,7 @@ const CarFinderFormPage = () => {
         throw new Error('Failed to retrieve vehicle details');
       }
     } catch (error) {
-      console.error('DVLA lookup error:', error);
+      console.error('Vehicle lookup error:', error);
       setErrors({
         ...errors,
         registrationNumber: 'Unable to find vehicle details. Please check the registration number and try again.'
@@ -322,79 +397,89 @@ const CarFinderFormPage = () => {
                 )}
               </div>
 
-              <div className="detail-item">
-                <label className="detail-label">Make</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    className="detail-input"
-                    value={vehicleDetails.make}
-                    onChange={(e) => setVehicleDetails({...vehicleDetails, make: e.target.value})}
-                  />
-                ) : (
-                  <p className="detail-value">{vehicleDetails.make}</p>
-                )}
-              </div>
+              {vehicleDetails.make && (
+                <div className="detail-item">
+                  <label className="detail-label">Make</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="detail-input"
+                      value={vehicleDetails.make}
+                      onChange={(e) => setVehicleDetails({...vehicleDetails, make: e.target.value})}
+                    />
+                  ) : (
+                    <p className="detail-value">{vehicleDetails.make}</p>
+                  )}
+                </div>
+              )}
 
-              <div className="detail-item">
-                <label className="detail-label">Model</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    className="detail-input"
-                    value={vehicleDetails.model}
-                    onChange={(e) => setVehicleDetails({...vehicleDetails, model: e.target.value})}
-                  />
-                ) : (
-                  <p className="detail-value">{vehicleDetails.model}</p>
-                )}
-              </div>
+              {vehicleDetails.model && (
+                <div className="detail-item">
+                  <label className="detail-label">Model</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="detail-input"
+                      value={vehicleDetails.model}
+                      onChange={(e) => setVehicleDetails({...vehicleDetails, model: e.target.value})}
+                    />
+                  ) : (
+                    <p className="detail-value">{vehicleDetails.model}</p>
+                  )}
+                </div>
+              )}
 
-              <div className="detail-item">
-                <label className="detail-label">Year</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    className="detail-input"
-                    value={vehicleDetails.year}
-                    onChange={(e) => setVehicleDetails({...vehicleDetails, year: e.target.value})}
-                  />
-                ) : (
-                  <p className="detail-value">{vehicleDetails.year}</p>
-                )}
-              </div>
+              {vehicleDetails.year && (
+                <div className="detail-item">
+                  <label className="detail-label">Year</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="detail-input"
+                      value={vehicleDetails.year}
+                      onChange={(e) => setVehicleDetails({...vehicleDetails, year: e.target.value})}
+                    />
+                  ) : (
+                    <p className="detail-value">{vehicleDetails.year}</p>
+                  )}
+                </div>
+              )}
 
-              <div className="detail-item">
-                <label className="detail-label">Color</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    className="detail-input"
-                    value={vehicleDetails.color}
-                    onChange={(e) => setVehicleDetails({...vehicleDetails, color: e.target.value})}
-                  />
-                ) : (
-                  <p className="detail-value">{vehicleDetails.color}</p>
-                )}
-              </div>
+              {vehicleDetails.color && (
+                <div className="detail-item">
+                  <label className="detail-label">Color</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="detail-input"
+                      value={vehicleDetails.color}
+                      onChange={(e) => setVehicleDetails({...vehicleDetails, color: e.target.value})}
+                    />
+                  ) : (
+                    <p className="detail-value">{vehicleDetails.color}</p>
+                  )}
+                </div>
+              )}
 
-              <div className="detail-item">
-                <label className="detail-label">Fuel Type</label>
-                {isEditing ? (
-                  <select
-                    className="detail-input"
-                    value={vehicleDetails.fuelType}
-                    onChange={(e) => setVehicleDetails({...vehicleDetails, fuelType: e.target.value})}
-                  >
-                    <option value="Petrol">Petrol</option>
-                    <option value="Diesel">Diesel</option>
-                    <option value="Electric">Electric</option>
-                    <option value="Hybrid">Hybrid</option>
-                  </select>
-                ) : (
-                  <p className="detail-value">{vehicleDetails.fuelType}</p>
-                )}
-              </div>
+              {vehicleDetails.fuelType && (
+                <div className="detail-item">
+                  <label className="detail-label">Fuel Type</label>
+                  {isEditing ? (
+                    <select
+                      className="detail-input"
+                      value={vehicleDetails.fuelType}
+                      onChange={(e) => setVehicleDetails({...vehicleDetails, fuelType: e.target.value})}
+                    >
+                      <option value="Petrol">Petrol</option>
+                      <option value="Diesel">Diesel</option>
+                      <option value="Electric">Electric</option>
+                      <option value="Hybrid">Hybrid</option>
+                    </select>
+                  ) : (
+                    <p className="detail-value">{vehicleDetails.fuelType}</p>
+                  )}
+                </div>
+              )}
 
               <div className="detail-item">
                 <label className="detail-label">Transmission</label>
@@ -412,61 +497,101 @@ const CarFinderFormPage = () => {
                 )}
               </div>
 
-              <div className="detail-item">
-                <label className="detail-label">Engine Size</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    className="detail-input"
-                    value={vehicleDetails.engineSize}
-                    onChange={(e) => setVehicleDetails({...vehicleDetails, engineSize: e.target.value})}
-                  />
-                ) : (
-                  <p className="detail-value">{vehicleDetails.engineSize}</p>
-                )}
-              </div>
+              {vehicleDetails.engineSize && (
+                <div className="detail-item">
+                  <label className="detail-label">Engine Size</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="detail-input"
+                      value={vehicleDetails.engineSize}
+                      onChange={(e) => setVehicleDetails({...vehicleDetails, engineSize: e.target.value})}
+                    />
+                  ) : (
+                    <p className="detail-value">{vehicleDetails.engineSize}</p>
+                  )}
+                </div>
+              )}
 
-              <div className="detail-item">
-                <label className="detail-label">Doors</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    className="detail-input"
-                    value={vehicleDetails.doors}
-                    onChange={(e) => setVehicleDetails({...vehicleDetails, doors: e.target.value})}
-                  />
-                ) : (
-                  <p className="detail-value">{vehicleDetails.doors}</p>
-                )}
-              </div>
+              {vehicleDetails.doors && (
+                <div className="detail-item">
+                  <label className="detail-label">Doors</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="detail-input"
+                      value={vehicleDetails.doors}
+                      onChange={(e) => setVehicleDetails({...vehicleDetails, doors: e.target.value})}
+                    />
+                  ) : (
+                    <p className="detail-value">{vehicleDetails.doors}</p>
+                  )}
+                </div>
+              )}
 
-              <div className="detail-item">
-                <label className="detail-label">Body Type</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    className="detail-input"
-                    value={vehicleDetails.bodyType}
-                    onChange={(e) => setVehicleDetails({...vehicleDetails, bodyType: e.target.value})}
-                  />
-                ) : (
-                  <p className="detail-value">{vehicleDetails.bodyType}</p>
-                )}
-              </div>
+              {vehicleDetails.bodyType && (
+                <div className="detail-item">
+                  <label className="detail-label">Body Type</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="detail-input"
+                      value={vehicleDetails.bodyType}
+                      onChange={(e) => setVehicleDetails({...vehicleDetails, bodyType: e.target.value})}
+                    />
+                  ) : (
+                    <p className="detail-value">{vehicleDetails.bodyType}</p>
+                  )}
+                </div>
+              )}
 
-              <div className="detail-item">
-                <label className="detail-label">Previous Owners</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    className="detail-input"
-                    value={vehicleDetails.previousOwners}
-                    onChange={(e) => setVehicleDetails({...vehicleDetails, previousOwners: e.target.value})}
-                  />
-                ) : (
-                  <p className="detail-value">{vehicleDetails.previousOwners}</p>
-                )}
-              </div>
+              {vehicleDetails.previousOwners && (
+                <div className="detail-item">
+                  <label className="detail-label">Previous Owners</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="detail-input"
+                      value={vehicleDetails.previousOwners}
+                      onChange={(e) => setVehicleDetails({...vehicleDetails, previousOwners: e.target.value})}
+                    />
+                  ) : (
+                    <p className="detail-value">{vehicleDetails.previousOwners}</p>
+                  )}
+                </div>
+              )}
+
+              {vehicleDetails.gearbox && (
+                <div className="detail-item">
+                  <label className="detail-label">Gearbox</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="detail-input"
+                      value={vehicleDetails.gearbox}
+                      onChange={(e) => setVehicleDetails({...vehicleDetails, gearbox: e.target.value})}
+                    />
+                  ) : (
+                    <p className="detail-value">{vehicleDetails.gearbox}</p>
+                  )}
+                </div>
+              )}
+
+              {vehicleDetails.emissionClass && (
+                <div className="detail-item">
+                  <label className="detail-label">Emission Class</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="detail-input"
+                      value={vehicleDetails.emissionClass}
+                      onChange={(e) => setVehicleDetails({...vehicleDetails, emissionClass: e.target.value})}
+                    />
+                  ) : (
+                    <p className="detail-value">{vehicleDetails.emissionClass}</p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="vehicle-actions">
@@ -525,6 +650,20 @@ const CarFinderFormPage = () => {
                     <button 
                       className="create-advert-button"
                       onClick={async () => {
+                        // Check if user is authenticated
+                        if (!isAnyUserAuthenticated) {
+                          // Store vehicle details in localStorage for after login
+                          localStorage.setItem('pendingVehicleDetails', JSON.stringify(vehicleDetails));
+                          // Redirect to sign in page
+                          navigate('/signin', { 
+                            state: { 
+                              from: '/find-your-car',
+                              message: 'Please sign in to continue listing your vehicle'
+                            } 
+                          });
+                          return;
+                        }
+
                         try {
                           setIsLoading(true);
                           

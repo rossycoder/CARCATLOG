@@ -90,7 +90,7 @@ const CarDetailPage = () => {
         {/* Image Gallery */}
         <div className="image-gallery">
           <div className="main-image">
-            <img src={images[currentImageIndex]} alt={`${car.make} ${car.model}`} />
+            <img src={images[currentImageIndex]} alt={`${car.make} ${car.model}${car.submodel ? ` ${car.submodel}` : ''}`} />
             <button className="gallery-btn" onClick={() => {}}>
               📷 Gallery
             </button>
@@ -134,7 +134,7 @@ const CarDetailPage = () => {
             {/* Title and Price */}
             <div className="car-header">
               <h1 className="car-title">
-                {car.make} {car.model}
+                {car.make} {car.model}{car.submodel ? ` ${car.submodel}` : ''}
               </h1>
               <p className="car-subtitle">
                 {car.engineSize ? `${car.engineSize}L ` : ''}{car.fuelType} {car.transmission}
@@ -193,7 +193,10 @@ const CarDetailPage = () => {
                   <span className="spec-icon">⚙️</span>
                   <div className="spec-details">
                     <span className="spec-label">Gearbox</span>
-                    <span className="spec-value">{car.transmission}</span>
+                    <span className="spec-value">
+                      {car.transmission}
+                      {car.gearbox && ` (${car.gearbox} speed)`}
+                    </span>
                   </div>
                 </div>
 
@@ -225,8 +228,18 @@ const CarDetailPage = () => {
                   <div className="spec-item">
                     <span className="spec-icon">🌱</span>
                     <div className="spec-details">
-                      <span className="spec-label">Emission class</span>
+                      <span className="spec-label">CO2 Emissions</span>
                       <span className="spec-value">{car.co2Emissions}g/km</span>
+                    </div>
+                  </div>
+                )}
+
+                {car.emissionClass && (
+                  <div className="spec-item">
+                    <span className="spec-icon">🏷️</span>
+                    <div className="spec-details">
+                      <span className="spec-label">Emission Class</span>
+                      <span className="spec-value">{car.emissionClass}</span>
                     </div>
                   </div>
                 )}

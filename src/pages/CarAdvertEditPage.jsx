@@ -3,12 +3,19 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import advertService from '../services/advertService';
 import uploadService from '../services/uploadService';
+import useEnhancedVehicleLookup from '../hooks/useEnhancedVehicleLookup';
+import AutoFillField from '../components/AutoFillField/AutoFillField';
 import './CarAdvertEditPage.css';
 
 const CarAdvertEditPage = () => {
   const { advertId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { lookupVehicle, loading: apiLoading, error: apiError, vehicleData: enhancedData, sources: fieldSources, dataSources } = useEnhancedVehicleLookup();
+  
+  console.log('🔍 Hook state - enhancedData:', enhancedData);
+  console.log('🔍 Hook state - fieldSources:', fieldSources);
+  console.log('🔍 Hook state - dataSources:', dataSources);
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -20,9 +27,29 @@ const CarAdvertEditPage = () => {
     photos: [],
     contactPhone: '',
     contactEmail: '',
-    location: ''
+    location: '',
+    features: [],
+    runningCosts: {
+      fuelEconomy: { urban: '', extraUrban: '', combined: '' },
+      annualTax: '',
+      insuranceGroup: '',
+      co2Emissions: ''
+    },
+    videoUrl: ''
   });
   const [errors, setErrors] = useState({});
+  
+  // Expandable sections state
+  const [expandedSections, setExpandedSections] = useState({
+    features: false,
+    runningCosts: false,
+    video: false
+  });
+  
+  // Price editing state
+  const [isPriceEditing, setIsPriceEditing] = useState(false);
+  const [videoUrlTimeout, setVideoUrlTimeout] = useState(null);
+  const [runningCostsTimeout, setRunningCostsTimeout] = useState(null);
 
   // Load vehicle data and advert details on mount
   useEffect(() => {
@@ -36,6 +63,51 @@ const CarAdvertEditPage = () => {
     }
   }, [vehicleData, isLoading]);
 
+  // Auto-fill data when enhanced data is received from API
+  useEffect(() => {
+    if (enhancedData && !apiLoading) {
+      console.log('✨ Enhanced data received');
+      console.log('📊 Data sources:', dataSources);
+      console.log('🔧 Field sources available:', !!fieldSources);
+      
+      // Auto-fill price from valuation data if available
+      if (enhancedData.valuation?.dealerPrice && !advertData.price) {
+        console.log('💰 Auto-filling price:', enhancedData.valuation.dealerPrice);
+        setAdvertData(prev => ({
+          ...prev,
+          price: enhancedData.valuation.dealerPrice
+        }));
+      }
+      
+      // Auto-fill running costs
+      if (enhancedData.runningCosts) {
+        console.log('💰 Running costs from API:');
+        console.log('  - Urban:', enhancedData.runningCosts.fuelEconomy?.urban, 'mpg');
+        console.log('  - Extra Urban:', enhancedData.runningCosts.fuelEconomy?.extraUrban, 'mpg');
+        console.log('  - Combined:', enhancedData.runningCosts.fuelEconomy?.combined, 'mpg');
+        console.log('  - CO2:', enhancedData.runningCosts.co2Emissions, 'g/km');
+        console.log('  - Annual Tax: £', enhancedData.runningCosts.annualTax);
+        console.log('  - Insurance Group:', enhancedData.runningCosts.insuranceGroup || 'N/A');
+        
+        setAdvertData(prev => ({
+          ...prev,
+          runningCosts: {
+            fuelEconomy: {
+              urban: enhancedData.runningCosts?.fuelEconomy?.urban || prev.runningCosts.fuelEconomy.urban,
+              extraUrban: enhancedData.runningCosts?.fuelEconomy?.extraUrban || prev.runningCosts.fuelEconomy.extraUrban,
+              combined: enhancedData.runningCosts?.fuelEconomy?.combined || prev.runningCosts.fuelEconomy.combined
+            },
+            annualTax: enhancedData.runningCosts?.annualTax || prev.runningCosts.annualTax,
+            insuranceGroup: enhancedData.runningCosts?.insuranceGroup || prev.runningCosts.insuranceGroup,
+            co2Emissions: enhancedData.runningCosts?.co2Emissions || prev.runningCosts.co2Emissions
+          }
+        }));
+        
+        console.log('✅ Running costs auto-filled successfully');
+      }
+    }
+  }, [enhancedData, apiLoading]);
+
   const loadAdvertData = async () => {
     try {
       setIsLoading(true);
@@ -43,15 +115,43 @@ const CarAdvertEditPage = () => {
       // Fetch advert data from backend or localStorage (advertService handles fallback)
       const response = await advertService.getAdvert(advertId);
       
+      console.log('Advert Response:', response);
+      
       if (response.success && response.data) {
+        console.log('Vehicle Data:', response.data.vehicleData);
+        console.log('Advert Data:', response.data.advertData);
+        console.log('Estimated Value:', response.data.vehicleData?.estimatedValue);
+        
         setVehicleData(response.data.vehicleData);
+        
+        // Fetch enhanced data from CheckCarDetails API if registration number exists
+        if (response.data.vehicleData?.registrationNumber) {
+          console.log('🚗 Fetching enhanced data for:', response.data.vehicleData.registrationNumber);
+          await lookupVehicle(response.data.vehicleData.registrationNumber);
+        }
+        
+        const priceValue = response.data.advertData?.price || response.data.vehicleData?.estimatedValue || '';
+        console.log('Setting price to:', priceValue);
+        
         setAdvertData({
-          price: response.data.advertData?.price || '',
+          price: priceValue,
           description: response.data.advertData?.description || '',
           photos: response.data.advertData?.photos || [],
           contactPhone: response.data.advertData?.contactPhone || '',
           contactEmail: response.data.advertData?.contactEmail || user?.email || '',
-          location: response.data.advertData?.location?.postcode || response.data.advertData?.location || ''
+          location: response.data.advertData?.location?.postcode || response.data.advertData?.location || '',
+          features: response.data.advertData?.features || [],
+          runningCosts: response.data.advertData?.runningCosts || {
+            fuelEconomy: { 
+              urban: response.data.vehicleData?.fuelEconomyUrban || '', 
+              extraUrban: response.data.vehicleData?.fuelEconomyExtraUrban || '', 
+              combined: response.data.vehicleData?.fuelEconomyCombined || '' 
+            },
+            annualTax: response.data.vehicleData?.annualTax || '',
+            insuranceGroup: response.data.vehicleData?.insuranceGroup || '',
+            co2Emissions: response.data.vehicleData?.co2Emissions || ''
+          },
+          videoUrl: response.data.advertData?.videoUrl || ''
         });
       } else {
         throw new Error(response.message || 'Failed to load advert data');
@@ -78,6 +178,140 @@ const CarAdvertEditPage = () => {
         [field]: ''
       }));
     }
+  };
+  
+  // Toggle section expansion
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+  
+  // Handle price editing
+  const handlePriceEdit = () => {
+    console.log('🖱️ Edit price button clicked!');
+    setIsPriceEditing(true);
+  };
+  
+  // Handle price save
+  const handlePriceSave = async () => {
+    const priceValue = parseFloat(advertData.price);
+    
+    if (!advertData.price || isNaN(priceValue) || priceValue <= 0) {
+      setErrors(prev => ({ ...prev, price: 'Please enter a valid price' }));
+      return;
+    }
+    
+    setIsPriceEditing(false);
+    
+    // Auto-save price to database
+    try {
+      const updatedAdvertData = {
+        ...advertData,
+        price: priceValue // Ensure price is a number
+      };
+      
+      console.log('💰 Saving price:', priceValue);
+      const response = await advertService.updateAdvert(advertId, updatedAdvertData, vehicleData);
+      console.log('✅ Price saved successfully:', response);
+      
+      // Update local state with the saved price
+      setAdvertData(prev => ({
+        ...prev,
+        price: priceValue
+      }));
+    } catch (error) {
+      console.error('❌ Error saving price:', error);
+      setErrors(prev => ({ ...prev, price: 'Failed to save price. Please try again.' }));
+    }
+  };
+  
+  // Handle price cancel
+  const handlePriceCancel = () => {
+    setIsPriceEditing(false);
+    // Revert to original price
+    handleInputChange('price', vehicleData.estimatedValue || '');
+  };
+  
+  // Handle feature toggle
+  const toggleFeature = async (feature) => {
+    const newFeatures = advertData.features.includes(feature)
+      ? advertData.features.filter(f => f !== feature)
+      : [...advertData.features, feature];
+    
+    setAdvertData(prev => ({
+      ...prev,
+      features: newFeatures
+    }));
+    
+    // Auto-save to database
+    try {
+      await advertService.updateAdvert(advertId, { ...advertData, features: newFeatures }, vehicleData);
+      console.log('Features saved successfully');
+    } catch (error) {
+      console.error('Error saving features:', error);
+    }
+  };
+  
+  // Handle video URL with auto-save
+  const handleVideoUrl = async (url) => {
+    setAdvertData(prev => ({
+      ...prev,
+      videoUrl: url
+    }));
+    
+    // Auto-save to database after a short delay (debounce)
+    if (videoUrlTimeout) clearTimeout(videoUrlTimeout);
+    const timeout = setTimeout(async () => {
+      try {
+        await advertService.updateAdvert(advertId, { ...advertData, videoUrl: url }, vehicleData);
+        console.log('Video URL saved successfully');
+      } catch (error) {
+        console.error('Error saving video URL:', error);
+      }
+    }, 1000);
+    setVideoUrlTimeout(timeout);
+  };
+  
+  // Handle running costs change with auto-save
+  const handleRunningCostsChange = async (field, value) => {
+    let newRunningCosts;
+    
+    if (field.includes('.')) {
+      // Handle nested fields like fuelEconomy.urban
+      const [parent, child] = field.split('.');
+      newRunningCosts = {
+        ...advertData.runningCosts,
+        [parent]: {
+          ...advertData.runningCosts[parent],
+          [child]: value
+        }
+      };
+    } else {
+      // Handle top-level fields
+      newRunningCosts = {
+        ...advertData.runningCosts,
+        [field]: value
+      };
+    }
+    
+    setAdvertData(prev => ({
+      ...prev,
+      runningCosts: newRunningCosts
+    }));
+    
+    // Auto-save to database after a short delay (debounce)
+    if (runningCostsTimeout) clearTimeout(runningCostsTimeout);
+    const timeout = setTimeout(async () => {
+      try {
+        await advertService.updateAdvert(advertId, { ...advertData, runningCosts: newRunningCosts }, vehicleData);
+        console.log('Running costs saved successfully');
+      } catch (error) {
+        console.error('Error saving running costs:', error);
+      }
+    }, 1000);
+    setRunningCostsTimeout(timeout);
   };
 
   const [isUploading, setIsUploading] = useState(false);
@@ -409,22 +643,55 @@ const CarAdvertEditPage = () => {
             </div>
             
             <div className="price-section">
-              <div className="price-input-wrapper">
-                <span className="currency">£</span>
-                <input
-                  type="number"
-                  value={advertData.price}
-                  onChange={(e) => handleInputChange('price', e.target.value)}
-                  placeholder="16,870"
-                  className={`price-input ${errors.price ? 'error' : ''}`}
-                />
-                <a href="#" className="edit-price-link">Edit price</a>
+              <div className="price-display-wrapper">
+                {!isPriceEditing ? (
+                  <div className="price-display">
+                    <span className="currency">£</span>
+                    <span className="price-value">
+                      {advertData.price 
+                        ? (typeof advertData.price === 'number' ? advertData.price.toLocaleString() : advertData.price)
+                        : (vehicleData?.estimatedValue ? vehicleData.estimatedValue.toLocaleString() : '0')
+                      }
+                    </span>
+                    <button type="button" onClick={handlePriceEdit} className="edit-price-button">
+                      Edit price
+                    </button>
+                  </div>
+                ) : (
+                  <div className="price-edit">
+                    <span className="currency">£</span>
+                    <input
+                      type="number"
+                      value={advertData.price}
+                      onChange={(e) => handleInputChange('price', e.target.value)}
+                      placeholder="Enter price"
+                      className={`price-input ${errors.price ? 'error' : ''}`}
+                      autoFocus
+                    />
+                    <div className="price-actions">
+                      <button 
+                        type="button"
+                        onClick={handlePriceSave} 
+                        className="save-price-button"
+                      >
+                        Save
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={handlePriceCancel} 
+                        className="cancel-price-button"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
               {errors.price && (
                 <p className="error-message">{errors.price}</p>
               )}
               <p className="price-note">
-                Our current valuation for your vehicle is £{vehicleData.estimatedValue?.toLocaleString() || '16,670'}
+                Our current valuation for your vehicle is £{vehicleData?.estimatedValue ? vehicleData.estimatedValue.toLocaleString() : '0'}
               </p>
               <p className="finance-note">
                 We'll also display a monthly finance price on qualifying vehicles
@@ -469,7 +736,10 @@ const CarAdvertEditPage = () => {
               </div>
               <div className="spec-item">
                 <label>Gearbox</label>
-                <span>{vehicleData.transmission || 'Automatic'}</span>
+                <span>
+                  {vehicleData.transmission || 'Automatic'}
+                  {vehicleData.gearbox && ` (${vehicleData.gearbox} speed)`}
+                </span>
               </div>
               <div className="spec-item">
                 <label>Doors</label>
@@ -478,6 +748,10 @@ const CarAdvertEditPage = () => {
               <div className="spec-item">
                 <label>Seats</label>
                 <span>{vehicleData.seats || '5'}</span>
+              </div>
+              <div className="spec-item">
+                <label>Emission Class</label>
+                <span>{vehicleData.emissionClass || 'N/A'}</span>
               </div>
             </div>
           </section>
@@ -503,20 +777,193 @@ const CarAdvertEditPage = () => {
 
           {/* Additional Sections */}
           <section className="additional-sections">
-            <div className="section-item">
-              <span className="section-icon">⭐</span>
-              <span className="section-text">Vehicle features</span>
-              <span className="section-arrow">›</span>
+            {/* Vehicle Features Section */}
+            <div className="section-item expandable">
+              <div 
+                className="section-header"
+                onClick={() => toggleSection('features')}
+              >
+                <span className="section-icon">⭐</span>
+                <span className="section-text">Vehicle features</span>
+                <span className={`section-arrow ${expandedSections.features ? 'expanded' : ''}`}>›</span>
+              </div>
+              
+              {expandedSections.features && (
+                <div className="section-content">
+                  <p className="section-description">Select the features your vehicle has:</p>
+                  <div className="features-grid">
+                    {[
+                      'Air Conditioning', 'Climate Control', 'Leather Seats', 'Heated Seats',
+                      'Electric Windows', 'Electric Mirrors', 'Parking Sensors', 'Reversing Camera',
+                      'Cruise Control', 'Sat Nav', 'Bluetooth', 'USB Port',
+                      'Alloy Wheels', 'Sunroof', 'Panoramic Roof', 'Keyless Entry',
+                      'Start/Stop System', 'Lane Assist', 'Blind Spot Monitor', 'Adaptive Cruise Control'
+                    ].map(feature => (
+                      <label key={feature} className="feature-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={advertData.features.includes(feature)}
+                          onChange={() => toggleFeature(feature)}
+                        />
+                        <span>{feature}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="section-item">
-              <span className="section-icon">💰</span>
-              <span className="section-text">Running costs</span>
-              <span className="section-arrow">›</span>
+
+            {/* Running Costs Section */}
+            <div className="section-item expandable">
+              <div 
+                className="section-header"
+                onClick={() => toggleSection('runningCosts')}
+              >
+                <span className="section-icon">💰</span>
+                <span className="section-text">Running costs</span>
+                <span className={`section-arrow ${expandedSections.runningCosts ? 'expanded' : ''}`}>›</span>
+              </div>
+              
+              {expandedSections.runningCosts && (
+                <div className="section-content">
+                  <p className="section-description">
+                    Add running cost information to help buyers. Some fields may be auto-filled from vehicle data.
+                  </p>
+                  
+                  {/* Data Source Banner */}
+                  {dataSources && (dataSources.dvla || dataSources.checkCarDetails) && (
+                    <div className="data-source-banner">
+                      <span className="info-icon">ℹ️</span>
+                      <span>
+                        Data auto-filled from: {' '}
+                        {dataSources.dvla && 'DVLA'}
+                        {dataSources.dvla && dataSources.checkCarDetails && ' & '}
+                        {dataSources.checkCarDetails && 'CheckCarDetails'}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {apiError && (
+                    <div className="api-error-banner">
+                      <span className="warning-icon">⚠️</span>
+                      <span>{apiError}</span>
+                    </div>
+                  )}
+                  
+                  <div className="running-costs-form">
+                    <div className="form-group">
+                      <label>Fuel Economy (MPG)</label>
+                      <div className="fuel-economy-inputs">
+                        <AutoFillField
+                          label="Urban"
+                          type="number"
+                          value={advertData.runningCosts.fuelEconomy.urban}
+                          onChange={(value) => handleRunningCostsChange('fuelEconomy.urban', value)}
+                          source={fieldSources?.runningCosts?.fuelEconomy?.urban}
+                          unit="mpg"
+                          placeholder="e.g. 35.5"
+                        />
+                        <AutoFillField
+                          label="Extra Urban"
+                          type="number"
+                          value={advertData.runningCosts.fuelEconomy.extraUrban}
+                          onChange={(value) => handleRunningCostsChange('fuelEconomy.extraUrban', value)}
+                          source={fieldSources?.runningCosts?.fuelEconomy?.extraUrban}
+                          unit="mpg"
+                          placeholder="e.g. 50.2"
+                        />
+                        <AutoFillField
+                          label="Combined"
+                          type="number"
+                          value={advertData.runningCosts.fuelEconomy.combined}
+                          onChange={(value) => handleRunningCostsChange('fuelEconomy.combined', value)}
+                          source={fieldSources?.runningCosts?.fuelEconomy?.combined}
+                          unit="mpg"
+                          placeholder="e.g. 45.8"
+                        />
+                      </div>
+                    </div>
+                    
+                    <AutoFillField
+                      label="Annual Tax (£)"
+                      type="number"
+                      value={advertData.runningCosts.annualTax}
+                      onChange={(value) => handleRunningCostsChange('annualTax', value)}
+                      source={fieldSources?.runningCosts?.annualTax}
+                      unit="£"
+                      placeholder="e.g. 165"
+                    />
+                    
+                    <AutoFillField
+                      label="Insurance Group"
+                      type="text"
+                      value={advertData.runningCosts.insuranceGroup}
+                      onChange={(value) => handleRunningCostsChange('insuranceGroup', value)}
+                      source={fieldSources?.runningCosts?.insuranceGroup}
+                      placeholder="e.g. 15E"
+                    />
+                    
+                    <AutoFillField
+                      label="CO2 Emissions"
+                      type="number"
+                      value={advertData.runningCosts.co2Emissions}
+                      onChange={(value) => handleRunningCostsChange('co2Emissions', value)}
+                      source={fieldSources?.runningCosts?.co2Emissions}
+                      unit="g/km"
+                      placeholder="e.g. 120"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="section-item">
-              <span className="section-icon">🎥</span>
-              <span className="section-text">Advert video - add a video</span>
-              <span className="section-arrow">›</span>
+
+            {/* Video Section */}
+            <div className="section-item expandable">
+              <div 
+                className="section-header"
+                onClick={() => toggleSection('video')}
+              >
+                <span className="section-icon">🎥</span>
+                <span className="section-text">Advert video - add a video</span>
+                <span className={`section-arrow ${expandedSections.video ? 'expanded' : ''}`}>›</span>
+              </div>
+              
+              {expandedSections.video && (
+                <div className="section-content">
+                  <p className="section-description">
+                    Add a YouTube video link to showcase your vehicle. First upload your video to YouTube, then paste the link here.
+                  </p>
+                  <div className="video-form">
+                    <div className="form-group">
+                      <label>YouTube Video URL</label>
+                      <input
+                        type="url"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        value={advertData.videoUrl}
+                        onChange={(e) => handleVideoUrl(e.target.value)}
+                        className="video-url-input"
+                      />
+                      {advertData.videoUrl && /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(advertData.videoUrl) && (
+                        <div className="video-preview">
+                          <p className="success-message">✓ Valid YouTube URL</p>
+                        </div>
+                      )}
+                      {advertData.videoUrl && !/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(advertData.videoUrl) && (
+                        <p className="error-message">Please enter a valid YouTube URL</p>
+                      )}
+                    </div>
+                    <div className="video-info">
+                      <p>💡 Tips for a great video:</p>
+                      <ul>
+                        <li>Show the exterior from all angles</li>
+                        <li>Showcase the interior and features</li>
+                        <li>Include a short test drive clip</li>
+                        <li>Keep it under 3 minutes</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </section>
 
@@ -531,6 +978,7 @@ const CarAdvertEditPage = () => {
                     : 'Please add a description to continue'}
               </p>
             )}
+            
             <button
               onClick={handlePublish}
               disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}

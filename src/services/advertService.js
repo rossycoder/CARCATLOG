@@ -55,15 +55,20 @@ export const createAdvert = async (vehicleData) => {
  * @returns {Promise<Object>} Advert data
  */
 export const getAdvert = async (advertId) => {
+  console.log('🔍 Fetching advert:', advertId);
+  
   // First check for pending advert data (from Find Your Car page)
   const pendingData = localStorage.getItem('pendingAdvertData');
   if (pendingData) {
     try {
       const parsed = JSON.parse(pendingData);
+      console.log('📦 Found pending advert data:', parsed);
+      
       if (parsed.advertId === advertId) {
         // Clear the pending data after reading
         localStorage.removeItem('pendingAdvertData');
         
+        console.log('✅ Using pending advert data');
         // Return formatted data
         return {
           success: true,
@@ -71,8 +76,8 @@ export const getAdvert = async (advertId) => {
             advertId: parsed.advertId,
             vehicleData: {
               ...parsed.vehicleData,
-              registrationNumber: parsed.vehicleData.registration,
-              estimatedValue: parsed.vehicleData.estimatedValue || 16670
+              registrationNumber: parsed.vehicleData.registration || parsed.vehicleData.registrationNumber,
+              estimatedValue: parsed.vehicleData.estimatedValue || 0
             },
             advertData: {
               price: parsed.vehicleData.estimatedValue || '',
@@ -80,64 +85,49 @@ export const getAdvert = async (advertId) => {
               photos: [],
               contactPhone: '',
               contactEmail: '',
-              location: ''
+              location: '',
+              features: [],
+              runningCosts: {
+                fuelEconomy: { urban: '', extraUrban: '', combined: '' },
+                annualTax: '',
+                insuranceGroup: '',
+                co2Emissions: parsed.vehicleData.co2Emissions || ''
+              },
+              videoUrl: ''
             },
             status: 'incomplete'
           }
         };
       }
     } catch (e) {
-      console.error('Error parsing pending advert data:', e);
+      console.error('❌ Error parsing pending advert data:', e);
     }
   }
 
+  // Try to fetch from backend API
   try {
+    console.log('🌐 Fetching from API: /adverts/' + advertId);
     const response = await api.get(`/adverts/${advertId}`);
+    console.log('✅ API Response:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error fetching advert:', error);
+    console.error('❌ API Error:', error.message);
+    console.log('Response status:', error.response?.status);
+    console.log('Response data:', error.response?.data);
     
     // Try to get from localStorage as fallback
     const localData = localStorage.getItem(`advert_${advertId}`);
     if (localData) {
+      console.log('📦 Using localStorage fallback');
       return {
         success: true,
         data: JSON.parse(localData)
       };
     }
     
-    // Return mock data for demo purposes
-    return {
-      success: true,
-      data: {
-        advertId,
-        vehicleData: {
-          registrationNumber: 'AB12CDE',
-          make: 'BMW',
-          model: 'M6 Gran Coupe',
-          year: 2014,
-          color: 'Black',
-          fuelType: 'Petrol',
-          transmission: 'Automatic',
-          engineSize: '4.4L',
-          mileage: 83119,
-          doors: 4,
-          seats: 5,
-          bodyType: 'Saloon',
-          motDue: '05/06/2026',
-          estimatedValue: 16670
-        },
-        advertData: {
-          price: 16870,
-          description: '',
-          photos: [],
-          contactPhone: '',
-          contactEmail: '',
-          location: ''
-        },
-        status: 'incomplete'
-      }
-    };
+    // If API fails and no local data, throw error instead of returning mock data
+    console.error('❌ No data found for advert:', advertId);
+    throw new Error('Advert not found. Please create a new advert from the Find Your Car page.');
   }
 };
 

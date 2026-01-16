@@ -159,7 +159,7 @@ const BikeDetailPage = () => {
             {/* Title and Price */}
             <div className="bike-header">
               <h1 className="bike-title">
-                {bike.make} {bike.model}
+                {bike.make} {bike.model}{bike.submodel ? ` ${bike.submodel}` : ''}
               </h1>
               <p className="bike-subtitle">
                 {bike.year} • {bike.engineCC ? `${bike.engineCC}cc` : ''} {bike.bikeType || 'Motorcycle'}

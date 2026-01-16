@@ -50,18 +50,25 @@ const TradeSubscriptionPage = () => {
       setLoading(true);
       setError(null);
 
-      // Create subscription directly (no Stripe checkout)
+      // Create checkout session
       const response = await tradeSubscriptionService.createCheckoutSession(planSlug);
       
       if (response.success) {
-        // Show success message
-        alert(`${response.message}\n\nYou can now access your dashboard and start listing vehicles!`);
-        
-        // Refresh subscription data
-        await fetchPlansAndSubscription();
-        
-        // Navigate to dashboard
-        navigate('/trade/dashboard');
+        // Check if we got a Stripe URL (production) or direct activation (development)
+        if (response.url) {
+          // Production: Redirect to Stripe checkout
+          console.log('Redirecting to Stripe checkout:', response.url);
+          window.location.href = response.url;
+        } else {
+          // Development: Direct activation
+          alert(`${response.message}\n\nYou can now access your dashboard and start listing vehicles!`);
+          
+          // Refresh subscription data
+          await fetchPlansAndSubscription();
+          
+          // Navigate to dashboard
+          navigate('/trade/dashboard');
+        }
       } else {
         setError(response.message || 'Failed to activate subscription');
         setLoading(false);

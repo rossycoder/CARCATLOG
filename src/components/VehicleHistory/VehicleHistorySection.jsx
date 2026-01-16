@@ -73,22 +73,50 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
       <div className="vehicle-history-section">
         <h2>This vehicle's history</h2>
         <div className={`history-error ${error?.isNotFound ? 'history-not-found' : ''}`}>
-          <p>{error?.message || error || 'Unable to load vehicle history at this time.'}</p>
-          {error?.nextSteps && error.nextSteps.length > 0 && (
-            <div className="error-next-steps">
-              <p className="next-steps-title">What you can do:</p>
-              <ul>
-                {error.nextSteps.map((step, index) => (
-                  <li key={index}>{step}</li>
-                ))}
-              </ul>
+          <div className="history-summary">
+            <div className="history-stat">
+              <span className="stat-icon">👤</span>
+              <div className="stat-details">
+                <span className="stat-label">Owners</span>
+                <span className="stat-value">Contact seller</span>
+              </div>
             </div>
-          )}
-          {error?.isNotFound && (
-            <p className="history-info-text">
-              This vehicle may be new, recently imported, or the registration may be incorrect.
-            </p>
-          )}
+
+            <div className="history-stat">
+              <span className="stat-icon">🔑</span>
+              <div className="stat-details">
+                <span className="stat-label">Keys</span>
+                <span className="stat-value">Contact seller</span>
+              </div>
+            </div>
+
+            <div className="history-stat">
+              <span className="stat-icon">📋</span>
+              <div className="stat-details">
+                <span className="stat-label">Service history</span>
+                <span className="stat-value">Contact seller</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="history-message">
+            <p>{error?.message || error || 'Vehicle history information is not available online for this vehicle.'}</p>
+            {error?.nextSteps && error.nextSteps.length > 0 && (
+              <div className="error-next-steps">
+                <p className="next-steps-title">What you can do:</p>
+                <ul>
+                  {error.nextSteps.map((step, index) => (
+                    <li key={index}>{step}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {error?.isNotFound && (
+              <p className="history-info-text">
+                This vehicle may be new, recently imported, or the registration may be incorrect. Please contact the seller for detailed vehicle history information.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -148,7 +176,9 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
           <span className="stat-icon">👤</span>
           <div className="stat-details">
             <span className="stat-label">Owners</span>
-            <span className="stat-value">{historyData.previousOwners || historyData.numberOfOwners || 'N/A'}</span>
+            <span className="stat-value">
+              {historyData.previousOwners || historyData.numberOfOwners || historyData.keeperChanges || 'Contact seller'}
+            </span>
           </div>
         </div>
 
@@ -156,7 +186,9 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
           <span className="stat-icon">🔑</span>
           <div className="stat-details">
             <span className="stat-label">Keys</span>
-            <span className="stat-value">{historyData.numberOfKeys || historyData.keys || 'N/A'}</span>
+            <span className="stat-value">
+              {historyData.numberOfKeys || historyData.keys || '1'}
+            </span>
           </div>
         </div>
 
@@ -164,7 +196,9 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
           <span className="stat-icon">📋</span>
           <div className="stat-details">
             <span className="stat-label">Service history</span>
-            <span className="stat-value">{historyData.serviceHistory || 'Contact seller'}</span>
+            <span className="stat-value">
+              {historyData.serviceHistory || historyData.hasServiceHistory ? 'Available' : 'Contact seller'}
+            </span>
           </div>
         </div>
       </div>

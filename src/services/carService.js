@@ -90,4 +90,10 @@ export const carService = {
     });
     return response.data;
   },
+
+  // Enhanced vehicle lookup (CheckCarDetails + Valuation)
+  enhancedLookup: async (registrationNumber, mileage) => {
+    const response = await api.get(`/vehicles/enhanced-lookup/${registrationNumber}?mileage=${mileage}`);
+    return response.data;
+  },
 };
