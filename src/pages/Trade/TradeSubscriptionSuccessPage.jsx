@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import tradeSubscriptionService from '../../services/tradeSubscriptionService';
+import { useTradeDealerContext } from '../../context/TradeDealerContext';
 import './TradeSubscriptionSuccessPage.css';
 
 const TradeSubscriptionSuccessPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { refreshDealer } = useTradeDealerContext();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [subscription, setSubscription] = useState(null);
@@ -32,6 +34,11 @@ const TradeSubscriptionSuccessPage = () => {
       if (response.success) {
         setSubscription(response.subscription);
         console.log('Payment verified successfully:', response.subscription);
+        
+        // ✅ FIX: Refresh dealer data in context to update subscription state
+        console.log('🔄 Refreshing dealer data to update subscription...');
+        await refreshDealer();
+        console.log('✅ Dealer data refreshed - subscription should now be active');
         
         // Redirect to dashboard after 3 seconds
         setTimeout(() => {

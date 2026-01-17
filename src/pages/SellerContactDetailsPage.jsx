@@ -388,7 +388,14 @@ const SellerContactDetailsPage = () => {
             onClick={isTradeDealer ? handleTradePublish : handleSubmit}
             disabled={isSubmitting || loading || Object.values(errors).filter(Boolean).length > 0}
           >
-            {loading ? 'Loading...' : (isSubmitting ? 'Processing...' : (isTradeDealer ? 'Publish Vehicle' : 'Continue to package selection'))}
+            {loading || isSubmitting ? (
+              <span className="button-content">
+                <span className="loading-spinner"></span>
+                <span>{loading ? 'Loading...' : 'Processing...'}</span>
+              </span>
+            ) : (
+              isTradeDealer ? 'Publish Vehicle' : 'Continue to package selection'
+            )}
           </button>
         </div>
 

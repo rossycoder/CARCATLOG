@@ -221,8 +221,7 @@ const TradeRegisterPage = () => {
         <div className="trade-register-container">
           <div className="success-message">
             <h2>Registration Successful!</h2>
-            <p>Please check your email to verify your account.</p>
-            <p>We've sent a verification link to your email address.</p>
+            <p>Your trade dealer account has been created.</p>
             <p style={{ marginTop: '20px', color: '#7f8c8d' }}>Redirecting to login page...</p>
           </div>
         </div>

@@ -258,6 +258,107 @@ const CarDetailPage = () => {
               </div>
             )}
 
+            {/* YouTube Video Section */}
+            {car.videoUrl && (
+              <div className="video-section">
+                <h2>Video</h2>
+                <div className="video-container">
+                  <iframe
+                    width="100%"
+                    height="400"
+                    src={car.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                    title="Vehicle Video"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+            )}
+
+            {/* Running Costs Section */}
+            {car.runningCosts && (car.runningCosts.fuelEconomy?.combined || car.runningCosts.co2Emissions || car.runningCosts.insuranceGroup || car.runningCosts.annualTax) && (
+              <div className="running-costs-section">
+                <h2>Running Costs</h2>
+                <div className="running-costs-grid">
+                  {car.runningCosts.fuelEconomy?.combined && (
+                    <div className="cost-item">
+                      <span className="cost-icon">⛽</span>
+                      <div className="cost-details">
+                        <span className="cost-label">Fuel Economy (Combined)</span>
+                        <span className="cost-value">{car.runningCosts.fuelEconomy.combined} mpg</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {car.runningCosts.fuelEconomy?.urban && (
+                    <div className="cost-item">
+                      <span className="cost-icon">🏙️</span>
+                      <div className="cost-details">
+                        <span className="cost-label">Fuel Economy (Urban)</span>
+                        <span className="cost-value">{car.runningCosts.fuelEconomy.urban} mpg</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {car.runningCosts.fuelEconomy?.extraUrban && (
+                    <div className="cost-item">
+                      <span className="cost-icon">🛣️</span>
+                      <div className="cost-details">
+                        <span className="cost-label">Fuel Economy (Extra Urban)</span>
+                        <span className="cost-value">{car.runningCosts.fuelEconomy.extraUrban} mpg</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {car.runningCosts.co2Emissions && (
+                    <div className="cost-item">
+                      <span className="cost-icon">🌱</span>
+                      <div className="cost-details">
+                        <span className="cost-label">CO2 Emissions</span>
+                        <span className="cost-value">{car.runningCosts.co2Emissions}g/km</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {car.runningCosts.insuranceGroup && (
+                    <div className="cost-item">
+                      <span className="cost-icon">🛡️</span>
+                      <div className="cost-details">
+                        <span className="cost-label">Insurance Group</span>
+                        <span className="cost-value">{car.runningCosts.insuranceGroup}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {car.runningCosts.annualTax && (
+                    <div className="cost-item">
+                      <span className="cost-icon">💷</span>
+                      <div className="cost-details">
+                        <span className="cost-label">Annual Tax</span>
+                        <span className="cost-value">{formatPrice(car.runningCosts.annualTax)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Vehicle Features Section */}
+            {car.features && car.features.length > 0 && (
+              <div className="features-section">
+                <h2>Vehicle Features</h2>
+                <div className="features-grid">
+                  {car.features.map((feature, index) => (
+                    <div key={index} className="feature-item">
+                      <span className="feature-icon">✓</span>
+                      <span className="feature-text">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Location Display */}
             <LocationDisplay 
               sellerPostcode={car.postcode || car.sellerContact?.postcode}
@@ -297,9 +398,27 @@ const CarDetailPage = () => {
                     {car.sellerContact?.businessName && (
                       <div className="dealer-business-name">{car.sellerContact.businessName}</div>
                     )}
-                    <div className="dealer-location">
-                      📍 {car.locationName || 'Location available'}
-                    </div>
+                    {car.sellerContact?.businessAddress && (
+                      <div className="dealer-business-address">
+                        {car.sellerContact.businessAddress.street && (
+                          <div>{car.sellerContact.businessAddress.street}</div>
+                        )}
+                        {car.sellerContact.businessAddress.city && (
+                          <div>{car.sellerContact.businessAddress.city}</div>
+                        )}
+                        {car.sellerContact.businessAddress.postcode && (
+                          <div>{car.sellerContact.businessAddress.postcode}</div>
+                        )}
+                        {car.sellerContact.businessAddress.country && (
+                          <div>{car.sellerContact.businessAddress.country}</div>
+                        )}
+                      </div>
+                    )}
+                    {!car.sellerContact?.businessAddress && (
+                      <div className="dealer-location">
+                        📍 {car.locationName || 'Location available'}
+                      </div>
+                    )}
                   </div>
                 )}
                 

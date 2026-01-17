@@ -527,6 +527,17 @@
   color: #1a1a1a;
 }
 
+.dealer-business-address {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+  padding: 8px 0;
+}
+
+.dealer-business-address div {
+  margin-bottom: 2px;
+}
+
 .dealer-location {
   font-size: 0.95rem;
   color: #666;
@@ -609,4 +620,162 @@
 .seller-protection-notice a {
   color: #0066cc;
   text-decoration: underline;
+}
+
+/* Video Section */
+.video-section {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.video-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: #1a1a1a;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #000;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+/* Running Costs Section */
+.running-costs-section {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.running-costs-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
+}
+
+.running-costs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.cost-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s;
+}
+
+.cost-item:hover {
+  background: #e3f2fd;
+  border-color: #0066cc;
+}
+
+.cost-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+}
+
+.cost-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.cost-label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.cost-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* Vehicle Features Section */
+.features-section {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.features-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.feature-icon {
+  color: #4caf50;
+  font-size: 1.2rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.feature-text {
+  font-size: 0.95rem;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Responsive adjustments for new sections */
+@media (max-width: 768px) {
+  .running-costs-grid,
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .video-container {
+    padding-bottom: 75%; /* Adjust for mobile */
+  }
 }
