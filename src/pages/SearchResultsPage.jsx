@@ -56,42 +56,69 @@ function SearchResultsPage() {
   }, [savedCars, filteredResults]);
 
   useEffect(() => {
-    // Get search parameters from URL or location state
+    // Get search parameters from URL
     const params = new URLSearchParams(location.search);
-    const postcodeParam = params.get('postcode') || location.state?.postcode;
-    const radiusParam = params.get('radius') || location.state?.radius || 25;
-    const makeParam = params.get('make') || location.state?.make;
-    const modelParam = params.get('model') || location.state?.model;
-    const openFilterParam = params.get('openFilter'); // Check if filter should auto-open
+    
+    // Check if we have any filter parameters
+    const hasFilters = Array.from(params.keys()).length > 0;
+    
+    console.log('SearchResultsPage mounted with params:', Object.fromEntries(params));
 
-    console.log('SearchResultsPage mounted with params:', {
-      postcodeParam,
-      radiusParam,
-      makeParam,
-      modelParam,
-      openFilterParam,
-      urlSearch: location.search,
-      locationState: location.state
-    });
-
-    if (postcodeParam) {
-      setPostcode(postcodeParam);
-      setRadius(parseInt(radiusParam) || 25);
-      performSearch(postcodeParam, parseInt(radiusParam) || 25, makeParam, modelParam);
-      
-      // Auto-open filter if requested
-      if (openFilterParam === 'true') {
-        setTimeout(() => setShowFilterModal(true), 500);
-      }
+    if (hasFilters) {
+      // Perform filtered search
+      performFilteredSearch(params);
     } else {
-      // Load all cars if no postcode provided
-      loadAllCars(makeParam, modelParam);
+      // Load all cars if no filters provided
+      loadAllCars();
       // Auto-open filter modal if no search params
-      if (!makeParam && !modelParam) {
-        setTimeout(() => setShowFilterModal(true), 300);
-      }
+      setTimeout(() => setShowFilterModal(true), 300);
     }
-  }, [location]);
+  }, [location.search]);
+
+  const performFilteredSearch = async (params) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // Convert URLSearchParams to object
+      const filterParams = {};
+      for (const [key, value] of params.entries()) {
+        filterParams[key] = value;
+      }
+      
+      console.log('[SearchResultsPage] Performing filtered search with:', filterParams);
+      const response = await carService.searchCars(filterParams);
+      
+      console.log('[SearchResultsPage] Search response:', response);
+      
+      if (response.success) {
+        const cars = response.cars || [];
+        const total = response.total || 0;
+        
+        console.log('[SearchResultsPage] Found cars:', total, 'Sample mileages:', cars.slice(0, 5).map(c => c.mileage));
+        
+        // Transform to match expected format
+        const transformedData = {
+          postcode: filterParams.postcode || 'All UK',
+          radius: filterParams.distance || 0,
+          count: total,
+          results: cars,
+          showingAllCars: false
+        };
+        
+        console.log('[SearchResultsPage] Setting filtered results:', transformedData);
+        setSearchResults(transformedData);
+        setFilteredResults(transformedData);
+      } else {
+        setError(response.error || 'Search failed');
+      }
+    } catch (err) {
+      console.error('[SearchResultsPage] Search error:', err);
+      setError(err.response?.data?.error || err.message || 'An error occurred while searching');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const performSearch = async (searchPostcode, searchRadius, make, model) => {
     setLoading(true);
@@ -150,16 +177,12 @@ function SearchResultsPage() {
     }
   };
 
-  const loadAllCars = async (make, model) => {
+  const loadAllCars = async () => {
     setLoading(true);
     setError('');
 
     try {
-      const filterParams = {};
-      if (make && make !== 'Any') filterParams.make = make;
-      if (model && model !== 'Any') filterParams.model = model;
-      
-      const response = await carService.getCars(filterParams);
+      const response = await carService.getCars({});
       
       // Backend returns: { success: true, data: [...], pagination: { total: X } }
       const cars = response.data || [];
@@ -449,7 +472,7 @@ function SearchResultsPage() {
               className="filter-sort-btn"
               onClick={() => setShowFilterModal(true)}
             >
-              ⚙️ More options
+             Filter and Sort
             </button>
             <button 
               className={`save-search-btn ${searchSaved ? 'saved' : ''}`}

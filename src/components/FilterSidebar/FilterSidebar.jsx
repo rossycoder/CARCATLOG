@@ -10,6 +10,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
   const [filterOptions, setFilterOptions] = useState({
     makes: [],
     models: [],
+    modelsByMake: {},
+    submodelsByMakeModel: {},
     fuelTypes: [],
     transmissions: [],
     bodyTypes: [],
@@ -22,6 +24,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     postcode: '',
     make: '',
     model: '',
+    submodel: '',
     priceFrom: '',
     priceTo: '',
     yearFrom: '',
@@ -46,6 +49,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         postcode: searchParams.get('postcode') || '',
         make: searchParams.get('make') || '',
         model: searchParams.get('model') || '',
+        submodel: searchParams.get('submodel') || '',
         priceFrom: searchParams.get('priceFrom') || '',
         priceTo: searchParams.get('priceTo') || '',
         yearFrom: searchParams.get('yearFrom') || '',
@@ -67,12 +71,28 @@ const FilterSidebar = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        console.log('[FilterSidebar] Fetching filter options...');
+        console.log('[FilterSidebar] 🎯 Component mounted, fetching filter options...');
+        console.log('[FilterSidebar] API Base URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000');
+        
         const options = await carService.getFilterOptions();
-        console.log('[FilterSidebar] Received filter options:', options);
-        setFilterOptions(options);
+        
+        console.log('[FilterSidebar] ✅ Successfully received filter options!');
+        console.log('[FilterSidebar] Raw response:', options);
+        console.log('[FilterSidebar] Makes:', options?.makes);
+        console.log('[FilterSidebar] ModelsByMake:', options?.modelsByMake);
+        console.log('[FilterSidebar] SubmodelsByMakeModel:', options?.submodelsByMakeModel);
+        
+        if (options && options.makes) {
+          setFilterOptions(options);
+          console.log('[FilterSidebar] ✅ Filter options set successfully!');
+        } else {
+          console.error('[FilterSidebar] ❌ Invalid options structure:', options);
+        }
       } catch (error) {
-        console.error('[FilterSidebar] Error fetching filter options:', error);
+        console.error('[FilterSidebar] ❌ Error fetching filter options:');
+        console.error('[FilterSidebar] Error message:', error.message);
+        console.error('[FilterSidebar] Error stack:', error.stack);
+        console.error('[FilterSidebar] Full error:', error);
       }
     };
     
@@ -80,12 +100,42 @@ const FilterSidebar = ({ isOpen, onClose }) => {
   }, []);
 
   const handleChange = (field, value) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
+    setFilters(prev => {
+      const newFilters = { ...prev, [field]: value };
+      
+      // Cascading filter logic: reset dependent filters
+      if (field === 'make') {
+        newFilters.model = '';
+        newFilters.submodel = '';
+      } else if (field === 'model') {
+        newFilters.submodel = '';
+      }
+      
+      return newFilters;
+    });
+    
     // Clear validation error for this field when user makes changes
     if (validationErrors[field]) {
       setValidationErrors(prev => ({ ...prev, [field]: null }));
     }
   };
+
+  // Get available models based on selected make
+  const availableModels = filters.make && filterOptions.modelsByMake[filters.make]
+    ? filterOptions.modelsByMake[filters.make]
+    : [];
+
+  // Get available submodels based on selected make and model
+  const availableSubmodels = filters.make && filters.model && 
+    filterOptions.submodelsByMakeModel[filters.make] && 
+    filterOptions.submodelsByMakeModel[filters.make][filters.model]
+    ? filterOptions.submodelsByMakeModel[filters.make][filters.model]
+    : [];
+
+  // Debug logging
+  console.log('[FilterSidebar] Current filters:', filters);
+  console.log('[FilterSidebar] Available models for', filters.make, ':', availableModels);
+  console.log('[FilterSidebar] Available submodels for', filters.make, filters.model, ':', availableSubmodels);
 
   const validateFilters = () => {
     const errors = {};
@@ -127,6 +177,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       postcode: '',
       make: '',
       model: '',
+      submodel: '',
       priceFrom: '',
       priceTo: '',
       yearFrom: '',
@@ -264,43 +315,58 @@ const FilterSidebar = ({ isOpen, onClose }) => {
             />
           </div>
 
-          {/* Make and Model */}
-          <div className="filter-section">
-            <label className="filter-label">
+          {/* Make and Model - Collapsible Section */}
+          <div className="filter-section-collapsible">
+            <div className="filter-section-header">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 17h14v-5H5v5zm0 0v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2M5 17V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10"/>
               </svg>
-              Make
-            </label>
-            <select
-              className="filter-select"
-              value={filters.make}
-              onChange={(e) => handleChange('make', e.target.value)}
-            >
-              <option value="">Select Make</option>
-              {filterOptions.makes.map(make => (
-                <option key={make} value={make}>{make}</option>
-              ))}
-            </select>
-          </div>
+              <span>Make and model</span>
+            </div>
+            
+            <div className="filter-subsection">
+              <label className="filter-sublabel">Make</label>
+              <select
+                className="filter-select"
+                value={filters.make}
+                onChange={(e) => handleChange('make', e.target.value)}
+              >
+                <option value="">Select Make</option>
+                {filterOptions.makes.map(make => (
+                  <option key={make} value={make}>{make}</option>
+                ))}
+              </select>
+            </div>
 
-          <div className="filter-section">
-            <label className="filter-label">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 17h14v-5H5v5zm0 0v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2M5 17V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10"/>
-              </svg>
-              Model
-            </label>
-            <select
-              className="filter-select"
-              value={filters.model}
-              onChange={(e) => handleChange('model', e.target.value)}
-            >
-              <option value="">Select Model</option>
-              {filterOptions.models.map(model => (
-                <option key={model} value={model}>{model}</option>
-              ))}
-            </select>
+            <div className="filter-subsection">
+              <label className="filter-sublabel">Model</label>
+              <select
+                className="filter-select"
+                value={filters.model}
+                onChange={(e) => handleChange('model', e.target.value)}
+                disabled={!filters.make}
+              >
+                <option value="">Select Model</option>
+                {availableModels.map(model => (
+                  <option key={model} value={model}>{model}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-subsection">
+              <label className="filter-sublabel">Model variant</label>
+              <select
+                className="filter-select"
+                value={filters.submodel}
+                onChange={(e) => handleChange('submodel', e.target.value)}
+                disabled={!filters.make || !filters.model}
+              >
+                <option value="">All Variants</option>
+                {availableSubmodels.map(submodel => (
+                  <option key={submodel} value={submodel}>{submodel}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Price */}

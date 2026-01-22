@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import VehicleHistorySection from '../components/VehicleHistory/VehicleHistorySection';
 import MOTHistorySection from '../components/VehicleHistory/MOTHistorySection';
 import LocationDisplay from '../components/Location/LocationDisplay';
+import { generateVariantDisplay } from '../utils/vehicleFormatter';
 import './CarDetailPage.css';
 
 const CarDetailPage = () => {
@@ -131,14 +132,16 @@ const CarDetailPage = () => {
               </span>
             </div>
 
-            {/* Title and Price */}
+            {/* Title and Price - AutoTrader Format */}
             <div className="car-header">
-              <h1 className="car-title">
-                {car.make} {car.model}{car.submodel ? ` ${car.submodel}` : ''}
+              <h1 className="car-make-model">
+                {car.make} {car.model}
               </h1>
-              <p className="car-subtitle">
-                {car.engineSize ? `${car.engineSize}L ` : ''}{car.fuelType} {car.transmission}
-              </p>
+              <h2 className="car-variant-line">
+                {car.engineSize ? `${car.engineSize.toFixed(1)}L ` : ''}
+                {car.variant && car.variant !== 'null' ? `${car.variant} ` : ''}
+                {car.transmission ? car.transmission.charAt(0).toUpperCase() + car.transmission.slice(1) : ''}
+              </h2>
               <div className="price-tag">
                 {formatPrice(car.price)}
               </div>
@@ -184,8 +187,8 @@ const CarDetailPage = () => {
                 <div className="spec-item">
                   <span className="spec-icon">🔧</span>
                   <div className="spec-details">
-                    <span className="spec-label">Engine</span>
-                    <span className="spec-value">{car.engineSize ? `${car.engineSize}L` : 'N/A'}</span>
+                    <span className="spec-label">Engine size</span>
+                    <span className="spec-value">{car.engineSize ? `${(car.engineSize / 1000).toFixed(1)}L` : 'N/A'}</span>
                   </div>
                 </div>
 
@@ -201,7 +204,13 @@ const CarDetailPage = () => {
                 </div>
 
                 <div className="spec-item">
-                  <span className="spec-icon">🚪</span>
+                  <span className="spec-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 10v11h18V7H7L3 10z"></path>
+                      <path d="M7 7v13"></path>
+                      <circle cx="16" cy="15" r="1"></circle>
+                    </svg>
+                  </span>
                   <div className="spec-details">
                     <span className="spec-label">Doors</span>
                     <span className="spec-value">{car.doors || 'N/A'}</span>
@@ -209,7 +218,9 @@ const CarDetailPage = () => {
                 </div>
 
                 <div className="spec-item">
-                  <span className="spec-icon">💺</span>
+                  <span className="spec-icon">
+                    <img src="/images/brands/car-seat-svgrepo-com.svg" alt="Seats" style={{ width: '24px', height: '24px' }} />
+                  </span>
                   <div className="spec-details">
                     <span className="spec-label">Seats</span>
                     <span className="spec-value">{car.seats || 'N/A'}</span>
@@ -224,21 +235,11 @@ const CarDetailPage = () => {
                   </div>
                 </div>
 
-                {car.co2Emissions && (
-                  <div className="spec-item">
-                    <span className="spec-icon">🌱</span>
-                    <div className="spec-details">
-                      <span className="spec-label">CO2 Emissions</span>
-                      <span className="spec-value">{car.co2Emissions}g/km</span>
-                    </div>
-                  </div>
-                )}
-
                 {car.emissionClass && (
                   <div className="spec-item">
                     <span className="spec-icon">🏷️</span>
                     <div className="spec-details">
-                      <span className="spec-label">Emission Class</span>
+                      <span className="spec-label">Emission class</span>
                       <span className="spec-value">{car.emissionClass}</span>
                     </div>
                   </div>
@@ -377,7 +378,7 @@ const CarDetailPage = () => {
               vrm={car.registrationNumber || car.vrm}
             />
 
-            {/* Meet the Seller Section - After MOT History */}
+            {/* Meet the Seller Section */}
             <div className="meet-seller-section">
               <h2>Meet the seller</h2>
               

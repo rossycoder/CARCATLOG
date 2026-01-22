@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HeroSection.css';
-import { carBrands } from '../../data/carBrands';
 import { carService } from '../../services/carService';
+import { filterService } from '../../services/filterService';
 
 const HeroSection = ({ headline, subheadline, onFilterClick }) => {
   const navigate = useNavigate();
@@ -18,8 +18,10 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
   const [carCount, setCarCount] = useState(0);
   const [loadingCount, setLoadingCount] = useState(true);
   const [postcodeError, setPostcodeError] = useState('');
+  const [makes, setMakes] = useState([]);
+  const [loadingMakes, setLoadingMakes] = useState(true);
 
-  // Fetch car count on component mount
+  // Fetch car count and makes on component mount
   useEffect(() => {
     const fetchCarCount = async () => {
       try {
@@ -37,11 +39,23 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
       }
     };
 
-    fetchCarCount();
-  }, []);
+    const fetchMakes = async () => {
+      try {
+        setLoadingMakes(true);
+        const makesData = await filterService.getMakes();
+        setMakes(makesData);
+        console.log('Fetched makes from database:', makesData.length);
+      } catch (err) {
+        console.error('Error fetching makes:', err);
+        setMakes([]);
+      } finally {
+        setLoadingMakes(false);
+      }
+    };
 
-  // Sort brands alphabetically
-  const sortedBrands = [...carBrands].sort((a, b) => a.name.localeCompare(b.name));
+    fetchCarCount();
+    fetchMakes();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -113,13 +127,18 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
                     name="make"
                     value={searchParams.make}
                     onChange={handleInputChange}
+                    disabled={loadingMakes}
                   >
                     <option value="">Any</option>
-                    {sortedBrands.map((brand) => (
-                      <option key={brand.name} value={brand.name}>
-                        {brand.name}
-                      </option>
-                    ))}
+                    {loadingMakes ? (
+                      <option disabled>Loading makes...</option>
+                    ) : (
+                      makes.map((makeName) => (
+                        <option key={makeName} value={makeName}>
+                          {makeName}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
                 

@@ -68,19 +68,49 @@ const ValuationResultsPage = () => {
     return result;
   };
 
-  // Parse the derivative to get additional details
-  const derivativeInfo = parseDerivative(formData?.derivative);
+  // Parse vehicle description to extract details
+  // Example: "BMW 335i M Sport Auto 335I M Sport [Petrol / Automatic]"
+  const parseVehicleDescription = (description) => {
+    if (!description) return {};
+    
+    const result = {};
+    
+    // Extract fuel type and transmission from brackets
+    const bracketMatch = description.match(/\[(.*?)\]/);
+    if (bracketMatch) {
+      const bracketContent = bracketMatch[1];
+      const parts = bracketContent.split('/').map(p => p.trim());
+      
+      if (parts[0]) result.fuelType = parts[0];
+      if (parts[1]) result.transmission = parts[1];
+    }
+    
+    // Extract make and model (before brackets)
+    const beforeBrackets = description.replace(/\[.*?\]/g, '').trim();
+    const words = beforeBrackets.split(' ');
+    
+    if (words.length > 0) result.make = words[0];
+    if (words.length > 1) result.model = words.slice(1).join(' ');
+    
+    return result;
+  };
+
+  // Parse valuation description if available
+  const valuationParsed = parseVehicleDescription(valuationData?.vehicleDescription);
+  
+  // Parse derivative info if available
+  const derivativeInfo = parseDerivative(formData?.derivative || '');
 
   // Merge vehicleDetails with formData to get complete vehicle info
   const mergedVehicleDetails = {
     ...vehicleDetails,
-    make: vehicleDetails?.make || formData?.make || '',
-    model: vehicleDetails?.model || formData?.model || '',
-    registrationNumber: vehicleDetails?.registrationNumber || formData?.vrm || '',
-    fuelType: vehicleDetails?.fuelType || derivativeInfo.fuelType || '',
+    make: vehicleDetails?.make || valuationParsed.make || formData?.make || '',
+    model: vehicleDetails?.model || valuationParsed.model || formData?.model || '',
+    registrationNumber: vehicleDetails?.registrationNumber || valuationData?.vrm || formData?.vrm || '',
+    fuelType: vehicleDetails?.fuelType || valuationParsed.fuelType || derivativeInfo.fuelType || '',
     engineCapacity: vehicleDetails?.engineCapacity || derivativeInfo.engineCapacity || '',
     colour: vehicleDetails?.colour || '',
-    transmission: vehicleDetails?.transmission || derivativeInfo.transmission || 'Manual',
+    transmission: vehicleDetails?.transmission || valuationParsed.transmission || derivativeInfo.transmission || 'Manual',
     typeApproval: vehicleDetails?.typeApproval || vehicleDetails?.bodyType || formData?.variant || '',
     monthOfFirstRegistration: vehicleDetails?.monthOfFirstRegistration || (formData?.regMonth && formData?.regYear ? `${formData.regMonth}/${formData.regYear}` : ''),
     yearOfManufacture: vehicleDetails?.yearOfManufacture || formData?.regYear || '',
@@ -116,7 +146,10 @@ const ValuationResultsPage = () => {
   };
 
   useEffect(() => {
+    console.log('ValuationResultsPage received state:', location.state);
+    
     if (!valuationData && !vehicleDetails && !formData) {
+      console.log('No valuation data found, redirecting to /valuation');
       navigate('/valuation');
       return;
     }
@@ -124,7 +157,7 @@ const ValuationResultsPage = () => {
     if (mergedVehicleDetails) {
       setIsNotCar(checkIfNotCar(mergedVehicleDetails));
     }
-  }, [valuationData, vehicleDetails, formData, navigate]);
+  }, [valuationData, vehicleDetails, formData, navigate, location.state, mergedVehicleDetails]);
 
   const handleCreateAdvert = () => {
     // Navigate to the specific advert edit page
@@ -149,18 +182,26 @@ const ValuationResultsPage = () => {
     return null;
   }
 
-  // Build vehicle title
+  // Build vehicle title - use vehicleDescription from API if available
   const buildVehicleTitle = () => {
+    // If we have vehicleDescription from the valuation API, use it
+    if (valuationData?.vehicleDescription) {
+      return valuationData.vehicleDescription;
+    }
+    
+    // Otherwise build from available details
     const details = mergedVehicleDetails;
     if (!details.make && !details.model) return 'Vehicle';
+    
     const parts = [
       details.make,
       details.model,
-      details.engineCapacity ? `${details.engineCapacity}cc` : '',
-      details.colour,
+      details.engineCapacity ? `${(details.engineCapacity / 1000).toFixed(1)}L` : '',
       details.fuelType,
-      details.transmission || 'Manual'
+      details.transmission,
+      details.typeApproval
     ].filter(Boolean);
+    
     return parts.join(' ') || 'Vehicle';
   };
 
@@ -177,71 +218,6 @@ const ValuationResultsPage = () => {
       <div className="results-container">
         <div className="results-card">
           <div className="result-header-bar"></div>
-          <h2 className="result-title">We've identified this car</h2>
-          
-          <div className="vehicle-identification">
-            <h3 className="vehicle-name">{buildVehicleTitle()}</h3>
-            
-            <div className="vehicle-details-grid">
-              <div className="details-column">
-                <div className="detail-row">
-                  <span className="detail-label">Registration number:</span>
-                  <span className="detail-value">{mergedVehicleDetails.registrationNumber || 'N/A'}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Mileage:</span>
-                  <span className="detail-value">{getMileage()}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Fuel type:</span>
-                  <span className="detail-value">{mergedVehicleDetails.fuelType || 'N/A'}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Engine size:</span>
-                  <span className="detail-value">{mergedVehicleDetails.engineCapacity ? `${mergedVehicleDetails.engineCapacity}cc` : 'N/A'}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Body type:</span>
-                  <span className="detail-value">{mergedVehicleDetails.typeApproval || 'N/A'}</span>
-                </div>
-                {mergedVehicleDetails.colour && (
-                  <div className="detail-row">
-                    <span className="detail-label">Colour:</span>
-                    <span className="detail-value">{mergedVehicleDetails.colour}</span>
-                  </div>
-                )}
-                {mergedVehicleDetails.derivative && (
-                  <div className="detail-row">
-                    <span className="detail-label">Derivative:</span>
-                    <span className="detail-value">{mergedVehicleDetails.derivative}</span>
-                  </div>
-                )}
-                <div className="detail-row">
-                  <span className="detail-label">Transmission:</span>
-                  <span className="detail-value">{mergedVehicleDetails.transmission}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Date of first registration:</span>
-                  <span className="detail-value">{mergedVehicleDetails.monthOfFirstRegistration || mergedVehicleDetails.yearOfManufacture || 'N/A'}</span>
-                </div>
-                <div className="change-details-row">
-                  <span>Not your car?</span>
-                  <button className="change-details-link" onClick={handleChangeDetails}>
-                    change details
-                  </button>
-                </div>
-              </div>
-              
-              <div className="brand-logo-column">
-                {mergedVehicleDetails.make && (
-                  <div className="brand-logo">
-                    <span className="brand-name">{mergedVehicleDetails.make}</span>
-                    <span className="brand-icon">{isNotCar ? '🏍️' : '🚗'}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
 
           {isNotCar ? (
             <>

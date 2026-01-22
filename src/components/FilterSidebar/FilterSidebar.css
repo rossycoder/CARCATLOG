@@ -106,6 +106,50 @@
   margin-bottom: 0 !important;
 }
 
+/* Collapsible Section for Make and Model */
+.filter-section-collapsible {
+  margin-bottom: 24px !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+}
+
+.filter-section-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 14px 16px !important;
+  background-color: #f9fafb !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  font-size: 15px !important;
+}
+
+.filter-section-header svg {
+  color: #666666 !important;
+  width: 18px !important;
+  height: 18px !important;
+  flex-shrink: 0 !important;
+}
+
+.filter-subsection {
+  padding: 16px !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+}
+
+.filter-subsection:last-child {
+  border-bottom: none !important;
+}
+
+.filter-sublabel {
+  display: block !important;
+  font-weight: 500 !important;
+  color: #4b5563 !important;
+  margin-bottom: 8px !important;
+  font-size: 14px !important;
+}
+
 .filter-label {
   display: flex !important;
   align-items: center !important;

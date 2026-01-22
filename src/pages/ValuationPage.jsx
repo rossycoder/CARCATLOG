@@ -19,6 +19,8 @@ const ValuationPage = () => {
   const [dvlaData, setDvlaData] = useState(null);
   const [valuationData, setValuationData] = useState(null);
   const [isNotCar, setIsNotCar] = useState(false);
+  const [showValuation, setShowValuation] = useState(false); // New state for two-step flow
+  const [vehicleIdentified, setVehicleIdentified] = useState(false); // Track if vehicle is identified
 
   // Check if vehicle is not a car (motorcycle, etc.)
   const checkIfNotCar = (vehicleDetails) => {
@@ -58,7 +60,7 @@ const ValuationPage = () => {
     }
   }, [location.state]);
 
-  const handleFormSubmit = async ({ vrm, mileage }) => {
+  const handleFormSubmit = async ({ vrm, mileage, make, model, variant, derivative, regMonth, regYear }) => {
     setLoading(true);
     setError(null);
     setIsNotCar(false);
@@ -70,14 +72,21 @@ const ValuationPage = () => {
         // Check if we got valid vehicle details
         if (response.data.vehicleDetails) {
           const vehicleDetails = response.data.vehicleDetails;
-          setDvlaData(vehicleDetails);
           
           // Check if this is not a car
           if (checkIfNotCar(vehicleDetails)) {
             setIsNotCar(true);
+            setDvlaData(vehicleDetails);
             setValuationData({ vrm, mileage }); // Store basic info for display
           } else {
-            setValuationData(response.data.valuation);
+            // Navigate to identification page first
+            navigate('/valuation/identification', {
+              state: {
+                vehicleDetails,
+                valuationData: response.data.valuation,
+                formData: { vrm, mileage, make, model, variant, derivative, regMonth, regYear }
+              }
+            });
           }
         } else {
           // No vehicle details found - redirect to detailed form

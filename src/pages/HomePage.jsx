@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaFacebookF, FaYoutube, FaInstagram, FaTiktok } from 'react-icons/fa';
 
-import { getFeaturedBrands, getAllBrands } from '../data/carBrands';
 import AdvertisingPromotionSection from '../components/AdvertisingPromotionSection';
 import { carService } from '../services/carService';
+import { filterService } from '../services/filterService';
 import './HomePage.css';
 
 const HomePage = () => {
@@ -17,13 +17,26 @@ const HomePage = () => {
   const [error, setError] = useState('');
   const [totalCars, setTotalCars] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [makes, setMakes] = useState([]);
+  const [models, setModels] = useState([]);
+  const [loadingMakes, setLoadingMakes] = useState(true);
+  const [loadingModels, setLoadingModels] = useState(false);
 
-  const brands = getAllBrands();
-
-  // Fetch total car count on initial load
+  // Fetch total car count and makes on initial load
   useEffect(() => {
     fetchCarCount();
+    fetchMakes();
   }, []);
+
+  // Fetch models when make changes
+  useEffect(() => {
+    if (make && make !== 'Any') {
+      fetchModels(make);
+    } else {
+      setModels([]);
+      setModel('Any');
+    }
+  }, [make]);
 
   const fetchCarCount = async () => {
     try {
@@ -33,9 +46,37 @@ const HomePage = () => {
       console.log('Total cars from database:', count);
     } catch (err) {
       console.error('Error fetching car count:', err);
-      setTotalCars(0); // Show 0 if there's an error
+      setTotalCars(0);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMakes = async () => {
+    try {
+      setLoadingMakes(true);
+      const makesData = await filterService.getMakes();
+      setMakes(makesData);
+      console.log('Fetched makes from database:', makesData.length);
+    } catch (err) {
+      console.error('Error fetching makes:', err);
+      setMakes([]);
+    } finally {
+      setLoadingMakes(false);
+    }
+  };
+
+  const fetchModels = async (selectedMake) => {
+    try {
+      setLoadingModels(true);
+      const modelsData = await filterService.getModelsForMake(selectedMake);
+      setModels(modelsData);
+      console.log(`Fetched models for ${selectedMake}:`, modelsData.length);
+    } catch (err) {
+      console.error('Error fetching models:', err);
+      setModels([]);
+    } finally {
+      setLoadingModels(false);
     }
   };
 
@@ -175,19 +216,36 @@ const HomePage = () => {
                 </div>
                 <div className="search-field">
                   <label>Make</label>
-                  <select value={make} onChange={handleMakeChange}>
+                  <select value={make} onChange={handleMakeChange} disabled={loadingMakes}>
                     <option>Any</option>
-                    {brands.map((brand) => (
-                      <option key={brand.name} value={brand.name}>
-                        {brand.name}
-                      </option>
-                    ))}
+                    {loadingMakes ? (
+                      <option disabled>Loading makes...</option>
+                    ) : (
+                      makes.map((makeName) => (
+                        <option key={makeName} value={makeName}>
+                          {makeName}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
                 <div className="search-field">
                   <label>Model</label>
-                  <select value={model} onChange={(e) => setModel(e.target.value)}>
+                  <select 
+                    value={model} 
+                    onChange={(e) => setModel(e.target.value)}
+                    disabled={make === 'Any' || loadingModels}
+                  >
                     <option>Any</option>
+                    {loadingModels ? (
+                      <option disabled>Loading models...</option>
+                    ) : (
+                      models.map((modelName) => (
+                        <option key={modelName} value={modelName}>
+                          {modelName}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
               </div>

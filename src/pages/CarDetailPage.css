@@ -160,17 +160,54 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.car-title {
+/* AutoTrader Style Title */
+.car-make-model {
   font-size: 2rem;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 8px 0;
+  line-height: 1.2;
 }
 
-.car-subtitle {
+.car-variant-line {
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: #333;
+  margin: 0 0 20px 0;
+  line-height: 1.4;
+}
+
+/* Legacy styles for fallback */
+.car-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 20px 0;
+  line-height: 1.3;
+}
+
+.car-make {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.car-model {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.car-variant {
   color: #666;
-  font-size: 1rem;
-  margin: 0 0 16px 0;
+  font-size: 0.95rem;
+  margin: 0 0 20px 0;
+  font-weight: 400;
+  line-height: 1.4;
 }
 
 .price-tag {
@@ -218,6 +255,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #666;
+}
+
+.spec-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
 }
 
 .spec-details {
@@ -741,41 +785,58 @@
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr) !important;
   gap: 12px;
 }
 
 .feature-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 12px;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 12px;
   background: #f8f9fa;
   border-radius: 6px;
   border: 1px solid #e0e0e0;
+  text-align: center;
+  min-height: 80px;
 }
 
 .feature-icon {
   color: #4caf50;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: bold;
   flex-shrink: 0;
 }
 
 .feature-text {
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   color: #333;
   font-weight: 500;
+  line-height: 1.3;
 }
 
 /* Responsive adjustments for new sections */
+@media (max-width: 1024px) {
+  .features-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
 @media (max-width: 768px) {
   .running-costs-grid,
   .features-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 
   .video-container {
     padding-bottom: 75%; /* Adjust for mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .features-grid {
+    grid-template-columns: 1fr !important;
   }
 }

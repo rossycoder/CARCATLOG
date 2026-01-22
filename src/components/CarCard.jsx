@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { generateDisplayTitle, generateSubtitle } from '../utils/vehicleFormatter';
 import './CarCard.css';
 
 const CarCard = ({ car }) => {
@@ -41,6 +42,42 @@ const CarCard = ({ car }) => {
       currency: 'GBP',
       maximumFractionDigits: 0,
     }).format(price);
+  };
+
+  // Format engine size properly (always with 1 decimal)
+  const formatEngineSize = (size) => {
+    if (!size) return '';
+    return `${parseFloat(size).toFixed(1)}L`;
+  };
+
+  // Get vehicle title - use backend displayTitle if available, otherwise build it
+  const getVehicleTitle = () => {
+    if (car.displayTitle) {
+      return car.displayTitle;
+    }
+    // Fallback: build title manually
+    const parts = [car.make, car.model];
+    if (car.variant && car.variant !== 'null' && car.variant !== 'undefined' && car.variant.trim() !== '') {
+      parts.push(car.variant);
+    } else if (car.submodel && car.submodel !== 'null' && car.submodel !== 'undefined') {
+      parts.push(car.submodel);
+    }
+    return parts.filter(Boolean).join(' ');
+  };
+
+  // Get subtitle with engine, fuel, transmission
+  const getSubtitle = () => {
+    const parts = [];
+    if (car.engineSize) {
+      parts.push(formatEngineSize(car.engineSize));
+    }
+    if (car.fuelType) {
+      parts.push(car.fuelType);
+    }
+    if (car.transmission) {
+      parts.push(car.transmission.charAt(0).toUpperCase() + car.transmission.slice(1));
+    }
+    return parts.join(' ');
   };
 
   const imageCount = car.images?.length || 0;
@@ -123,8 +160,8 @@ const CarCard = ({ car }) => {
       </div>
       
       <div className="car-content">
-        <h3 className="car-title">{car.make} {car.model}{car.submodel ? ` ${car.submodel}` : ''}</h3>
-        <p className="car-subtitle">{car.engineSize ? `${car.engineSize}L ` : ''}{car.fuelType} {car.transmission}</p>
+        <h3 className="car-title">{generateDisplayTitle(car)}</h3>
+        <p className="car-subtitle">{generateSubtitle(car)}</p>
         <p className="car-dealer">{car.sellerContact?.businessName || car.sellerContact?.city || 'Private seller'}</p>
         
         <div className="car-badges">

@@ -1,0 +1,250 @@
+.vehicle-identification-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 40px 20px;
+}
+
+.identification-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.identification-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+}
+
+.vehicle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.vehicle-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.brand-logo-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 20px;
+  border: 2px solid #e0e0e0;
+}
+
+.brand-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  letter-spacing: 0.5px;
+  padding: 4px;
+  line-height: 1.2;
+}
+
+.vehicle-details-table {
+  margin-bottom: 30px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-row:last-of-type {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 400;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 600;
+  text-align: right;
+}
+
+.change-details-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 0;
+  font-size: 14px;
+  color: #666;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 10px;
+}
+
+.not-your-car {
+  color: #666;
+}
+
+.change-details-link {
+  background: none;
+  border: none;
+  color: #0066cc;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-size: 14px;
+}
+
+.change-details-link:hover {
+  color: #0052a3;
+}
+
+.validation-checklist {
+  background: #f9f9f9;
+  border-radius: 6px;
+  padding: 24px;
+  margin-bottom: 30px;
+}
+
+.checklist-title {
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.checklist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+.check-icon {
+  color: #00a650;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.continue-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.btn-get-valuation {
+  background: #0066cc;
+  color: white;
+  border: none;
+  padding: 14px 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.btn-get-valuation:hover {
+  background: #0052a3;
+}
+
+.btn-get-valuation:active {
+  transform: scale(0.98);
+}
+
+.account-notice {
+  text-align: center;
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .vehicle-identification-page {
+    padding: 20px 15px;
+  }
+
+  .page-title {
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+
+  .identification-card {
+    padding: 24px;
+  }
+
+  .vehicle-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .vehicle-title {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .brand-logo-circle {
+    margin-left: 0;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 12px 0;
+  }
+
+  .detail-value {
+    text-align: left;
+  }
+
+  .validation-checklist {
+    padding: 20px;
+  }
+
+  .btn-get-valuation {
+    width: 100%;
+    padding: 14px 24px;
+  }
+
+  .account-notice {
+    font-size: 12px;
+  }
+}
+

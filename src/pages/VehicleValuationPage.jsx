@@ -66,12 +66,12 @@ const VehicleValuationPage = () => {
       const response = await getDetailedValuation(generatedVrm, parseInt(mileage));
       
       if (response.success) {
-        // Navigate to results page with data
-        navigate('/valuation/results', {
+        // Navigate to identification page first
+        navigate('/valuation/identification', {
           state: {
             valuationData: response.data.valuation,
             vehicleDetails: response.data.vehicleDetails,
-            formData: { make, model, variant, derivative, regYear, regMonth, mileage }
+            formData: { make, model, variant, derivative, regYear, regMonth, mileage, vrm: generatedVrm }
           }
         });
       } else {

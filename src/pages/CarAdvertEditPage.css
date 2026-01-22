@@ -13,16 +13,24 @@
 
 .loading-spinner {
   text-align: center;
+  padding: 60px 20px;
 }
 
 .loading-spinner .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #e3e3e3;
-  border-top: 4px solid #1a4ba0;
+  width: 60px;
+  height: 60px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #1a4ba0;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 20px;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 24px;
+}
+
+.loading-spinner p {
+  font-size: 18px;
+  color: #666;
+  font-weight: 500;
+  margin: 0;
 }
 
 @keyframes spin {
@@ -214,8 +222,8 @@
 .photo-section {
   background: white;
   border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 16px;
+  padding: 28px;
+  margin-bottom: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -308,7 +316,8 @@
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 12px;
+  gap: 16px;
+  row-gap: 14px;
 }
 
 .photo-item {
@@ -363,13 +372,13 @@
 .vehicle-details-section {
   background: white;
   border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 16px;
+  padding: 28px;
+  margin-bottom: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .vehicle-details-section h2 {
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
   font-size: 22px;
   color: #333;
   font-weight: 600;
@@ -377,7 +386,7 @@
 
 .vehicle-subtitle {
   color: #666;
-  margin: 0 0 16px 0;
+  margin: 0 0 20px 0;
   font-size: 14px;
 }
 
@@ -466,26 +475,26 @@
 .specifications-section {
   background: white;
   border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 16px;
+  padding: 28px;
+  margin-bottom: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .specifications-section h3 {
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
   font-size: 18px;
   color: #333;
   font-weight: 600;
 }
 
 .spec-actions {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .mileage-note {
   color: #666;
   font-size: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .mileage-display {
@@ -518,16 +527,19 @@
 }
 
 .spec-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 20px !important;
+  row-gap: 16px !important;
 }
 
 .spec-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
+  display: flex !important;
+  justify-content: space-between !important;
+  padding: 16px !important;
+  border-bottom: 1px solid #eee !important;
+  background: #fafafa !important;
+  border-radius: 6px !important;
 }
 
 .spec-item:nth-child(odd) {
@@ -536,7 +548,6 @@
 
 .spec-item:nth-child(even) {
   padding-left: 16px;
-  border-left: 1px solid #eee;
 }
 
 .spec-item label {
@@ -552,13 +563,13 @@
 .description-section {
   background: white;
   border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 16px;
+  padding: 28px;
+  margin-bottom: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .description-section h3 {
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
   font-size: 18px;
   color: #333;
   font-weight: 600;
@@ -567,7 +578,7 @@
 .section-note {
   color: #666;
   font-size: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .description-textarea {
@@ -605,7 +616,7 @@
 .additional-sections {
   background: white;
   border-radius: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
@@ -613,7 +624,7 @@
 .section-item {
   display: flex;
   align-items: center;
-  padding: 16px 24px;
+  padding: 18px 28px;
   border-bottom: 1px solid #eee;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -914,20 +925,21 @@
 
 /* Features Grid */
 .features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+  gap: 16px !important;
+  row-gap: 14px !important;
 }
 
 .feature-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px 14px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
 }
 
 .feature-checkbox:hover {
@@ -946,46 +958,47 @@
 
 /* Running Costs Form */
 .running-costs-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px !important;
 }
 
 .auto-fill-notice {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #e8f4fd;
-  padding: 10px 14px;
-  border-radius: 6px;
-  color: #1a4ba0;
-  font-size: 13px;
-  margin-bottom: 12px;
-  border-left: 3px solid #1a4ba0;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  background: #e8f4fd !important;
+  padding: 12px 16px !important;
+  border-radius: 6px !important;
+  color: #1a4ba0 !important;
+  font-size: 13px !important;
+  margin-bottom: 16px !important;
+  border-left: 3px solid #1a4ba0 !important;
 }
 
 .auto-fill-notice .info-icon {
-  font-size: 16px;
+  font-size: 16px !important;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  margin-bottom: 8px !important;
 }
 
 .form-group label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #333 !important;
 }
 
 .form-group input {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.2s;
+  padding: 12px 14px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  transition: border-color 0.2s !important;
 }
 
 .form-group input:focus {
@@ -994,9 +1007,10 @@
 }
 
 .fuel-economy-inputs {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 16px !important;
+  row-gap: 14px !important;
 }
 
 /* Video Form */
@@ -1116,4 +1130,55 @@
   .fuel-economy-inputs {
     grid-template-columns: 1fr;
   }
+}
+
+/* Error state styles */
+.error-message {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.error-message h2 {
+  color: #d32f2f;
+  margin-bottom: 16px;
+}
+
+.error-message p {
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.error-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.retry-button,
+.back-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-button {
+  background-color: #1976d2;
+  color: white;
+}
+
+.retry-button:hover {
+  background-color: #1565c0;
+}
+
+.back-button {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.back-button:hover {
+  background-color: #e0e0e0;
 }

@@ -1,23 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { filterService } from '../services/filterService';
 import './NewCarsPage.css';
-
-const BRANDS = [
-  { name: 'Audi', logo: 'https://via.placeholder.com/120x60/f0f0f0/666?text=AUDI' },
-  { name: 'BMW', logo: 'https://via.placeholder.com/120x60/f0f0f0/666?text=BMW' },
-  { name: 'Ford', logo: 'https://via.placeholder.com/120x60/f0f0f0/666?text=FORD' },
-  { name: 'Mercedes', logo: 'https://via.placeholder.com/120x60/f0f0f0/666?text=MERCEDES' },
-  { name: 'Volkswagen', logo: 'https://via.placeholder.com/120x60/f0f0f0/666?text=VW' },
-  { name: 'Toyota', logo: 'https://via.placeholder.com/120x60/f0f0f0/666?text=TOYOTA' },
-  { name: 'Honda', logo: 'https://via.placeholder.com/120x60/f0f0f0/666?text=HONDA' },
-  { name: 'Nissan', logo: 'https://via.placeholder.com/120x60/f0f0f0/666?text=NISSAN' }
-];
 
 const NewCarsPage = () => {
   const navigate = useNavigate();
   const [newCars, setNewCars] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [makes, setMakes] = useState([]);
+  const [loadingMakes, setLoadingMakes] = useState(true);
   const [searchFilters, setSearchFilters] = useState({
     make: '',
     maxPrice: '',
@@ -29,7 +21,22 @@ const NewCarsPage = () => {
     document.title = 'New Cars for Sale | CarCatalog';
     window.scrollTo(0, 0);
     fetchNewCars();
+    fetchMakes();
   }, []);
+
+  const fetchMakes = async () => {
+    try {
+      setLoadingMakes(true);
+      const makesData = await filterService.getMakes();
+      setMakes(makesData);
+      console.log('Fetched makes from database:', makesData.length);
+    } catch (err) {
+      console.error('Error fetching makes:', err);
+      setMakes([]);
+    } finally {
+      setLoadingMakes(false);
+    }
+  };
 
   const fetchNewCars = async () => {
     try {
@@ -103,11 +110,16 @@ const NewCarsPage = () => {
                   <select
                     value={searchFilters.make}
                     onChange={(e) => handleFilterChange('make', e.target.value)}
+                    disabled={loadingMakes}
                   >
                     <option value="">Any Make</option>
-                    {BRANDS.map(brand => (
-                      <option key={brand.name} value={brand.name}>{brand.name}</option>
-                    ))}
+                    {loadingMakes ? (
+                      <option disabled>Loading makes...</option>
+                    ) : (
+                      makes.map(makeName => (
+                        <option key={makeName} value={makeName}>{makeName}</option>
+                      ))
+                    )}
                   </select>
                 </div>
                 <div className="new-search-field">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import advertService from '../services/advertService';
@@ -21,6 +21,7 @@ const CarAdvertEditPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [vehicleData, setVehicleData] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [loadError, setLoadError] = useState(null);
   const [advertData, setAdvertData] = useState({
     price: '',
     description: '',
@@ -50,11 +51,6 @@ const CarAdvertEditPage = () => {
   const [isPriceEditing, setIsPriceEditing] = useState(false);
   const [videoUrlTimeout, setVideoUrlTimeout] = useState(null);
   const [runningCostsTimeout, setRunningCostsTimeout] = useState(null);
-
-  // Load vehicle data and advert details on mount
-  useEffect(() => {
-    loadAdvertData();
-  }, [advertId]);
 
   // Show popup when page loads
   useEffect(() => {
@@ -108,9 +104,17 @@ const CarAdvertEditPage = () => {
     }
   }, [enhancedData, apiLoading]);
 
-  const loadAdvertData = async () => {
+  const loadAdvertData = useCallback(async () => {
     try {
       setIsLoading(true);
+      setLoadError(null);
+      console.log('📥 Loading advert data for ID:', advertId);
+      
+      if (!advertId) {
+        console.error('❌ No advert ID provided');
+        navigate('/find-your-car');
+        return;
+      }
       
       // Fetch advert data from backend or localStorage (advertService handles fallback)
       const response = await advertService.getAdvert(advertId);
@@ -125,9 +129,14 @@ const CarAdvertEditPage = () => {
         setVehicleData(response.data.vehicleData);
         
         // Fetch enhanced data from CheckCarDetails API if registration number exists
-        if (response.data.vehicleData?.registrationNumber) {
+        // Only fetch if we haven't already fetched it
+        if (response.data.vehicleData?.registrationNumber && !enhancedData) {
           console.log('🚗 Fetching enhanced data for:', response.data.vehicleData.registrationNumber);
-          await lookupVehicle(response.data.vehicleData.registrationNumber);
+          try {
+            await lookupVehicle(response.data.vehicleData.registrationNumber);
+          } catch (apiErr) {
+            console.warn('⚠️ Enhanced lookup failed, continuing without it:', apiErr.message);
+          }
         }
         
         const priceValue = response.data.advertData?.price || response.data.vehicleData?.estimatedValue || '';
@@ -153,17 +162,26 @@ const CarAdvertEditPage = () => {
           },
           videoUrl: response.data.advertData?.videoUrl || ''
         });
+        
+        console.log('✅ Advert data loaded successfully');
       } else {
+        console.error('❌ Failed to load advert:', response.message);
         throw new Error(response.message || 'Failed to load advert data');
       }
     } catch (error) {
-      console.error('Error loading advert:', error);
-      // If advert doesn't exist, redirect back
-      navigate('/find-your-car');
+      console.error('❌ Error loading advert:', error);
+      setLoadError(error.message || 'Failed to load advert data');
+      // Don't redirect immediately, let user retry
     } finally {
+      console.log('🏁 Setting isLoading to false');
       setIsLoading(false);
     }
-  };
+  }, [advertId, navigate, enhancedData]);
+
+  // Load advert data on mount - only once
+  useEffect(() => {
+    loadAdvertData();
+  }, [advertId]); // Only depend on advertId, not loadAdvertData
 
   const handleInputChange = (field, value) => {
     setAdvertData(prev => ({
@@ -203,7 +221,8 @@ const CarAdvertEditPage = () => {
       return;
     }
     
-    setIsPriceEditing(false);
+    // Clear any price errors
+    setErrors(prev => ({ ...prev, price: null }));
     
     // Auto-save price to database
     try {
@@ -221,9 +240,13 @@ const CarAdvertEditPage = () => {
         ...prev,
         price: priceValue
       }));
+      
+      // Exit editing mode after successful save
+      setIsPriceEditing(false);
     } catch (error) {
       console.error('❌ Error saving price:', error);
       setErrors(prev => ({ ...prev, price: 'Failed to save price. Please try again.' }));
+      // Don't exit editing mode if save failed
     }
   };
   
@@ -485,11 +508,16 @@ const CarAdvertEditPage = () => {
     return (
       <div className="car-advert-edit-page error">
         <div className="error-message">
-          <h2>Advert not found</h2>
-          <p>The advert you're looking for doesn't exist or you don't have permission to edit it.</p>
-          <button onClick={() => navigate('/find-your-car')} className="back-button">
-            Back to Find Your Car
-          </button>
+          <h2>{loadError ? 'Error Loading Advert' : 'Advert not found'}</h2>
+          <p>{loadError || "The advert you're looking for doesn't exist or you don't have permission to edit it."}</p>
+          <div className="error-actions">
+            <button onClick={loadAdvertData} className="retry-button">
+              Try Again
+            </button>
+            <button onClick={() => navigate('/find-your-car')} className="back-button">
+              Back to Find Your Car
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -517,11 +545,11 @@ const CarAdvertEditPage = () => {
               </div>
               <div className="checklist-item">
                 <span className="checkmark">✓</span>
-                <span>Your vehicle description & spec</span>
+                <span>Your vehicle features and specs</span>
               </div>
               <div className="checklist-item">
                 <span className="photo-icon">📷</span>
-                <span>Don't forget to add some photos.</span>
+                <span>Now just add some photos and a description</span>
               </div>
             </div>
             <p className="popup-note">
@@ -693,10 +721,6 @@ const CarAdvertEditPage = () => {
               <p className="price-note">
                 Our current valuation for your vehicle is £{vehicleData?.estimatedValue ? vehicleData.estimatedValue.toLocaleString() : '0'}
               </p>
-              <p className="finance-note">
-                We'll also display a monthly finance price on qualifying vehicles
-              </p>
-              <a href="#" className="find-out-more">Find out more</a>
             </div>
           </section>
 
@@ -705,16 +729,6 @@ const CarAdvertEditPage = () => {
             <h3>Overview</h3>
             <div className="spec-actions">
               <a href="#" className="edit-link">Edit service history, MOT and seats</a>
-            </div>
-            
-            <p className="mileage-note">
-              We've set an initial mileage for your advert based on your vehicle's MOT history
-            </p>
-            
-            <div className="mileage-display">
-              <span className="mileage-icon">🛣️</span>
-              <span className="mileage-text">{vehicleData.mileage?.toLocaleString() || '83,119'} miles</span>
-              <a href="#" className="edit-mileage">Edit mileage</a>
             </div>
             
             <div className="spec-grid">
@@ -732,7 +746,13 @@ const CarAdvertEditPage = () => {
               </div>
               <div className="spec-item">
                 <label>Engine</label>
-                <span>{vehicleData.engineSize || '4.4L'}</span>
+                <span>
+                  {vehicleData.engineSize 
+                    ? (vehicleData.engineSize.toString().includes('L') 
+                        ? vehicleData.engineSize 
+                        : `${vehicleData.engineSize}L`)
+                    : '4.4L'}
+                </span>
               </div>
               <div className="spec-item">
                 <label>Gearbox</label>
@@ -751,7 +771,9 @@ const CarAdvertEditPage = () => {
               </div>
               <div className="spec-item">
                 <label>Emission Class</label>
-                <span>{vehicleData.emissionClass || 'N/A'}</span>
+                <span>
+                  {enhancedData?.emissionClass || vehicleData.emissionClass || 'N/A'}
+                </span>
               </div>
             </div>
           </section>
@@ -797,7 +819,8 @@ const CarAdvertEditPage = () => {
                       'Electric Windows', 'Electric Mirrors', 'Parking Sensors', 'Reversing Camera',
                       'Cruise Control', 'Sat Nav', 'Bluetooth', 'USB Port',
                       'Alloy Wheels', 'Sunroof', 'Panoramic Roof', 'Keyless Entry',
-                      'Start/Stop System', 'Lane Assist', 'Blind Spot Monitor', 'Adaptive Cruise Control'
+                      'Start/Stop System', 'Lane Assist', 'Blind Spot Monitor', 'Adaptive Cruise Control',
+                      'Full service history', 'Partial service history'
                     ].map(feature => (
                       <label key={feature} className="feature-checkbox">
                         <input

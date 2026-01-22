@@ -243,11 +243,7 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
           ))}
         </div>
 
-        <button className="view-all-history">
-          <span className="history-icon">📋</span>
-          View all checks and history
-          <span className="arrow">→</span>
-        </button>
+       
       </div>
     </div>
   );

@@ -18,6 +18,8 @@ const TradeInventoryPage = () => {
   const [sortBy, setSortBy] = useState('newest');
   const [subscription, setSubscription] = useState(null);
   const [showLimitWarning, setShowLimitWarning] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [limitModalMessage, setLimitModalMessage] = useState('');
 
   useEffect(() => {
     fetchAllInventory();
@@ -82,9 +84,26 @@ const TradeInventoryPage = () => {
         await tradeInventoryService.deleteVehicle(id);
       }
       fetchAllInventory();
+      fetchSubscription(); // Refresh subscription to update usage
     } catch (error) {
       console.error('Failed to delete vehicle:', error);
     }
+  };
+
+  const handleAddVehicleClick = (e, type) => {
+    // Check if at limit
+    if (subscription && subscription.listingsLimit !== null) {
+      if (subscription.listingsUsed >= subscription.listingsLimit) {
+        e.preventDefault();
+        const planName = subscription.plan?.name || 'current';
+        setLimitModalMessage(
+          `You have reached your listing limit of ${subscription.listingsLimit} vehicles for your ${planName} subscription. Please upgrade your plan to add more vehicles.`
+        );
+        setShowLimitModal(true);
+        return false;
+      }
+    }
+    return true;
   };
 
   // Combine cars, bikes, and vans based on filter
@@ -149,19 +168,31 @@ const TradeInventoryPage = () => {
             )}
           </div>
           <div className="header-actions">
-            <Link to="/find-your-car" className="btn-add-vehicle">
+            <Link 
+              to="/find-your-car" 
+              className="btn-add-vehicle"
+              onClick={(e) => handleAddVehicleClick(e, 'car')}
+            >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
               Add Car
             </Link>
-            <Link to="/bikes/find-your-bike" className="btn-add-vehicle btn-add-bike">
+            <Link 
+              to="/bikes/find-your-bike" 
+              className="btn-add-vehicle btn-add-bike"
+              onClick={(e) => handleAddVehicleClick(e, 'bike')}
+            >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
               Add Bike
             </Link>
-            <Link to="/vans/find-your-van" className="btn-add-vehicle btn-add-van">
+            <Link 
+              to="/vans/find-your-van" 
+              className="btn-add-vehicle btn-add-van"
+              onClick={(e) => handleAddVehicleClick(e, 'van')}
+            >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
@@ -414,6 +445,35 @@ const TradeInventoryPage = () => {
           </div>
         )}
       </div>
+
+      {/* Limit Reached Modal */}
+      {showLimitModal && (
+        <div className="modal-overlay" onClick={() => setShowLimitModal(false)}>
+          <div className="modal-content limit-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>🚫 Listing Limit Reached</h2>
+              <button className="modal-close" onClick={() => setShowLimitModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <p>{limitModalMessage}</p>
+              {subscription && (
+                <div className="subscription-info-box">
+                  <p><strong>Current Plan:</strong> {subscription.plan?.name || 'Unknown'}</p>
+                  <p><strong>Listings Used:</strong> {subscription.listingsUsed} / {subscription.listingsLimit}</p>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setShowLimitModal(false)}>
+                Close
+              </button>
+              <Link to="/trade/subscription" className="btn-primary">
+                View Upgrade Options
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

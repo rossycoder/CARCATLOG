@@ -18,22 +18,45 @@ const generateUUID = () => {
  */
 export const createAdvert = async (vehicleData) => {
   try {
-    const response = await api.post('/adverts', { vehicleData });
+    // Try to create via API with timeout
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Request timeout')), 5000);
+    });
+    
+    const response = await Promise.race([
+      api.post('/adverts', { vehicleData }),
+      timeoutPromise
+    ]);
+    
     return response.data;
   } catch (error) {
-    console.error('Error creating advert:', error);
+    console.error('Error creating advert via API:', error.message);
+    console.log('Falling back to localStorage');
+    
     // Fallback to local storage if backend is unavailable
     const advertId = generateUUID();
     const advertData = {
       id: advertId,
-      vehicleData,
+      advertId: advertId,
+      vehicleData: {
+        ...vehicleData,
+        registrationNumber: vehicleData.registration || vehicleData.registrationNumber
+      },
       advertData: {
         price: vehicleData.estimatedValue || '',
         description: '',
         photos: [],
         contactPhone: '',
         contactEmail: '',
-        location: ''
+        location: '',
+        features: [],
+        runningCosts: {
+          fuelEconomy: { urban: '', extraUrban: '', combined: '' },
+          annualTax: '',
+          insuranceGroup: '',
+          co2Emissions: vehicleData.co2Emissions || ''
+        },
+        videoUrl: ''
       },
       status: 'incomplete',
       createdAt: new Date().toISOString()
@@ -41,6 +64,12 @@ export const createAdvert = async (vehicleData) => {
     
     // Store in localStorage as fallback
     localStorage.setItem(`advert_${advertId}`, JSON.stringify(advertData));
+    
+    // Also store as pending data for immediate access
+    localStorage.setItem('pendingAdvertData', JSON.stringify({
+      advertId: advertId,
+      vehicleData: advertData.vehicleData
+    }));
     
     return {
       success: true,
@@ -50,7 +79,7 @@ export const createAdvert = async (vehicleData) => {
 };
 
 /**
- * Get advert by ID
+ * Get advert by ID with timeout
  * @param {string} advertId - Advert UUID
  * @returns {Promise<Object>} Advert data
  */
@@ -104,10 +133,21 @@ export const getAdvert = async (advertId) => {
     }
   }
 
-  // Try to fetch from backend API
+  // Try to fetch from backend API with timeout
   try {
     console.log('🌐 Fetching from API: /adverts/' + advertId);
-    const response = await api.get(`/adverts/${advertId}`);
+    
+    // Create timeout promise
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Request timeout')), 10000);
+    });
+    
+    // Race between API call and timeout
+    const response = await Promise.race([
+      api.get(`/adverts/${advertId}`),
+      timeoutPromise
+    ]);
+    
     console.log('✅ API Response:', response.data);
     return response.data;
   } catch (error) {

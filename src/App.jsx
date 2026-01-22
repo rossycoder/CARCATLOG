@@ -20,6 +20,7 @@ import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import SearchResultsPage from './pages/SearchResultsPage'
 import SavedCarsPage from './pages/SavedCarsPage'
 import ValuationPage from './pages/ValuationPage'
+import VehicleIdentificationPage from './pages/VehicleIdentificationPage'
 import ValuationResultsPage from './pages/ValuationResultsPage'
 import VehicleValuationPage from './pages/VehicleValuationPage'
 import CarAdvertEditPage from './pages/CarAdvertEditPage'
@@ -115,6 +116,7 @@ function App() {
               <Route path="/search-results" element={<SearchResultsPage />} />
               <Route path="/saved-cars" element={<SavedCarsPage />} />
               <Route path="/valuation" element={<ValuationPage />} />
+              <Route path="/valuation/identification" element={<VehicleIdentificationPage />} />
               <Route path="/valuation/results" element={<ValuationResultsPage />} />
               <Route path="/valuation/vehicle" element={<VehicleValuationPage />} />
               <Route path="/selling/advert/edit/:advertId" element={<CarAdvertEditPage />} />
