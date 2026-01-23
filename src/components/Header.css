@@ -629,8 +629,8 @@ body {
 
   .main-header {
     max-width: 100%;
-    padding: 10px 6px;
-    gap: 8px;
+    padding: 8px 8px;
+    gap: 4px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -643,22 +643,25 @@ body {
     flex-shrink: 0;
     align-items: center;
     order: 1;
+    width: 40px;
   }
 
   .menu-btn {
-    padding: 8px;
+    padding: 6px;
   }
 
   .logo {
     flex: 1;
-    margin: 0 8px;
+    margin: 0;
     order: 2;
     min-width: 0;
+    display: flex;
+    justify-content: center;
   }
 
   .logo-img {
-    height: 90px;
-    max-width: 160px;
+    height: 36px;
+    max-width: 120px;
     width: auto;
   }
 
@@ -668,16 +671,18 @@ body {
 
   .header-right {
     display: flex !important;
-    gap: 0;
+    gap: 2px;
     flex-shrink: 0;
     align-items: center;
     position: static;
     transform: none;
     order: 3;
+    width: 80px;
+    justify-content: flex-end;
   }
 
   .saved-btn {
-    padding: 8px;
+    padding: 6px;
     color: #333 !important;
   }
 
@@ -686,7 +691,7 @@ body {
   }
 
   .account-btn {
-    padding: 8px;
+    padding: 6px;
     color: #333 !important;
   }
 
@@ -739,31 +744,40 @@ body {
    ============================================ */
 @media (max-width: 480px) {
   .main-header {
-    padding: 8px 4px;
-    gap: 6px;
+    padding: 6px 6px;
+    gap: 2px;
   }
 
   .logo-img {
-    height: 85px;
-    max-width: 140px;
+    height: 32px;
+    max-width: 100px;
     width: auto;
   }
 
   .menu-btn {
-    padding: 6px;
+    padding: 5px;
   }
 
   .saved-btn {
-    padding: 6px;
+    padding: 5px;
   }
 
   .account-btn {
-    padding: 6px;
+    padding: 5px;
   }
 
   .logo {
-    margin: 0 6px;
+    margin: 0;
     min-width: 0;
+  }
+  
+  .header-left {
+    width: 36px;
+  }
+  
+  .header-right {
+    width: 70px;
+    gap: 0;
   }
 
   .channel-switcher {
@@ -788,19 +802,28 @@ body {
 /* Extra small devices */
 @media (max-width: 360px) {
   .logo-img {
-    height: 75px;
-    max-width: 120px;
+    height: 28px;
+    max-width: 90px;
   }
   
   .main-header {
-    padding: 6px 3px;
-    gap: 4px;
+    padding: 5px 4px;
+    gap: 2px;
   }
   
   .menu-btn,
   .saved-btn,
   .account-btn {
-    padding: 5px;
+    padding: 4px;
+  }
+  
+  .header-left {
+    width: 32px;
+  }
+  
+  .header-right {
+    width: 60px;
+    gap: 0;
   }
   
   .mobile-menu {
