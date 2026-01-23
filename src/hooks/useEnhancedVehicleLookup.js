@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 
 const useEnhancedVehicleLookup = () => {
   const [loading, setLoading] = useState(false);
@@ -14,7 +14,7 @@ const useEnhancedVehicleLookup = () => {
     setVehicleData(null);
 
     try {
-      const response = await axios.get(`/api/vehicles/enhanced-lookup/${registration}`);
+      const response = await api.get(`/vehicles/enhanced-lookup/${registration}`);
       const data = response.data;
 
       console.log('🔍 Raw API response:', data);
