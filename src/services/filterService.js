@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import api from './api';
 
 /**
  * Service for fetching filter options from the database
@@ -12,7 +10,7 @@ class FilterService {
    */
   async getFilterOptions() {
     try {
-      const response = await axios.get(`${API_BASE_URL}/vehicles/filter-options`);
+      const response = await api.get('/vehicles/filter-options');
       return response.data.data;
     } catch (error) {
       console.error('Error fetching filter options:', error);
