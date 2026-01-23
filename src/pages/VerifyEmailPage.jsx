@@ -40,11 +40,19 @@ const VerifyEmailPage = () => {
           }
         }
       } catch (error) {
+        console.error('Verification error:', error);
         setStatus('error');
-        setMessage(
-          error.response?.data?.message || 
-          'Verification failed. The link may be expired or invalid.'
-        );
+        
+        const errorData = error.response?.data;
+        let errorMessage = 'Verification failed. The link may be expired or invalid.';
+        
+        if (errorData?.expired) {
+          errorMessage = 'Your verification link has expired. Please request a new verification email from the sign-in page.';
+        } else if (errorData?.message) {
+          errorMessage = errorData.message;
+        }
+        
+        setMessage(errorMessage);
       }
     };
 
