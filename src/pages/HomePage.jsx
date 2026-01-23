@@ -6,6 +6,7 @@ import AdvertisingPromotionSection from '../components/AdvertisingPromotionSecti
 import { carService } from '../services/carService';
 import { filterService } from '../services/filterService';
 import './HomePage.css';
+import './HomePage-responsive-fix.css';
 
 const HomePage = () => {
   const navigate = useNavigate();

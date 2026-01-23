@@ -138,9 +138,7 @@ const CarDetailPage = () => {
                 {car.make} {car.model}
               </h1>
               <h2 className="car-variant-line">
-                {car.engineSize ? `${car.engineSize.toFixed(1)}L ` : ''}
-                {car.variant && car.variant !== 'null' ? `${car.variant} ` : ''}
-                {car.transmission ? car.transmission.charAt(0).toUpperCase() + car.transmission.slice(1) : ''}
+                {car.displayTitle || generateVariantDisplay(car)}
               </h2>
               <div className="price-tag">
                 {formatPrice(car.price)}

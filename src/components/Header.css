@@ -653,11 +653,13 @@ body {
     flex: 1;
     margin: 0 8px;
     order: 2;
+    min-width: 0;
   }
 
   .logo-img {
     height: 90px;
     max-width: 160px;
+    width: auto;
   }
 
   .main-nav {
@@ -698,6 +700,7 @@ body {
 
   .channel-switcher {
     display: flex !important;
+    flex-wrap: wrap;
   }
 
   /* Hide account dropdown on mobile - use mobile menu instead */
@@ -718,6 +721,16 @@ body {
   /* Mobile menu should be visible */
   .mobile-menu {
     display: block !important;
+    width: 280px;
+    max-width: 85vw;
+  }
+  
+  .mobile-menu-overlay {
+    display: none;
+  }
+  
+  .mobile-menu-overlay.active {
+    display: block !important;
   }
 }
 
@@ -733,6 +746,7 @@ body {
   .logo-img {
     height: 85px;
     max-width: 140px;
+    width: auto;
   }
 
   .menu-btn {
@@ -749,6 +763,11 @@ body {
 
   .logo {
     margin: 0 6px;
+    min-width: 0;
+  }
+
+  .channel-switcher {
+    flex-wrap: wrap;
   }
 
   .channel-switcher a {
@@ -758,5 +777,34 @@ body {
 
   .header-right {
     gap: 0;
+  }
+  
+  .mobile-menu {
+    width: 260px;
+    max-width: 80vw;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 360px) {
+  .logo-img {
+    height: 75px;
+    max-width: 120px;
+  }
+  
+  .main-header {
+    padding: 6px 3px;
+    gap: 4px;
+  }
+  
+  .menu-btn,
+  .saved-btn,
+  .account-btn {
+    padding: 5px;
+  }
+  
+  .mobile-menu {
+    width: 240px;
+    max-width: 75vw;
   }
 }

@@ -110,44 +110,53 @@ export const generateSubtitle = (vehicle) => {
 
 /**
  * Generate variant display for detail page
- * Shows the complete derivative/trim information
+ * Shows the complete derivative/trim information in AutoTrader format
+ * Format: "EngineSize Variant BodyStyle"
+ * Example: "1.6 TDI S 5dr" or "2.0 320d M Sport 4dr"
  * 
  * @param {object} vehicle - Vehicle data object
  * @returns {string} - Formatted variant
  */
 export const generateVariantDisplay = (vehicle) => {
-  // If we have a variant field, use it (but check it's not "null" string or empty)
-  if (vehicle.variant && vehicle.variant !== 'null' && vehicle.variant !== 'undefined' && vehicle.variant.trim() !== '') {
-    return vehicle.variant;
-  }
-  
-  // Otherwise build from available data
   const parts = [];
   
-  // Engine size
+  // Engine size (without 'L' suffix for AutoTrader style)
   if (vehicle.engineSize) {
-    const formatted = formatEngineSize(vehicle.engineSize);
-    if (formatted) parts.push(formatted);
-  }
-  
-  // Submodel (if it's actually a trim, not fuel/transmission)
-  if (vehicle.submodel && vehicle.submodel !== 'null' && vehicle.submodel !== 'undefined') {
-    const submodel = vehicle.submodel.toLowerCase();
-    const hasFuelOrTrans = /petrol|diesel|manual|automatic|auto|electric|hybrid/.test(submodel);
-    if (!hasFuelOrTrans) {
-      parts.push(vehicle.submodel);
+    const size = parseFloat(vehicle.engineSize);
+    if (!isNaN(size)) {
+      parts.push(size.toFixed(1));
     }
   }
   
-  // Fuel type
-  if (vehicle.fuelType) {
-    parts.push(vehicle.fuelType);
+  // Variant/trim - this should contain fuel type + trim (e.g., "TDI S" or "320d M Sport")
+  if (vehicle.variant && vehicle.variant !== 'null' && vehicle.variant !== 'undefined' && vehicle.variant.trim() !== '') {
+    parts.push(vehicle.variant);
+  } else {
+    // Fallback: build from fuel type if no variant
+    if (vehicle.fuelType) {
+      parts.push(vehicle.fuelType);
+    }
   }
   
-  // Transmission
-  if (vehicle.transmission) {
-    const trans = vehicle.transmission.charAt(0).toUpperCase() + vehicle.transmission.slice(1);
-    parts.push(trans);
+  // Body style - convert to AutoTrader format (e.g., "5dr", "4dr", "Estate")
+  if (vehicle.doors) {
+    parts.push(`${vehicle.doors}dr`);
+  } else if (vehicle.bodyType) {
+    // Map body types to short form
+    const bodyType = vehicle.bodyType.toLowerCase();
+    if (bodyType.includes('hatchback') && vehicle.doors) {
+      parts.push(`${vehicle.doors}dr`);
+    } else if (bodyType.includes('saloon') || bodyType.includes('sedan')) {
+      parts.push('Saloon');
+    } else if (bodyType.includes('estate')) {
+      parts.push('Estate');
+    } else if (bodyType.includes('coupe')) {
+      parts.push('Coupe');
+    } else if (bodyType.includes('convertible') || bodyType.includes('cabriolet')) {
+      parts.push('Convertible');
+    } else if (bodyType.includes('suv')) {
+      parts.push('SUV');
+    }
   }
   
   return parts.join(' ');

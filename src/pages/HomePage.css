@@ -1,31 +1,31 @@
 .hero-section-with-search {
-  padding: var(--spacing-5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  padding: var(--spacing-5) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
 
 .hero-section-with-search .container {
-  position: relative;
-  max-width: var(--container-xl);
-  width: 100%;
-  min-height: 850px;
-  background-image: url('/images/brands/background1.jpeg');
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  border-radius: var(--radius-2xl);
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-  padding: var(--spacing-5) var(--spacing-5) var(--spacing-12);
-  box-shadow: var(--shadow-xl);
+  position: relative !important;
+  max-width: var(--container-xl) !important;
+  width: 100% !important;
+  min-height: 850px !important;
+  background-image: url('/images/brands/background1.jpeg') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  border-radius: var(--radius-2xl) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  padding: var(--spacing-5) var(--spacing-5) var(--spacing-12) !important;
+  box-shadow: var(--shadow-xl) !important;
 }
 
 .hero-background-overlay {
-  position: absolute;
-  inset: 0;
-  display: block;
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
   background: linear-gradient(
     to bottom,
     transparent 0%,
@@ -33,19 +33,19 @@
     rgba(255,255,255,0.3) 65%,
     rgba(255,255,255,0.85) 85%,
     rgba(255,255,255,1) 100%
-  );
-  z-index: 1;
-  pointer-events: none;
+  ) !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
 }
 
 .hero-content {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
+  position: relative !important;
+  z-index: 2 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
 }
 
 /* Search Container in Hero */
@@ -58,6 +58,7 @@
   width: 100%;
   transform: translateY(var(--spacing-5));
   border: 1px solid var(--color-neutral-200);
+  box-sizing: border-box;
 }
 
 .search-field-group {
@@ -65,12 +66,15 @@
   grid-template-columns: 2fr 1.5fr 1.5fr;
   gap: var(--spacing-4);
   margin-bottom: var(--spacing-6);
+  width: 100%;
 }
 
 .search-field {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
+  width: 100%;
+  min-width: 0;
 }
 
 .search-field label {
@@ -89,6 +93,9 @@
   background: white;
   color: var(--color-neutral-800);
   transition: all var(--transition-base);
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .search-field input:focus,
@@ -100,6 +107,13 @@
 
 .input-wrapper {
   position: relative;
+  width: 100%;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding-right: 45px;
+  box-sizing: border-box;
 }
 
 .location-icon-btn {
@@ -134,6 +148,7 @@
   align-items: center;
   gap: var(--spacing-6);
   justify-content: space-between;
+  width: 100%;
 }
 
 .more-options-link {
@@ -149,6 +164,9 @@
   gap: var(--spacing-2);
   cursor: pointer;
   font-family: var(--font-family-primary);
+  white-space: nowrap;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .more-options-link:hover {
@@ -179,6 +197,8 @@
   white-space: nowrap;
   width: auto;
   max-width: fit-content;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .search-button:hover:not(:disabled) {
@@ -935,8 +955,19 @@
   }
   
   .search-field-group {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-3);
+    grid-template-columns: 1fr 1fr !important;
+    gap: var(--spacing-3) !important;
+  }
+  
+  .search-field input,
+  .search-field select {
+    width: 100% !important;
+    font-size: 0.95rem !important;
+  }
+  
+  .search-button {
+    width: 100% !important;
+    justify-content: center !important;
   }
 }
   
@@ -988,36 +1019,49 @@
   .search-container-hero {
     padding: var(--spacing-4) !important;
     transform: translateY(0) !important;
+    max-width: 100% !important;
   }
 
   .search-field-group {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-3);
-    margin-bottom: var(--spacing-4);
+    grid-template-columns: 1fr !important;
+    gap: var(--spacing-3) !important;
+    margin-bottom: var(--spacing-4) !important;
+  }
+  
+  .search-field {
+    width: 100% !important;
+  }
+  
+  .search-field input,
+  .search-field select {
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .search-button-group {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--spacing-3);
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: var(--spacing-3) !important;
   }
 
   .search-button {
-    width: 100%;
-    justify-content: center;
-    padding: var(--spacing-4) var(--spacing-6);
+    width: 100% !important;
+    justify-content: center !important;
+    padding: var(--spacing-4) var(--spacing-6) !important;
   }
   
   .more-options-link {
-    text-align: center;
+    text-align: center !important;
+    width: 100% !important;
+    justify-content: center !important;
   }
 
   .results-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   .more-options-panel {
-    flex-direction: column;
+    flex-direction: column !important;
   }
   
   .welcome-content-wrapper {
@@ -1167,28 +1211,57 @@
     transform: translateY(0) !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
     max-width: 92% !important;
+    width: 92% !important;
     background: rgba(255, 255, 255, 0.98) !important;
     backdrop-filter: blur(10px) !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
   }
 
   .search-field-group {
+    grid-template-columns: 1fr !important;
     gap: 4px !important;
     margin-bottom: 8px !important;
   }
   
-  .search-button-group {
-    gap: 6px !important;
-  }
-  
-  .search-field label {
-    font-size: 0.8rem !important;
+  .search-field {
+    width: 100% !important;
   }
   
   .search-field input,
   .search-field select {
+    width: 100% !important;
     padding: 8px !important;
     font-size: 0.9rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  .input-wrapper {
+    width: 100% !important;
+  }
+  
+  .input-wrapper input {
+    width: 100% !important;
+    padding-right: 40px !important;
+  }
+  
+  .search-button-group {
+    flex-direction: column !important;
+    gap: 6px !important;
+    width: 100% !important;
+  }
+  
+  .search-button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  
+  .more-options-link {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  
+  .search-field label {
+    font-size: 0.8rem !important;
   }
   
   .welcome-title {
@@ -1405,27 +1478,57 @@
   .search-container-hero {
     padding: 6px !important;
     max-width: 88% !important;
+    width: 88% !important;
     background: rgba(255, 255, 255, 0.98) !important;
   }
   
   .search-field-group {
+    grid-template-columns: 1fr !important;
     gap: 4px !important;
     margin-top: 0 !important;
     margin-bottom: 6px !important;
   }
   
-  .search-button-group {
-    gap: 4px !important;
-  }
-  
-  .search-field label {
-    font-size: 0.75rem !important;
+  .search-field {
+    width: 100% !important;
   }
   
   .search-field input,
   .search-field select {
+    width: 100% !important;
     padding: 6px !important;
     font-size: 0.85rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  .input-wrapper {
+    width: 100% !important;
+  }
+  
+  .input-wrapper input {
+    width: 100% !important;
+    padding-right: 35px !important;
+  }
+  
+  .search-button-group {
+    flex-direction: column !important;
+    gap: 4px !important;
+    width: 100% !important;
+  }
+  
+  .search-button {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 8px 12px !important;
+  }
+  
+  .more-options-link {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  
+  .search-field label {
+    font-size: 0.75rem !important;
   }
   
   
