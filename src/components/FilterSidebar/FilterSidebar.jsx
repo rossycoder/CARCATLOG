@@ -12,6 +12,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     models: [],
     modelsByMake: {},
     submodelsByMakeModel: {},
+    variantsByMakeModel: {},
     fuelTypes: [],
     transmissions: [],
     bodyTypes: [],
@@ -81,6 +82,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         console.log('[FilterSidebar] Makes:', options?.makes);
         console.log('[FilterSidebar] ModelsByMake:', options?.modelsByMake);
         console.log('[FilterSidebar] SubmodelsByMakeModel:', options?.submodelsByMakeModel);
+        console.log('[FilterSidebar] VariantsByMakeModel:', options?.variantsByMakeModel);
         
         if (options && options.makes) {
           setFilterOptions(options);
@@ -132,10 +134,19 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     ? filterOptions.submodelsByMakeModel[filters.make][filters.model]
     : [];
 
+  // Get available variants based on selected make and model
+  const availableVariants = filters.make && filters.model && 
+    filterOptions.variantsByMakeModel && 
+    filterOptions.variantsByMakeModel[filters.make] && 
+    filterOptions.variantsByMakeModel[filters.make][filters.model]
+    ? filterOptions.variantsByMakeModel[filters.make][filters.model]
+    : [];
+
   // Debug logging
   console.log('[FilterSidebar] Current filters:', filters);
   console.log('[FilterSidebar] Available models for', filters.make, ':', availableModels);
   console.log('[FilterSidebar] Available submodels for', filters.make, filters.model, ':', availableSubmodels);
+  console.log('[FilterSidebar] Available variants for', filters.make, filters.model, ':', availableVariants);
 
   const validateFilters = () => {
     const errors = {};
@@ -362,8 +373,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
                 disabled={!filters.make || !filters.model}
               >
                 <option value="">All Variants</option>
-                {availableSubmodels.map(submodel => (
-                  <option key={submodel} value={submodel}>{submodel}</option>
+                {availableVariants.map(variant => (
+                  <option key={variant} value={variant}>{variant}</option>
                 ))}
               </select>
             </div>

@@ -163,6 +163,7 @@ const HomePage = () => {
     const params = new URLSearchParams();
     
     params.append('postcode', trimmedPostcode);
+    params.append('radius', radius); // Include radius
     params.append('openFilter', 'true'); // Flag to auto-open filter
     if (make && make !== 'Any') {
       params.append('make', make);
@@ -171,7 +172,7 @@ const HomePage = () => {
       params.append('model', model);
     }
     
-    // Navigate to search results page
+    // Navigate to search results page with filter open
     navigate(`/search-results?${params.toString()}`);
   };
 

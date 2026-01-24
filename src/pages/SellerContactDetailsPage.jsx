@@ -207,6 +207,7 @@ const SellerContactDetailsPage = () => {
           advertData,
           vehicleData,
           contactDetails: formData,
+          vehicleValuation: advertData?.price || vehicleData?.estimatedValue || vehicleData?.price, // Pass valuation
         },
       });
     } catch (error) {

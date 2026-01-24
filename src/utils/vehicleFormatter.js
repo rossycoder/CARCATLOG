@@ -162,9 +162,44 @@ export const generateVariantDisplay = (vehicle) => {
   return parts.join(' ');
 };
 
+/**
+ * Extract town/city name from location string
+ * Removes postcodes and extra descriptors like "unparished area"
+ * @param {string} locationName - Full location string from API
+ * @returns {string} Clean town/city name
+ */
+export const extractTownName = (locationName) => {
+  if (!locationName) return '';
+  
+  // Split by comma to get parts
+  const parts = locationName.split(',').map(part => part.trim());
+  
+  // Remove parts that look like postcodes (e.g., SS11TH, SS1 1TH)
+  // Remove descriptive parts like "unparished area"
+  const cleanParts = parts.filter(part => {
+    // Skip if it looks like a postcode (alphanumeric with optional space)
+    if (/^[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}$/i.test(part)) {
+      return false;
+    }
+    // Skip if it's just a postcode without space (e.g., SS11TH)
+    if (/^[A-Z]{1,2}\d{1,2}[A-Z]?\d[A-Z]{2}$/i.test(part)) {
+      return false;
+    }
+    // Skip descriptive terms
+    if (part.toLowerCase().includes('unparished area')) {
+      return false;
+    }
+    return true;
+  });
+  
+  // Return the first clean part (usually the town/city name)
+  return cleanParts[0] || locationName;
+};
+
 export default {
   formatEngineSize,
   generateDisplayTitle,
   generateSubtitle,
-  generateVariantDisplay
+  generateVariantDisplay,
+  extractTownName
 };

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { checkVehicleHistory } from '../../services/vehicleHistoryService';
+import { validateVehicleHistory, formatValidationResults } from '../../utils/vehicleHistoryValidator';
+import DataQualityWarning from './DataQualityWarning';
 import './VehicleHistorySection.css';
 
 const VehicleHistorySection = ({ vrm, historyCheckId }) => {
@@ -167,6 +169,18 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
 
   const passedChecks = checks.filter(c => c.passed).length;
 
+  // Validate history data for contradictions
+  const historyForValidation = {
+    checks: checks.map(check => ({
+      description: check.label,
+      status: check.passed ? 'pass' : 'alert',
+      details: check.details
+    }))
+  };
+  
+  const validation = validateVehicleHistory(historyForValidation);
+  const validationDisplay = formatValidationResults(validation);
+
   return (
     <div className="vehicle-history-section">
       <h2>This vehicle's history</h2>
@@ -208,6 +222,11 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
           <span className="checks-title">Basic history check</span>
           <span className="checks-status">{passedChecks} checks passed</span>
         </div>
+
+        {/* Show data quality warning if inconsistencies detected */}
+        {validationDisplay && (
+          <DataQualityWarning validation={validationDisplay} />
+        )}
 
         {historyData.motStatus && (
           <div className="mot-info">

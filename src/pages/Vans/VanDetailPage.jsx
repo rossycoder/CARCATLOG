@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import VehicleHistorySection from '../../components/VehicleHistory/VehicleHistorySection';
 import MOTHistorySection from '../../components/VehicleHistory/MOTHistorySection';
 import LocationDisplay from '../../components/Location/LocationDisplay';
+import { extractTownName } from '../../utils/vehicleFormatter';
 import './VanDetailPage.css';
 
 const VanDetailPage = () => {
@@ -127,7 +128,7 @@ const VanDetailPage = () => {
             <div className="location-info">
               <span className="location-label">From</span>
               <span className="location-value">
-                {van.locationName}{van.distance ? ` • ${van.distance} miles away` : ' • Location available'}
+                {extractTownName(van.locationName)}{van.distance ? ` • ${van.distance} miles away` : ' • Location available'}
               </span>
             </div>
 
@@ -281,7 +282,7 @@ const VanDetailPage = () => {
             {/* Location Display */}
             <LocationDisplay 
               sellerPostcode={van.postcode || van.sellerContact?.postcode}
-              sellerLocation={van.locationName}
+              sellerLocation={extractTownName(van.locationName)}
               distance={van.distance}
             />
 
@@ -318,7 +319,7 @@ const VanDetailPage = () => {
                       <div className="dealer-business-name">{van.sellerContact.businessName}</div>
                     )}
                     <div className="dealer-location">
-                      📍 {van.locationName || 'Location available'}
+                      📍 {extractTownName(van.locationName) || 'Location available'}
                     </div>
                   </div>
                 )}
@@ -328,7 +329,7 @@ const VanDetailPage = () => {
                   <div className="private-seller-details">
                     <div className="private-seller-label">Private Seller</div>
                     <div className="private-seller-location">
-                      📍 {van.locationName || 'Location available'}
+                      📍 {extractTownName(van.locationName) || 'Location available'}
                     </div>
                   </div>
                 )}
@@ -368,7 +369,7 @@ const VanDetailPage = () => {
                   <div className="business-name">{van.sellerContact.businessName}</div>
                 )}
                 <div className="seller-location">
-                  {van.locationName}{van.distance ? ` • ${van.distance} miles away` : ''}
+                  {extractTownName(van.locationName)}{van.distance ? ` • ${van.distance} miles away` : ''}
                 </div>
               </div>
 

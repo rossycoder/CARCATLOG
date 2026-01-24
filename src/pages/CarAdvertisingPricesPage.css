@@ -512,3 +512,25 @@
     width: 100%;
   }
 }
+
+/* Locked Price Range Indicator */
+.locked-indicator {
+  margin-left: 8px;
+  font-size: 0.875rem;
+  color: #059669;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.filter-select:disabled {
+  opacity: 0.7;
+}
+
+.helper-text {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}

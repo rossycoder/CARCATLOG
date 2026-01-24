@@ -14,6 +14,7 @@ const CarAdvertisingPricesPage = () => {
   const [mileage, setMileage] = useState('');
   const [sellerType, setSellerType] = useState('private');
   const [priceRange, setPriceRange] = useState('under-1000');
+  const [isPriceRangeLocked, setIsPriceRangeLocked] = useState(false); // Track if price range is auto-selected
   const [quickFormErrors, setQuickFormErrors] = useState({
     registration: '',
     mileage: ''
@@ -23,6 +24,7 @@ const CarAdvertisingPricesPage = () => {
   const [advertData, setAdvertData] = useState(locationState.state?.advertData);
   const [vehicleData, setVehicleData] = useState(locationState.state?.vehicleData);
   const contactDetails = locationState.state?.contactDetails;
+  const vehicleValuation = locationState.state?.vehicleValuation; // Get valuation from state
 
   // Fetch advert data if not passed via state (to get photos)
   useEffect(() => {
@@ -215,10 +217,73 @@ const CarAdvertisingPricesPage = () => {
     ];
   };
 
+  // Calculate the appropriate price range based on vehicle valuation
+  const calculatePriceRange = (valuation, isTradeType) => {
+    if (!valuation || isNaN(valuation)) return null;
+    
+    const value = parseFloat(valuation);
+    
+    if (isTradeType) {
+      // Trade pricing tiers
+      if (value < 1000) return 'under-1000';
+      if (value <= 2000) return '1001-2000';
+      if (value <= 3000) return '2001-3000';
+      if (value <= 5000) return '3001-5000';
+      if (value <= 7000) return '5001-7000';
+      if (value <= 10000) return '7001-10000';
+      if (value <= 17000) return '10001-17000';
+      return 'over-17000';
+    } else {
+      // Private pricing tiers
+      if (value < 1000) return 'under-1000';
+      if (value <= 2999) return '1000-2999';
+      if (value <= 4999) return '3000-4999';
+      if (value <= 6999) return '5000-6999';
+      if (value <= 9999) return '7000-9999';
+      if (value <= 12999) return '10000-12999';
+      if (value <= 16999) return '13000-16999';
+      if (value <= 24999) return '17000-24999';
+      return 'over-24995';
+    }
+  };
+
+  // Auto-select price range on component mount if valuation is available
+  useEffect(() => {
+    // Check if we have vehicle valuation data (from the create advert flow)
+    const valuation = vehicleValuation || advertData?.price || vehicleData?.estimatedValue;
+    
+    if (valuation) {
+      const calculatedRange = calculatePriceRange(valuation, sellerType === 'trade');
+      if (calculatedRange) {
+        setPriceRange(calculatedRange);
+        setIsPriceRangeLocked(true);
+        console.log(`🔒 Auto-selected price range: ${calculatedRange} for valuation: £${valuation}`);
+      }
+    } else {
+      // No valuation data - allow manual selection
+      setIsPriceRangeLocked(false);
+      console.log('🔓 No valuation data - manual price range selection enabled');
+    }
+  }, [vehicleValuation, advertData, vehicleData, sellerType]);
+
   // Reset price range when seller type changes
   const handleSellerTypeChange = (type) => {
     setSellerType(type);
-    setPriceRange('under-1000');
+    
+    // If price range is locked (auto-selected), recalculate for new seller type
+    if (isPriceRangeLocked) {
+      const valuation = vehicleValuation || advertData?.price || vehicleData?.estimatedValue;
+      if (valuation) {
+        const calculatedRange = calculatePriceRange(valuation, type === 'trade');
+        if (calculatedRange) {
+          setPriceRange(calculatedRange);
+          console.log(`🔄 Recalculated price range for ${type}: ${calculatedRange}`);
+        }
+      }
+    } else {
+      // Manual selection - reset to first option
+      setPriceRange('under-1000');
+    }
   };
 
   const currentPricingTiers = sellerType === 'trade' ? tradePricingTiers : privatePricingTiers;
@@ -436,16 +501,30 @@ const CarAdvertisingPricesPage = () => {
           </div>
 
           <div className="filter-group">
-            <label className="filter-label">How much is your car worth?</label>
+            <label className="filter-label">
+              How much is your car worth?
+              {isPriceRangeLocked && (
+                <span className="locked-indicator" title="Price range auto-selected based on your vehicle valuation">
+                  🔒 Auto-selected
+                </span>
+              )}
+            </label>
             <select 
               className="filter-select"
               value={priceRange}
               onChange={(e) => setPriceRange(e.target.value)}
+              disabled={isPriceRangeLocked}
+              style={isPriceRangeLocked ? { backgroundColor: '#f5f5f5', cursor: 'not-allowed' } : {}}
             >
               {getPriceRangeOptions().map(option => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
+            {isPriceRangeLocked && (
+              <p className="helper-text" style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>
+                Price range is automatically selected based on your vehicle's estimated value of £{(vehicleValuation || advertData?.price || vehicleData?.estimatedValue)?.toLocaleString()}
+              </p>
+            )}
           </div>
         </div>
 

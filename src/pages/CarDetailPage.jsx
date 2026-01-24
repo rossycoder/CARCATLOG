@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import VehicleHistorySection from '../components/VehicleHistory/VehicleHistorySection';
 import MOTHistorySection from '../components/VehicleHistory/MOTHistorySection';
 import LocationDisplay from '../components/Location/LocationDisplay';
-import { generateVariantDisplay } from '../utils/vehicleFormatter';
+import { generateVariantDisplay, extractTownName } from '../utils/vehicleFormatter';
 import './CarDetailPage.css';
 
 const CarDetailPage = () => {
@@ -14,6 +14,7 @@ const CarDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showAllFeatures, setShowAllFeatures] = useState(false);
 
   useEffect(() => {
     fetchCarDetails();
@@ -128,7 +129,7 @@ const CarDetailPage = () => {
             <div className="location-info">
               <span className="location-label">From</span>
               <span className="location-value">
-                {car.locationName || 'Location available'}
+                {extractTownName(car.locationName) || 'Location available'}
               </span>
             </div>
 
@@ -244,7 +245,19 @@ const CarDetailPage = () => {
                 )}
               </div>
 
-              <button className="view-all-specs">
+              <button 
+                className="view-all-specs"
+                onClick={() => {
+                  setShowAllFeatures(true);
+                  // Scroll to features section
+                  setTimeout(() => {
+                    const featuresSection = document.querySelector('.features-section');
+                    if (featuresSection) {
+                      featuresSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }, 100);
+                }}
+              >
                 ≡ View all spec and features →
               </button>
             </div>
@@ -267,7 +280,7 @@ const CarDetailPage = () => {
                     height="400"
                     src={car.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
                     title="Vehicle Video"
-                    frameBorder="0"
+                    style={{ border: 0 }}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   ></iframe>
@@ -344,7 +357,7 @@ const CarDetailPage = () => {
             )}
 
             {/* Vehicle Features Section */}
-            {car.features && car.features.length > 0 && (
+            {showAllFeatures && car.features && car.features.length > 0 && (
               <div className="features-section">
                 <h2>Vehicle Features</h2>
                 <div className="features-grid">
@@ -361,7 +374,7 @@ const CarDetailPage = () => {
             {/* Location Display */}
             <LocationDisplay 
               sellerPostcode={car.postcode || car.sellerContact?.postcode}
-              sellerLocation={car.locationName}
+              sellerLocation={extractTownName(car.locationName)}
               distance={car.distance}
             />
 
@@ -415,7 +428,7 @@ const CarDetailPage = () => {
                     )}
                     {!car.sellerContact?.businessAddress && (
                       <div className="dealer-location">
-                        📍 {car.locationName || 'Location available'}
+                        📍 {extractTownName(car.locationName) || 'Location available'}
                       </div>
                     )}
                   </div>
@@ -426,7 +439,7 @@ const CarDetailPage = () => {
                   <div className="private-seller-details">
                     <div className="private-seller-label">Private Seller</div>
                     <div className="private-seller-location">
-                      📍 {car.locationName || 'Location available'}
+                      📍 {extractTownName(car.locationName) || 'Location available'}
                     </div>
                   </div>
                 )}
@@ -443,12 +456,6 @@ const CarDetailPage = () => {
                     </button>
                   )}
                 </div>
-
-                {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
-                  <div className="seller-protection-notice">
-                    Seller's number has been protected. <a href="#">Learn more</a>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -466,7 +473,7 @@ const CarDetailPage = () => {
                   <div className="business-name">{car.sellerContact.businessName}</div>
                 )}
                 <div className="seller-location">
-                  {car.locationName}{car.distance ? ` • ${car.distance} miles away` : ''}
+                  {extractTownName(car.locationName)}{car.distance ? ` • ${car.distance} miles away` : ''}
                 </div>
               </div>
 
@@ -479,10 +486,6 @@ const CarDetailPage = () => {
                   📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
                 </button>
               )}
-
-              <div className="seller-notice">
-                Seller's number has been protected. <a href="#">Learn more</a>
-              </div>
             </div>
           </div>
         </div>

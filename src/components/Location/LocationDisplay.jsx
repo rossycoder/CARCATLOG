@@ -45,7 +45,7 @@ const LocationDisplay = ({ sellerPostcode, sellerLocation, distance }) => {
         <div className="location-details">
           <span className="location-label">Seller location:</span>
           <span className="location-value">
-            {sellerLocation && `${sellerLocation}, `}{sellerPostcode}
+            {sellerLocation || 'Location available'}
           </span>
         </div>
       </div>

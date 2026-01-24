@@ -4,6 +4,7 @@ import { bikeService } from '../../services/bikeService';
 import VehicleHistorySection from '../../components/VehicleHistory/VehicleHistorySection';
 import MOTHistorySection from '../../components/VehicleHistory/MOTHistorySection';
 import LocationDisplay from '../../components/Location/LocationDisplay';
+import { extractTownName } from '../../utils/vehicleFormatter';
 import './BikeDetailPage.css';
 
 const BikeDetailPage = () => {
@@ -152,7 +153,7 @@ const BikeDetailPage = () => {
             <div className="location-info">
               <span className="location-label">From</span>
               <span className="location-value">
-                {bike.locationName || 'Location available'}
+                {extractTownName(bike.locationName) || 'Location available'}
               </span>
             </div>
 
@@ -261,7 +262,7 @@ const BikeDetailPage = () => {
             {/* Location Display */}
             <LocationDisplay 
               sellerPostcode={bike.postcode || bike.sellerContact?.postcode}
-              sellerLocation={bike.locationName}
+              sellerLocation={extractTownName(bike.locationName)}
               distance={bike.distance}
             />
 
@@ -298,7 +299,7 @@ const BikeDetailPage = () => {
                       <div className="dealer-business-name">{bike.sellerContact.businessName}</div>
                     )}
                     <div className="dealer-location">
-                      📍 {bike.locationName || 'Location available'}
+                      📍 {extractTownName(bike.locationName) || 'Location available'}
                     </div>
                   </div>
                 )}
@@ -308,7 +309,7 @@ const BikeDetailPage = () => {
                   <div className="private-seller-details">
                     <div className="private-seller-label">Private Seller</div>
                     <div className="private-seller-location">
-                      📍 {bike.locationName || 'Location available'}
+                      📍 {extractTownName(bike.locationName) || 'Location available'}
                     </div>
                   </div>
                 )}
@@ -348,7 +349,7 @@ const BikeDetailPage = () => {
                   <div className="business-name">{bike.sellerContact.businessName}</div>
                 )}
                 <div className="seller-location">
-                  {bike.locationName}{bike.distance ? ` • ${bike.distance} miles away` : ''}
+                  {extractTownName(bike.locationName)}{bike.distance ? ` • ${bike.distance} miles away` : ''}
                 </div>
               </div>
 

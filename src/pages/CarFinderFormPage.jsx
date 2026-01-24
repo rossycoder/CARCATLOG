@@ -55,7 +55,8 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
   const getEngineSize = () => {
     const engineSize = getValue(enhancedData.engineSize);
     if (engineSize) {
-      return `${(engineSize / 1000).toFixed(1)}L`;
+      // engineSize from API is already in litres, no need to divide
+      return `${parseFloat(engineSize).toFixed(1)}L`;
     }
     return null;
   };

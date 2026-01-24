@@ -65,15 +65,43 @@ const CarAdvertEditPage = () => {
       console.log('✨ Enhanced data received');
       console.log('📊 Data sources:', dataSources);
       console.log('🔧 Field sources available:', !!fieldSources);
+      console.log('🚗 Enhanced data:', enhancedData);
       
-      // Auto-fill price from valuation data if available
-      if (enhancedData.valuation?.dealerPrice && !advertData.price) {
-        console.log('💰 Auto-filling price:', enhancedData.valuation.dealerPrice);
-        setAdvertData(prev => ({
-          ...prev,
-          price: enhancedData.valuation.dealerPrice
-        }));
+      // Auto-fill price from valuation data if available and not already set
+      // Check for null/undefined specifically, not falsy (0 is a valid price)
+      if (enhancedData.valuation?.estimatedValue && (advertData.price === null || advertData.price === undefined || advertData.price === '')) {
+        // estimatedValue might be an object with retail/trade/private values
+        const priceValue = typeof enhancedData.valuation.estimatedValue === 'object'
+          ? (enhancedData.valuation.estimatedValue.retail || 
+             enhancedData.valuation.estimatedValue.trade || 
+             enhancedData.valuation.estimatedValue.private)
+          : enhancedData.valuation.estimatedValue;
+          
+        console.log('💰 Auto-filling price from API:', priceValue);
+        console.log('💰 Full valuation object:', enhancedData.valuation);
+        
+        if (priceValue) {
+          setAdvertData(prev => ({
+            ...prev,
+            price: priceValue
+          }));
+          
+          // Also update vehicleData with estimated value
+          setVehicleData(prev => ({
+            ...prev,
+            estimatedValue: priceValue
+          }));
+        }
       }
+      
+      // Note: MOT data is not available from the API
+      // MOT information should be stored in the database when the vehicle is created
+      console.log('ℹ️ MOT data is not provided by the vehicle lookup API');
+      console.log('📋 MOT data should be in vehicleData from database:', {
+        motDue: vehicleData?.motDue,
+        motStatus: vehicleData?.motStatus,
+        motExpiry: vehicleData?.motExpiry
+      });
       
       // Auto-fill running costs
       if (enhancedData.runningCosts) {
@@ -139,7 +167,14 @@ const CarAdvertEditPage = () => {
           }
         }
         
-        const priceValue = response.data.advertData?.price || response.data.vehicleData?.estimatedValue || '';
+        // Handle price carefully - 0 is a valid price, so check for null/undefined specifically
+        let priceValue = response.data.advertData?.price;
+        if (priceValue === null || priceValue === undefined) {
+          priceValue = response.data.vehicleData?.estimatedValue;
+        }
+        if (priceValue === null || priceValue === undefined) {
+          priceValue = '';
+        }
         console.log('Setting price to:', priceValue);
         
         setAdvertData({
@@ -660,9 +695,17 @@ const CarAdvertEditPage = () => {
 
           {/* Vehicle Details Section */}
           <section className="vehicle-details-section">
-            <h2>{vehicleData.make} {vehicleData.model} ({vehicleData.year})</h2>
+            <h2>
+              {`${vehicleData.make} ${vehicleData.model}`}
+            </h2>
             <p className="vehicle-subtitle">
-              {vehicleData.engineSize} {vehicleData.fuelType} {vehicleData.transmission} | {vehicleData.mileage?.toLocaleString()} miles
+              {[
+                vehicleData.engineSize ? `${parseFloat(vehicleData.engineSize).toFixed(1)}L` : null,
+                vehicleData.variant && vehicleData.variant !== 'null' && vehicleData.variant !== 'undefined' ? vehicleData.variant : null,
+                vehicleData.fuelType,
+                vehicleData.transmission,
+                vehicleData.mileage ? `${vehicleData.mileage.toLocaleString()} miles` : null
+              ].filter(Boolean).join(' | ')}
             </p>
             
             <div className="vehicle-actions">
@@ -678,7 +721,7 @@ const CarAdvertEditPage = () => {
                     <span className="price-value">
                       {advertData.price 
                         ? (typeof advertData.price === 'number' ? advertData.price.toLocaleString() : advertData.price)
-                        : (vehicleData?.estimatedValue ? vehicleData.estimatedValue.toLocaleString() : '0')
+                        : (vehicleData?.estimatedValue ? vehicleData.estimatedValue.toLocaleString() : 'Not set')
                       }
                     </span>
                     <button type="button" onClick={handlePriceEdit} className="edit-price-button">
@@ -719,7 +762,10 @@ const CarAdvertEditPage = () => {
                 <p className="error-message">{errors.price}</p>
               )}
               <p className="price-note">
-                Our current valuation for your vehicle is £{vehicleData?.estimatedValue ? vehicleData.estimatedValue.toLocaleString() : '0'}
+                {vehicleData?.estimatedValue 
+                  ? `Our current valuation for your vehicle is £${vehicleData.estimatedValue.toLocaleString()}`
+                  : 'Set your asking price above'
+                }
               </p>
             </div>
           </section>
@@ -734,7 +780,19 @@ const CarAdvertEditPage = () => {
             <div className="spec-grid">
               <div className="spec-item">
                 <label>MOT Due</label>
-                <span>{vehicleData.motDue || '05/06/2026'}</span>
+                <span>
+                  {vehicleData.motDue 
+                    ? (typeof vehicleData.motDue === 'string' && vehicleData.motDue.includes('-')
+                        ? new Date(vehicleData.motDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                        : vehicleData.motDue)
+                    : (vehicleData.motExpiry
+                        ? (typeof vehicleData.motExpiry === 'string' && vehicleData.motExpiry.includes('-')
+                            ? new Date(vehicleData.motExpiry).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                            : vehicleData.motExpiry)
+                        : (vehicleData.motStatus && vehicleData.motStatus !== 'Not valid' 
+                            ? vehicleData.motStatus 
+                            : 'Contact seller for MOT details'))}
+                </span>
               </div>
               <div className="spec-item">
                 <label>Fuel type</label>
