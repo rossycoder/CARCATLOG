@@ -159,10 +159,16 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
     {
       id: 'writtenOff',
       label: 'Never been written off',
-      passed: !historyData.hasAccidentHistory,
+      passed: !(historyData.hasAccidentHistory === true || 
+                historyData.isWrittenOff === true || 
+                (historyData.accidentDetails?.severity && historyData.accidentDetails.severity !== 'unknown')),
       icon: '✓',
-      details: historyData.hasAccidentHistory && historyData.accidentDetails
-        ? `${historyData.accidentDetails.count} accident(s) recorded with ${historyData.accidentDetails.severity} severity.`
+      details: (historyData.hasAccidentHistory === true || 
+                historyData.isWrittenOff === true || 
+                (historyData.accidentDetails?.severity && historyData.accidentDetails.severity !== 'unknown'))
+        ? (historyData.accidentDetails?.severity && historyData.accidentDetails.severity !== 'unknown')
+          ? `Recorded as Category ${historyData.accidentDetails.severity} (insurance write-off)`
+          : `This vehicle has been recorded as written off or has accident history.`
         : 'This vehicle has no recorded accident history or write-off status.'
     }
   ];

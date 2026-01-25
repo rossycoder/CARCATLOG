@@ -62,10 +62,11 @@ export const carService = {
   },
 
   // Get filter options from database
-  getFilterOptions: async () => {
-    console.log('[carService] 🚀 Making API call to /vehicles/filter-options');
+  getFilterOptions: async (queryString = '') => {
+    const url = queryString ? `/vehicles/filter-options?${queryString}` : '/vehicles/filter-options';
+    console.log('[carService] 🚀 Making API call to', url);
     try {
-      const response = await api.get('/vehicles/filter-options');
+      const response = await api.get(url);
       console.log('[carService] ✅ API call successful');
       console.log('[carService] Response status:', response.status);
       console.log('[carService] Response data:', response.data);

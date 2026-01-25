@@ -68,21 +68,32 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     }
   }, [isOpen, searchParams]);
 
-  // Fetch filter options from database on mount
+  // Fetch filter options from database on mount and when filters change
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        console.log('[FilterSidebar] 🎯 Component mounted, fetching filter options...');
-        console.log('[FilterSidebar] API Base URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000');
+        console.log('[FilterSidebar] 🎯 Fetching filter options with params:', {
+          make: filters.make,
+          model: filters.model,
+          submodel: filters.submodel
+        });
         
-        const options = await carService.getFilterOptions();
+        // Build query params for filtered options
+        const params = new URLSearchParams();
+        if (filters.make) params.append('make', filters.make);
+        if (filters.model) params.append('model', filters.model);
+        if (filters.submodel) params.append('submodel', filters.submodel);
+        
+        const queryString = params.toString();
+        const url = queryString ? `/vehicles/filter-options?${queryString}` : '/vehicles/filter-options';
+        
+        console.log('[FilterSidebar] API URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000');
+        console.log('[FilterSidebar] Fetching from:', url);
+        
+        const options = await carService.getFilterOptions(queryString);
         
         console.log('[FilterSidebar] ✅ Successfully received filter options!');
-        console.log('[FilterSidebar] Raw response:', options);
-        console.log('[FilterSidebar] Makes:', options?.makes);
-        console.log('[FilterSidebar] ModelsByMake:', options?.modelsByMake);
-        console.log('[FilterSidebar] SubmodelsByMakeModel:', options?.submodelsByMakeModel);
-        console.log('[FilterSidebar] VariantsByMakeModel:', options?.variantsByMakeModel);
+        console.log('[FilterSidebar] Colours:', options?.colours);
         
         if (options && options.makes) {
           setFilterOptions(options);
@@ -93,13 +104,12 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       } catch (error) {
         console.error('[FilterSidebar] ❌ Error fetching filter options:');
         console.error('[FilterSidebar] Error message:', error.message);
-        console.error('[FilterSidebar] Error stack:', error.stack);
         console.error('[FilterSidebar] Full error:', error);
       }
     };
     
     fetchFilterOptions();
-  }, []);
+  }, [filters.make, filters.model, filters.submodel]); // Re-fetch when these change
 
   const handleChange = (field, value) => {
     setFilters(prev => {
