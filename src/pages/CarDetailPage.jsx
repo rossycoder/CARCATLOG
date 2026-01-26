@@ -187,7 +187,13 @@ const CarDetailPage = () => {
                   <span className="spec-icon">🔧</span>
                   <div className="spec-details">
                     <span className="spec-label">Engine size</span>
-                    <span className="spec-value">{car.engineSize ? `${(car.engineSize / 1000).toFixed(1)}L` : 'N/A'}</span>
+                    <span className="spec-value">
+                      {car.engineSize 
+                        ? (car.engineSize.toString().includes('L') 
+                            ? car.engineSize 
+                            : `${car.engineSize}L`)
+                        : 'N/A'}
+                    </span>
                   </div>
                 </div>
 

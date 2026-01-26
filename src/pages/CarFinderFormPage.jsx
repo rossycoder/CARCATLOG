@@ -95,7 +95,7 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
     taxDue: null,
     co2Emissions: getValue(enhancedData.runningCosts?.co2Emissions) || null,
     euroStatus: null,
-    estimatedValue: getValue(enhancedData.valuation?.dealerPrice) || null
+    estimatedValue: getValue(enhancedData.valuation?.estimatedValue?.retail) || null
   };
 };
 

@@ -217,6 +217,12 @@
     grid-column: 1 / -1;
   }
   
+  .more-options-link {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+  
   .redesign-search-btn {
     width: 100%;
   }
@@ -255,6 +261,12 @@
   
   .redesign-search-actions {
     grid-column: 1;
+  }
+  
+  .more-options-link {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
   }
   
   .redesign-more-options {

@@ -39,6 +39,8 @@ const CarAdvertEditPage = () => {
     videoUrl: ''
   });
   const [errors, setErrors] = useState({});
+  const [motData, setMotData] = useState(null);
+  const [motLoading, setMotLoading] = useState(false);
   
   // Expandable sections state
   const [expandedSections, setExpandedSections] = useState({
@@ -79,6 +81,12 @@ const CarAdvertEditPage = () => {
           
         console.log('💰 Auto-filling price from API:', priceValue);
         console.log('💰 Full valuation object:', enhancedData.valuation);
+        console.log('💰 Valuation confidence:', enhancedData.valuation.confidence);
+        console.log('💰 All valuation prices:', {
+          retail: enhancedData.valuation.estimatedValue?.retail,
+          trade: enhancedData.valuation.estimatedValue?.trade,
+          private: enhancedData.valuation.estimatedValue?.private
+        });
         
         if (priceValue) {
           setAdvertData(prev => ({
@@ -89,7 +97,9 @@ const CarAdvertEditPage = () => {
           // Also update vehicleData with estimated value
           setVehicleData(prev => ({
             ...prev,
-            estimatedValue: priceValue
+            estimatedValue: priceValue,
+            valuationConfidence: enhancedData.valuation.confidence || 'medium',
+            allValuations: enhancedData.valuation.estimatedValue
           }));
         }
       }
@@ -156,6 +166,11 @@ const CarAdvertEditPage = () => {
         
         setVehicleData(response.data.vehicleData);
         
+        // Fetch MOT data from API if registration number exists
+        if (response.data.vehicleData?.registrationNumber) {
+          fetchMOTData(response.data.vehicleData.registrationNumber);
+        }
+        
         // Fetch enhanced data from CheckCarDetails API if registration number exists
         // Only fetch if we haven't already fetched it
         if (response.data.vehicleData?.registrationNumber && !enhancedData) {
@@ -212,6 +227,32 @@ const CarAdvertEditPage = () => {
       setIsLoading(false);
     }
   }, [advertId, navigate, enhancedData]);
+
+  // Fetch MOT data from API
+  const fetchMOTData = async (vrm) => {
+    try {
+      setMotLoading(true);
+      const cleanVrm = vrm.replace(/\s+/g, '').toUpperCase();
+      console.log('🔧 Fetching MOT data for:', cleanVrm);
+      
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_BASE_URL}/vehicle-history/mot/${cleanVrm}`);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ MOT data fetched:', result);
+        setMotData(result.data || result);
+      } else {
+        console.warn('⚠️ MOT data not available');
+        setMotData(null);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching MOT data:', error);
+      setMotData(null);
+    } finally {
+      setMotLoading(false);
+    }
+  };
 
   // Load advert data on mount - only once
   useEffect(() => {
@@ -719,9 +760,11 @@ const CarAdvertEditPage = () => {
                   <div className="price-display">
                     <span className="currency">£</span>
                     <span className="price-value">
-                      {advertData.price 
+                      {advertData.price && advertData.price > 0
                         ? (typeof advertData.price === 'number' ? advertData.price.toLocaleString() : advertData.price)
-                        : (vehicleData?.estimatedValue ? vehicleData.estimatedValue.toLocaleString() : 'Not set')
+                        : (vehicleData?.estimatedValue && vehicleData.estimatedValue > 0
+                            ? vehicleData.estimatedValue.toLocaleString() 
+                            : 'Not set')
                       }
                     </span>
                     <button type="button" onClick={handlePriceEdit} className="edit-price-button">
@@ -762,10 +805,26 @@ const CarAdvertEditPage = () => {
                 <p className="error-message">{errors.price}</p>
               )}
               <p className="price-note">
-                {vehicleData?.estimatedValue 
-                  ? `Our current valuation for your vehicle is £${vehicleData.estimatedValue.toLocaleString()}`
-                  : 'Set your asking price above'
-                }
+                {vehicleData?.estimatedValue && vehicleData.estimatedValue > 0 ? (
+                  <>
+                    Our current valuation for your vehicle is £{vehicleData.estimatedValue.toLocaleString()}
+                    {vehicleData.allValuations && (
+                      <span className="valuation-breakdown" style={{ display: 'block', fontSize: '0.9em', marginTop: '8px', color: '#666' }}>
+                        💡 Valuation range: 
+                        {vehicleData.allValuations.private && ` Private £${vehicleData.allValuations.private.toLocaleString()}`}
+                        {vehicleData.allValuations.trade && ` | Trade £${vehicleData.allValuations.trade.toLocaleString()}`}
+                        {vehicleData.allValuations.retail && ` | Retail £${vehicleData.allValuations.retail.toLocaleString()}`}
+                      </span>
+                    )}
+                    {vehicleData.valuationConfidence === 'low' && (
+                      <span style={{ display: 'block', fontSize: '0.85em', marginTop: '4px', color: '#ff9800' }}>
+                        ⚠️ Limited data available - please verify with similar vehicles
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  '⚠️ Valuation not available for this vehicle. Please research similar vehicles to set a fair price.'
+                )}
               </p>
             </div>
           </section>
@@ -781,17 +840,33 @@ const CarAdvertEditPage = () => {
               <div className="spec-item">
                 <label>MOT Due</label>
                 <span>
-                  {vehicleData.motDue 
-                    ? (typeof vehicleData.motDue === 'string' && vehicleData.motDue.includes('-')
-                        ? new Date(vehicleData.motDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-                        : vehicleData.motDue)
-                    : (vehicleData.motExpiry
-                        ? (typeof vehicleData.motExpiry === 'string' && vehicleData.motExpiry.includes('-')
-                            ? new Date(vehicleData.motExpiry).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-                            : vehicleData.motExpiry)
-                        : (vehicleData.motStatus && vehicleData.motStatus !== 'Not valid' 
-                            ? vehicleData.motStatus 
-                            : 'Contact seller for MOT details'))}
+                  {motLoading ? (
+                    'Loading...'
+                  ) : motData?.mot?.motDueDate ? (
+                    new Date(motData.mot.motDueDate).toLocaleDateString('en-GB', { 
+                      day: 'numeric', 
+                      month: 'long', 
+                      year: 'numeric' 
+                    })
+                  ) : motData?.expiryDate ? (
+                    new Date(motData.expiryDate).toLocaleDateString('en-GB', { 
+                      day: 'numeric', 
+                      month: 'long', 
+                      year: 'numeric' 
+                    })
+                  ) : motData?.mot?.motStatus ? (
+                    motData.mot.motStatus
+                  ) : vehicleData.motDue ? (
+                    typeof vehicleData.motDue === 'string' && vehicleData.motDue.includes('-')
+                      ? new Date(vehicleData.motDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                      : vehicleData.motDue
+                  ) : vehicleData.motExpiry ? (
+                    typeof vehicleData.motExpiry === 'string' && vehicleData.motExpiry.includes('-')
+                      ? new Date(vehicleData.motExpiry).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                      : vehicleData.motExpiry
+                  ) : (
+                    'Contact seller for MOT details'
+                  )}
                 </span>
               </div>
               <div className="spec-item">
