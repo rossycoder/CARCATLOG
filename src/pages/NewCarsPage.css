@@ -51,21 +51,23 @@
   max-width: 900px;
   margin: 0 auto;
   display: flex;
+  flex-direction: column;
   gap: 20px;
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 .new-search-fields {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-  flex: 1;
+  width: 100%;
 }
 
 .new-search-field {
   display: flex;
   flex-direction: column;
   position: relative;
+  min-width: 0;
 }
 
 .new-search-field label {
@@ -115,8 +117,8 @@
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  align-self: flex-start;
-  margin-top: 28px;
+  width: 100%;
+  margin-top: 0;
 }
 
 .new-search-btn:hover {

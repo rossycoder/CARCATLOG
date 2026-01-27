@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { checkVehicleHistory } from '../../services/vehicleHistoryService';
 import { validateVehicleHistory, formatValidationResults } from '../../utils/vehicleHistoryValidator';
 import DataQualityWarning from './DataQualityWarning';
 import './VehicleHistorySection.css';
 
-const VehicleHistorySection = ({ vrm, historyCheckId }) => {
+const VehicleHistorySection = ({ vrm }) => {
   const [historyData, setHistoryData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,6 +14,7 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
     if (vrm) {
       fetchHistoryData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vrm]);
 
   const fetchHistoryData = async () => {
@@ -23,25 +24,9 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
       const result = await checkVehicleHistory(vrm);
       const data = result.data || result;
       
-      // Debug logging to help identify data issues
-      console.log('=== Vehicle History Data ===');
-      console.log('VRM:', vrm);
-      console.log('hasAccidentHistory:', data.hasAccidentHistory);
-      console.log('isWrittenOff:', data.isWrittenOff);
-      console.log('accidentDetails:', data.accidentDetails);
-      console.log('writeOffCategory:', data.writeOffCategory);
-      console.log('numberOfPreviousKeepers:', data.numberOfPreviousKeepers);
-      console.log('previousOwners:', data.previousOwners);
-      console.log('numberOfOwners:', data.numberOfOwners);
-      console.log('numberOfKeys:', data.numberOfKeys);
-      console.log('keys:', data.keys);
-      console.log('serviceHistory:', data.serviceHistory);
-      console.log('hasServiceHistory:', data.hasServiceHistory);
-      console.log('===========================');
-      
       setHistoryData(data);
     } catch (err) {
-      console.error('Error fetching history:', err);
+      console.error('Error fetching vehicle history:', err);
       
       // Check if it's a service unavailable error (daily limit)
       if (err.status === 503 || err.isServiceUnavailable) {
