@@ -37,6 +37,8 @@ export const checkVehicleHistory = async (vrm, forceRefresh = false) => {
     enhancedError.status = error.response?.status;
     enhancedError.nextSteps = errorData.nextSteps || [];
     enhancedError.timestamp = errorData.timestamp;
+    enhancedError.isServiceUnavailable = errorData.isServiceUnavailable || false;
+    enhancedError.message = errorData.message || enhancedError.message;
     
     throw enhancedError;
   }

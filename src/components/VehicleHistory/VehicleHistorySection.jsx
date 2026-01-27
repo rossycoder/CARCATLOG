@@ -30,14 +30,32 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
       console.log('isWrittenOff:', data.isWrittenOff);
       console.log('accidentDetails:', data.accidentDetails);
       console.log('writeOffCategory:', data.writeOffCategory);
+      console.log('numberOfPreviousKeepers:', data.numberOfPreviousKeepers);
+      console.log('previousOwners:', data.previousOwners);
+      console.log('numberOfOwners:', data.numberOfOwners);
+      console.log('numberOfKeys:', data.numberOfKeys);
+      console.log('keys:', data.keys);
+      console.log('serviceHistory:', data.serviceHistory);
+      console.log('hasServiceHistory:', data.hasServiceHistory);
       console.log('===========================');
       
       setHistoryData(data);
     } catch (err) {
       console.error('Error fetching history:', err);
       
+      // Check if it's a service unavailable error (daily limit)
+      if (err.status === 503 || err.isServiceUnavailable) {
+        setError({
+          message: err.message || 'Vehicle history service is temporarily unavailable',
+          nextSteps: err.nextSteps || [
+            'Try again in 24 hours',
+            'Contact the seller for vehicle history information'
+          ],
+          isServiceUnavailable: true
+        });
+      }
       // Check if it's a 404 error
-      if (err.status === 404 || err.message.includes('404') || err.message.includes('not found')) {
+      else if (err.status === 404 || err.message.includes('404') || err.message.includes('not found')) {
         setError({
           message: err.message || 'No vehicle history found for this registration',
           nextSteps: err.nextSteps || [
@@ -85,7 +103,7 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
     return (
       <div className="vehicle-history-section">
         <h2>This vehicle's history</h2>
-        <div className={`history-error ${error?.isNotFound ? 'history-not-found' : ''}`}>
+        <div className={`history-error ${error?.isNotFound ? 'history-not-found' : ''} ${error?.isServiceUnavailable ? 'history-service-unavailable' : ''}`}>
           <div className="history-summary">
             <div className="history-stat">
               <span className="stat-icon">👤</span>
@@ -127,6 +145,11 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
             {error?.isNotFound && (
               <p className="history-info-text">
                 This vehicle may be new, recently imported, or the registration may be incorrect. Please contact the seller for detailed vehicle history information.
+              </p>
+            )}
+            {error?.isServiceUnavailable && (
+              <p className="history-info-text">
+                The vehicle history check service is temporarily unavailable due to daily usage limits. This is a temporary issue and will be resolved within 24 hours.
               </p>
             )}
           </div>
@@ -175,7 +198,8 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
                 historyData.writeOffCategory ||
                 (historyData.accidentDetails?.severity && 
                  historyData.accidentDetails.severity !== 'unknown' && 
-                 historyData.accidentDetails.severity !== null)),
+                 historyData.accidentDetails.severity !== null &&
+                 historyData.accidentDetails.count > 0)),
       icon: '✓',
       details: (() => {
         // Check if vehicle has been written off
@@ -185,7 +209,11 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
         // Get severity category - check multiple possible fields
         const severity = historyData.writeOffCategory || 
                         historyData.accidentDetails?.severity;
-        const hasValidSeverity = severity && severity !== 'unknown' && severity !== null;
+        const hasValidSeverity = severity && 
+                                severity !== 'unknown' && 
+                                severity !== null && 
+                                severity.trim() !== '' &&
+                                historyData.accidentDetails?.count > 0;
         
         if (isWrittenOff && hasValidSeverity) {
           return `Recorded as Category ${severity.toUpperCase()} (insurance write-off)`;
@@ -222,7 +250,14 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
           <div className="stat-details">
             <span className="stat-label">Owners</span>
             <span className="stat-value">
-              {historyData.previousOwners || historyData.numberOfOwners || historyData.keeperChanges || 'Contact seller'}
+              {(() => {
+                const owners = historyData.numberOfPreviousKeepers || 
+                              historyData.previousOwners || 
+                              historyData.numberOfOwners || 
+                              historyData.keeperChanges;
+                // Only show number if it's greater than 0
+                return (owners && owners > 0) ? owners : 'Contact seller';
+              })()}
             </span>
           </div>
         </div>
@@ -232,7 +267,11 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
           <div className="stat-details">
             <span className="stat-label">Keys</span>
             <span className="stat-value">
-              {historyData.numberOfKeys || historyData.keys || '1'}
+              {(() => {
+                const keys = historyData.numberOfKeys || historyData.keys;
+                // Only show if explicitly set and not default value
+                return (keys && keys > 0) ? keys : 'Contact seller';
+              })()}
             </span>
           </div>
         </div>
@@ -242,7 +281,21 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
           <div className="stat-details">
             <span className="stat-label">Service history</span>
             <span className="stat-value">
-              {historyData.serviceHistory || historyData.hasServiceHistory ? 'Available' : 'Contact seller'}
+              {(() => {
+                const serviceHistory = historyData.serviceHistory;
+                // Check if service history is meaningful (not default placeholder)
+                if (serviceHistory && 
+                    serviceHistory !== 'Contact seller' && 
+                    serviceHistory !== 'Unknown' &&
+                    serviceHistory !== 'unknown') {
+                  return serviceHistory;
+                }
+                // Check boolean flag
+                if (historyData.hasServiceHistory === true) {
+                  return 'Available';
+                }
+                return 'Contact seller';
+              })()}
             </span>
           </div>
         </div>
