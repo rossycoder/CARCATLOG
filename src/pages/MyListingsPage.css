@@ -1,0 +1,320 @@
+.my-listings-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 2rem 0;
+}
+
+.my-listings-page .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.listings-count {
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Loading & Error States */
+.loading-state,
+.error-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* No Listings State */
+.no-listings-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.no-listings-state h2 {
+  font-size: 1.5rem;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.no-listings-state p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.sell-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Listings Grid */
+.listings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.listing-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.listing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.listing-image {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.listing-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.status-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-active {
+  background: #28a745;
+  color: white;
+}
+
+.status-sold {
+  background: #6c757d;
+  color: white;
+}
+
+.status-expired {
+  background: #dc3545;
+  color: white;
+}
+
+.status-draft {
+  background: #ffc107;
+  color: #1a1a1a;
+}
+
+.status-pending {
+  background: #17a2b8;
+  color: white;
+}
+
+.listing-details {
+  padding: 1.5rem;
+}
+
+.listing-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.listing-subtitle {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.listing-specs {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.listing-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+.listing-package {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.package-badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #007bff;
+}
+
+.expiry-date {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.listing-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.listing-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.listing-actions button {
+  flex: 1;
+  min-width: 100px;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-edit {
+  background: #007bff;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #0056b3;
+}
+
+.btn-view {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-view:hover {
+  background: #138496;
+}
+
+.btn-sold {
+  background: #28a745;
+  color: white;
+}
+
+.btn-sold:hover {
+  background: #218838;
+}
+
+.btn-delete {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #c82333;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .listings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sell-buttons {
+    flex-direction: column;
+  }
+
+  .listing-actions {
+    flex-direction: column;
+  }
+
+  .listing-actions button {
+    width: 100%;
+  }
+}

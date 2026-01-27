@@ -18,9 +18,11 @@ const generateUUID = () => {
  */
 export const createAdvert = async (vehicleData) => {
   try {
-    // Try to create via API with timeout
+    console.log('🚀 Creating advert via API...');
+    
+    // Try to create via API with longer timeout (15 seconds for API calls)
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Request timeout')), 5000);
+      setTimeout(() => reject(new Error('Request timeout after 15 seconds')), 15000);
     });
     
     const response = await Promise.race([
@@ -28,10 +30,12 @@ export const createAdvert = async (vehicleData) => {
       timeoutPromise
     ]);
     
+    console.log('✅ Advert created successfully:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error creating advert via API:', error.message);
-    console.log('Falling back to localStorage');
+    console.error('❌ Error creating advert via API:', error.message);
+    console.error('Error details:', error.response?.data || error);
+    console.log('⚠️  Falling back to localStorage');
     
     // Fallback to local storage if backend is unavailable
     const advertId = generateUUID();

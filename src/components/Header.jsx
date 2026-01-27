@@ -159,6 +159,9 @@ const Header = () => {
                     <span className="account-email">{user.email}</span>
                   </div>
                   <div className="account-dropdown-divider" />
+                  <Link to="/my-listings" className="account-dropdown-link" onClick={() => setShowAccountDropdown(false)}>
+                    <FaUser size={14} /> My Listings
+                  </Link>
                   <Link to="/saved-cars" className="account-dropdown-link" onClick={() => setShowAccountDropdown(false)}>
                     <FaHeart size={14} /> Saved Cars
                   </Link>

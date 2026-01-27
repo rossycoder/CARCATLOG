@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import VehicleHistorySection from '../components/VehicleHistory/VehicleHistorySection';
 import MOTHistorySection from '../components/VehicleHistory/MOTHistorySection';
 import LocationDisplay from '../components/Location/LocationDisplay';
@@ -9,12 +9,27 @@ import './CarDetailPage.css';
 const CarDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [car, setCar] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
+
+  // Function to handle back navigation intelligently
+  const handleBackClick = () => {
+    // Check if we have a 'from' state passed from the previous page
+    if (location.state?.from) {
+      navigate(location.state.from);
+    } else if (window.history.length > 1) {
+      // Try to go back in history
+      navigate(-1);
+    } else {
+      // Default to search results
+      navigate('/search-results');
+    }
+  };
 
   useEffect(() => {
     fetchCarDetails();
@@ -85,7 +100,7 @@ const CarDetailPage = () => {
     <div className="car-detail-page">
       <div className="detail-container">
         {/* Back Button */}
-        <button onClick={() => navigate(-1)} className="back-to-results">
+        <button onClick={handleBackClick} className="back-to-results">
           ← Back to results
         </button>
 

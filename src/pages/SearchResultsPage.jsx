@@ -26,6 +26,10 @@ function SearchResultsPage() {
     maxMileage: '',
     transmission: 'All',
     fuelType: 'All',
+    colour: 'All',
+    bodyType: 'All',
+    doors: 'All',
+    seats: 'All',
     sortBy: 'distance'
   });
 
@@ -62,6 +66,19 @@ function SearchResultsPage() {
     const radiusParam = params.get('radius') || location.state?.radius || 25;
     const makeParam = params.get('make') || location.state?.make;
     const modelParam = params.get('model') || location.state?.model;
+    const submodelParam = params.get('submodel');
+    const colourParam = params.get('colour');
+    const bodyTypeParam = params.get('bodyType');
+    const doorsParam = params.get('doors');
+    const seatsParam = params.get('seats');
+    const gearboxParam = params.get('gearbox');
+    const fuelTypeParam = params.get('fuelType');
+    const priceFromParam = params.get('priceFrom');
+    const priceToParam = params.get('priceTo');
+    const yearFromParam = params.get('yearFrom');
+    const yearToParam = params.get('yearTo');
+    const mileageFromParam = params.get('mileageFrom');
+    const mileageToParam = params.get('mileageTo');
     const openFilterParam = params.get('openFilter'); // Check if filter should auto-open
 
     console.log('SearchResultsPage mounted with params:', {
@@ -69,6 +86,19 @@ function SearchResultsPage() {
       radiusParam,
       makeParam,
       modelParam,
+      submodelParam,
+      colourParam,
+      bodyTypeParam,
+      doorsParam,
+      seatsParam,
+      gearboxParam,
+      fuelTypeParam,
+      priceFromParam,
+      priceToParam,
+      yearFromParam,
+      yearToParam,
+      mileageFromParam,
+      mileageToParam,
       openFilterParam,
       urlSearch: location.search,
       locationState: location.state
@@ -80,22 +110,41 @@ function SearchResultsPage() {
       setShowFilterModal(true);
     }
 
+    // Build filter params object
+    const filterParams = {
+      make: makeParam,
+      model: modelParam,
+      submodel: submodelParam,
+      colour: colourParam,
+      bodyType: bodyTypeParam,
+      doors: doorsParam,
+      seats: seatsParam,
+      gearbox: gearboxParam,
+      fuelType: fuelTypeParam,
+      priceFrom: priceFromParam,
+      priceTo: priceToParam,
+      yearFrom: yearFromParam,
+      yearTo: yearToParam,
+      mileageFrom: mileageFromParam,
+      mileageTo: mileageToParam
+    };
+
     if (postcodeParam) {
       setPostcode(postcodeParam);
       setRadius(parseInt(radiusParam) || 25);
-      performSearch(postcodeParam, parseInt(radiusParam) || 25, makeParam, modelParam);
+      performSearch(postcodeParam, parseInt(radiusParam) || 25, filterParams);
     } else {
       // Load all cars if no postcode provided
-      loadAllCars(makeParam, modelParam);
+      loadAllCars(filterParams);
     }
   }, [location]);
 
-  const performSearch = async (searchPostcode, searchRadius, make, model) => {
+  const performSearch = async (searchPostcode, searchRadius, filterParams = {}) => {
     setLoading(true);
     setError('');
 
     try {
-      console.log('Performing search with:', { searchPostcode, searchRadius, make, model });
+      console.log('Performing search with:', { searchPostcode, searchRadius, filterParams });
       const response = await carService.searchCarsByPostcode(searchPostcode, searchRadius);
       
       console.log('Full search response:', response);
@@ -106,20 +155,72 @@ function SearchResultsPage() {
         let results = response.data.results || [];
         console.log('Results count before filtering:', results.length);
         
-        // Apply make/model filters if provided
-        if (make && make !== 'Any') {
-          results = results.filter(car => car.make === make);
+        // Apply filters if provided
+        if (filterParams.make && filterParams.make !== 'Any') {
+          results = results.filter(car => car.make === filterParams.make);
           console.log('Results after make filter:', results.length);
         }
-        if (model && model !== 'Any') {
-          results = results.filter(car => car.model === model);
+        if (filterParams.model && filterParams.model !== 'Any') {
+          results = results.filter(car => car.model === filterParams.model);
           console.log('Results after model filter:', results.length);
+        }
+        if (filterParams.submodel) {
+          results = results.filter(car => car.variant === filterParams.submodel);
+          console.log('Results after submodel/variant filter:', results.length);
+        }
+        if (filterParams.colour) {
+          results = results.filter(car => car.color === filterParams.colour);
+          console.log('Results after colour filter:', results.length);
+        }
+        if (filterParams.bodyType) {
+          results = results.filter(car => car.bodyType === filterParams.bodyType);
+          console.log('Results after bodyType filter:', results.length);
+        }
+        if (filterParams.doors) {
+          results = results.filter(car => car.doors === parseInt(filterParams.doors));
+          console.log('Results after doors filter:', results.length);
+        }
+        if (filterParams.seats) {
+          results = results.filter(car => car.seats === parseInt(filterParams.seats));
+          console.log('Results after seats filter:', results.length);
+        }
+        if (filterParams.gearbox) {
+          results = results.filter(car => car.transmission === filterParams.gearbox);
+          console.log('Results after gearbox filter:', results.length);
+        }
+        if (filterParams.fuelType) {
+          results = results.filter(car => car.fuelType === filterParams.fuelType);
+          console.log('Results after fuelType filter:', results.length);
+        }
+        if (filterParams.priceFrom) {
+          results = results.filter(car => car.price >= parseFloat(filterParams.priceFrom));
+          console.log('Results after priceFrom filter:', results.length);
+        }
+        if (filterParams.priceTo) {
+          results = results.filter(car => car.price <= parseFloat(filterParams.priceTo));
+          console.log('Results after priceTo filter:', results.length);
+        }
+        if (filterParams.yearFrom) {
+          results = results.filter(car => car.year >= parseInt(filterParams.yearFrom));
+          console.log('Results after yearFrom filter:', results.length);
+        }
+        if (filterParams.yearTo) {
+          results = results.filter(car => car.year <= parseInt(filterParams.yearTo));
+          console.log('Results after yearTo filter:', results.length);
+        }
+        if (filterParams.mileageFrom) {
+          results = results.filter(car => car.mileage >= parseInt(filterParams.mileageFrom));
+          console.log('Results after mileageFrom filter:', results.length);
+        }
+        if (filterParams.mileageTo) {
+          results = results.filter(car => car.mileage <= parseInt(filterParams.mileageTo));
+          console.log('Results after mileageTo filter:', results.length);
         }
         
         // If no results found, load all cars from database
         if (results.length === 0) {
           console.log('No results in radius, loading all cars from database');
-          await loadAllCarsAsFallback(make, model, searchPostcode, searchRadius);
+          await loadAllCarsAsFallback(filterParams, searchPostcode, searchRadius);
           return;
         }
         
@@ -147,20 +248,33 @@ function SearchResultsPage() {
     }
   };
 
-  const loadAllCars = async (make, model) => {
+  const loadAllCars = async (filterParams = {}) => {
     setLoading(true);
     setError('');
 
     try {
-      const filterParams = {};
-      if (make && make !== 'Any') filterParams.make = make;
-      if (model && model !== 'Any') filterParams.model = model;
+      const apiFilterParams = {};
+      if (filterParams.make && filterParams.make !== 'Any') apiFilterParams.make = filterParams.make;
+      if (filterParams.model && filterParams.model !== 'Any') apiFilterParams.model = filterParams.model;
+      if (filterParams.submodel) apiFilterParams.submodel = filterParams.submodel;
+      if (filterParams.colour) apiFilterParams.colour = filterParams.colour;
+      if (filterParams.bodyType) apiFilterParams.bodyType = filterParams.bodyType;
+      if (filterParams.doors) apiFilterParams.doors = filterParams.doors;
+      if (filterParams.seats) apiFilterParams.seats = filterParams.seats;
+      if (filterParams.gearbox) apiFilterParams.gearbox = filterParams.gearbox;
+      if (filterParams.fuelType) apiFilterParams.fuelType = filterParams.fuelType;
+      if (filterParams.priceFrom) apiFilterParams.priceFrom = filterParams.priceFrom;
+      if (filterParams.priceTo) apiFilterParams.priceTo = filterParams.priceTo;
+      if (filterParams.yearFrom) apiFilterParams.yearFrom = filterParams.yearFrom;
+      if (filterParams.yearTo) apiFilterParams.yearTo = filterParams.yearTo;
+      if (filterParams.mileageFrom) apiFilterParams.mileageFrom = filterParams.mileageFrom;
+      if (filterParams.mileageTo) apiFilterParams.mileageTo = filterParams.mileageTo;
       
-      const response = await carService.getCars(filterParams);
+      const response = await carService.searchCars(apiFilterParams);
       
-      // Backend returns: { success: true, data: [...], pagination: { total: X } }
-      const cars = response.data || [];
-      const total = response.pagination?.total || cars.length;
+      // Backend returns: { success: true, cars: [...], total: X }
+      const cars = response.cars || [];
+      const total = response.total || cars.length;
       
       // Transform to match search results format
       const transformedData = {
@@ -185,20 +299,33 @@ function SearchResultsPage() {
     }
   };
 
-  const loadAllCarsAsFallback = async (make, model, originalPostcode, originalRadius) => {
+  const loadAllCarsAsFallback = async (filterParams = {}, originalPostcode, originalRadius) => {
     setLoading(true);
     setError('');
 
     try {
-      const filterParams = {};
-      if (make && make !== 'Any') filterParams.make = make;
-      if (model && model !== 'Any') filterParams.model = model;
+      const apiFilterParams = {};
+      if (filterParams.make && filterParams.make !== 'Any') apiFilterParams.make = filterParams.make;
+      if (filterParams.model && filterParams.model !== 'Any') apiFilterParams.model = filterParams.model;
+      if (filterParams.submodel) apiFilterParams.submodel = filterParams.submodel;
+      if (filterParams.colour) apiFilterParams.colour = filterParams.colour;
+      if (filterParams.bodyType) apiFilterParams.bodyType = filterParams.bodyType;
+      if (filterParams.doors) apiFilterParams.doors = filterParams.doors;
+      if (filterParams.seats) apiFilterParams.seats = filterParams.seats;
+      if (filterParams.gearbox) apiFilterParams.gearbox = filterParams.gearbox;
+      if (filterParams.fuelType) apiFilterParams.fuelType = filterParams.fuelType;
+      if (filterParams.priceFrom) apiFilterParams.priceFrom = filterParams.priceFrom;
+      if (filterParams.priceTo) apiFilterParams.priceTo = filterParams.priceTo;
+      if (filterParams.yearFrom) apiFilterParams.yearFrom = filterParams.yearFrom;
+      if (filterParams.yearTo) apiFilterParams.yearTo = filterParams.yearTo;
+      if (filterParams.mileageFrom) apiFilterParams.mileageFrom = filterParams.mileageFrom;
+      if (filterParams.mileageTo) apiFilterParams.mileageTo = filterParams.mileageTo;
       
-      const response = await carService.getCars(filterParams);
+      const response = await carService.searchCars(apiFilterParams);
       
-      // Backend returns: { success: true, data: [...], pagination: { total: X } }
-      const cars = response.data || [];
-      const total = response.pagination?.total || cars.length;
+      // Backend returns: { success: true, cars: [...], total: X }
+      const cars = response.cars || [];
+      const total = response.total || cars.length;
       
       // Transform to match search results format
       const transformedData = {
@@ -265,6 +392,26 @@ function SearchResultsPage() {
       results = results.filter(car => car.fuelType === filters.fuelType);
     }
 
+    // Filter by colour
+    if (filters.colour !== 'All') {
+      results = results.filter(car => car.color === filters.colour);
+    }
+
+    // Filter by body type
+    if (filters.bodyType !== 'All') {
+      results = results.filter(car => car.bodyType === filters.bodyType);
+    }
+
+    // Filter by doors
+    if (filters.doors !== 'All') {
+      results = results.filter(car => car.doors === parseInt(filters.doors));
+    }
+
+    // Filter by seats
+    if (filters.seats !== 'All') {
+      results = results.filter(car => car.seats === parseInt(filters.seats));
+    }
+
     // Sort results
     switch (filters.sortBy) {
       case 'price-low':
@@ -305,6 +452,10 @@ function SearchResultsPage() {
         maxMileage: '',
         transmission: 'All',
         fuelType: 'All',
+        colour: 'All',
+        bodyType: 'All',
+        doors: 'All',
+        seats: 'All',
         sortBy: 'distance'
       });
     }
@@ -350,7 +501,9 @@ function SearchResultsPage() {
   };
 
   const handleCarClick = (carId) => {
-    navigate(`/cars/${carId}`);
+    navigate(`/cars/${carId}`, { 
+      state: { from: window.location.pathname + window.location.search } 
+    });
   };
 
   // Get unique makes from results

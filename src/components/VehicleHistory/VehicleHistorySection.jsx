@@ -21,7 +21,18 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
       setIsLoading(true);
       setError(null);
       const result = await checkVehicleHistory(vrm);
-      setHistoryData(result.data || result);
+      const data = result.data || result;
+      
+      // Debug logging to help identify data issues
+      console.log('=== Vehicle History Data ===');
+      console.log('VRM:', vrm);
+      console.log('hasAccidentHistory:', data.hasAccidentHistory);
+      console.log('isWrittenOff:', data.isWrittenOff);
+      console.log('accidentDetails:', data.accidentDetails);
+      console.log('writeOffCategory:', data.writeOffCategory);
+      console.log('===========================');
+      
+      setHistoryData(data);
     } catch (err) {
       console.error('Error fetching history:', err);
       
@@ -161,15 +172,29 @@ const VehicleHistorySection = ({ vrm, historyCheckId }) => {
       label: 'Never been written off',
       passed: !(historyData.hasAccidentHistory === true || 
                 historyData.isWrittenOff === true || 
-                (historyData.accidentDetails?.severity && historyData.accidentDetails.severity !== 'unknown')),
+                historyData.writeOffCategory ||
+                (historyData.accidentDetails?.severity && 
+                 historyData.accidentDetails.severity !== 'unknown' && 
+                 historyData.accidentDetails.severity !== null)),
       icon: '✓',
-      details: (historyData.hasAccidentHistory === true || 
-                historyData.isWrittenOff === true || 
-                (historyData.accidentDetails?.severity && historyData.accidentDetails.severity !== 'unknown'))
-        ? (historyData.accidentDetails?.severity && historyData.accidentDetails.severity !== 'unknown')
-          ? `Recorded as Category ${historyData.accidentDetails.severity} (insurance write-off)`
-          : `This vehicle has been recorded as written off or has accident history.`
-        : 'This vehicle has no recorded accident history or write-off status.'
+      details: (() => {
+        // Check if vehicle has been written off
+        const isWrittenOff = historyData.hasAccidentHistory === true || 
+                            historyData.isWrittenOff === true;
+        
+        // Get severity category - check multiple possible fields
+        const severity = historyData.writeOffCategory || 
+                        historyData.accidentDetails?.severity;
+        const hasValidSeverity = severity && severity !== 'unknown' && severity !== null;
+        
+        if (isWrittenOff && hasValidSeverity) {
+          return `Recorded as Category ${severity.toUpperCase()} (insurance write-off)`;
+        } else if (isWrittenOff) {
+          return 'This vehicle has been recorded as written off or has accident history.';
+        } else {
+          return 'This vehicle has no recorded accident history or write-off status.';
+        }
+      })()
     }
   ];
 

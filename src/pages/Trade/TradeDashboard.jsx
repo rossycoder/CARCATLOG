@@ -29,6 +29,8 @@ const TradeDashboard = () => {
     try {
       const data = await tradeInventoryService.getStats();
       if (data.success) {
+        console.log('Stats data received:', data.stats);
+        console.log('Most viewed vehicles:', data.stats.mostViewed);
         setStats(data.stats);
       }
     } catch (error) {
@@ -250,7 +252,7 @@ const TradeDashboard = () => {
                   />
                   <div className="vehicle-card-content">
                     <h4>{vehicle.year} {vehicle.make} {vehicle.model}</h4>
-                    <p className="vehicle-price">£{vehicle.price?.toLocaleString()}</p>
+                 
                     <div className="vehicle-metrics">
                       <span className="metric">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">

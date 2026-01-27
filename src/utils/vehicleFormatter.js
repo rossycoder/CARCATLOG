@@ -131,9 +131,13 @@ export const generateVariantDisplay = (vehicle) => {
   // Variant/trim - this should contain fuel type + trim (e.g., "TDI S" or "320d M Sport")
   if (vehicle.variant && vehicle.variant !== 'null' && vehicle.variant !== 'undefined' && vehicle.variant.trim() !== '') {
     parts.push(vehicle.variant);
+  } else if (vehicle.submodel && vehicle.submodel !== 'null' && vehicle.submodel !== 'undefined' && vehicle.submodel.trim() !== '') {
+    // Use submodel if available
+    parts.push(vehicle.submodel);
   } else {
     // Fallback: build from fuel type if no variant
-    if (vehicle.fuelType) {
+    // Only add fuel type if it's not already obvious from engine size
+    if (vehicle.fuelType && vehicle.fuelType !== 'Petrol') {
       parts.push(vehicle.fuelType);
     }
   }

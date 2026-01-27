@@ -8,9 +8,11 @@ const AdvertPaymentSuccessPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [purchaseData, setPurchaseData] = useState(null);
   const [error, setError] = useState(null);
+  const [isCompletingTest, setIsCompletingTest] = useState(false);
   
   const sessionId = searchParams.get('session_id');
   const packageName = searchParams.get('package');
+  const advertId = searchParams.get('advertId');
 
   useEffect(() => {
     if (sessionId) {
@@ -46,6 +48,48 @@ const AdvertPaymentSuccessPage = () => {
 
   const handleViewPricing = () => {
     navigate('/sell-my-car/advertising-prices');
+  };
+
+  const handleCompleteTestPayment = async () => {
+    if (!purchaseData?._id) {
+      alert('Purchase ID not found');
+      return;
+    }
+
+    try {
+      setIsCompletingTest(true);
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      
+      const response = await fetch(`${API_BASE_URL}/payments/test-complete-purchase`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          purchaseId: purchaseData._id
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Test payment completed! Car created successfully.');
+        // Refresh purchase data
+        await fetchPurchaseDetails();
+        
+        // Navigate to my listings after 2 seconds
+        setTimeout(() => {
+          navigate('/my-listings');
+        }, 2000);
+      } else {
+        alert('Failed to complete test payment: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error completing test payment:', error);
+      alert('Error completing test payment');
+    } finally {
+      setIsCompletingTest(false);
+    }
   };
 
   if (isLoading) {
@@ -122,6 +166,25 @@ const AdvertPaymentSuccessPage = () => {
           </div>
 
           <div className="action-buttons">
+            {purchaseData?.paymentStatus === 'pending' && (
+              <button 
+                className="test-button" 
+                onClick={handleCompleteTestPayment}
+                disabled={isCompletingTest}
+                style={{
+                  backgroundColor: '#FF9800',
+                  color: 'white',
+                  padding: '12px 24px',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: isCompletingTest ? 'not-allowed' : 'pointer',
+                  marginBottom: '10px',
+                  width: '100%'
+                }}
+              >
+                {isCompletingTest ? 'Completing...' : '🧪 Complete Test Payment & Create Car'}
+              </button>
+            )}
             <button className="primary-button" onClick={handleCreateAd}>
               Create Your Ad Now
             </button>

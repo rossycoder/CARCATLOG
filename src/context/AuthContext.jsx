@@ -10,16 +10,65 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check if user is logged in on mount
     const loadUser = async () => {
-      if (authService.isAuthenticated()) {
-        try {
-          const userData = await authService.getCurrentUser();
-          setUser(userData);
-        } catch (error) {
-          console.error('Failed to load user:', error);
-          authService.logout();
-        }
+      const token = authService.getToken();
+      
+      if (!token) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+      
+      try {
+        // First try to get user from localStorage (instant load)
+        const localUser = authService.getCurrentUser();
+        if (localUser) {
+          setUser(localUser);
+          setLoading(false);
+          
+          // Then verify with backend in background (don't block UI)
+          authService.getMe()
+            .then(response => {
+              if (response.success && response.data.user) {
+                const userData = response.data.user;
+                localStorage.setItem('user', JSON.stringify(userData));
+                setUser(userData);
+              }
+            })
+            .catch(error => {
+              console.error('Background user verification failed:', error);
+              // Only logout if it's a 401 error (invalid token)
+              // Don't logout on network errors or other issues
+              if (error.response?.status === 401 || error.status === 401) {
+                console.warn('Token is invalid - logging out');
+                authService.logout();
+                setUser(null);
+              }
+            });
+        } else {
+          // No user in localStorage but token exists - fetch from backend
+          try {
+            const response = await authService.getMe();
+            if (response.success && response.data.user) {
+              const userData = response.data.user;
+              localStorage.setItem('user', JSON.stringify(userData));
+              setUser(userData);
+            } else {
+              authService.logout();
+              setUser(null);
+            }
+          } catch (error) {
+            console.error('Failed to fetch user from backend:', error);
+            // Only logout on 401, not on network errors
+            if (error.response?.status === 401 || error.status === 401) {
+              authService.logout();
+              setUser(null);
+            }
+          }
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Failed to load user:', error);
+        setLoading(false);
+      }
     };
 
     loadUser();

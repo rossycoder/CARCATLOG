@@ -29,26 +29,82 @@ export const TradeDealerProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       const token = tradeDealerService.getToken();
-      if (token) {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      
+      // Try to get dealer from localStorage first (instant load)
+      const localDealer = localStorage.getItem('tradeDealer');
+      const localSubscription = localStorage.getItem('tradeSubscription');
+      
+      if (localDealer) {
+        try {
+          setDealer(JSON.parse(localDealer));
+          if (localSubscription) {
+            setSubscription(JSON.parse(localSubscription));
+          }
+          setIsAuthenticated(true);
+          setLoading(false);
+          
+          // Verify with backend in background
+          tradeDealerService.getCurrentDealer()
+            .then(data => {
+              if (data.success) {
+                setDealer(data.dealer);
+                setSubscription(data.subscription);
+                if (data.subscription) {
+                  localStorage.setItem('tradeSubscription', JSON.stringify(data.subscription));
+                } else {
+                  localStorage.removeItem('tradeSubscription');
+                }
+              }
+            })
+            .catch(error => {
+              console.error('Background dealer verification failed:', error);
+              // Only logout on 401 (invalid token)
+              if (error.response?.status === 401 || error.status === 401) {
+                console.warn('Trade token is invalid - logging out');
+                logout();
+              }
+            });
+        } catch (e) {
+          console.error('Failed to parse local dealer data:', e);
+          // Fetch from backend if local data is corrupted
+          const data = await tradeDealerService.getCurrentDealer();
+          if (data.success) {
+            setDealer(data.dealer);
+            setSubscription(data.subscription);
+            if (data.subscription) {
+              localStorage.setItem('tradeSubscription', JSON.stringify(data.subscription));
+            }
+            setIsAuthenticated(true);
+          } else {
+            logout();
+          }
+          setLoading(false);
+        }
+      } else {
+        // No local dealer data - fetch from backend
         const data = await tradeDealerService.getCurrentDealer();
         if (data.success) {
           setDealer(data.dealer);
           setSubscription(data.subscription);
-          // Store subscription in localStorage for persistence
           if (data.subscription) {
             localStorage.setItem('tradeSubscription', JSON.stringify(data.subscription));
-          } else {
-            localStorage.removeItem('tradeSubscription');
           }
           setIsAuthenticated(true);
         } else {
           logout();
         }
+        setLoading(false);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      logout();
-    } finally {
+      // Only logout on 401, not on network errors
+      if (error.response?.status === 401 || error.status === 401) {
+        logout();
+      }
       setLoading(false);
     }
   };
@@ -58,6 +114,9 @@ export const TradeDealerProvider = ({ children }) => {
     if (data.success) {
       setDealer(data.dealer);
       setIsAuthenticated(true);
+      
+      // Store dealer in localStorage for persistence
+      localStorage.setItem('tradeDealer', JSON.stringify(data.dealer));
       
       // Set subscription from login response
       if (data.subscription) {
@@ -81,6 +140,7 @@ export const TradeDealerProvider = ({ children }) => {
     setDealer(null);
     setSubscription(null);
     setIsAuthenticated(false);
+    localStorage.removeItem('tradeDealer');
     localStorage.removeItem('tradeSubscription');
   };
 

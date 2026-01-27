@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import advertService from '../services/advertService';
 import uploadService from '../services/uploadService';
 import useEnhancedVehicleLookup from '../hooks/useEnhancedVehicleLookup';
@@ -20,6 +21,8 @@ const CarAdvertEditPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [vehicleData, setVehicleData] = useState(null);
+  const [carStatus, setCarStatus] = useState(null); // Track car status
+  const [isDealerCar, setIsDealerCar] = useState(false); // Track if it's a dealer car
   const [showPopup, setShowPopup] = useState(false);
   const [loadError, setLoadError] = useState(null);
   const [advertData, setAdvertData] = useState({
@@ -154,7 +157,73 @@ const CarAdvertEditPage = () => {
         return;
       }
       
-      // Fetch advert data from backend or localStorage (advertService handles fallback)
+      // Try to fetch from vehicle API first (for cars created via DVLA lookup)
+      try {
+        console.log('🔍 Fetching vehicle data from /api/vehicles/', advertId);
+        const vehicleResponse = await api.get(`/vehicles/${advertId}`);
+        
+        if (vehicleResponse.data && vehicleResponse.data.data) {
+          console.log('✅ Vehicle found in vehicles collection');
+          const vehicleData = vehicleResponse.data.data;
+          
+          setVehicleData(vehicleData);
+          setCarStatus(vehicleData.advertStatus); // Store car status
+          setIsDealerCar(vehicleData.isDealerListing || false); // Store if it's a dealer car
+          
+          console.log('🚗 Car loaded:', {
+            advertStatus: vehicleData.advertStatus,
+            isDealerListing: vehicleData.isDealerListing,
+            dealerId: vehicleData.dealerId,
+            willShowSaveButton: vehicleData.advertStatus === 'active' || vehicleData.isDealerListing
+          });
+          
+          // Populate form fields with existing data
+          setAdvertData({
+            price: vehicleData.price || '',
+            description: vehicleData.description || '',
+            photos: vehicleData.images || [],
+            contactPhone: vehicleData.sellerContact?.phoneNumber || '',
+            contactEmail: vehicleData.sellerContact?.email || '',
+            location: vehicleData.postcode || '',
+            features: vehicleData.features || [],
+            runningCosts: {
+              fuelEconomy: {
+                urban: vehicleData.runningCosts?.fuelEconomy?.urban || vehicleData.fuelEconomyUrban || '',
+                extraUrban: vehicleData.runningCosts?.fuelEconomy?.extraUrban || vehicleData.fuelEconomyExtraUrban || '',
+                combined: vehicleData.runningCosts?.fuelEconomy?.combined || vehicleData.fuelEconomyCombined || ''
+              },
+              annualTax: vehicleData.runningCosts?.annualTax || vehicleData.annualTax || '',
+              insuranceGroup: vehicleData.runningCosts?.insuranceGroup || vehicleData.insuranceGroup || '',
+              co2Emissions: vehicleData.runningCosts?.co2Emissions || vehicleData.co2Emissions || ''
+            },
+            videoUrl: vehicleData.videoUrl || ''
+          });
+          
+          console.log('✅ Form fields populated with existing data');
+          
+          // Fetch MOT data if registration exists
+          if (vehicleData.registrationNumber) {
+            fetchMOTData(vehicleData.registrationNumber);
+          }
+          
+          // Fetch enhanced data if registration exists
+          if (vehicleData.registrationNumber && !enhancedData) {
+            console.log('🚗 Fetching enhanced data for:', vehicleData.registrationNumber);
+            try {
+              await lookupVehicle(vehicleData.registrationNumber);
+            } catch (apiErr) {
+              console.error('Enhanced lookup failed:', apiErr);
+            }
+          }
+          
+          setIsLoading(false);
+          return;
+        }
+      } catch (vehicleErr) {
+        console.log('⚠️ Vehicle not found in vehicles collection, trying adverts...');
+      }
+      
+      // Fallback to advert service (for backward compatibility)
       const response = await advertService.getAdvert(advertId);
       
       console.log('Advert Response:', response);
@@ -543,6 +612,13 @@ const CarAdvertEditPage = () => {
       
       if (response.success) {
         alert('Advert saved successfully!');
+        
+        // If car is already active (payment completed), redirect to My Listings
+        if (carStatus === 'active') {
+          setTimeout(() => {
+            navigate('/my-listings');
+          }, 1000);
+        }
       } else {
         throw new Error(response.message || 'Failed to save advert');
       }
@@ -843,27 +919,44 @@ const CarAdvertEditPage = () => {
                   {motLoading ? (
                     'Loading...'
                   ) : motData?.mot?.motDueDate ? (
-                    new Date(motData.mot.motDueDate).toLocaleDateString('en-GB', { 
-                      day: 'numeric', 
-                      month: 'long', 
-                      year: 'numeric' 
-                    })
+                    (() => {
+                      const dateStr = motData.mot.motDueDate;
+                      const [year, month, day] = dateStr.split('-').map(Number);
+                      const date = new Date(year, month - 1, day);
+                      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                    })()
                   ) : motData?.expiryDate ? (
-                    new Date(motData.expiryDate).toLocaleDateString('en-GB', { 
-                      day: 'numeric', 
-                      month: 'long', 
-                      year: 'numeric' 
-                    })
+                    (() => {
+                      const dateStr = motData.expiryDate;
+                      const [year, month, day] = dateStr.split('-').map(Number);
+                      const date = new Date(year, month - 1, day);
+                      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                    })()
                   ) : motData?.mot?.motStatus ? (
                     motData.mot.motStatus
                   ) : vehicleData.motDue ? (
-                    typeof vehicleData.motDue === 'string' && vehicleData.motDue.includes('-')
-                      ? new Date(vehicleData.motDue).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-                      : vehicleData.motDue
+                    (() => {
+                      const dateStr = vehicleData.motDue;
+                      if (typeof dateStr === 'string' && dateStr.includes('-')) {
+                        const [year, month, day] = dateStr.split('-').map(Number);
+                        const date = new Date(year, month - 1, day);
+                        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                      }
+                      return dateStr;
+                    })()
                   ) : vehicleData.motExpiry ? (
-                    typeof vehicleData.motExpiry === 'string' && vehicleData.motExpiry.includes('-')
-                      ? new Date(vehicleData.motExpiry).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-                      : vehicleData.motExpiry
+                    (() => {
+                      const dateValue = vehicleData.motExpiry;
+                      if (typeof dateValue === 'string' && dateValue.includes('-')) {
+                        const [year, month, day] = dateValue.split('-').map(Number);
+                        const date = new Date(year, month - 1, day);
+                        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                      } else if (dateValue instanceof Date || !isNaN(Date.parse(dateValue))) {
+                        const date = new Date(dateValue);
+                        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                      }
+                      return dateValue;
+                    })()
                   ) : (
                     'Contact seller for MOT details'
                   )}
@@ -1135,13 +1228,25 @@ const CarAdvertEditPage = () => {
               </p>
             )}
             
-            <button
-              onClick={handlePublish}
-              disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}
-              className="publish-button"
-            >
-              {isSaving ? 'Publishing...' : "I'm happy with my ad"}
-            </button>
+            {/* Show different button based on car status or dealer listing */}
+            {(carStatus === 'active' || isDealerCar) ? (
+              <button
+                onClick={handleSave}
+                disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}
+                className="publish-button"
+                style={{ backgroundColor: '#4CAF50' }}
+              >
+                {isSaving ? 'Saving...' : '✓ Save Changes'}
+              </button>
+            ) : (
+              <button
+                onClick={handlePublish}
+                disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}
+                className="publish-button"
+              >
+                {isSaving ? 'Publishing...' : "I'm happy with my ad"}
+              </button>
+            )}
           </section>
 
          
