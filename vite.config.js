@@ -13,11 +13,11 @@ export default defineConfig({
     }
   },
   build: {
-    minify: 'esbuild',
+    minify: true,
     target: 'es2015'
   },
   esbuild: {
-    drop: ['console', 'debugger'],
+    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
   },
   test: {
     globals: true,
