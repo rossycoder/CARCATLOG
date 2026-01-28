@@ -14,7 +14,10 @@ export default defineConfig({
   },
   build: {
     minify: 'esbuild',
-    target: 'es2015'
+    target: 'es2015',
+    rollupOptions: {
+      external: [],
+    }
   },
   esbuild: {
     drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
