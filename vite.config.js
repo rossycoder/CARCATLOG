@@ -13,7 +13,7 @@ export default defineConfig({
     }
   },
   build: {
-    minify: true,
+    minify: 'esbuild',
     target: 'es2015'
   },
   esbuild: {
