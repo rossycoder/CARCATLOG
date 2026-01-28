@@ -14,7 +14,6 @@ export const uploadImage = async (imageData, advertId = null) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Upload error:', error);
     throw error;
   }
 };
@@ -33,7 +32,6 @@ export const uploadMultipleImages = async (images, advertId = null) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Multiple upload error:', error);
     throw error;
   }
 };
@@ -48,7 +46,6 @@ export const deleteImage = async (publicId) => {
     const response = await api.delete(`/upload/image/${encodeURIComponent(publicId)}`);
     return response.data;
   } catch (error) {
-    console.error('Delete error:', error);
     throw error;
   }
 };

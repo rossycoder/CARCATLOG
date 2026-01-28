@@ -16,7 +16,6 @@ export const getValuation = async (vrm, mileage, forceRefresh = false) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching valuation:', error);
     throw error;
   }
 };
@@ -35,7 +34,6 @@ export const getDetailedValuation = async (vrm, mileage) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching detailed valuation:', error);
     throw error;
   }
 };

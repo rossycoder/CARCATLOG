@@ -57,31 +57,21 @@ export const carService = {
   // Get total count of available cars
   getCarCount: async () => {
     const response = await api.get('/vehicles/count');
-    console.log('API response:', response);
     return response.data.count;
   },
 
   // Get filter options from database
   getFilterOptions: async (queryString = '') => {
     const url = queryString ? `/vehicles/filter-options?${queryString}` : '/vehicles/filter-options';
-    console.log('[carService] 🚀 Making API call to', url);
     try {
       const response = await api.get(url);
-      console.log('[carService] ✅ API call successful');
-      console.log('[carService] Response status:', response.status);
-      console.log('[carService] Response data:', response.data);
       
       if (response.data && response.data.success && response.data.data) {
-        console.log('[carService] ✅ Returning filter options data');
         return response.data.data;
       } else {
-        console.error('[carService] ❌ Invalid response structure:', response.data);
         throw new Error('Invalid API response structure');
       }
     } catch (error) {
-      console.error('[carService] ❌ API call failed:');
-      console.error('[carService] Error:', error.message);
-      console.error('[carService] Full error:', error);
       throw error;
     }
   },

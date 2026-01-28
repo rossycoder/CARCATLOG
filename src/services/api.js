@@ -84,11 +84,6 @@ api.interceptors.response.use(
       
       // Only clear and redirect if we had a token (meaning it's invalid/expired)
       if (hasUserToken || hasTradeToken) {
-        console.warn('Authentication failed - token invalid or expired');
-        console.log('Request URL:', requestUrl);
-        console.log('Current Path:', currentPath);
-        console.log('Is Trade Request:', isTradeRequest);
-        
         // Clear only the relevant auth data
         if (isTradeRequest && hasTradeToken) {
           // Trade authentication failed

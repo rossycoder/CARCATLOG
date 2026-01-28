@@ -18,8 +18,6 @@ const generateUUID = () => {
  */
 export const createAdvert = async (vehicleData) => {
   try {
-    console.log('🚀 Creating advert via API...');
-    
     // Try to create via API with longer timeout (15 seconds for API calls)
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('Request timeout after 15 seconds')), 15000);
@@ -30,13 +28,8 @@ export const createAdvert = async (vehicleData) => {
       timeoutPromise
     ]);
     
-    console.log('✅ Advert created successfully:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error creating advert via API:', error.message);
-    console.error('Error details:', error.response?.data || error);
-    console.log('⚠️  Falling back to localStorage');
-    
     // Fallback to local storage if backend is unavailable
     const advertId = generateUUID();
     const advertData = {
@@ -88,20 +81,16 @@ export const createAdvert = async (vehicleData) => {
  * @returns {Promise<Object>} Advert data
  */
 export const getAdvert = async (advertId) => {
-  console.log('🔍 Fetching advert:', advertId);
-  
   // First check for pending advert data (from Find Your Car page)
   const pendingData = localStorage.getItem('pendingAdvertData');
   if (pendingData) {
     try {
       const parsed = JSON.parse(pendingData);
-      console.log('📦 Found pending advert data:', parsed);
       
       if (parsed.advertId === advertId) {
         // Clear the pending data after reading
         localStorage.removeItem('pendingAdvertData');
         
-        console.log('✅ Using pending advert data');
         // Return formatted data
         return {
           success: true,
@@ -133,14 +122,12 @@ export const getAdvert = async (advertId) => {
         };
       }
     } catch (e) {
-      console.error('❌ Error parsing pending advert data:', e);
+      // Error parsing pending data
     }
   }
 
   // Try to fetch from backend API with timeout
   try {
-    console.log('🌐 Fetching from API: /adverts/' + advertId);
-    
     // Create timeout promise
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('Request timeout')), 10000);
@@ -152,25 +139,18 @@ export const getAdvert = async (advertId) => {
       timeoutPromise
     ]);
     
-    console.log('✅ API Response:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ API Error:', error.message);
-    console.log('Response status:', error.response?.status);
-    console.log('Response data:', error.response?.data);
-    
     // Try to get from localStorage as fallback
     const localData = localStorage.getItem(`advert_${advertId}`);
     if (localData) {
-      console.log('📦 Using localStorage fallback');
       return {
         success: true,
         data: JSON.parse(localData)
       };
     }
     
-    // If API fails and no local data, throw error instead of returning mock data
-    console.error('❌ No data found for advert:', advertId);
+    // If API fails and no local data, throw error
     throw new Error('Advert not found. Please create a new advert from the Find Your Car page.');
   }
 };
@@ -193,8 +173,6 @@ export const updateAdvert = async (advertId, advertData, vehicleData, contactDet
     const response = await api.put(`/adverts/${advertId}`, payload);
     return response.data;
   } catch (error) {
-    console.error('Error updating advert:', error);
-    
     // Fallback to localStorage
     const localData = localStorage.getItem(`advert_${advertId}`);
     if (localData) {
@@ -229,8 +207,6 @@ export const publishAdvert = async (advertId, advertData, vehicleData) => {
     const response = await api.post(`/adverts/${advertId}/publish`, { advertData, vehicleData });
     return response.data;
   } catch (error) {
-    console.error('Error publishing advert:', error);
-    
     // Fallback to localStorage
     const localData = localStorage.getItem(`advert_${advertId}`);
     if (localData) {

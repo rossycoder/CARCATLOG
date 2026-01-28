@@ -14,7 +14,6 @@ export const createCheckoutSession = async (vrm, customerEmail = null) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error creating checkout session:', error);
     throw error;
   }
 };
@@ -33,7 +32,6 @@ export const createCreditCheckoutSession = async (creditAmount, customerEmail = 
     });
     return response.data;
   } catch (error) {
-    console.error('Error creating credit checkout session:', error);
     throw error;
   }
 };
@@ -48,7 +46,6 @@ export const getSessionDetails = async (sessionId) => {
     const response = await api.get(`/payments/session/${sessionId}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching session details:', error);
     throw error;
   }
 };
@@ -62,7 +59,6 @@ export const getCreditBalance = async () => {
     const response = await api.get('/payments/credits');
     return response.data;
   } catch (error) {
-    console.error('Error fetching credit balance:', error);
     throw error;
   }
 };
@@ -79,7 +75,6 @@ export const useCreditForCheck = async (vrm) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error using credit for check:', error);
     throw error;
   }
 };

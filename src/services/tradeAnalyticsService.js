@@ -7,14 +7,9 @@ import api from './api';
  */
 export const getAnalytics = async (timeRange = '30days') => {
   try {
-    console.log('[Analytics Service] Fetching analytics with timeRange:', timeRange);
     const response = await api.get(`/trade/analytics?timeRange=${timeRange}`);
-    console.log('[Analytics Service] Response received:', response.data);
     return response.data;
   } catch (error) {
-    console.error('[Analytics Service] Error fetching analytics:', error);
-    console.error('[Analytics Service] Error response:', error.response?.data);
-    console.error('[Analytics Service] Error status:', error.response?.status);
     return {
       success: false,
       message: error.response?.data?.message || error.response?.data?.error || 'Failed to load analytics data',

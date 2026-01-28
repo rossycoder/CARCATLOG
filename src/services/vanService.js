@@ -164,7 +164,6 @@ export const vanService = {
       }
       return response.data;
     } catch (error) {
-      console.error('Error looking up van:', error);
       throw error;
     }
   }

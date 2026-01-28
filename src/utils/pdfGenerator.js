@@ -1,11 +1,8 @@
 import jsPDF from 'jspdf';
 
 export const generateVehicleHistoryPDF = (vehicleData, registration) => {
-  console.log('PDF Generator received:', { vehicleData, registration });
-  
   // Ensure we have valid data
   if (!vehicleData) {
-    console.error('No vehicle data provided to PDF generator');
     throw new Error('Vehicle data is required to generate PDF');
   }
   
@@ -61,8 +58,6 @@ export const generateVehicleHistoryPDF = (vehicleData, registration) => {
   const colour = vehicleData.colour || vehicleData.color || 'N/A';
   const fuelType = vehicleData.fuelType || vehicleData.fuel || 'N/A';
   const engineSize = vehicleData.engineSize || vehicleData.engineCapacity || 'N/A';
-  
-  console.log('Extracted values:', { make, model, year, colour, fuelType, engineSize });
   
   const details = [
     ['Make:', make],

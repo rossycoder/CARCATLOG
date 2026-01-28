@@ -13,7 +13,6 @@ class FilterService {
       const response = await api.get('/vehicles/filter-options');
       return response.data.data;
     } catch (error) {
-      console.error('Error fetching filter options:', error);
       throw error;
     }
   }
@@ -27,7 +26,6 @@ class FilterService {
       const filterOptions = await this.getFilterOptions();
       return filterOptions.makes || [];
     } catch (error) {
-      console.error('Error fetching makes:', error);
       return [];
     }
   }
@@ -42,7 +40,6 @@ class FilterService {
       const filterOptions = await this.getFilterOptions();
       return filterOptions.modelsByMake?.[make] || [];
     } catch (error) {
-      console.error(`Error fetching models for ${make}:`, error);
       return [];
     }
   }

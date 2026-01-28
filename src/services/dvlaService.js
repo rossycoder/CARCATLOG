@@ -12,7 +12,6 @@ export const validateRegistration = async (registrationNumber) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error validating registration:', error);
     throw error;
   }
 };
@@ -30,7 +29,6 @@ export const lookupVehicle = async (registrationNumber, mileage = 0) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error looking up vehicle:', error);
     throw error;
   }
 };

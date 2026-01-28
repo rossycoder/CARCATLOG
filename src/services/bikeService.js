@@ -162,7 +162,6 @@ export const bikeService = {
       }
       return response.data;
     } catch (error) {
-      console.error('Error looking up bike:', error);
       throw error;
     }
   }
