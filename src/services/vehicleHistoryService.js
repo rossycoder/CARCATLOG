@@ -10,7 +10,6 @@ export const getVehicleHistory = async (vrm) => {
     const response = await api.get(`/vehicle-history/${vrm}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching vehicle history:', error);
     throw error;
   }
 };
@@ -29,8 +28,6 @@ export const checkVehicleHistory = async (vrm, forceRefresh = false) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error checking vehicle history:', error);
-    
     // Extract error details from response
     const errorData = error.response?.data || {};
     const enhancedError = new Error(errorData.error || error.message || 'Failed to check vehicle history');
@@ -54,7 +51,6 @@ export const getMOTHistory = async (vrm) => {
     const response = await api.get(`/vehicle-history/mot/${vrm}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching MOT history:', error);
     throw error;
   }
 };
@@ -69,7 +65,6 @@ export const getVehicleRegistration = async (vrm) => {
     const response = await api.get(`/vehicle-history/registration/${vrm}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching vehicle registration:', error);
     throw error;
   }
 };
@@ -84,7 +79,6 @@ export const getVehicleSpecs = async (vrm) => {
     const response = await api.get(`/vehicle-history/specs/${vrm}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching vehicle specs:', error);
     throw error;
   }
 };
@@ -99,7 +93,6 @@ export const getMileageHistory = async (vrm) => {
     const response = await api.get(`/vehicle-history/mileage/${vrm}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching mileage history:', error);
     throw error;
   }
 };
@@ -114,7 +107,6 @@ export const getComprehensiveVehicleData = async (vrm) => {
     const response = await api.get(`/vehicle-history/comprehensive/${vrm}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching comprehensive vehicle data:', error);
     throw error;
   }
 };

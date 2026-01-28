@@ -11,55 +11,52 @@ const VehicleHistorySection = ({ vrm }) => {
   const [expandedCheck, setExpandedCheck] = useState(null);
 
   useEffect(() => {
+    const fetchHistoryData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const result = await checkVehicleHistory(vrm);
+        const data = result.data || result;
+        
+        setHistoryData(data);
+      } catch (err) {
+        // Check if it's a service unavailable error (daily limit)
+        if (err.status === 503 || err.isServiceUnavailable) {
+          setError({
+            message: err.message || 'Vehicle history service is temporarily unavailable',
+            nextSteps: err.nextSteps || [
+              'Try again in 24 hours',
+              'Contact the seller for vehicle history information'
+            ],
+            isServiceUnavailable: true
+          });
+        }
+        // Check if it's a 404 error
+        else if (err.status === 404 || err.message.includes('404') || err.message.includes('not found')) {
+          setError({
+            message: err.message || 'No vehicle history found for this registration',
+            nextSteps: err.nextSteps || [
+              'Verify the registration number is correct',
+              'Request vehicle history documents from the seller'
+            ],
+            isNotFound: true
+          });
+        } else {
+          setError({
+            message: err.message || 'Unable to load vehicle history',
+            nextSteps: ['Try again later', 'Contact support if the problem persists'],
+            isNotFound: false
+          });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     if (vrm) {
       fetchHistoryData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vrm]);
-
-  const fetchHistoryData = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const result = await checkVehicleHistory(vrm);
-      const data = result.data || result;
-      
-      setHistoryData(data);
-    } catch (err) {
-      console.error('Error fetching vehicle history:', err);
-      
-      // Check if it's a service unavailable error (daily limit)
-      if (err.status === 503 || err.isServiceUnavailable) {
-        setError({
-          message: err.message || 'Vehicle history service is temporarily unavailable',
-          nextSteps: err.nextSteps || [
-            'Try again in 24 hours',
-            'Contact the seller for vehicle history information'
-          ],
-          isServiceUnavailable: true
-        });
-      }
-      // Check if it's a 404 error
-      else if (err.status === 404 || err.message.includes('404') || err.message.includes('not found')) {
-        setError({
-          message: err.message || 'No vehicle history found for this registration',
-          nextSteps: err.nextSteps || [
-            'Verify the registration number is correct',
-            'Request vehicle history documents from the seller'
-          ],
-          isNotFound: true
-        });
-      } else {
-        setError({
-          message: err.message || 'Unable to load vehicle history',
-          nextSteps: ['Try again later', 'Contact support if the problem persists'],
-          isNotFound: false
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (!vrm) {
     return (
