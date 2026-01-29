@@ -18,6 +18,14 @@ const VehicleHistorySection = ({ vrm }) => {
         const result = await checkVehicleHistory(vrm);
         const data = result.data || result;
         
+        // Debug log to see what data we're receiving
+        console.log('[VehicleHistory] Received data for', vrm, ':', {
+          numberOfPreviousKeepers: data.numberOfPreviousKeepers,
+          previousOwners: data.previousOwners,
+          numberOfOwners: data.numberOfOwners,
+          fullData: data
+        });
+        
         setHistoryData(data);
       } catch (err) {
         // Check if it's a service unavailable error (daily limit)
