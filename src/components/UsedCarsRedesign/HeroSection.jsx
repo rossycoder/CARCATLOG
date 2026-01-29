@@ -9,11 +9,7 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
   const [searchParams, setSearchParams] = useState({
     postcode: '',
     make: '',
-    model: '',
-    minPrice: '',
-    maxPrice: '',
-    minYear: '',
-    maxYear: ''
+    maxPrice: ''
   });
   const [carCount, setCarCount] = useState(0);
   const [loadingCount, setLoadingCount] = useState(true);

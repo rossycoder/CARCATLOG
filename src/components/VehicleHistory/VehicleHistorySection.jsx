@@ -233,12 +233,16 @@ const VehicleHistorySection = ({ vrm }) => {
             <span className="stat-label">Owners</span>
             <span className="stat-value">
               {(() => {
-                const owners = historyData.numberOfPreviousKeepers || 
-                              historyData.previousOwners || 
-                              historyData.numberOfOwners || 
-                              historyData.keeperChanges;
-                // Only show number if it's greater than 0
-                return (owners && owners > 0) ? owners : 'Contact seller';
+                // Try multiple field names for owners
+                const owners = historyData.numberOfPreviousKeepers !== undefined ? historyData.numberOfPreviousKeepers :
+                              historyData.previousOwners !== undefined ? historyData.previousOwners :
+                              historyData.numberOfOwners !== undefined ? historyData.numberOfOwners :
+                              historyData.keeperChanges !== undefined ? historyData.keeperChanges :
+                              null;
+                
+                // Show number if it's defined (including 0 for first owner)
+                // Only show "Contact seller" if data is truly missing (null/undefined)
+                return owners !== null && owners !== undefined ? owners : 'Contact seller';
               })()}
             </span>
           </div>
