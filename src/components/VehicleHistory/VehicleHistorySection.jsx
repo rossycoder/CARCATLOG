@@ -187,13 +187,32 @@ const VehicleHistorySection = ({ vrm }) => {
     {
       id: 'writtenOff',
       label: 'Never been written off',
-      passed: !(historyData.hasAccidentHistory === true || 
-                historyData.isWrittenOff === true || 
-                historyData.writeOffCategory ||
-                (historyData.accidentDetails?.severity && 
-                 historyData.accidentDetails.severity !== 'unknown' && 
-                 historyData.accidentDetails.severity !== null &&
-                 historyData.accidentDetails.count > 0)),
+      passed: (() => {
+        // Check if vehicle has been written off
+        const isWrittenOff = historyData.hasAccidentHistory === true || 
+                            historyData.isWrittenOff === true;
+        
+        // Get severity category - check multiple possible fields
+        const severity = historyData.writeOffCategory || 
+                        historyData.accidentDetails?.severity;
+        const hasValidSeverity = severity && 
+                                severity !== 'unknown' && 
+                                severity !== null && 
+                                severity.trim() !== '';
+        
+        // If no write-off data at all, it's passed (clean vehicle)
+        if (!isWrittenOff && !hasValidSeverity) {
+          return true;
+        }
+        
+        // If explicitly written off or has valid severity, it failed
+        if (isWrittenOff || hasValidSeverity) {
+          return false;
+        }
+        
+        // Default to passed (clean)
+        return true;
+      })(),
       icon: '✓',
       details: (() => {
         // Check if vehicle has been written off
