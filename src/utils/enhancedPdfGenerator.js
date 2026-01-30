@@ -340,7 +340,7 @@ export const generateEnhancedVehicleReport = (vehicleData, registration) => {
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(255, 255, 255);
-  doc.text('📋 Report Summary', 20, yPos + 7);
+  doc.text('Report Summary', 20, yPos + 7);
   
   doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
@@ -389,7 +389,7 @@ export const generateEnhancedVehicleReport = (vehicleData, registration) => {
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(255, 255, 255);
-  doc.text('🚗 Vehicle Details', 20, yPos + 7);
+  doc.text('Vehicle Details', 20, yPos + 7);
   
   doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
@@ -493,7 +493,7 @@ export const generateEnhancedVehicleReport = (vehicleData, registration) => {
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(255, 255, 255);
-  doc.text('✓ All Clear', 20, yPos + 7);
+  doc.text('All Clear', 20, yPos + 7);
   
   yPos += 15;
   
@@ -607,7 +607,7 @@ export const generateEnhancedVehicleReport = (vehicleData, registration) => {
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(255, 255, 255);
-    doc.text('📊 Mileage History', 20, yPos + 7);
+    doc.text('Mileage History', 20, yPos + 7);
     
     yPos += 15;
     
@@ -672,7 +672,7 @@ export const generateEnhancedVehicleReport = (vehicleData, registration) => {
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(255, 255, 255);
-  doc.text('👥 Previous Keepers', 20, yPos + 7);
+  doc.text('Previous Keepers', 20, yPos + 7);
   
   doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
@@ -719,7 +719,7 @@ export const generateEnhancedVehicleReport = (vehicleData, registration) => {
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(255, 255, 255);
-  doc.text('🔧 MOT History', 20, yPos + 7);
+  doc.text('MOT History', 20, yPos + 7);
   
   doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
@@ -940,49 +940,53 @@ export const generateEnhancedVehicleReport = (vehicleData, registration) => {
   }
 
   // ============================================
-  // ENVIRONMENTAL IMPACT - Green Theme
+  // ENVIRONMENTAL IMPACT - Green Theme (Only if CO2 data available)
   // ============================================
-  ({ yPos, pageNum } = checkNewPage(doc, yPos, 50, pageWidth, pageHeight, pageNum));
+  const co2Value = vehicleData.co2Emissions?.value || vehicleData.co2Emissions;
   
-  // Section header with green background
-  doc.setFillColor(76, 175, 80);
-  doc.roundedRect(15, yPos, pageWidth - 30, 10, 2, 2, 'F');
-  
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.text('🌱 Environmental Impact', 20, yPos + 7);
-  
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Lower emissions = Better for environment', pageWidth - 20, yPos + 7, { align: 'right' });
-  
-  yPos += 15;
-  
-  // Info box with light green background
-  doc.setFillColor(232, 245, 233);
-  doc.roundedRect(15, yPos, pageWidth - 30, 25, 2, 2, 'F');
-  
-  yPos += 10;
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(60, 60, 60);
-  doc.text('CO2 emissions', 20, yPos);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(14);
-  doc.setTextColor(76, 175, 80);
-  doc.text(vehicleData.co2Emissions ? safeString(vehicleData.co2Emissions) + ' g/km' : 'N/A', 70, yPos);
-  
-  yPos += 10;
-  
-  // Environmental disclaimer
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'italic');
-  doc.setTextColor(120, 120, 120);
-  doc.text('Disclaimer: This information is not covered by the data guarantee.', 20, yPos);
-  
-  yPos += 15;
+  if (co2Value) {
+    ({ yPos, pageNum } = checkNewPage(doc, yPos, 50, pageWidth, pageHeight, pageNum));
+    
+    // Section header with green background
+    doc.setFillColor(76, 175, 80);
+    doc.roundedRect(15, yPos, pageWidth - 30, 10, 2, 2, 'F');
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text('Environmental Impact', 20, yPos + 7);
+    
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Lower emissions = Better for environment', pageWidth - 20, yPos + 7, { align: 'right' });
+    
+    yPos += 15;
+    
+    // Info box with light green background
+    doc.setFillColor(232, 245, 233);
+    doc.roundedRect(15, yPos, pageWidth - 30, 25, 2, 2, 'F');
+    
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(60, 60, 60);
+    doc.text('CO2 emissions', 20, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(14);
+    doc.setTextColor(76, 175, 80);
+    doc.text(safeString(co2Value) + ' g/km', 70, yPos);
+    
+    yPos += 10;
+    
+    // Environmental disclaimer
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(120, 120, 120);
+    doc.text('Disclaimer: This information is not covered by the data guarantee.', 20, yPos);
+    
+    yPos += 15;
+  }
 
   // ============================================
   // ADDITIONAL CHECKS - Import/Export/Color Changes
