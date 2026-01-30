@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import advertService from '../services/advertService';
 import './ValuationResultsPage.css';
 
 // List of motorcycle makes to detect non-car vehicles

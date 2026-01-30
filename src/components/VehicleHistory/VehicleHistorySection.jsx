@@ -198,7 +198,20 @@ const VehicleHistorySection = ({ vrm }) => {
         const hasValidSeverity = severity && 
                                 severity !== 'unknown' && 
                                 severity !== null && 
+                                severity !== 'none' &&
                                 severity.trim() !== '';
+        
+        // Debug log
+        console.log('[WriteOff Check]', {
+          isWrittenOff,
+          hasAccidentHistory: historyData.hasAccidentHistory,
+          isWrittenOffFlag: historyData.isWrittenOff,
+          severity,
+          writeOffCategory: historyData.writeOffCategory,
+          accidentDetailsSeverity: historyData.accidentDetails?.severity,
+          hasValidSeverity,
+          result: !isWrittenOff && !hasValidSeverity
+        });
         
         // If no write-off data at all, it's passed (clean vehicle)
         if (!isWrittenOff && !hasValidSeverity) {
@@ -225,6 +238,7 @@ const VehicleHistorySection = ({ vrm }) => {
         const hasValidSeverity = severity && 
                                 severity !== 'unknown' && 
                                 severity !== null && 
+                                severity !== 'none' &&
                                 severity.trim() !== '';
         
         // Get write-off details if available
@@ -250,7 +264,20 @@ const VehicleHistorySection = ({ vrm }) => {
           
           return detailText;
         } else if (isWrittenOff) {
+          // Try to get category from any available source
+          const anySeverity = historyData.writeOffCategory || 
+                             historyData.accidentDetails?.severity ||
+                             historyData.writeOffDetails?.category;
+          
           let detailText = 'This vehicle has been recorded as written off or has accident history';
+          
+          // If we have any category info, show it
+          if (anySeverity && 
+              anySeverity !== 'unknown' && 
+              anySeverity !== 'none' && 
+              anySeverity.trim() !== '') {
+            detailText = `Recorded as Category ${anySeverity.toUpperCase()} (insurance write-off)`;
+          }
           
           // Add any available details
           if (writeOffDetails?.status) {
@@ -320,8 +347,9 @@ const VehicleHistorySection = ({ vrm }) => {
             <span className="stat-value">
               {(() => {
                 const keys = historyData.numberOfKeys || historyData.keys;
-                // Only show if explicitly set and not default value
-                return (keys && keys > 0) ? keys : 'Contact seller';
+                // Show "Contact seller" if keys is 1 (default value) or not set
+                // Only show actual number if it's 2 or more
+                return (keys && keys > 1) ? keys : 'Contact seller';
               })()}
             </span>
           </div>
