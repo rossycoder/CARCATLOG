@@ -22,6 +22,65 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
     return value !== null && value !== undefined && value !== 'Unknown' && value !== '';
   };
 
+  // Enhanced valuation extraction - prefer PRIVATE price for private sellers
+  const getEstimatedValue = () => {
+    console.log('=== EXTRACTING VALUATION (PRIVATE PREFERRED) ===');
+    console.log('Enhanced Data Valuation:', enhancedData.valuation);
+    
+    // Check multiple possible locations for valuation
+    const valuation = enhancedData.valuation || 
+                     enhancedData.Valuation || 
+                     enhancedData.valuationData;
+    
+    if (!valuation) {
+      console.log('❌ No valuation object found');
+      return null;
+    }
+    
+    // Check for estimatedValue object
+    const estimatedValue = valuation.estimatedValue || 
+                          valuation.EstimatedValue || 
+                          valuation.value ||
+                          valuation.Value;
+    
+    if (!estimatedValue) {
+      console.log('❌ No estimatedValue found in valuation');
+      return null;
+    }
+    
+    console.log('Estimated Value Object:', estimatedValue);
+    
+    // If it's an object with retail/trade/private
+    if (typeof estimatedValue === 'object' && estimatedValue !== null) {
+      // For private sellers, prefer PRIVATE price first
+      const privateValue = estimatedValue.private || 
+                          estimatedValue.Private || 
+                          estimatedValue.privatePrice;
+      const retailValue = estimatedValue.retail || 
+                         estimatedValue.Retail || 
+                         estimatedValue.retailPrice;
+      const tradeValue = estimatedValue.trade || 
+                        estimatedValue.Trade || 
+                        estimatedValue.tradePrice;
+      
+      console.log('Valuation breakdown:', { private: privateValue, retail: retailValue, trade: tradeValue });
+      
+      // Prefer PRIVATE for private sellers, then retail, then trade
+      const finalValue = privateValue || retailValue || tradeValue || estimatedValue.value;
+      console.log('✅ Selected valuation (PRIVATE preferred):', finalValue);
+      return finalValue;
+    }
+    
+    // If it's a direct number
+    if (typeof estimatedValue === 'number') {
+      console.log('✅ Direct number valuation:', estimatedValue);
+      return estimatedValue;
+    }
+    
+    console.log('❌ Could not extract valuation value');
+    return null;
+  };
+
   // Create a descriptive model if not available
   const getModelDisplay = () => {
     const model = getValue(enhancedData.model);
@@ -95,7 +154,7 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
     taxDue: null,
     co2Emissions: getValue(enhancedData.runningCosts?.co2Emissions) || null,
     euroStatus: null,
-    estimatedValue: getValue(enhancedData.valuation?.estimatedValue?.retail) || null
+    estimatedValue: getEstimatedValue()
   };
 };
 
@@ -134,6 +193,26 @@ const CarFinderFormPage = () => {
       return;
     }
     
+    // Check for pending vehicle details (after sign in)
+    const pendingDetails = localStorage.getItem('pendingVehicleDetails');
+    if (pendingDetails) {
+      try {
+        const parsed = JSON.parse(pendingDetails);
+        setVehicleDetails(parsed);
+        // Clear the pending details after loading
+        localStorage.removeItem('pendingVehicleDetails');
+        // Scroll to vehicle details
+        setTimeout(() => {
+          document.getElementById('vehicle-details')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+        return;
+      } catch (e) {
+        console.error('Failed to parse pending vehicle details');
+        localStorage.removeItem('pendingVehicleDetails');
+      }
+    }
+    
+    // Load saved form data (registration and mileage only, NOT vehicle details)
     const savedData = localStorage.getItem('carFinderFormData');
     if (savedData) {
       try {
@@ -658,7 +737,7 @@ const CarFinderFormPage = () => {
                           // Redirect to sign in page
                           navigate('/signin', { 
                             state: { 
-                              from: '/find-your-car',
+                              from: { pathname: '/find-your-car' },
                               message: 'Please sign in to continue listing your vehicle'
                             } 
                           });
@@ -697,20 +776,9 @@ const CarFinderFormPage = () => {
         </section>
       )}
 
-      {/* Back to Top Button */}
-      {showBackToTop && (
-        <button
-          className="back-to-top-button"
-          onClick={scrollToTop}
-          aria-label="Back to top"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 19V5M5 12l7-7 7 7"/>
-          </svg>
-          <span className="back-to-top-text">Back to top</span>
-        </button>
-      )}
-
+     
+     
+     
       
 
     </div>

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import SEOHelmet from '../components/SEO/SEOHelmet';
+import { breadcrumbSchema } from '../utils/seoSchemas';
 import { filterService } from '../services/filterService';
 import './NewCarsPage.css';
 
@@ -81,13 +83,24 @@ const NewCarsPage = () => {
   };
 
   return (
-    <div className="new-cars-page">
-      {/* Hero Section */}
-      <section className="new-hero">
-        <div className="new-hero-background">
-          <div className="new-hero-container">
-            <span className="new-hero-label">New Cars</span>
-            <h1 className="new-hero-title">Nothing like that smell of a new car</h1>
+    <>
+      <SEOHelmet 
+        title="New Cars for Sale UK | Latest Models & Best Deals | CarCatlog"
+        description="Discover the latest new cars for sale in the UK. Compare prices, specifications, and find the best deals on brand new vehicles from trusted dealers. Get your dream car today."
+        keywords="new cars UK, brand new cars, latest car models, new car deals, buy new car, new car prices, car dealerships UK"
+        url="/new-cars"
+        schema={breadcrumbSchema([
+          { name: 'Home', url: '/' },
+          { name: 'New Cars', url: '/new-cars' }
+        ])}
+      />
+      <div className="new-cars-page">
+        {/* Hero Section */}
+        <section className="new-hero">
+          <div className="new-hero-background">
+            <div className="new-hero-container">
+              <span className="new-hero-label">New Cars</span>
+              <h1 className="new-hero-title">Nothing like that smell of a new car</h1>
             
             <div className="new-search-card">
               <div className="new-search-fields">
@@ -291,7 +304,8 @@ const NewCarsPage = () => {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 };
 

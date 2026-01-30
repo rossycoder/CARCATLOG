@@ -15,7 +15,10 @@ const VehicleHistorySection = ({ vrm }) => {
       try {
         setIsLoading(true);
         setError(null);
-        const result = await checkVehicleHistory(vrm);
+        
+        // Force fresh data - add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        const result = await checkVehicleHistory(vrm, timestamp);
         const data = result.data || result;
         
         // Debug log to see what data we're receiving
@@ -23,6 +26,7 @@ const VehicleHistorySection = ({ vrm }) => {
           numberOfPreviousKeepers: data.numberOfPreviousKeepers,
           previousOwners: data.previousOwners,
           numberOfOwners: data.numberOfOwners,
+          checkDate: data.checkDate,
           fullData: data
         });
         
@@ -202,13 +206,47 @@ const VehicleHistorySection = ({ vrm }) => {
         const hasValidSeverity = severity && 
                                 severity !== 'unknown' && 
                                 severity !== null && 
-                                severity.trim() !== '' &&
-                                historyData.accidentDetails?.count > 0;
+                                severity.trim() !== '';
+        
+        // Get write-off details if available
+        const writeOffDetails = historyData.writeOffDetails;
         
         if (isWrittenOff && hasValidSeverity) {
-          return `Recorded as Category ${severity.toUpperCase()} (insurance write-off)`;
+          let detailText = `Recorded as Category ${severity.toUpperCase()} (insurance write-off)`;
+          
+          // Add date if available
+          if (writeOffDetails?.date) {
+            const dateStr = new Date(writeOffDetails.date).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            });
+            detailText += `. Reported on ${dateStr}`;
+          }
+          
+          // Add status description if available
+          if (writeOffDetails?.status && writeOffDetails.status !== severity) {
+            detailText += `. Status: ${writeOffDetails.status}`;
+          }
+          
+          return detailText;
         } else if (isWrittenOff) {
-          return 'This vehicle has been recorded as written off or has accident history.';
+          let detailText = 'This vehicle has been recorded as written off or has accident history';
+          
+          // Add any available details
+          if (writeOffDetails?.status) {
+            detailText += `. Status: ${writeOffDetails.status}`;
+          }
+          if (writeOffDetails?.date) {
+            const dateStr = new Date(writeOffDetails.date).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            });
+            detailText += `. Reported on ${dateStr}`;
+          }
+          
+          return detailText + '.';
         } else {
           return 'This vehicle has no recorded accident history or write-off status.';
         }

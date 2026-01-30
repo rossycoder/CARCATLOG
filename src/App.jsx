@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
+import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider } from './context/AuthContext'
 import { TradeDealerProvider } from './context/TradeDealerContext'
 import Header from './components/Header'
@@ -92,13 +93,14 @@ function ScrollToTop() {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <TradeDealerProvider>
-          <ScrollToTop />
-          <div className="App">
-            <Header />
-            <main>
+    <HelmetProvider>
+      <Router>
+        <AuthProvider>
+          <TradeDealerProvider>
+            <ScrollToTop />
+            <div className="App">
+              <Header />
+              <main>
               <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/used-cars" element={<UsedCarsPage />} />
@@ -216,12 +218,13 @@ function App() {
                 }
               />
             </Routes>
-          </main>
-          <Footer />
-        </div>
-        </TradeDealerProvider>
-      </AuthProvider>
-    </Router>
+            </main>
+            <Footer />
+          </div>
+          </TradeDealerProvider>
+        </AuthProvider>
+      </Router>
+    </HelmetProvider>
   )
 }
 

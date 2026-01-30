@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { checkVehicleHistory } from '../services/vehicleHistoryService';
-import { generateVehicleHistoryPDF } from '../utils/pdfGenerator';
+import { carService } from '../services/carService';
+import { generateEnhancedVehicleReport } from '../utils/enhancedPdfGenerator';
 import './PaymentSuccessPage.css';
 
 const PaymentSuccessPage = () => {
@@ -27,62 +27,83 @@ const PaymentSuccessPage = () => {
   const generateVehicleReport = async () => {
     try {
       setIsLoading(true);
-      console.log('Fetching real vehicle data for:', registration);
+      console.log('Fetching comprehensive vehicle data for:', registration);
       
-      // Call both APIs in parallel to get complete vehicle data
-      const [historyResponse, dvlaResponse] = await Promise.allSettled([
-        checkVehicleHistory(registration, true),
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/vehicles/dvla-lookup`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ registrationNumber: registration })
-        }).then(res => res.json())
-      ]);
+      // Use enhanced lookup API (CheckCarDetails) instead of DVLA
+      const response = await carService.enhancedLookup(registration, 0);
       
-      console.log('History API Response:', historyResponse);
-      console.log('DVLA API Response:', dvlaResponse);
+      console.log('Enhanced API Response:', response);
       
-      // Check if DVLA API failed - this is critical, we need vehicle details
-      if (dvlaResponse.status === 'rejected' || !dvlaResponse.value?.success) {
-        const errorMsg = dvlaResponse.value?.error || dvlaResponse.reason?.message || 'Unable to fetch vehicle details';
-        throw new Error(`DVLA API Error: ${errorMsg}`);
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Unable to fetch vehicle details');
       }
       
-      // Extract DVLA data (required)
-      const dvlaData = dvlaResponse.value.data;
+      const enhancedData = response.data;
       
-      // Extract History data (optional - use defaults if failed)
-      let historyData = {};
-      if (historyResponse.status === 'fulfilled' && historyResponse.value?.success) {
-        historyData = historyResponse.value.data;
-        console.log('History API succeeded, using real history data');
-      } else {
-        console.warn('History API failed, using default values for history checks');
-      }
+      // Helper function to safely extract value from {value, source} format or direct value
+      const getValue = (field) => {
+        if (field === null || field === undefined) return null;
+        if (typeof field === 'object' && field !== null && 'value' in field) {
+          return field.value;
+        }
+        return field;
+      };
       
-      // Combine real data from both APIs (DVLA required, History optional)
+      // Format the data for PDF (same structure as VehicleCheckPage)
       const combinedData = {
         vrm: registration.toUpperCase(),
         checkDate: new Date().toISOString(),
-        // DVLA vehicle details (required)
-        make: dvlaData.make,
-        model: dvlaData.model,
-        year: dvlaData.yearOfManufacture || dvlaData.year,
-        colour: dvlaData.colour || dvlaData.color,
-        fuelType: dvlaData.fuelType || dvlaData.fuel,
-        engineSize: dvlaData.engineCapacity ? `${dvlaData.engineCapacity}cc` : null,
-        // History check data (optional - defaults to safe values)
-        stolen: historyData.isStolen || false,
-        writeOff: historyData.isWrittenOff || false,
-        outstandingFinance: historyData.hasOutstandingFinance || false,
-        previousOwners: historyData.previousOwners || historyData.numberOfOwners || 0,
-        serviceHistory: historyData.serviceHistory || 'Contact seller for service history',
-        motStatus: historyData.motStatus || dvlaData.motStatus || 'Unknown',
-        motExpiryDate: historyData.motExpiryDate || dvlaData.motExpiryDate,
+        // Vehicle details
+        make: getValue(enhancedData.make) || 'Unknown',
+        model: getValue(enhancedData.model) || 'Unknown',
+        variant: getValue(enhancedData.variant),
+        year: getValue(enhancedData.year),
+        colour: getValue(enhancedData.color),
+        fuelType: getValue(enhancedData.fuelType),
+        engineSize: getValue(enhancedData.engineSize),
+        transmission: getValue(enhancedData.transmission),
+        bodyType: getValue(enhancedData.bodyType),
+        doors: getValue(enhancedData.doors),
+        seats: getValue(enhancedData.seats),
+        // Safety checks
+        stolen: enhancedData.isStolen || false,
+        writeOff: enhancedData.isWrittenOff || false,
+        outstandingFinance: enhancedData.hasOutstandingFinance || false,
+        writeOffCategory: enhancedData.writeOffCategory || null,
+        // Additional info
+        previousOwners: getValue(enhancedData.previousOwners) || 0,
+        mileage: getValue(enhancedData.mileage) || 0,
+        serviceHistory: 'Contact seller for service history',
+        motStatus: getValue(enhancedData.motStatus) || 'Unknown',
+        motExpiryDate: getValue(enhancedData.motExpiry) || getValue(enhancedData.motDue),
+        // Running costs
+        co2Emissions: enhancedData.runningCosts?.co2Emissions || enhancedData.co2Emissions || null,
+        insuranceGroup: getValue(enhancedData.runningCosts?.insuranceGroup) || getValue(enhancedData.insuranceGroup),
+        annualTax: getValue(enhancedData.runningCosts?.annualTax) || getValue(enhancedData.annualTax),
+        // MOT History - Add this data
+        motHistory: enhancedData.motHistory || [],
+        // Mileage History
+        mileageHistory: enhancedData.mileageHistory || [],
+        // Valuation
+        valuation: enhancedData.valuation ? {
+          estimatedValue: enhancedData.valuation.estimatedValue ? {
+            retail: getValue(enhancedData.valuation.estimatedValue.retail),
+            private: getValue(enhancedData.valuation.estimatedValue.private),
+            partExchange: getValue(enhancedData.valuation.estimatedValue.partExchange)
+          } : null
+        } : null,
+        // Full data for reference
+        fullData: enhancedData
       };
       
-      console.log('Combined real vehicle data:', combinedData);
+      console.log('Combined vehicle data for PDF:', combinedData);
       setVehicleData(combinedData);
+      
+      // Auto-download PDF after data is loaded
+      setTimeout(() => {
+        console.log('Auto-downloading enhanced PDF report...');
+        generateEnhancedVehicleReport(combinedData, registration);
+      }, 1000); // Small delay to ensure state is updated
       
     } catch (err) {
       console.error('Error generating vehicle report:', err);
@@ -108,11 +129,13 @@ const PaymentSuccessPage = () => {
         return;
       }
       
-      generateVehicleHistoryPDF(vehicleData, registration);
+      // Use enhanced PDF generator
+      generateEnhancedVehicleReport(vehicleData, registration);
       console.log('PDF generation completed successfully');
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+      console.error('Error details:', error.message);
+      alert('Failed to generate PDF: ' + error.message + '\n\nPlease check the console for more details.');
     }
   };
 

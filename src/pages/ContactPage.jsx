@@ -1,4 +1,6 @@
 import { FaWhatsapp, FaPhone, FaEnvelope } from 'react-icons/fa';
+import SEOHelmet from '../components/SEO/SEOHelmet';
+import { breadcrumbSchema } from '../utils/seoSchemas';
 import './ContactPage.css';
 
 const ContactPage = () => {
@@ -27,7 +29,18 @@ const ContactPage = () => {
   ];
 
   return (
-    <div className="contact-page">
+    <>
+      <SEOHelmet 
+        title="Contact Us | Get in Touch with CarCatlog Support"
+        description="Need help? Contact CarCatlog support team via WhatsApp, phone, or email. We're here to assist you with buying, selling, or any questions about our platform."
+        keywords="contact carcatlog, customer support, help, contact us, car marketplace support"
+        url="/contact"
+        schema={breadcrumbSchema([
+          { name: 'Home', url: '/' },
+          { name: 'Contact Us', url: '/contact' }
+        ])}
+      />
+      <div className="contact-page">
       <div className="contact-hero">
         <div className="contact-hero-content">
           <h1>Contact Us</h1>
@@ -48,7 +61,8 @@ const ContactPage = () => {
           ))}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

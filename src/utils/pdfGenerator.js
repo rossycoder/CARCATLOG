@@ -11,6 +11,43 @@ export const generateVehicleHistoryPDF = (vehicleData, registration) => {
   const pageHeight = doc.internal.pageSize.getHeight();
   let yPos = 20;
 
+  // Add watermark in background (before any content)
+  doc.setTextColor(245, 245, 245); // Very light gray
+  doc.setFontSize(50);
+  doc.setFont('helvetica', 'bold');
+  
+  // Save the current state
+  doc.saveGraphicsState();
+  
+  // Set opacity for watermark
+  doc.setGState(new doc.GState({ opacity: 0.08 })); // 8% opacity for subtle effect
+  
+  // Calculate center position
+  const centerX = pageWidth / 2;
+  const centerY = pageHeight / 2;
+  
+  // Add diagonal watermarks across the page
+  const watermarkText = 'CARCATLOG';
+  
+  // Multiple watermarks in a pattern
+  const positions = [
+    { x: centerX, y: centerY - 60 },
+    { x: centerX, y: centerY },
+    { x: centerX, y: centerY + 60 },
+    { x: centerX - 40, y: centerY + 120 },
+    { x: centerX + 40, y: centerY - 120 }
+  ];
+  
+  positions.forEach(pos => {
+    doc.text(watermarkText, pos.x, pos.y, {
+      align: 'center',
+      angle: 45
+    });
+  });
+  
+  // Restore state
+  doc.restoreGraphicsState();
+
   // Header with branding
   doc.setFillColor(41, 128, 185);
   doc.rect(0, 0, pageWidth, 40, 'F');

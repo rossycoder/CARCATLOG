@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import SEOHelmet from '../components/SEO/SEOHelmet';
+import { breadcrumbSchema } from '../utils/seoSchemas';
 import './SellYourCarPage.css';
 
 // Utility component for the main blue CTA cards
-const CTACard = ({ title, benefits, isPrimary }) => {
+const CTACard = ({ title, benefits }) => {
   return (
     <div className="cta-card">
       <h3 className="cta-card-title">{title}</h3>
@@ -172,15 +174,26 @@ const SellYourCarPage = () => {
 
 
   return (
-    <div className="sell-your-car-page">
-      {/* Section 1: Hero Header */}
-      <section className="hero-header-section">
-        <div className="hero-header-background">
-          <div className="hero-header-content">
-            <p className="hero-label">Sell your car</p>
-            <h1 className="hero-main-title">
-              Advertise your car on UK's Newest vehicle listing platform
-            </h1>
+    <>
+      <SEOHelmet 
+        title="Sell Your Car Fast | Free Valuation & Easy Listing | CarCatlog"
+        description="Sell your car quickly and easily on UK's newest vehicle listing platform. Get a free instant valuation, create your listing in minutes, and reach thousands of potential buyers."
+        keywords="sell my car, car valuation, sell car online, quick car sale, free car valuation UK, advertise car, private car sale"
+        url="/sell-your-car"
+        schema={breadcrumbSchema([
+          { name: 'Home', url: '/' },
+          { name: 'Sell Your Car', url: '/sell-your-car' }
+        ])}
+      />
+      <div className="sell-your-car-page">
+        {/* Section 1: Hero Header */}
+        <section className="hero-header-section">
+          <div className="hero-header-background">
+            <div className="hero-header-content">
+              <p className="hero-label">Sell your car</p>
+              <h1 className="hero-main-title">
+                Advertise your car on UK's Newest vehicle listing platform
+              </h1>
           </div>
         </div>
       </section>
@@ -231,8 +244,8 @@ const SellYourCarPage = () => {
           </div>
         </div>
       </section>
-
-    </div>
+      </div>
+    </>
   );
 };
 

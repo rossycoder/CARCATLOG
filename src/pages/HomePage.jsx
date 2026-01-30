@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaFacebookF, FaYoutube, FaInstagram, FaTiktok } from 'react-icons/fa';
+import SEOHelmet from '../components/SEO/SEOHelmet';
+import { organizationSchema, websiteSchema } from '../utils/seoSchemas';
 
 import AdvertisingPromotionSection from '../components/AdvertisingPromotionSection';
 import { carService } from '../services/carService';
@@ -177,9 +179,20 @@ const HomePage = () => {
   };
 
   return (
-    <div className="home-page">
-      {/* Hero Section with Background Image and Search Bar */}
-      <section className="hero-section-with-search">
+    <>
+      <SEOHelmet 
+        title="CarCatlog - Buy & Sell Cars, Bikes & Vans in UK | Best Deals"
+        description={`Find your perfect vehicle from ${totalCars.toLocaleString()}+ cars, bikes and vans. Get instant vehicle checks, free valuations, and sell your vehicle quickly. Trusted UK marketplace.`}
+        keywords="buy cars UK, sell cars online, used cars for sale, new cars, car valuation, vehicle check, MOT history, bikes for sale, vans for sale, car marketplace UK"
+        url="/"
+        schema={{
+          "@context": "https://schema.org",
+          "@graph": [organizationSchema, websiteSchema]
+        }}
+      />
+      <div className="home-page">
+        {/* Hero Section with Background Image and Search Bar */}
+        <section className="hero-section-with-search">
         <div className="hero-background-overlay"></div>
         <div className="container">
           <div className="hero-content">
@@ -471,33 +484,6 @@ const HomePage = () => {
         
         </div>
       </section>
-    </div>
-  );
-};
-
-
-
-// Browse Brands Component with Expand/Collapse
-const BrowseBrands = () => {
-  const [showAll, setShowAll] = useState(false);
-  
-  const displayedBrands = showAll ? getAllBrands() : getFeaturedBrands();
-
-  return (
-    <>
-      <div className="brands-grid">
-        {displayedBrands.map((brand) => (
-          <div key={brand.name} className="brand-tile">
-            <div className="brand-logo">{brand.logo}</div>
-            <h3>{brand.name.toUpperCase()}</h3>
-          </div>
-        ))}
-      </div>
-      <div className="show-all-brands">
-        <button onClick={() => setShowAll(!showAll)} className="show-all-btn">
-          <span className="plus-icon">{showAll ? '−' : '+'}</span>
-          {showAll ? 'Hide all brands' : 'Show all brands'}
-        </button>
       </div>
     </>
   );

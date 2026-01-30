@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import SEOHelmet from '../components/SEO/SEOHelmet';
+import { breadcrumbSchema, faqSchema } from '../utils/seoSchemas';
 import ValuationForm from '../components/Valuation/ValuationForm';
 import ValuationResult from '../components/Valuation/ValuationResult';
 import { getDetailedValuation } from '../services/valuationService';
@@ -243,7 +245,37 @@ const ValuationPage = () => {
   };
 
   return (
-    <div className="valuation-page">
+    <>
+      <SEOHelmet 
+        title="Free Car Valuation UK | Instant Vehicle Value Check | CarCatlog"
+        description="Get a free, instant car valuation in seconds. We analyze millions of used cars to provide accurate, independent valuations. No obligations, completely free."
+        keywords="car valuation UK, free car valuation, vehicle value check, how much is my car worth, instant car valuation, sell my car value"
+        url="/valuation"
+        schema={{
+          "@context": "https://schema.org",
+          "@graph": [
+            breadcrumbSchema([
+              { name: 'Home', url: '/' },
+              { name: 'Car Valuation', url: '/valuation' }
+            ]),
+            faqSchema([
+              {
+                question: "How accurate is the car valuation?",
+                answer: "We analyze millions of used cars to provide accurate, data-driven valuations based on current market conditions."
+              },
+              {
+                question: "Is the valuation really free?",
+                answer: "Yes, our car valuation service is completely free with no obligations or hidden costs."
+              },
+              {
+                question: "How long does it take to get a valuation?",
+                answer: "You'll receive your vehicle valuation in seconds after entering your registration and mileage."
+              }
+            ])
+          ]
+        }}
+      />
+      <div className="valuation-page">
       {/* Hero Section */}
       <div className="valuation-hero">
         <div className="hero-content">
@@ -358,7 +390,8 @@ const ValuationPage = () => {
 
       
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

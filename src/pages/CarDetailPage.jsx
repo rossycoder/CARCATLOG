@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import SEOHelmet from '../components/SEO/SEOHelmet';
+import { vehicleSchema, breadcrumbSchema } from '../utils/seoSchemas';
 import VehicleHistorySection from '../components/VehicleHistory/VehicleHistorySection';
 import MOTHistorySection from '../components/VehicleHistory/MOTHistorySection';
 import LocationDisplay from '../components/Location/LocationDisplay';
@@ -96,13 +98,37 @@ const CarDetailPage = () => {
     ? car.images 
     : ['/images/dummy/placeholder-car.jpg'];
 
+  // Generate SEO data
+  const carTitle = `${car.year} ${car.make} ${car.model}${car.submodel ? ` ${car.submodel}` : ''}`;
+  const carDescription = `${carTitle} for sale. ${formatMileage(car.mileage)} miles, ${car.fuelType}, ${car.transmission}. ${car.description ? car.description.substring(0, 100) : 'View full details and contact seller.'}`;
+  const carLocation = extractTownName(car.locationName) || 'UK';
+
   return (
-    <div className="car-detail-page">
-      <div className="detail-container">
-        {/* Back Button */}
-        <button onClick={handleBackClick} className="back-to-results">
-          ← Back to results
-        </button>
+    <>
+      <SEOHelmet 
+        title={`${carTitle} for Sale in ${carLocation} | ${formatPrice(car.price)} | CarCatlog`}
+        description={carDescription}
+        keywords={`${car.make} ${car.model}, ${car.year} ${car.make}, ${car.fuelType} car, ${car.transmission} car, used ${car.make}, cars for sale ${carLocation}`}
+        url={`/cars/${car._id}`}
+        image={images[0]}
+        schema={{
+          "@context": "https://schema.org",
+          "@graph": [
+            vehicleSchema(car),
+            breadcrumbSchema([
+              { name: 'Home', url: '/' },
+              { name: 'Used Cars', url: '/used-cars' },
+              { name: carTitle, url: `/cars/${car._id}` }
+            ])
+          ]
+        }}
+      />
+      <div className="car-detail-page">
+        <div className="detail-container">
+          {/* Back Button */}
+          <button onClick={handleBackClick} className="back-to-results">
+            ← Back to results
+          </button>
 
         {/* Image Gallery */}
         <div className="image-gallery">
@@ -511,7 +537,8 @@ const CarDetailPage = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import SEOHelmet from '../components/SEO/SEOHelmet';
+import { breadcrumbSchema } from '../utils/seoSchemas';
 import './UsedCarsPage.css';
 import HeroSection from '../components/UsedCarsRedesign/HeroSection';
 import FeaturedContent from '../components/UsedCarsRedesign/FeaturedContent';
@@ -45,12 +47,23 @@ const UsedCarsPage = () => {
   };
 
   return (
-    <div className="used-cars-page-redesign">
-      <HeroSection 
-        headline={heroContent.headline}
-        subheadline={heroContent.subheadline}
-        onFilterClick={handleFilterClick}
+    <>
+      <SEOHelmet 
+        title="Used Cars for Sale UK | Quality Pre-Owned Vehicles | CarCatlog"
+        description={`Browse ${carCount.toLocaleString()}+ quality used cars for sale across the UK. Find your perfect pre-owned vehicle with detailed history checks, competitive prices, and trusted sellers.`}
+        keywords="used cars UK, second hand cars, pre-owned cars, quality used vehicles, buy used car, certified pre-owned, used car deals"
+        url="/used-cars"
+        schema={breadcrumbSchema([
+          { name: 'Home', url: '/' },
+          { name: 'Used Cars', url: '/used-cars' }
+        ])}
       />
+      <div className="used-cars-page-redesign">
+        <HeroSection 
+          headline={heroContent.headline}
+          subheadline={heroContent.subheadline}
+          onFilterClick={handleFilterClick}
+        />
       
     
      {/* Partners Section */}
@@ -98,7 +111,8 @@ const UsedCarsPage = () => {
       />
       
       <ValueProposition benefits={benefits} />
-    </div>
+      </div>
+    </>
   );
 };
 

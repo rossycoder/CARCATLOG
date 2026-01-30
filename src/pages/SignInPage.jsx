@@ -18,7 +18,7 @@ const SignInPage = () => {
   const [showPasswordText, setShowPasswordText] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
 
-  const from = location.state?.from?.pathname || '/';
+  const from = location.state?.from?.pathname || location.state?.from || '/';
 
   const handleEmailContinue = async (e) => {
     e.preventDefault();
@@ -79,6 +79,12 @@ const SignInPage = () => {
             // Redirect to check email page
             navigate('/check-email', { state: { email } });
           } else {
+            // Check if there are pending vehicle details
+            const pendingVehicleDetails = localStorage.getItem('pendingVehicleDetails');
+            if (pendingVehicleDetails && from === '/find-your-car') {
+              // Clear the pending details
+              localStorage.removeItem('pendingVehicleDetails');
+            }
             // User is already logged in via register context
             navigate(from, { replace: true });
           }
@@ -90,6 +96,12 @@ const SignInPage = () => {
         const result = await login({ email, password });
         
         if (result.success) {
+          // Check if there are pending vehicle details
+          const pendingVehicleDetails = localStorage.getItem('pendingVehicleDetails');
+          if (pendingVehicleDetails && from === '/find-your-car') {
+            // Clear the pending details
+            localStorage.removeItem('pendingVehicleDetails');
+          }
           // Navigate to previous page or home
           navigate(from, { replace: true });
         } else {

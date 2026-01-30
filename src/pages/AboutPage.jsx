@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import SEOHelmet from '../components/SEO/SEOHelmet';
+import { breadcrumbSchema, organizationSchema } from '../utils/seoSchemas';
 import './AboutPage.css';
 
 const AboutPage = () => {
@@ -8,7 +10,24 @@ const AboutPage = () => {
   }, []);
 
   return (
-    <div className="about-page">
+    <>
+      <SEOHelmet 
+        title="About CarCatlog | UK's Newest Vehicle Marketplace"
+        description="Learn about CarCatlog - the UK's newest online vehicle listing platform built on transparency, fairness, and value. Discover our mission to revolutionize how vehicles are bought and sold."
+        keywords="about carcatlog, vehicle marketplace UK, car listing platform, transparent car sales, motor trade platform"
+        url="/about"
+        schema={{
+          "@context": "https://schema.org",
+          "@graph": [
+            organizationSchema,
+            breadcrumbSchema([
+              { name: 'Home', url: '/' },
+              { name: 'About Us', url: '/about' }
+            ])
+          ]
+        }}
+      />
+      <div className="about-page">
       <section className="about-hero">
         <div className="container">
           <h1>About CarCatALog</h1>
@@ -81,7 +100,8 @@ const AboutPage = () => {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import SEOHelmet from '../components/SEO/SEOHelmet';
-import { breadcrumbSchema, faqSchema } from '../utils/seoSchemas';
 import { carService } from '../services/carService';
 import './VehicleCheckPage.css';
 
@@ -105,92 +103,8 @@ const VehicleCheckPage = () => {
     navigate(paymentUrl);
   };
 
-  const handleViewSampleReport = () => {
-    // Generate enhanced sample PDF with comprehensive data
-    const sampleData = {
-      vrm: 'AB12CDE',
-      make: 'FORD',
-      model: 'FIESTA',
-      year: 2014,
-      colour: 'Blue',
-      fuelType: 'Petrol',
-      engineSize: '1.0L',
-      transmission: 'Manual',
-      doors: 5,
-      seats: 5,
-      bodyType: 'Hatchback',
-      stolen: false,
-      writeOff: false,
-      outstandingFinance: false,
-      mileage: 45000,
-      previousOwners: 2,
-      serviceHistory: 'Full Service History',
-      motStatus: 'Valid',
-      motExpiryDate: '2025-06-15',
-      checkDate: new Date().toISOString(),
-      // Mileage history for graph
-      mileageHistory: [
-        { year: 2014, mileage: 0 },
-        { year: 2016, mileage: 15000 },
-        { year: 2018, mileage: 28000 },
-        { year: 2020, mileage: 38000 },
-        { year: 2022, mileage: 42000 },
-        { year: 2024, mileage: 45000 }
-      ]
-    };
-    
-    // Use the enhanced PDF generator with sample data
-    try {
-      import('../utils/enhancedPdfGenerator').then(({ generateEnhancedVehicleReport }) => {
-        try {
-          generateEnhancedVehicleReport(sampleData, 'AB12CDE');
-          console.log('Enhanced sample report generated with registration: AB12CDE');
-        } catch (err) {
-          console.error('Error generating enhanced sample PDF:', err);
-          alert('Unable to generate sample report: ' + err.message);
-        }
-      }).catch(err => {
-        console.error('Error loading PDF generator:', err);
-        alert('Unable to load PDF generator. Please try again.');
-      });
-    } catch (err) {
-      console.error('Error in handleViewSampleReport:', err);
-      alert('Unable to generate sample report. Please try again.');
-    }
-  };
-
   return (
-    <>
-      <SEOHelmet 
-        title="Vehicle Check UK | Full Car History & MOT Check | CarCatlog"
-        description="Get a comprehensive vehicle history check in seconds. Check MOT history, mileage, write-offs, outstanding finance, and more. Instant results for any UK vehicle registration."
-        keywords="vehicle check UK, car history check, MOT check, HPI check, vehicle history, mileage check, write off check, stolen car check, finance check"
-        url="/vehicle-check"
-        schema={{
-          "@context": "https://schema.org",
-          "@graph": [
-            breadcrumbSchema([
-              { name: 'Home', url: '/' },
-              { name: 'Vehicle Check', url: '/vehicle-check' }
-            ]),
-            faqSchema([
-              {
-                question: "What does a vehicle check include?",
-                answer: "Our vehicle check includes MOT history, mileage verification, write-off status, outstanding finance, stolen vehicle check, and comprehensive vehicle specifications."
-              },
-              {
-                question: "How quickly will I get the results?",
-                answer: "You'll receive instant results as soon as you enter the vehicle registration number."
-              },
-              {
-                question: "Is the vehicle check reliable?",
-                answer: "Yes, we use official DVLA data and trusted sources to provide accurate and up-to-date vehicle information."
-              }
-            ])
-          ]
-        }}
-      />
-      <div className="vehicle-check-page">
+    <div className="vehicle-check-page">
       {/* Hero Section */}
       <section className="hero-section">
         <div className="container">
@@ -319,6 +233,188 @@ const VehicleCheckPage = () => {
                   </div>
                 )}
               </div>
+
+              <button className="get-check-button" onClick={handleGetCheck}>
+                Get full vehicle history check
+              </button>
+
+              <p className="not-right-vehicle">
+                Not the right vehicle? <button onClick={() => setShowVehicleFound(false)} className="search-again-link">Search again</button>
+              </p>
+
+              <div className="check-benefits">
+                <div className="benefit-item">
+                  <span className="check-icon">✓</span>
+                  <span>Up to £30,000 data guarantee</span>
+                </div>
+                <div className="benefit-item">
+                  <span className="check-icon">✓</span>
+                  <span>27 point independent report</span>
+                </div>
+                <div className="benefit-item">
+                  <span className="check-icon">✓</span>
+                  <span>Over 15,000 checks completed per month</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+              <div className="vehicle-details-section-header">
+                <h4>Basic Information</h4>
+              </div>
+              <div className="vehicle-details-table">
+                <div className="detail-row">
+                  <span className="label">Registration</span>
+                  <span className="value">{vehicleData.vrm}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Make</span>
+                  <span className="value">{vehicleData.make}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Model</span>
+                  <span className="value">{vehicleData.model}</span>
+                </div>
+                {vehicleData.variant && (
+                  <div className="detail-row">
+                    <span className="label">Variant</span>
+                    <span className="value">{vehicleData.variant}</span>
+                  </div>
+                )}
+                {vehicleData.bodyType && vehicleData.bodyType !== 'Body type unavailable' && (
+                  <div className="detail-row">
+                    <span className="label">Body type</span>
+                    <span className="value">{vehicleData.bodyType}</span>
+                  </div>
+                )}
+                <div className="detail-row">
+                  <span className="label">Colour</span>
+                  <span className="value">{vehicleData.colour}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">First registered</span>
+                  <span className="value">{vehicleData.firstRegistered}</span>
+                </div>
+                {vehicleData.fuelType && vehicleData.fuelType !== 'Fuel type unavailable' && (
+                  <div className="detail-row">
+                    <span className="label">Fuel type</span>
+                    <span className="value">{vehicleData.fuelType}</span>
+                  </div>
+                )}
+                {vehicleData.transmission && vehicleData.transmission !== 'Transmission unavailable' && (
+                  <div className="detail-row">
+                    <span className="label">Transmission</span>
+                    <span className="value">{vehicleData.transmission}</span>
+                  </div>
+                )}
+                {vehicleData.engineSize && vehicleData.engineSize !== 'Engine size unavailable' && (
+                  <div className="detail-row">
+                    <span className="label">Engine size</span>
+                    <span className="value">{vehicleData.engineSize}</span>
+                  </div>
+                )}
+                {vehicleData.doors && (
+                  <div className="detail-row">
+                    <span className="label">Doors</span>
+                    <span className="value">{vehicleData.doors}</span>
+                  </div>
+                )}
+                {vehicleData.seats && (
+                  <div className="detail-row">
+                    <span className="label">Seats</span>
+                    <span className="value">{vehicleData.seats}</span>
+                  </div>
+                )}
+                {vehicleData.previousOwners !== null && (
+                  <div className="detail-row">
+                    <span className="label">Previous owners</span>
+                    <span className="value">{vehicleData.previousOwners}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Running Costs */}
+              {(vehicleData.co2Emissions || vehicleData.fuelEconomy || vehicleData.annualTax || vehicleData.insuranceGroup) && (
+                <>
+                  <div className="vehicle-details-section-header">
+                    <h4>Running Costs</h4>
+                  </div>
+                  <div className="vehicle-details-table">
+                    {vehicleData.co2Emissions && (
+                      <div className="detail-row">
+                        <span className="label">CO₂ emissions</span>
+                        <span className="value">{vehicleData.co2Emissions}g/km</span>
+                      </div>
+                    )}
+                    {vehicleData.fuelEconomy?.combined && (
+                      <div className="detail-row">
+                        <span className="label">Fuel economy (combined)</span>
+                        <span className="value">{vehicleData.fuelEconomy.combined} mpg</span>
+                      </div>
+                    )}
+                    {vehicleData.fuelEconomy?.urban && (
+                      <div className="detail-row">
+                        <span className="label">Fuel economy (urban)</span>
+                        <span className="value">{vehicleData.fuelEconomy.urban} mpg</span>
+                      </div>
+                    )}
+                    {vehicleData.fuelEconomy?.extraUrban && (
+                      <div className="detail-row">
+                        <span className="label">Fuel economy (extra urban)</span>
+                        <span className="value">{vehicleData.fuelEconomy.extraUrban} mpg</span>
+                      </div>
+                    )}
+                    {vehicleData.annualTax && (
+                      <div className="detail-row">
+                        <span className="label">Annual tax</span>
+                        <span className="value">£{vehicleData.annualTax}</span>
+                      </div>
+                    )}
+                    {vehicleData.insuranceGroup && (
+                      <div className="detail-row">
+                        <span className="label">Insurance group</span>
+                        <span className="value">{vehicleData.insuranceGroup}</span>
+                      </div>
+                    )}
+                    {vehicleData.emissionClass && (
+                      <div className="detail-row">
+                        <span className="label">Emission class</span>
+                        <span className="value">{vehicleData.emissionClass}</span>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Valuation */}
+              {vehicleData.valuation && (
+                <>
+                  <div className="vehicle-details-section-header">
+                    <h4>Estimated Valuation</h4>
+                  </div>
+                  <div className="vehicle-details-table">
+                    {vehicleData.valuation.estimatedValue?.retail && (
+                      <div className="detail-row">
+                        <span className="label">Retail value</span>
+                        <span className="value">£{vehicleData.valuation.estimatedValue.retail.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {vehicleData.valuation.estimatedValue?.private && (
+                      <div className="detail-row">
+                        <span className="label">Private sale value</span>
+                        <span className="value">£{vehicleData.valuation.estimatedValue.private.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {vehicleData.valuation.estimatedValue?.partExchange && (
+                      <div className="detail-row">
+                        <span className="label">Part exchange value</span>
+                        <span className="value">£{vehicleData.valuation.estimatedValue.partExchange.toLocaleString()}</span>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
 
               <button className="get-check-button" onClick={handleGetCheck}>
                 Get full vehicle history check
@@ -485,11 +581,12 @@ const VehicleCheckPage = () => {
             </div>
           </div>
           
-          <div className="cta-section">
+          {/* Sample report button temporarily disabled */}
+          {/* <div className="cta-section">
             <button className="sample-report-button" onClick={handleViewSampleReport}>
               View sample report
             </button>
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -530,7 +627,7 @@ const VehicleCheckPage = () => {
               <div className="benefit-content">
                 <h3>Fraud Protection</h3>
                 <p>After running a check, it is important to verify the Vehicle Identification Number (VIN) to identify any fraudulent issues with the car.</p>
-               
+                <a href="#" className="vin-link">What is a VIN and where can I find it?</a>
               </div>
             </div>
           </div>
@@ -609,7 +706,6 @@ const VehicleCheckPage = () => {
 
     
     </div>
-    </>
   );
 };
 

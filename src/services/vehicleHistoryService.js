@@ -17,14 +17,21 @@ export const getVehicleHistory = async (vrm) => {
 /**
  * Perform new vehicle history check
  * @param {string} vrm - Vehicle Registration Mark
- * @param {boolean} forceRefresh - Force new check
+ * @param {boolean|number} forceRefresh - Force new check (can be boolean or timestamp)
  * @returns {Promise<Object>} Vehicle history data
  */
 export const checkVehicleHistory = async (vrm, forceRefresh = false) => {
   try {
+    // Always force refresh to get latest data from database
+    const shouldForceRefresh = forceRefresh === true || typeof forceRefresh === 'number';
+    
+    // Add cache-busting parameter
+    const timestamp = typeof forceRefresh === 'number' ? forceRefresh : Date.now();
+    
     const response = await api.post('/vehicle-history/check', {
       vrm,
-      forceRefresh,
+      forceRefresh: shouldForceRefresh,
+      _t: timestamp, // Cache buster
     });
     return response.data;
   } catch (error) {

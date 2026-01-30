@@ -75,20 +75,22 @@ const CarAdvertEditPage = () => {
       // Auto-fill price from valuation data if available and not already set
       // Check for null/undefined specifically, not falsy (0 is a valid price)
       if (enhancedData.valuation?.estimatedValue && (advertData.price === null || advertData.price === undefined || advertData.price === '')) {
+        // For private sellers, prefer PRIVATE price, then RETAIL, then TRADE
         // estimatedValue might be an object with retail/trade/private values
         const priceValue = typeof enhancedData.valuation.estimatedValue === 'object'
-          ? (enhancedData.valuation.estimatedValue.retail || 
-             enhancedData.valuation.estimatedValue.trade || 
-             enhancedData.valuation.estimatedValue.private)
+          ? (enhancedData.valuation.estimatedValue.private || 
+             enhancedData.valuation.estimatedValue.Private ||
+             enhancedData.valuation.estimatedValue.retail || 
+             enhancedData.valuation.estimatedValue.trade)
           : enhancedData.valuation.estimatedValue;
           
-        console.log('💰 Auto-filling price from API:', priceValue);
+        console.log('💰 Auto-filling price from API (PRIVATE preferred):', priceValue);
         console.log('💰 Full valuation object:', enhancedData.valuation);
         console.log('💰 Valuation confidence:', enhancedData.valuation.confidence);
         console.log('💰 All valuation prices:', {
+          private: enhancedData.valuation.estimatedValue?.private,
           retail: enhancedData.valuation.estimatedValue?.retail,
-          trade: enhancedData.valuation.estimatedValue?.trade,
-          private: enhancedData.valuation.estimatedValue?.private
+          trade: enhancedData.valuation.estimatedValue?.trade
         });
         
         if (priceValue) {
