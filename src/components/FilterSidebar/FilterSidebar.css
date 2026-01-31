@@ -468,15 +468,13 @@ select {
 .filter-options-with-count {
   display: flex !important;
   flex-direction: column !important;
-  gap: 12px !important;
-  margin-top: 12px !important;
+  gap: 10px !important;
 }
 
 .filter-option-label {
   display: flex !important;
   align-items: center !important;
-  justify-content: space-between !important;
-  padding: 12px 16px !important;
+  padding: 12px 14px !important;
   border: 1px solid #e5e7eb !important;
   border-radius: 6px !important;
   cursor: pointer !important;
@@ -490,10 +488,10 @@ select {
 }
 
 .filter-option-label input[type="radio"] {
-  width: 20px !important;
-  height: 20px !important;
+  width: 18px !important;
+  height: 18px !important;
   margin: 0 !important;
-  margin-right: 12px !important;
+  margin-right: 10px !important;
   cursor: pointer !important;
   accent-color: #3b82f6 !important;
   flex-shrink: 0 !important;
@@ -510,16 +508,17 @@ select {
 
 .option-text {
   flex: 1 !important;
-  font-size: 15px !important;
-  color: #1f2937 !important;
+  font-size: 14px !important;
+  color: #374151 !important;
   font-weight: 400 !important;
 }
 
 .option-count {
-  font-size: 14px !important;
+  font-size: 13px !important;
   color: #6b7280 !important;
   font-weight: 500 !important;
-  margin-left: 12px !important;
+  margin-left: auto !important;
+  padding-left: 12px !important;
   flex-shrink: 0 !important;
 }
 

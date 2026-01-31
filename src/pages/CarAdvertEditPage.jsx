@@ -1081,19 +1081,6 @@ const CarAdvertEditPage = () => {
                     Add running cost information to help buyers. Some fields may be auto-filled from vehicle data.
                   </p>
                   
-                  {/* Data Source Banner */}
-                  {dataSources && (dataSources.dvla || dataSources.checkCarDetails) && (
-                    <div className="data-source-banner">
-                      <span className="info-icon">ℹ️</span>
-                      <span>
-                        Data auto-filled from: {' '}
-                        {dataSources.dvla && 'DVLA'}
-                        {dataSources.dvla && dataSources.checkCarDetails && ' & '}
-                        {dataSources.checkCarDetails && 'CheckCarDetails'}
-                      </span>
-                    </div>
-                  )}
-                  
                   {apiError && (
                     <div className="api-error-banner">
                       <span className="warning-icon">⚠️</span>
@@ -1143,15 +1130,6 @@ const CarAdvertEditPage = () => {
                       source={fieldSources?.runningCosts?.annualTax}
                       unit="£"
                       placeholder="e.g. 165"
-                    />
-                    
-                    <AutoFillField
-                      label="Insurance Group"
-                      type="text"
-                      value={advertData.runningCosts.insuranceGroup}
-                      onChange={(value) => handleRunningCostsChange('insuranceGroup', value)}
-                      source={fieldSources?.runningCosts?.insuranceGroup}
-                      placeholder="e.g. 15E"
                     />
                     
                     <AutoFillField

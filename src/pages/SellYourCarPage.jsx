@@ -207,12 +207,12 @@ const SellYourCarPage = () => {
             </h2>
             <ul className="advertising-card-benefits">
               <li><span className="checkmark">✓</span> Maximise your selling price</li>
-              <li><span className="checkmark">✓</span> Advertise to over 10 million people each month—4x more than any other site*</li>
+              <li><span className="checkmark">✓</span> Advertise to millions of potential buyers across the UK </li>
               <li><span className="checkmark">✓</span> Your sale, your terms. Sell when you're happy with the offer</li>
               <li><span className="checkmark">✓</span> Simple one-off payment, no hidden fees</li>
             </ul>
             <button className="advertising-card-button" onClick={() => navigate('/find-your-car')}>Start an advert</button>
-            <a href="/advertising-prices" className="advertising-card-link">See advertising prices →</a>
+            <a href="/advertising-prices?viewOnly=true" className="advertising-card-link">See advertising prices →</a>
           </div>
         </div>
       </section>

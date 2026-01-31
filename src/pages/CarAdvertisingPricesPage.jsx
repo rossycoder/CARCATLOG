@@ -20,6 +20,10 @@ const CarAdvertisingPricesPage = () => {
     mileage: ''
   });
 
+  // Check if this is view-only mode (from /sell-your-car page)
+  const searchParams = new URLSearchParams(locationState.search);
+  const isViewOnly = searchParams.get('viewOnly') === 'true';
+
   const advertId = locationState.state?.advertId;
   const [advertData, setAdvertData] = useState(locationState.state?.advertData);
   const [vehicleData, setVehicleData] = useState(locationState.state?.vehicleData);
@@ -268,6 +272,7 @@ const CarAdvertisingPricesPage = () => {
 
   // Reset price range when seller type changes
   const handleSellerTypeChange = (type) => {
+    console.log('🔄 Seller type changed to:', type);
     setSellerType(type);
     
     // If price range is locked (auto-selected), recalculate for new seller type
@@ -362,6 +367,7 @@ const CarAdvertisingPricesPage = () => {
         sellerType: sellerType
       };
       
+      console.log('📦 Payment request - Seller Type:', sellerType);
       console.log('📸 Sending payment request with', advertData?.photos?.length || 0, 'photos');
       console.log('📸 Photo URLs:', advertData?.photos?.map(p => p.url).slice(0, 3), '...');
       
@@ -469,7 +475,9 @@ const CarAdvertisingPricesPage = () => {
                 onClick={() => handleSellerTypeChange('trade')}
                 style={{ 
                   padding: '14px 40px', 
-                  border: sellerType === 'trade' ? '2px solid #1a1a2e' : '1px solid #ddd',
+                  borderTop: sellerType === 'trade' ? '2px solid #1a1a2e' : '1px solid #ddd',
+                  borderBottom: sellerType === 'trade' ? '2px solid #1a1a2e' : '1px solid #ddd',
+                  borderLeft: sellerType === 'trade' ? '2px solid #1a1a2e' : '1px solid #ddd',
                   borderRight: 'none',
                   borderRadius: '8px 0 0 8px',
                   background: 'white',
@@ -486,7 +494,10 @@ const CarAdvertisingPricesPage = () => {
                 onClick={() => handleSellerTypeChange('private')}
                 style={{ 
                   padding: '14px 40px', 
-                  border: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
+                  borderTop: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
+                  borderBottom: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
+                  borderLeft: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
+                  borderRight: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
                   borderRadius: '0 8px 8px 0',
                   background: 'white',
                   color: '#1a1a2e',
@@ -552,26 +563,32 @@ const CarAdvertisingPricesPage = () => {
                   </ul>
                 </div>
                 
-                {user ? (
-                  <button 
-                    className="select-package-btn"
-                    onClick={() => handleSelectPackage(pkg)}
-                    disabled={processingPackageId !== null}
-                  >
-                    {processingPackageId === pkg.id ? 'Processing...' : `Choose ${sellerType === 'trade' ? pkg.name.replace('TRADE ', '') : pkg.name}`}
-                  </button>
-                ) : (
-                  <button 
-                    className="select-package-btn login-required-btn"
-                    onClick={() => navigate('/signin', { state: { returnTo: '/sell-my-car/advertising-prices' } })}
-                  >
-                    Sign in to Select
-                  </button>
+                {!isViewOnly && (
+                  <>
+                    {user ? (
+                      <button 
+                        className="select-package-btn"
+                        onClick={() => handleSelectPackage(pkg)}
+                        disabled={processingPackageId !== null}
+                      >
+                        {processingPackageId === pkg.id ? 'Processing...' : `Choose ${sellerType === 'trade' ? pkg.name.replace('TRADE ', '') : pkg.name}`}
+                      </button>
+                    ) : (
+                      <button 
+                        className="select-package-btn login-required-btn"
+                        onClick={() => navigate('/signin', { state: { returnTo: '/sell-my-car/advertising-prices' } })}
+                      >
+                        Sign in to Select
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
           ))}
         </div>
+
+
 
 
         <div className="promotion-section">

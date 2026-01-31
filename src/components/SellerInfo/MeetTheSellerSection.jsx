@@ -13,11 +13,6 @@ const MeetTheSellerSection = ({ seller, distance, postcode }) => {
     }
   };
 
-  const handleMessageClick = () => {
-    // Handle message functionality
-    console.log('Message seller');
-  };
-
   const handleDirectionsClick = () => {
     if (postcode) {
       window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(postcode)}`, '_blank');

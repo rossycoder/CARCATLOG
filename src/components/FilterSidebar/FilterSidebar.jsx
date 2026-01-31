@@ -685,7 +685,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
                   checked={filters.sellerType === ''}
                   onChange={(e) => handleChange('sellerType', '')}
                 />
-                <span className="option-text">All Sellers</span>
+                <span className="option-text">All sellers</span>
                 <span className="option-count">{(filterOptions.counts?.total || 0).toLocaleString()}</span>
               </label>
               
@@ -741,7 +741,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
                   checked={filters.writeOffStatus === ''}
                   onChange={(e) => handleChange('writeOffStatus', '')}
                 />
-                <span className="option-text">Include</span>
+                <span className="option-text">Include all</span>
                 <span className="option-count">{(filterOptions.counts?.total || 0).toLocaleString()}</span>
               </label>
               
@@ -753,7 +753,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
                   checked={filters.writeOffStatus === 'exclude'}
                   onChange={(e) => handleChange('writeOffStatus', 'exclude')}
                 />
-                <span className="option-text">Exclude</span>
+                <span className="option-text">Exclude written off</span>
                 <span className="option-count">{(filterOptions.counts?.clean || 0).toLocaleString()}</span>
               </label>
               
@@ -765,7 +765,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
                   checked={filters.writeOffStatus === 'only'}
                   onChange={(e) => handleChange('writeOffStatus', 'only')}
                 />
-                <span className="option-text">Show only</span>
+                <span className="option-text">Show only written off</span>
                 <span className="option-count">{(filterOptions.counts?.writtenOff || 0).toLocaleString()}</span>
               </label>
             </div>
