@@ -515,10 +515,6 @@ const CarDetailPage = () => {
 
                 {/* Contact Buttons */}
                 <div className="seller-contact-buttons">
-                  <button className="message-seller-btn">
-                    ✉️ Message seller
-                  </button>
-
                   {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
                     <button className="call-seller-btn">
                       📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
@@ -548,10 +544,6 @@ const CarDetailPage = () => {
                   )}
                 </div>
               </div>
-
-              <button className="message-btn">
-                ✉️ Message
-              </button>
 
               {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
                 <button className="phone-btn">
