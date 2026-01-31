@@ -41,9 +41,26 @@ const UsedCarsPage = () => {
     }
   };
 
-  const handleFilterClick = () => {
-    // Navigate to search results page
-    navigate('/search-results');
+  const handleFilterClick = (postcode, make, model) => {
+    // Build query params with search values
+    const params = new URLSearchParams();
+    
+    if (postcode) {
+      params.append('postcode', postcode);
+      params.append('radius', 1000); // National search (1000 miles covers all UK)
+    }
+    if (make) {
+      params.append('make', make);
+    }
+    if (model) {
+      params.append('model', model);
+    }
+    
+    // Add flag to auto-open filter modal
+    params.append('openFilter', 'true');
+    
+    // Navigate to search results page with filters open
+    navigate(`/search-results?${params.toString()}`);
   };
 
   return (

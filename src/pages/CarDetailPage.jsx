@@ -41,7 +41,17 @@ const CarDetailPage = () => {
     try {
       setIsLoading(true);
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${API_BASE_URL}/vehicles/${id}`);
+      
+      // Get user's postcode from localStorage (saved from search)
+      const userPostcode = localStorage.getItem('userPostcode');
+      
+      // Build URL with optional postcode parameter
+      let url = `${API_BASE_URL}/vehicles/${id}`;
+      if (userPostcode) {
+        url += `?postcode=${encodeURIComponent(userPostcode)}`;
+      }
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error('Car not found');
@@ -166,11 +176,17 @@ const CarDetailPage = () => {
         <div className="content-grid">
           {/* Left Column - Car Details */}
           <div className="left-column">
-            {/* Location */}
+            {/* Location - AutoTrader Style */}
             <div className="location-info">
               <span className="location-label">From</span>
               <span className="location-value">
+                {(car.sellerContact?.businessName || car.dealerName) && (
+                  <span className="dealer-name">{car.sellerContact?.businessName || car.dealerName} </span>
+                )}
                 {extractTownName(car.locationName) || 'Location available'}
+                {car.distance && car.distance > 0 && (
+                  <> • <span className="distance-info">{Math.round(car.distance)} miles away</span></>
+                )}
               </span>
             </div>
 
@@ -220,7 +236,7 @@ const CarDetailPage = () => {
                   <span className="spec-icon">🚗</span>
                   <div className="spec-details">
                     <span className="spec-label">Body type</span>
-                    <span className="spec-value">{car.bodyType || 'Hatchback'}</span>
+                    <span className="spec-value">{car.bodyType ? car.bodyType.charAt(0).toUpperCase() + car.bodyType.slice(1).toLowerCase() : 'Hatchback'}</span>
                   </div>
                 </div>
 
@@ -243,7 +259,7 @@ const CarDetailPage = () => {
                   <div className="spec-details">
                     <span className="spec-label">Gearbox</span>
                     <span className="spec-value">
-                      {car.transmission}
+                      {car.transmission ? car.transmission.charAt(0).toUpperCase() + car.transmission.slice(1).toLowerCase() : 'Manual'}
                       {car.gearbox && ` (${car.gearbox} speed)`}
                     </span>
                   </div>
@@ -305,7 +321,7 @@ const CarDetailPage = () => {
                   }, 100);
                 }}
               >
-                ≡ View all spec and features →
+                ≡ Display all specs and features →
               </button>
             </div>
 
@@ -476,6 +492,9 @@ const CarDetailPage = () => {
                     {!car.sellerContact?.businessAddress && (
                       <div className="dealer-location">
                         📍 {extractTownName(car.locationName) || 'Location available'}
+                        {car.distance && car.distance > 0 && (
+                          <> • <span className="distance-highlight">{Math.round(car.distance)} miles away</span></>
+                        )}
                       </div>
                     )}
                   </div>
@@ -487,6 +506,9 @@ const CarDetailPage = () => {
                     <div className="private-seller-label">Private Seller</div>
                     <div className="private-seller-location">
                       📍 {extractTownName(car.locationName) || 'Location available'}
+                      {car.distance && car.distance > 0 && (
+                        <> • <span className="distance-highlight">{Math.round(car.distance)} miles away</span></>
+                      )}
                     </div>
                   </div>
                 )}
@@ -520,7 +542,10 @@ const CarDetailPage = () => {
                   <div className="business-name">{car.sellerContact.businessName}</div>
                 )}
                 <div className="seller-location">
-                  {extractTownName(car.locationName)}{car.distance ? ` • ${car.distance} miles away` : ''}
+                  {extractTownName(car.locationName)}
+                  {car.distance && car.distance > 0 && (
+                    <span className="distance-highlight"> • {Math.round(car.distance)} miles away</span>
+                  )}
                 </div>
               </div>
 

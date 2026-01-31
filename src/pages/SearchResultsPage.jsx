@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { carService } from '../services/carService';
 import FilterSidebar from '../components/FilterSidebar/FilterSidebar';
+import CarCard from '../components/CarCard';
 import './SearchResultsPage.css';
 
 function SearchResultsPage() {
@@ -12,7 +13,7 @@ function SearchResultsPage() {
   const [searchResults, setSearchResults] = useState(null);
   const [filteredResults, setFilteredResults] = useState(null);
   const [postcode, setPostcode] = useState('');
-  const [radius, setRadius] = useState(25);
+  const [radius, setRadius] = useState(1000); // National search by default (1000 miles covers all UK)
   const [savedCars, setSavedCars] = useState(new Set());
   const [searchSaved, setSearchSaved] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -63,7 +64,7 @@ function SearchResultsPage() {
     // Get search parameters from URL or location state
     const params = new URLSearchParams(location.search);
     const postcodeParam = params.get('postcode') || location.state?.postcode;
-    const radiusParam = params.get('radius') || location.state?.radius || 25;
+    const radiusParam = params.get('radius') || location.state?.radius || 1000; // National search by default
     const makeParam = params.get('make') || location.state?.make;
     const modelParam = params.get('model') || location.state?.model;
     const submodelParam = params.get('submodel');
@@ -132,9 +133,13 @@ function SearchResultsPage() {
     if (postcodeParam) {
       setPostcode(postcodeParam);
       setRadius(parseInt(radiusParam) || 25);
+      // Save postcode to localStorage for use on detail pages
+      localStorage.setItem('userPostcode', postcodeParam);
       performSearch(postcodeParam, parseInt(radiusParam) || 25, filterParams);
     } else {
       // Load all cars if no postcode provided
+      // Clear saved postcode if no postcode search
+      localStorage.removeItem('userPostcode');
       loadAllCars(filterParams);
     }
   }, [location]);
@@ -150,10 +155,13 @@ function SearchResultsPage() {
       console.log('Full search response:', response);
       console.log('Response success:', response.success);
       console.log('Response data:', response.data);
+      console.log('🔍 RAW API RESULTS:', response.data?.results);
+      console.log('🔍 FIRST CAR DISTANCE:', response.data?.results?.[0]?.distance);
       
       if (response.success && response.data) {
         let results = response.data.results || [];
         console.log('Results count before filtering:', results.length);
+        console.log('🔍 RESULTS BEFORE FILTER:', results[0]);
         
         // Apply filters if provided
         if (filterParams.make && filterParams.make !== 'Any') {
@@ -219,10 +227,14 @@ function SearchResultsPage() {
         
         // If no results found, load all cars from database
         if (results.length === 0) {
-          console.log('No results in radius, loading all cars from database');
+          console.log(`⚠️ No results in ${searchRadius} miles radius`);
+          console.log(`⚠️ Calling fallback to show all available cars`);
           await loadAllCarsAsFallback(filterParams, searchPostcode, searchRadius);
           return;
         }
+        
+        console.log(`✅ Found ${results.length} results in ${searchRadius} miles radius`);
+        console.log('✅ Results found in radius, NOT calling fallback');
         
         const filteredData = {
           postcode: response.data.postcode,
@@ -233,6 +245,8 @@ function SearchResultsPage() {
         };
         
         console.log('Setting search results:', filteredData);
+        console.log('First car distance:', results[0]?.distance);
+        console.log('First car full data:', results[0]);
         setSearchResults(filteredData);
         setFilteredResults(filteredData);
       } else {
@@ -327,15 +341,38 @@ function SearchResultsPage() {
       const cars = response.cars || [];
       const total = response.total || cars.length;
       
+      console.log('⚠️ Fallback: Calculating distance for all cars');
+      
+      // Calculate distance for each car if we have user's postcode
+      let carsWithDistance = cars;
+      if (originalPostcode) {
+        try {
+          const postcodeService = require('../services/postcodeService');
+          const haversine = require('../utils/haversine');
+          
+          // This won't work in frontend - we need backend API
+          // For now, set distance based on coordinates if available
+          carsWithDistance = cars.map(car => {
+            // If car has coordinates, we could calculate distance
+            // But we need user coordinates from postcode
+            // For now, keep original distance or set to null
+            return {
+              ...car,
+              distance: car.distance || null
+            };
+          });
+        } catch (err) {
+          console.warn('Could not calculate distance in fallback:', err);
+          carsWithDistance = cars.map(car => ({ ...car, distance: null }));
+        }
+      }
+      
       // Transform to match search results format
       const transformedData = {
         postcode: originalPostcode,
         radius: originalRadius,
         count: total,
-        results: cars.map(car => ({
-          ...car,
-          distance: 0 // No distance calculation for fallback
-        })),
+        results: carsWithDistance,
         showingAllCars: true // Flag to indicate we're showing all cars as fallback
       };
       
@@ -653,67 +690,11 @@ function SearchResultsPage() {
           </div>
         ) : (
           <div className="results-grid-autotrader">
-            {filteredResults?.results.map((car, index) => (
-              <div 
-                key={car._id} 
-                className="car-listing-card"
-                onClick={() => handleCarClick(car._id)}
-              >
-                {/* Save Button */}
-                <button 
-                  className={`save-btn ${savedCars.has(car._id) ? 'saved' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSaveCar(car._id);
-                  }}
-                >
-                  {savedCars.has(car._id) ? '♥' : '♡'}
-                </button>
-                
-                {/* Car Image */}
-                <div className="car-image-wrapper">
-                  <img 
-                    src={car.images?.[0] || '/images/dummy/placeholder-car.jpg'} 
-                    alt={`${car.make} ${car.model}`}
-                    className="car-image"
-                  />
-                  <div className="image-counter">
-                    {car.images?.length || 1}/{car.images?.length || 1}
-                  </div>
-                </div>
-                
-                {/* Car Details */}
-                <div className="car-details">
-                  <h3 className="car-name">{car.make} {car.model}</h3>
-                  <p className="car-subtitle">
-                    {car.year} {car.registrationNumber || 'REPLICA'}
-                  </p>
-                  
-                  <div className="car-specs">
-                    <span className="spec">{car.mileage?.toLocaleString() || '0'} miles</span>
-                    <span className="spec-dot">•</span>
-                    <span className="spec">{car.transmission || 'Manual'}</span>
-                    <span className="spec-dot">•</span>
-                    <span className="spec">{car.fuelType || 'Petrol'}</span>
-                  </div>
-                  
-                  <div className="car-price">
-                    £{car.price?.toLocaleString() || '0'}
-                  </div>
-                  
-                  <div className="car-location">
-                    <span className="location-icon">📍</span>
-                    <span>
-                      {car.locationName || car.postcode?.split(' ')[0] || 'Location'}
-                      {car.distance > 0 && ` (${(car.distance || 0).toFixed(0)} miles)`}
-                    </span>
-                  </div>
-                  
-                  
-                  
-                </div>
-              </div>
-            ))}
+            {filteredResults?.results.map((car, index) => {
+              console.log(`SearchResults - Car ${index} distance:`, car.distance);
+              console.log(`SearchResults - Car ${index} full:`, car);
+              return <CarCard key={car._id} car={car} />;
+            })}
           </div>
         )}
       </div>

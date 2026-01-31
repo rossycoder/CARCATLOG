@@ -186,7 +186,33 @@ const VehicleHistorySection = ({ vrm }) => {
     },
     {
       id: 'writtenOff',
-      label: 'Never been written off',
+      label: (() => {
+        // Check if vehicle has been written off
+        const isWrittenOff = historyData.hasAccidentHistory === true || 
+                            historyData.isWrittenOff === true;
+        
+        // Get severity category - check multiple possible fields
+        const severity = historyData.writeOffCategory || 
+                        historyData.accidentDetails?.severity;
+        const hasValidSeverity = severity && 
+                                severity !== 'unknown' && 
+                                severity !== null && 
+                                severity !== 'none' &&
+                                severity.trim() !== '';
+        
+        // If written off with valid category, show the category in the label
+        if ((isWrittenOff || hasValidSeverity) && hasValidSeverity) {
+          return `Category ${severity.toUpperCase()} - Written off`;
+        }
+        
+        // If written off but no category, show generic message
+        if (isWrittenOff) {
+          return 'Written off - Category unknown';
+        }
+        
+        // Clean vehicle
+        return 'Never been written off';
+      })(),
       passed: (() => {
         // Check if vehicle has been written off
         const isWrittenOff = historyData.hasAccidentHistory === true || 

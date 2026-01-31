@@ -15,7 +15,7 @@ const HomePage = () => {
   const [postcode, setPostcode] = useState('');
   const [make, setMake] = useState('Any');
   const [model, setModel] = useState('Any');
-  const [radius, setRadius] = useState(25);
+  const [radius, setRadius] = useState(1000); // National search by default
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [error, setError] = useState('');
   const [totalCars, setTotalCars] = useState(0);
@@ -296,9 +296,9 @@ const HomePage = () => {
                     <input 
                       type="number" 
                       value={radius}
-                      onChange={(e) => setRadius(parseInt(e.target.value) || 25)}
+                      onChange={(e) => setRadius(parseInt(e.target.value) || 1000)}
                       min="1"
-                      max="200"
+                      max="1000"
                     />
                   </div>
                 </div>

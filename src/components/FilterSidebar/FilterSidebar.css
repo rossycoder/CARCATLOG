@@ -451,3 +451,84 @@ input,
 select {
   -webkit-tap-highlight-color: transparent !important;
 }
+
+/* Help text for filters */
+.filter-help-text {
+  margin-top: 8px !important;
+  padding: 10px 12px !important;
+  background-color: #f0f4ff !important;
+  border-left: 3px solid #3b82f6 !important;
+  border-radius: 4px !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: #1e40af !important;
+}
+
+/* Filter options with counts (radio buttons) */
+.filter-options-with-count {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-top: 12px !important;
+}
+
+.filter-option-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 16px !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  background-color: #ffffff !important;
+}
+
+.filter-option-label:hover {
+  border-color: #3b82f6 !important;
+  background-color: #f8fafc !important;
+}
+
+.filter-option-label input[type="radio"] {
+  width: 20px !important;
+  height: 20px !important;
+  margin: 0 !important;
+  margin-right: 12px !important;
+  cursor: pointer !important;
+  accent-color: #3b82f6 !important;
+  flex-shrink: 0 !important;
+}
+
+.filter-option-label input[type="radio"]:checked {
+  accent-color: #f59e0b !important;
+}
+
+.filter-option-label:has(input[type="radio"]:checked) {
+  border-color: #f59e0b !important;
+  background-color: #fffbeb !important;
+}
+
+.option-text {
+  flex: 1 !important;
+  font-size: 15px !important;
+  color: #1f2937 !important;
+  font-weight: 400 !important;
+}
+
+.option-count {
+  font-size: 14px !important;
+  color: #6b7280 !important;
+  font-weight: 500 !important;
+  margin-left: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+.filter-option-label:has(input[type="radio"]:checked) .option-text {
+  font-weight: 500 !important;
+  color: #1f2937 !important;
+}
+
+.filter-option-label:has(input[type="radio"]:checked) .option-count {
+  color: #f59e0b !important;
+  font-weight: 600 !important;
+}

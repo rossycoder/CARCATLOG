@@ -145,12 +145,30 @@
 .location-label {
   color: #666;
   font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .location-value {
   color: #333;
-  font-weight: 500;
+  font-weight: 400;
   font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  line-height: 1.5;
+}
+
+.location-value .dealer-name {
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-right: 4px;
+}
+
+.location-value .distance-info {
+  color: #0066cc;
+  font-weight: 600;
+  margin-left: 0;
 }
 
 .car-header {
@@ -371,6 +389,12 @@
   font-size: 0.9rem;
 }
 
+.seller-location .distance-highlight {
+  color: #0066cc;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
 .message-btn,
 .phone-btn {
   width: 100%;
@@ -585,9 +609,16 @@
 .dealer-location {
   font-size: 0.95rem;
   color: #666;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 0;
+  line-height: 1.5;
+}
+
+.dealer-location .distance-highlight {
+  color: #0066cc;
+  font-weight: 600;
+  margin-left: 0;
 }
 
 /* Private Seller Styles */
@@ -609,9 +640,16 @@
 .private-seller-location {
   font-size: 0.95rem;
   color: #666;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 0;
+  line-height: 1.5;
+}
+
+.private-seller-location .distance-highlight {
+  color: #0066cc;
+  font-weight: 600;
+  margin-left: 0;
 }
 
 /* Contact Buttons in Meet Seller Section */

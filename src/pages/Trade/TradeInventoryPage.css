@@ -297,7 +297,7 @@
   color: white;
 }
 
-.image-count {
+.vehicle-card .image-count {
   position: absolute;
   bottom: 12px;
   right: 12px;

@@ -12,7 +12,7 @@
 
 /* Top Filter Bar */
 .top-filter-bar {
-  background: white;
+  background: #ffffff;
   border-bottom: 1px solid #e0e0e0;
   padding: 16px 0;
   position: sticky;
@@ -38,8 +38,8 @@
   padding: 8px 20px;
   border: 1px solid #d0d0d0;
   border-radius: 20px;
-  background: white;
-  color: #333;
+  background: #ffffff;
+  color: #333333;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -67,8 +67,8 @@
   padding: 8px 20px;
   border: 1px solid #d0d0d0;
   border-radius: 20px;
-  background: white;
-  color: #333;
+  background: #ffffff;
+  color: #333333;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -84,7 +84,7 @@
 
 /* Results Header */
 .results-header {
-  background: white;
+  background: #ffffff;
   padding: 12px 0;
   border-bottom: 1px solid #e0e0e0;
 }
@@ -92,12 +92,12 @@
 .results-count {
   margin: 0;
   font-size: 14px;
-  color: #666;
+  color: #666666;
 }
 
 .count-number {
   font-weight: 600;
-  color: #333;
+  color: #1a1a1a;
 }
 
 .fallback-notice {

@@ -80,11 +80,20 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
     // Build query string from search params
     const queryParams = new URLSearchParams();
     
-    Object.keys(searchParams).forEach(key => {
-      if (searchParams[key]) {
-        queryParams.append(key, searchParams[key]);
-      }
-    });
+    // Add postcode with national radius (1000 miles)
+    queryParams.append('postcode', searchParams.postcode);
+    queryParams.append('radius', 1000); // National search
+    
+    // Add other search params
+    if (searchParams.make) {
+      queryParams.append('make', searchParams.make);
+    }
+    if (searchParams.model) {
+      queryParams.append('model', searchParams.model);
+    }
+    if (searchParams.maxPrice) {
+      queryParams.append('maxPrice', searchParams.maxPrice);
+    }
     
     // Navigate to search results page
     navigate(`/search-results?${queryParams.toString()}`);
@@ -158,7 +167,12 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
                         setPostcodeError('Please enter a postcode first');
                         return;
                       }
-                      onFilterClick && onFilterClick();
+                      // Pass search params to parent for navigation
+                      onFilterClick && onFilterClick(
+                        searchParams.postcode,
+                        searchParams.make,
+                        searchParams.model
+                      );
                     }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

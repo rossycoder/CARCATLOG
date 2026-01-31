@@ -8,6 +8,14 @@ const CarCard = ({ car }) => {
   const [saved, setSaved] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  // Debug: Check if distance is coming
+  console.log('CarCard - car data:', {
+    make: car.make,
+    model: car.model,
+    distance: car.distance,
+    locationName: car.locationName
+  });
+
   const handleSave = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -44,15 +52,11 @@ const CarCard = ({ car }) => {
   };
 
   const imageCount = car.images?.length || 0;
-  const hasReserveOnline = car.advertStatus === 'active' || car.condition === 'new';
   const currentImage = car.images?.[currentImageIndex] || car.images?.[0] || 'https://via.placeholder.com/400x300?text=No+Image';
 
   return (
     <Link to={`/cars/${car._id}`} className="car-card">
       <div className="car-image-container">
-        {hasReserveOnline && (
-          <div className="reserve-badge">Reserve online</div>
-        )}
         
         <img 
           src={currentImage} 
@@ -103,7 +107,7 @@ const CarCard = ({ car }) => {
             height="24" 
             viewBox="0 0 24 24" 
             fill={saved ? '#e31e24' : 'none'}
-            stroke={saved ? '#e31e24' : '#fff'}
+            stroke={saved ? '#e31e24' : '#1a1a1a'}
             strokeWidth="2"
           >
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -112,27 +116,38 @@ const CarCard = ({ car }) => {
 
         {imageCount > 0 && (
           <div className="image-count">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <circle cx="8.5" cy="8.5" r="1.5"/>
-              <polyline points="21 15 16 10 5 21"/>
-            </svg>
             <span>{currentImageIndex + 1}/{imageCount}</span>
           </div>
         )}
       </div>
       
       <div className="car-content">
-        <h3 className="car-title">{car.make} {car.model}{car.submodel ? ` ${car.submodel}` : ''}</h3>
-        <p className="car-subtitle">{car.engineSize ? `${car.engineSize}L ` : ''}{car.fuelType} {car.transmission}</p>
-        <p className="car-dealer">{car.sellerContact?.businessName || car.sellerContact?.city || 'Private seller'}</p>
+        <h3 className="car-title">{car.make} {car.model}</h3>
+        <p className="car-subtitle">
+          {car.engineSize ? `${car.engineSize} ` : ''}
+          {car.variant || car.submodel || ''} {car.fuelType || ''} {car.doors ? `${car.doors}dr` : ''}
+        </p>
+        
+        {car.serviceHistory && (
+          <p className="car-service-history">{car.serviceHistory}</p>
+        )}
         
         <div className="car-badges">
+          {/* Show "Great price" badge if price is below estimated value */}
+          {car.price && car.estimatedValue && car.price < car.estimatedValue * 0.9 && (
+            <span className="badge price-badge">Great price</span>
+          )}
+          {/* Show insurance write-off category if exists */}
+          {car.historyCheckId?.writeOffCategory && car.historyCheckId.writeOffCategory !== 'none' && car.historyCheckId.writeOffCategory !== 'unknown' && (
+            <span className="badge cat-badge">Cat {car.historyCheckId.writeOffCategory}</span>
+          )}
           {car.mileage && (
             <span className="badge">{car.mileage.toLocaleString()} miles</span>
           )}
           {car.year && (
-            <span className="badge">{car.year} ({car.registrationNumber?.slice(0, 4) || 'reg'})</span>
+            <span className="badge">
+              {car.year} ({car.registrationNumber?.match(/\d{2}/)?.[0] || car.year.toString().slice(-2)} reg)
+            </span>
           )}
         </div>
 
@@ -147,14 +162,11 @@ const CarCard = ({ car }) => {
         
         <div className="car-footer">
           <span className="car-location">
-            📍 {car.locationName || car.sellerContact?.city || car.postcode || 'Location'}
-            {car.distance && ` • ${car.distance.toFixed(1)} miles away`}
+            📍 {car.locationName || car.sellerContact?.city || car.postcode?.split(' ')[0] || 'Location'}
+            {car.distance != null && (
+              <> • <span className="distance-text">{Math.round(car.distance)} miles away</span></>
+            )}
           </span>
-          {car.sellerContact?.rating && (
-            <span className="car-rating">
-              ⭐ {car.sellerContact.rating.toFixed(1)}
-            </span>
-          )}
         </div>
       </div>
     </Link>

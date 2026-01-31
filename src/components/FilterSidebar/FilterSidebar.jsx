@@ -17,7 +17,14 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     transmissions: [],
     bodyTypes: [],
     colours: [],
-    yearRange: { min: 2000, max: new Date().getFullYear() }
+    yearRange: { min: 2000, max: new Date().getFullYear() },
+    counts: {
+      total: 0,
+      privateSellers: 0,
+      tradeSellers: 0,
+      writtenOff: 0,
+      clean: 0
+    }
   });
   const [filters, setFilters] = useState({
     sort: 'relevance',
@@ -38,7 +45,9 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     doors: '',
     seats: '',
     fuelType: '',
-    engineSize: ''
+    engineSize: '',
+    sellerType: '',
+    writeOffStatus: ''
   });
 
   // Load filters from URL params when modal opens
@@ -63,7 +72,9 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         doors: searchParams.get('doors') || '',
         seats: searchParams.get('seats') || '',
         fuelType: searchParams.get('fuelType') || '',
-        engineSize: searchParams.get('engineSize') || ''
+        engineSize: searchParams.get('engineSize') || '',
+        sellerType: searchParams.get('sellerType') || '',
+        writeOffStatus: searchParams.get('writeOffStatus') || ''
       });
     }
   }, [isOpen, searchParams]);
@@ -93,11 +104,24 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         const options = await carService.getFilterOptions(queryString);
         
         console.log('[FilterSidebar] ✅ Successfully received filter options!');
+        console.log('[FilterSidebar] Full response:', options);
         console.log('[FilterSidebar] Colours:', options?.colours);
+        console.log('[FilterSidebar] Counts:', options?.counts);
         
-        if (options && options.makes) {
-          setFilterOptions(options);
-          console.log('[FilterSidebar] ✅ Filter options set successfully!');
+        if (options) {
+          // Ensure counts object exists with defaults
+          const optionsWithDefaults = {
+            ...options,
+            counts: options.counts || {
+              total: 0,
+              privateSellers: 0,
+              tradeSellers: 0,
+              writtenOff: 0,
+              clean: 0
+            }
+          };
+          setFilterOptions(optionsWithDefaults);
+          console.log('[FilterSidebar] ✅ Filter options set successfully with counts:', optionsWithDefaults.counts);
         } else {
           console.error('[FilterSidebar] ❌ Invalid options structure:', options);
         }
@@ -211,7 +235,9 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       doors: '',
       seats: '',
       fuelType: '',
-      engineSize: ''
+      engineSize: '',
+      sellerType: '',
+      writeOffStatus: ''
     });
   };
 
@@ -639,6 +665,117 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               <option value="3.0">2.5L - 3.0L</option>
               <option value="3.0+">3.0L+</option>
             </select>
+          </div>
+
+          {/* Seller Type */}
+          <div className="filter-section">
+            <label className="filter-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              Seller type
+            </label>
+            <div className="filter-options-with-count">
+              <label className="filter-option-label">
+                <input
+                  type="radio"
+                  name="sellerType"
+                  value=""
+                  checked={filters.sellerType === ''}
+                  onChange={(e) => handleChange('sellerType', '')}
+                />
+                <span className="option-text">All Sellers</span>
+                <span className="option-count">{(filterOptions.counts?.total || 0).toLocaleString()}</span>
+              </label>
+              
+              <label className="filter-option-label">
+                <input
+                  type="radio"
+                  name="sellerType"
+                  value="private"
+                  checked={filters.sellerType === 'private'}
+                  onChange={(e) => handleChange('sellerType', 'private')}
+                />
+                <span className="option-text">Private sellers</span>
+                <span className="option-count">{(filterOptions.counts?.privateSellers || 0).toLocaleString()}</span>
+              </label>
+              
+              <label className="filter-option-label">
+                <input
+                  type="radio"
+                  name="sellerType"
+                  value="trade"
+                  checked={filters.sellerType === 'trade'}
+                  onChange={(e) => handleChange('sellerType', 'trade')}
+                />
+                <span className="option-text">Trade sellers</span>
+                <span className="option-count">{(filterOptions.counts?.tradeSellers || 0).toLocaleString()}</span>
+              </label>
+            </div>
+            {filters.sellerType && (
+              <p className="filter-help-text">
+                {filters.sellerType === 'private' 
+                  ? 'Private sellers are people selling a vehicle registered to themselves.'
+                  : 'Trade sellers are dealerships or independent traders who sell vehicles as a business.'}
+              </p>
+            )}
+          </div>
+
+          {/* Previously Written Off */}
+          <div className="filter-section">
+            <label className="filter-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              Previously written off
+            </label>
+            <div className="filter-options-with-count">
+              <label className="filter-option-label">
+                <input
+                  type="radio"
+                  name="writeOffStatus"
+                  value=""
+                  checked={filters.writeOffStatus === ''}
+                  onChange={(e) => handleChange('writeOffStatus', '')}
+                />
+                <span className="option-text">Include</span>
+                <span className="option-count">{(filterOptions.counts?.total || 0).toLocaleString()}</span>
+              </label>
+              
+              <label className="filter-option-label">
+                <input
+                  type="radio"
+                  name="writeOffStatus"
+                  value="exclude"
+                  checked={filters.writeOffStatus === 'exclude'}
+                  onChange={(e) => handleChange('writeOffStatus', 'exclude')}
+                />
+                <span className="option-text">Exclude</span>
+                <span className="option-count">{(filterOptions.counts?.clean || 0).toLocaleString()}</span>
+              </label>
+              
+              <label className="filter-option-label">
+                <input
+                  type="radio"
+                  name="writeOffStatus"
+                  value="only"
+                  checked={filters.writeOffStatus === 'only'}
+                  onChange={(e) => handleChange('writeOffStatus', 'only')}
+                />
+                <span className="option-text">Show only</span>
+                <span className="option-count">{(filterOptions.counts?.writtenOff || 0).toLocaleString()}</span>
+              </label>
+            </div>
+            {filters.writeOffStatus && (
+              <p className="filter-help-text">
+                {filters.writeOffStatus === 'exclude' 
+                  ? 'Only show vehicles with no write-off history.'
+                  : 'Only show vehicles that have been previously written off (Cat A, B, C, D, S, N).'}
+              </p>
+            )}
           </div>
         </div>
 

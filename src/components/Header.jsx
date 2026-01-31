@@ -303,6 +303,35 @@ const Header = () => {
         <div className="mobile-menu-divider" />
 
         <div className="mobile-menu-section">
+          {user ? (
+            <>
+              <div className="mobile-menu-user-info">
+                <FaUser style={{ marginRight: '8px' }} size={14} />
+                <div>
+                  <div className="mobile-menu-user-name">{user.name || user.email}</div>
+                  <div className="mobile-menu-user-email">{user.email}</div>
+                </div>
+              </div>
+              <Link to="/my-listings" className="mobile-menu-link" onClick={closeMenu}>
+                <FaUser style={{ marginRight: '8px' }} size={14} />
+                My Listings
+              </Link>
+              <Link to="/saved-cars" className="mobile-menu-link" onClick={closeMenu}>
+                <FaHeart style={{ marginRight: '8px' }} size={14} />
+                Saved Cars
+              </Link>
+            </>
+          ) : (
+            <Link to="/signin" className="mobile-menu-link" onClick={closeMenu}>
+              <FaUser style={{ marginRight: '8px' }} size={14} />
+              Sign in
+            </Link>
+          )}
+        </div>
+
+        <div className="mobile-menu-divider" />
+
+        <div className="mobile-menu-section">
           {isTradeAuthenticated && dealer ? (
             <>
               <Link to="/trade/dashboard" className="mobile-menu-link" onClick={closeMenu}>

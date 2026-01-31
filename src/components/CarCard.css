@@ -1,29 +1,29 @@
 .car-card {
   background: #ffffff;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(255, 247, 247, 0.15);
   transition: all 0.25s ease;
   text-decoration: none;
-  color: inherit;
+  color: #e3dcdc;
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #e0e0e0;
 }
 
 .car-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   border-color: #d0d0d0;
 }
 
 .car-image-container {
   position: relative;
   width: 100%;
-  padding-top: 75%; /* 4:3 aspect ratio */
+  padding-top: 66.67%; /* 3:2 aspect ratio for AutoTrader style */
   overflow: hidden;
-  background: #f5f5f5;
+  background: #ffffff;
 }
 
 .car-image {
@@ -63,9 +63,9 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
+  
+  color: #1a1a1a !important;
+  border: none !important;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -77,6 +77,7 @@
   transition: all 0.2s ease;
   z-index: 2;
   opacity: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
 .car-image-container:hover .slider-btn {
@@ -84,7 +85,7 @@
 }
 
 .slider-btn:hover {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(255, 255, 255, 1) !important;
   transform: translateY(-50%) scale(1.1);
 }
 
@@ -111,50 +112,53 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  border: none;
+  background: rgba(255, 255, 255, 0.5) !important;
+  border: none !important;
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 0;
 }
 
 .dot:hover {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.8) !important;
 }
 
 .dot.active {
-  background: rgba(255, 255, 255, 1);
+  background: rgba(255, 255, 255, 1) !important;
   width: 10px;
   height: 10px;
 }
 
+/* Image Count Badge - AutoTrader Style */
 .image-count {
   position: absolute;
   bottom: 12px;
   right: 12px;
-  background: rgba(0, 0, 0, 0.7);
+  
   color: white;
   padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 13px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 4px;
+ 
   z-index: 2;
 }
 
 .image-count svg {
   width: 14px;
   height: 14px;
+  display: none; /* Hide icon for cleaner AutoTrader look */
 }
 
 .save-button {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: rgba(0, 0, 0, 0.5);
-  border: none;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: none !important;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -164,11 +168,12 @@
   justify-content: center;
   transition: all 0.2s ease;
   z-index: 3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
 .save-button:hover {
   transform: scale(1.1);
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(255, 255, 255, 1) !important;
 }
 
 .save-button.saved {
@@ -188,7 +193,7 @@
   flex-direction: column;
   flex: 1;
   background: #ffffff;
-  gap: 4px;
+  gap: 8px;
 }
 
 .car-title {
@@ -203,7 +208,7 @@
 }
 
 .car-subtitle {
-  color: #666;
+  color: #666666;
   font-size: 14px;
   margin: 0;
   font-weight: 400;
@@ -213,16 +218,38 @@
   white-space: nowrap;
 }
 
-.car-dealer {
-  color: #666;
+.car-service-history {
+  color: #888888;
+  font-size: 13px;
+  margin: 4px 0 8px 0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+}
+
+.car-trim-line {
+  color: #888888;
   font-size: 13px;
   margin: 0 0 8px 0;
   font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Badges */
+.car-dealer {
+  color: #888;
+  font-size: 11px;
+  margin: 0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: none; /* Hide for AutoTrader style */
+}
+
+/* Badges - AutoTrader Style */
 .car-badges {
   display: flex;
   flex-wrap: wrap;
@@ -232,23 +259,38 @@
 
 .badge {
   background: #f0f0f0;
-  color: #666;
-  padding: 4px 10px;
+  color: #333333;
+  padding: 6px 12px;
   border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   white-space: nowrap;
+  border: 1px solid #e0e0e0;
+}
+
+.badge.cat-badge {
+  background: #d32f2f;
+  color: #ffffff;
+  border-color: #d32f2f;
+  font-weight: 700;
+}
+
+.badge.price-badge {
+  background: #00a651;
+  color: #ffffff;
+  border-color: #00a651;
+  font-weight: 700;
 }
 
 .price-label {
-  color: #666;
+  color: #666666;
   font-size: 13px;
   margin: 0 0 4px 0;
   font-weight: 500;
 }
 
 .car-price {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 12px 0;
@@ -262,29 +304,31 @@
   justify-content: space-between;
   gap: 8px;
   padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid #e0e0e0;
   margin-top: auto;
 }
 
 .car-location {
-  color: #666;
-  font-size: 13px;
+  color: #666666;
+  font-size: 14px;
   font-weight: 400;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 0;
   flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.car-location .distance-text {
+  color: #0066cc;
+  font-weight: 600;
+  margin-left: 0;
 }
 
 .car-rating {
-  color: #666;
+  color: #666666;
   font-size: 13px;
   font-weight: 600;
   display: flex;
