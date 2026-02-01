@@ -71,10 +71,48 @@ const CarAdvertEditPage = () => {
       console.log('📊 Data sources:', dataSources);
       console.log('🔧 Field sources available:', !!fieldSources);
       console.log('🚗 Enhanced data:', enhancedData);
+      console.log('💰 Valuation data:', enhancedData.valuation);
+      console.log('💰 Mileage used for valuation:', enhancedData.valuation?.mileage);
       
-      // Auto-fill price from valuation data if available and not already set
-      // Check for null/undefined specifically, not falsy (0 is a valid price)
-      if (enhancedData.valuation?.estimatedValue && (advertData.price === null || advertData.price === undefined || advertData.price === '')) {
+      // PRIORITY FIX: Extract and set PRIVATE price IMMEDIATELY
+      if (enhancedData.valuation?.estimatedValue) {
+        const valuation = enhancedData.valuation.estimatedValue;
+        // Use PRIVATE for display (individual seller price)
+        const displayPrice = valuation.private || valuation.Private || valuation.retail;
+        
+        console.log('💰💰 FOUND PRICE:', displayPrice, '(Private preferred)');
+        console.log('💰💰 Full valuation:', valuation);
+        console.log('💰💰 Mileage used:', enhancedData.valuation.mileage);
+        console.log('💰💰 Current advertData.price:', advertData.price);
+        
+        if (displayPrice) {
+          console.log(`💰💰 FORCE UPDATING PRICE: £${advertData.price} → £${displayPrice}`);
+          
+          setAdvertData(prev => {
+            console.log('💰💰 Previous price:', prev.price);
+            console.log('💰💰 New price:', displayPrice);
+            return {
+              ...prev,
+              price: displayPrice
+            };
+          });
+          
+          setVehicleData(prev => ({
+            ...prev,
+            estimatedValue: displayPrice,
+            allValuations: valuation,
+            valuationConfidence: enhancedData.valuation.confidence || 'medium'
+          }));
+          
+          console.log('💰💰 Price update completed!');
+        }
+        
+        // SKIP the duplicate update below - we already set the price
+        return;
+      }
+      
+      // This code below will NOT run if valuation exists (early return above)
+      if (enhancedData.valuation?.estimatedValue) {
         // For private sellers, prefer PRIVATE price, then RETAIL, then TRADE
         // estimatedValue might be an object with retail/trade/private values
         const priceValue = typeof enhancedData.valuation.estimatedValue === 'object'
@@ -93,7 +131,14 @@ const CarAdvertEditPage = () => {
           trade: enhancedData.valuation.estimatedValue?.trade
         });
         
-        if (priceValue) {
+        // Update price if:
+        // 1. Price is empty/null/undefined, OR
+        // 2. Current price doesn't match private price (wrong price in database)
+        const shouldUpdatePrice = (advertData.price === null || advertData.price === undefined || advertData.price === '') ||
+                                 (priceValue && advertData.price !== priceValue);
+        
+        if (priceValue && shouldUpdatePrice) {
+          console.log(`💰 Updating price: £${advertData.price || 'empty'} → £${priceValue} (Private Sale)`);
           setAdvertData(prev => ({
             ...prev,
             price: priceValue
@@ -168,7 +213,20 @@ const CarAdvertEditPage = () => {
           console.log('✅ Vehicle found in vehicles collection');
           const vehicleData = vehicleResponse.data.data;
           
-          setVehicleData(vehicleData);
+          // Ensure allValuations and valuation are properly structured
+          const enhancedVehicleData = {
+            ...vehicleData,
+            // If valuation exists in database, structure it properly
+            allValuations: vehicleData.valuation ? {
+              private: vehicleData.valuation.privatePrice,
+              retail: vehicleData.valuation.dealerPrice,
+              trade: vehicleData.valuation.partExchangePrice
+            } : vehicleData.allValuations,
+            // Keep original estimatedValue as fallback
+            estimatedValue: vehicleData.valuation?.privatePrice || vehicleData.estimatedValue
+          };
+          
+          setVehicleData(enhancedVehicleData);
           setCarStatus(vehicleData.advertStatus); // Store car status
           setIsDealerCar(vehicleData.isDealerListing || false); // Store if it's a dealer car
           
@@ -180,8 +238,20 @@ const CarAdvertEditPage = () => {
           });
           
           // Populate form fields with existing data
+          // Prefer private sale price if available
+          const preferredPrice = enhancedVehicleData.valuation?.privatePrice || 
+                                enhancedVehicleData.allValuations?.private || 
+                                enhancedVehicleData.price || '';
+          
+          console.log('💰 Setting price field to:', preferredPrice);
+          console.log('💰 Available prices:', {
+            privatePrice: enhancedVehicleData.valuation?.privatePrice,
+            allValuationsPrivate: enhancedVehicleData.allValuations?.private,
+            dbPrice: enhancedVehicleData.price
+          });
+          
           setAdvertData({
-            price: vehicleData.price || '',
+            price: preferredPrice,
             description: vehicleData.description || '',
             photos: vehicleData.images || [],
             contactPhone: vehicleData.sellerContact?.phoneNumber || '',
@@ -210,11 +280,40 @@ const CarAdvertEditPage = () => {
           
           // Fetch enhanced data if registration exists
           if (vehicleData.registrationNumber && !enhancedData) {
-            console.log('🚗 Fetching enhanced data for:', vehicleData.registrationNumber);
+            console.log('🚗 Fetching enhanced data for:', vehicleData.registrationNumber, 'with mileage:', vehicleData.mileage);
             try {
-              await lookupVehicle(vehicleData.registrationNumber);
+              await lookupVehicle(vehicleData.registrationNumber, vehicleData.mileage);
+              console.log('✅ Enhanced data fetched successfully');
             } catch (apiErr) {
-              console.error('Enhanced lookup failed:', apiErr);
+              console.error('❌ Enhanced lookup failed:', apiErr);
+              
+              // FALLBACK: Try direct valuation API
+              console.log('🔄 Trying direct valuation API as fallback...');
+              try {
+                const valuationResponse = await api.post('/vehicle-valuation', {
+                  vrm: vehicleData.registrationNumber,
+                  mileage: vehicleData.mileage || 50000
+                });
+                
+                if (valuationResponse.data?.success && valuationResponse.data?.data?.estimatedValue) {
+                  const privatePrice = valuationResponse.data.data.estimatedValue.private;
+                  console.log('✅ Got private price from valuation API:', privatePrice);
+                  
+                  // Update price immediately
+                  setAdvertData(prev => ({
+                    ...prev,
+                    price: privatePrice
+                  }));
+                  
+                  setVehicleData(prev => ({
+                    ...prev,
+                    estimatedValue: privatePrice,
+                    allValuations: valuationResponse.data.data.estimatedValue
+                  }));
+                }
+              } catch (valuationErr) {
+                console.error('❌ Valuation API also failed:', valuationErr);
+              }
             }
           }
           
@@ -245,23 +344,47 @@ const CarAdvertEditPage = () => {
         // Fetch enhanced data from CheckCarDetails API if registration number exists
         // Only fetch if we haven't already fetched it
         if (response.data.vehicleData?.registrationNumber && !enhancedData) {
-          console.log('🚗 Fetching enhanced data for:', response.data.vehicleData.registrationNumber);
+          console.log('🚗 Fetching enhanced data for:', response.data.vehicleData.registrationNumber, 'with mileage:', response.data.vehicleData.mileage);
           try {
-            await lookupVehicle(response.data.vehicleData.registrationNumber);
+            await lookupVehicle(response.data.vehicleData.registrationNumber, response.data.vehicleData.mileage);
           } catch (apiErr) {
             console.warn('⚠️ Enhanced lookup failed, continuing without it:', apiErr.message);
           }
         }
         
-        // Handle price carefully - 0 is a valid price, so check for null/undefined specifically
-        let priceValue = response.data.advertData?.price;
+        // Handle price carefully - prefer PRIVATE sale price
+        // Priority: privatePrice > allValuations.private > advertData.price > estimatedValue
+        // TEMPORARY FIX: If no private price found, check if we have enhanced valuation data
+        let priceValue = response.data.vehicleData?.valuation?.privatePrice ||
+                        response.data.vehicleData?.allValuations?.private ||
+                        response.data.advertData?.price;
+        
+        // If still no price and we have enhanced data with valuation, use that
+        if ((!priceValue || priceValue === 3719) && enhancedData?.valuation?.estimatedValue) {
+          const apiPrivatePrice = typeof enhancedData.valuation.estimatedValue === 'object'
+            ? enhancedData.valuation.estimatedValue.private
+            : null;
+          
+          if (apiPrivatePrice) {
+            console.log('💰 Using private price from API valuation:', apiPrivatePrice);
+            priceValue = apiPrivatePrice;
+          }
+        }
+        
         if (priceValue === null || priceValue === undefined) {
           priceValue = response.data.vehicleData?.estimatedValue;
         }
         if (priceValue === null || priceValue === undefined) {
           priceValue = '';
         }
-        console.log('Setting price to:', priceValue);
+        console.log('💰 Setting price to:', priceValue, '(Private Sale preferred)');
+        console.log('💰 Available prices:');
+        console.log('   - privatePrice:', response.data.vehicleData?.valuation?.privatePrice);
+        console.log('   - allValuations.private:', response.data.vehicleData?.allValuations?.private);
+        console.log('   - advertPrice:', response.data.advertData?.price);
+        console.log('   - estimatedValue:', response.data.vehicleData?.estimatedValue);
+        console.log('   - API valuation:', enhancedData?.valuation?.estimatedValue);
+        console.log('   - FINAL PRICE USED:', priceValue);
         
         setAdvertData({
           price: priceValue,
@@ -885,7 +1008,7 @@ const CarAdvertEditPage = () => {
               <p className="price-note">
                 {vehicleData?.estimatedValue && vehicleData.estimatedValue > 0 ? (
                   <>
-                    Our current valuation for your vehicle is £{vehicleData.estimatedValue.toLocaleString()}
+                    Our current valuation for your vehicle is £{(vehicleData.allValuations?.private || vehicleData.valuation?.privatePrice || vehicleData.estimatedValue).toLocaleString()}
                     {vehicleData.allValuations && (
                       <span className="valuation-breakdown" style={{ display: 'block', fontSize: '0.9em', marginTop: '8px', color: '#666' }}>
                         💡 Valuation range: 

@@ -8,16 +8,24 @@ const useEnhancedVehicleLookup = () => {
   const [dataSources, setDataSources] = useState({ dvla: false, checkCarDetails: false });
   const [sources, setSources] = useState({});
 
-  const lookupVehicle = async (registration) => {
+  const lookupVehicle = async (registration, mileage = null) => {
     setLoading(true);
     setError(null);
     setVehicleData(null);
 
     try {
-      const response = await api.get(`/vehicles/enhanced-lookup/${registration}`);
+      // Build URL with optional mileage parameter
+      const url = mileage 
+        ? `/vehicles/enhanced-lookup/${registration}?mileage=${mileage}`
+        : `/vehicles/enhanced-lookup/${registration}`;
+      
+      console.log(`🔍 Calling enhanced lookup API: ${url}`);
+      console.log(`📏 Mileage parameter: ${mileage || 'not provided'}`);
+      const response = await api.get(url);
       const data = response.data;
 
       console.log('🔍 Raw API response:', data);
+      console.log('💰 Raw valuation in response:', data.data?.valuation);
 
       // Extract clean values from source-tracked data
       const cleanData = extractValues(data.data || data);
@@ -65,6 +73,12 @@ const useEnhancedVehicleLookup = () => {
     }
     if (data.dataSources) {
       extracted.dataSources = data.dataSources;
+    }
+    
+    // CRITICAL FIX: Preserve valuation object as-is (it's already in correct format)
+    if (data.valuation && typeof data.valuation === 'object') {
+      extracted.valuation = data.valuation;
+      console.log('💰 Preserved valuation object:', extracted.valuation);
     }
 
     return extracted;
