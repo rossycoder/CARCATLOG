@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { extractTownName } from '../utils/vehicleFormatter';
 import './SavedCarsPage.css';
 
 function SavedCarsPage() {
@@ -391,7 +392,7 @@ function SavedCarsPage() {
                   <div className="car-location">
                     <span className="location-icon">📍</span>
                     <span>
-                      {car.locationName || car.postcode?.split(' ')[0] || 'Location'}
+                      {extractTownName(car.locationName) || car.postcode?.split(' ')[0] || 'Location'}
                     </span>
                   </div>
                 </div>

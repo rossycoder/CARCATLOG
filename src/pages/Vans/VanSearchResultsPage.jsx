@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { vanService } from '../../services/vanService';
+import { extractTownName } from '../../utils/vehicleFormatter';
 import VanFilterSidebar from '../../components/FilterSidebar/VanFilterSidebar';
 import './VanSearchResultsPage.css';
 
@@ -482,7 +483,7 @@ function VanSearchResultsPage() {
                   <div className="car-location">
                     <span className="location-icon">📍</span>
                     <span>
-                      {van.locationName || van.postcode?.split(' ')[0] || 'Location'}
+                      {extractTownName(van.locationName) || van.postcode?.split(' ')[0] || 'Location'}
                       {van.distance > 0 && ` (${(van.distance || 0).toFixed(0)} miles)`}
                     </span>
                   </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { bikeService } from '../../services/bikeService';
+import { extractTownName } from '../../utils/vehicleFormatter';
 import BikeFilterSidebar from '../../components/FilterSidebar/BikeFilterSidebar';
 import './BikeSearchResultsPage.css';
 
@@ -471,7 +472,7 @@ function BikeSearchResultsPage() {
                   <div className="car-location">
                     <span className="location-icon">📍</span>
                     <span>
-                      {bike.locationName || bike.postcode?.split(' ')[0] || 'Location'}
+                      {extractTownName(bike.locationName) || bike.postcode?.split(' ')[0] || 'Location'}
                       {bike.distance > 0 && ` (${(bike.distance || 0).toFixed(0)} miles)`}
                     </span>
                   </div>

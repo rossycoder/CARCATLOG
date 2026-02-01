@@ -1,3 +1,4 @@
+import { extractTownName } from '../../utils/vehicleFormatter';
 import './MeetTheSellerSection.css';
 
 const MeetTheSellerSection = ({ seller, distance, postcode }) => {
@@ -39,7 +40,7 @@ const MeetTheSellerSection = ({ seller, distance, postcode }) => {
             
             <div className="seller-location">
               <span className="location-icon">📍</span>
-              <span>{seller.city || seller.locationName || 'Croydon'} • {distance || '10'} miles</span>
+              <span>{seller.city || extractTownName(seller.locationName) || 'Croydon'} • {distance || '10'} miles</span>
             </div>
           </div>
 
@@ -65,7 +66,7 @@ const MeetTheSellerSection = ({ seller, distance, postcode }) => {
           
           <div className="seller-location">
             <span className="location-icon">📍</span>
-            <span>{seller.locationName && `${seller.locationName}, `}{postcode} • {distance ? `${distance} miles away` : 'Location available'}</span>
+            <span>{seller.locationName && `${extractTownName(seller.locationName)}, `}{postcode} • {distance ? `${distance} miles away` : 'Location available'}</span>
           </div>
         </div>
       )}

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { extractTownName } from '../utils/vehicleFormatter';
 import './CarCard.css';
 
 const CarCard = ({ car }) => {
@@ -162,7 +163,7 @@ const CarCard = ({ car }) => {
         
         <div className="car-footer">
           <span className="car-location">
-            📍 {car.locationName || car.sellerContact?.city || car.postcode?.split(' ')[0] || 'Location'}
+            📍 {extractTownName(car.locationName) || car.sellerContact?.city || car.postcode?.split(' ')[0] || 'Location'}
             {car.distance != null && (
               <> • <span className="distance-text">{Math.round(car.distance)} miles away</span></>
             )}
