@@ -30,6 +30,11 @@ export const createAdvert = async (vehicleData) => {
     
     return response.data;
   } catch (error) {
+    // Silently handle errors in production - don't log to console
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('Advert creation failed, using fallback:', error.message);
+    }
+    
     // Fallback to local storage if backend is unavailable
     const advertId = generateUUID();
     const advertData = {

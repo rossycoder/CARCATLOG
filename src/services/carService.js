@@ -22,8 +22,16 @@ export const carService = {
 
   // Get single car by ID
   getCarById: async (id) => {
-    const response = await api.get(`/vehicles/${id}`);
-    return response.data;
+    try {
+      const response = await api.get(`/vehicles/${id}`);
+      return response.data;
+    } catch (error) {
+      // Silently handle errors in production
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`Failed to fetch vehicle ${id}:`, error.message);
+      }
+      throw error;
+    }
   },
 
   // Create new car (admin only)

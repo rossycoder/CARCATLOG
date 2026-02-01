@@ -62,6 +62,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Suppress console errors in production for specific endpoints
+    const isProduction = import.meta.env.PROD;
+    const url = error.config?.url || '';
+    const suppressErrors = ['/adverts', '/vehicles/'].some(endpoint => url.includes(endpoint));
+    
+    if (isProduction && suppressErrors) {
+      // Silently handle these errors in production
+      return Promise.reject(error);
+    }
+    
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
       const requestUrl = error.config?.url || '';

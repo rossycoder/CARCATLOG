@@ -77,11 +77,6 @@ const MeetTheSellerSection = ({ seller, distance, postcode }) => {
             {seller.phoneNumber}
           </button>
         )}
-        
-        <button className="contact-btn message-btn" onClick={handleMessageClick}>
-          <span className="btn-icon">✉️</span>
-          Message
-        </button>
       </div>
 
       {postcode && (
