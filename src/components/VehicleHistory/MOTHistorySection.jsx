@@ -8,9 +8,6 @@ const MOTHistorySection = ({ vrm, carData }) => {
   const [expandedTest, setExpandedTest] = useState(null);
 
   useEffect(() => {
-    console.log('MOTHistorySection - VRM prop:', vrm);
-    console.log('MOTHistorySection - Car data:', carData);
-    
     if (vrm) {
       loadMOTHistory();
     } else {
@@ -27,12 +24,9 @@ const MOTHistorySection = ({ vrm, carData }) => {
       
       // First try to use MOT data from car document or vehicle history
       if (carData) {
-        console.log('[MOTHistory] Checking car data for MOT information');
-        console.log('[MOTHistory] Car data keys:', Object.keys(carData));
-        
         // Check if MOT history array exists in car document
         if (carData.motHistory && Array.isArray(carData.motHistory) && carData.motHistory.length > 0) {
-          console.log('[MOTHistory] Using MOT history array from car document:', carData.motHistory.length, 'tests');
+          console.log('[MOTHistory] ✅ Using MOT history from database:', carData.motHistory.length, 'tests');
           setMotHistory({
             tests: carData.motHistory,
             currentStatus: carData.motStatus || 'Unknown',
@@ -198,13 +192,15 @@ const MOTHistorySection = ({ vrm, carData }) => {
           {tests.map((test, index) => (
             <div 
               key={index} 
-              className={`mot-test-item ${test.result?.toLowerCase() || 'unknown'}`}
+              className={`mot-test-item ${(test.testResult || test.result)?.toLowerCase() || 'unknown'}`}
               onClick={() => setExpandedTest(expandedTest === index ? null : index)}
             >
               <div className="test-header">
                 <div className="test-main-info">
-                  <span className={`test-result-badge ${test.result?.toLowerCase() || 'unknown'}`}>
-                    {test.result === 'PASSED' ? '✓ PASS' : test.result === 'FAILED' ? '✗ FAIL' : test.result}
+                  <span className={`test-result-badge ${(test.testResult || test.result)?.toLowerCase() || 'unknown'}`}>
+                    {(test.testResult || test.result) === 'PASSED' ? '✓ PASS' : 
+                     (test.testResult || test.result) === 'FAILED' ? '✗ FAIL' : 
+                     (test.testResult || test.result)}
                   </span>
                   <span className="test-date">{formatDate(test.testDate || test.completedDate)}</span>
                 </div>

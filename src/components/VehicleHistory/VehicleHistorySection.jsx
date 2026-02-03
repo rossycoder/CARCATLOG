@@ -400,19 +400,6 @@ const VehicleHistorySection = ({ vrm, carData }) => {
           <DataQualityWarning validation={validationDisplay} />
         )}
 
-        {historyData.motStatus && (
-          <div className="mot-info">
-            <span className="mot-label">MOT information</span>
-            <span className="mot-value">
-              {historyData.motStatus === 'Valid' || historyData.motStatus === 'valid'
-                ? historyData.motExpiryDate 
-                  ? `MOT valid until ${new Date(historyData.motExpiryDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`
-                  : '12 months MOT included'
-                : historyData.motStatus}
-            </span>
-          </div>
-        )}
-
         <div className="checks-list">
           {checks.map((check) => (
             <div 

@@ -5,18 +5,21 @@ const LazyImage = ({
   src, 
   alt, 
   className = '', 
-  placeholder = '/placeholder-car.jpg',
+  placeholder = '/images/dummy/red-car.png',
   width,
-  height 
+  height,
+  onError,
+  onClick
 }) => {
   const [imageSrc, setImageSrc] = useState(placeholder);
   const [imageRef, setImageRef] = useState();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     let observer;
     
-    if (imageRef && imageSrc === placeholder) {
+    if (imageRef && imageSrc === placeholder && !hasError) {
       observer = new IntersectionObserver(
         entries => {
           entries.forEach(entry => {
@@ -39,7 +42,19 @@ const LazyImage = ({
         observer.unobserve(imageRef);
       }
     };
-  }, [imageRef, imageSrc, src, placeholder]);
+  }, [imageRef, imageSrc, src, placeholder, hasError]);
+
+  const handleError = () => {
+    setHasError(true);
+    setImageSrc(placeholder);
+    if (onError) {
+      onError();
+    }
+  };
+
+  const handleLoad = () => {
+    setIsLoaded(true);
+  };
 
   return (
     <img
@@ -50,10 +65,13 @@ const LazyImage = ({
       width={width}
       height={height}
       loading="lazy"
-      onLoad={() => setIsLoaded(true)}
+      onLoad={handleLoad}
+      onError={handleError}
+      onClick={onClick}
       style={{
         transition: 'opacity 0.3s ease-in-out',
-        opacity: isLoaded ? 1 : 0.7
+        opacity: isLoaded ? 1 : 0.7,
+        cursor: onClick ? 'pointer' : 'default'
       }}
     />
   );
@@ -65,7 +83,9 @@ LazyImage.propTypes = {
   className: PropTypes.string,
   placeholder: PropTypes.string,
   width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onError: PropTypes.func,
+  onClick: PropTypes.func
 };
 
 export default LazyImage;

@@ -18,6 +18,7 @@ const CarDetailPage = () => {
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // Function to handle back navigation intelligently
   const handleBackClick = () => {
@@ -51,6 +52,8 @@ const CarDetailPage = () => {
         url += `?postcode=${encodeURIComponent(userPostcode)}`;
       }
       
+      console.log('Fetching car details from:', url);
+      
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -58,8 +61,11 @@ const CarDetailPage = () => {
       }
       
       const data = await response.json();
+      console.log('✅ Car data loaded successfully');
+      console.log('🖼️ Images:', data.data.images?.length || 0, 'found');
       setCar(data.data);
     } catch (err) {
+      console.error('Error fetching car details:', err);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -106,7 +112,24 @@ const CarDetailPage = () => {
 
   const images = car.images && car.images.length > 0 
     ? car.images 
-    : ['/images/dummy/placeholder-car.jpg'];
+    : ['/images/dummy/red-car.png'];
+
+  // Handle image error
+  const handleImageError = (e) => {
+    console.error('Main image failed to load:', getCurrentImage());
+    setImageError(true);
+    if (e && e.target) {
+      e.target.src = '/images/dummy/red-car.png';
+    }
+  };
+
+  // Get current image with fallback
+  const getCurrentImage = () => {
+    if (imageError || !images[currentImageIndex]) {
+      return '/images/dummy/red-car.png';
+    }
+    return images[currentImageIndex];
+  };
 
   // Generate SEO data
   const carTitle = `${car.year} ${car.make} ${car.model}${car.submodel ? ` ${car.submodel}` : ''}`;
@@ -143,7 +166,18 @@ const CarDetailPage = () => {
         {/* Image Gallery */}
         <div className="image-gallery">
           <div className="main-image">
-            <img src={images[currentImageIndex]} alt={`${car.make} ${car.model}${car.submodel ? ` ${car.submodel}` : ''}`} />
+            <img 
+              src={getCurrentImage()} 
+              alt={`${car.make} ${car.model}${car.submodel ? ` ${car.submodel}` : ''}`}
+              onError={handleImageError}
+              onLoad={() => {}} // Image loaded successfully
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                background: '#f5f5f5'
+              }}
+            />
             <button className="gallery-btn" onClick={() => {}}>
               📷 Gallery
             </button>
@@ -161,6 +195,20 @@ const CarDetailPage = () => {
                   alt={`View ${index + 1}`}
                   className={currentImageIndex === index ? 'active' : ''}
                   onClick={() => setCurrentImageIndex(index)}
+                  onError={(e) => {
+                    console.error('Thumbnail image failed to load:', img);
+                    e.target.src = '/images/dummy/red-car.png';
+                  }}
+                  style={{
+                    width: '100px',
+                    height: '70px',
+                    objectFit: 'cover',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    border: currentImageIndex === index ? '2px solid #0066cc' : '2px solid transparent',
+                    transition: 'border-color 0.2s',
+                    background: '#f5f5f5'
+                  }}
                 />
               ))}
               {images.length > 4 && (
@@ -192,15 +240,16 @@ const CarDetailPage = () => {
 
             {/* Title and Price - AutoTrader Format */}
             <div className="car-header">
-              {/* Write-off Warning Badge - Show for CAT A, B, S, N */}
+              {/* Write-off Warning Badge - Show for CAT A, B, S, N, D */}
               {car.historyCheckId && 
                car.historyCheckId.writeOffCategory && 
-               ['A', 'B', 'S', 'N'].includes(car.historyCheckId.writeOffCategory.toUpperCase()) && (
+               ['A', 'B', 'S', 'N', 'D'].includes(car.historyCheckId.writeOffCategory.toUpperCase()) && (
                 <div className="write-off-warning-badge">
                   <span className="warning-icon">⚠️</span>
                   <span className="warning-text">
                     CAT {car.historyCheckId.writeOffCategory.toUpperCase()}
                   </span>
+                 
                 </div>
               )}
               
