@@ -27,106 +27,37 @@ const VehiclePaymentPage = () => {
   const fetchVehicleData = async () => {
     try {
       setIsLoading(true);
-      console.log('Fetching vehicle data for registration:', registration);
+      console.log('⚠️ Skipping API calls to avoid charges - using basic data for payment page');
       
-      // Create promises for parallel API calls with timeout
-      const dvlaPromise = Promise.race([
-        lookupVehicle(registration, 0),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('DVLA API timeout')), 5000)
-        )
-      ]);
+      // For payment page, we don't need full vehicle data
+      // Just set basic info for display
+      const basicData = {
+        vrm: registration,
+        make: 'Vehicle',
+        model: 'Information',
+        bodyType: 'Available after payment',
+        colour: 'N/A',
+        firstRegistered: 'N/A',
+        fuelType: 'N/A',
+        engineSize: 'N/A',
+        transmission: 'N/A',
+        co2Emissions: 'N/A',
+        taxStatus: 'N/A',
+        motStatus: 'N/A',
+        _dataSource: {
+          dvla: false,
+          history: false,
+          fallback: true
+        },
+        _completeness: 'payment_mode'
+      };
       
-      const historyPromise = Promise.race([
-        checkVehicleHistory(registration, false),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('History API timeout')), 5000)
-        )
-      ]);
+      console.log('Using basic data for payment page:', basicData);
+      setVehicleData(basicData);
       
-      // Execute API calls in parallel
-      const [dvlaResult, historyResult] = await Promise.allSettled([
-        dvlaPromise,
-        historyPromise
-      ]);
-      
-      console.log('API Results:', { dvlaResult, historyResult });
-      
-      // Process DVLA response
-      let vehicleInfo = null;
-      let dvlaSuccess = false;
-      if (dvlaResult.status === 'fulfilled' && dvlaResult.value?.success) {
-        // Try both data and vehicle properties (backend returns both)
-        vehicleInfo = dvlaResult.value.data || dvlaResult.value.vehicle;
-        dvlaSuccess = true;
-        console.log('DVLA lookup successful:', vehicleInfo);
-      } else {
-        console.log('DVLA lookup failed:', dvlaResult.reason?.message || 'Unknown error');
-        if (dvlaResult.status === 'rejected') {
-          console.error('DVLA API Error:', dvlaResult.reason);
-        }
-      }
-      
-      // Process Vehicle History response
-      let historyInfo = null;
-      let historySuccess = false;
-      if (historyResult.status === 'fulfilled' && historyResult.value?.success && historyResult.value?.data) {
-        historyInfo = historyResult.value.data;
-        historySuccess = true;
-        console.log('History lookup successful');
-      } else {
-        console.log('History lookup failed:', historyResult.reason?.message || 'Unknown error');
-      }
-      
-      // Determine data completeness
-      let completeness = 'minimal';
-      if (dvlaSuccess && historySuccess) {
-        completeness = 'complete';
-      } else if (dvlaSuccess || historySuccess) {
-        completeness = 'partial';
-      }
-      
-      // Merge and prioritize data from both sources
-      if (vehicleInfo || historyInfo) {
-        const mergedData = {
-          vrm: registration,
-          // Prioritize DVLA data for basic vehicle info as it's more authoritative
-          make: vehicleInfo?.make || historyInfo?.make || 'Make information unavailable',
-          model: (vehicleInfo?.model && vehicleInfo.model !== 'Unknown') ? vehicleInfo.model : 
-                 (historyInfo?.model && historyInfo.model !== 'Unknown') ? historyInfo.model : 
-                 'Model information unavailable', 
-          bodyType: vehicleInfo?.bodyType || historyInfo?.bodyType || historyInfo?.body_type || 'Body type unavailable',
-          colour: vehicleInfo?.colour || vehicleInfo?.color || historyInfo?.colour || historyInfo?.color || 'Colour unavailable',
-          firstRegistered: vehicleInfo?.yearOfManufacture || vehicleInfo?.year || historyInfo?.firstRegistered || historyInfo?.first_registered || historyInfo?.year || 'Registration date unavailable',
-          fuelType: vehicleInfo?.fuelType || historyInfo?.fuelType || 'Fuel type unavailable',
-          engineSize: vehicleInfo?.engineCapacity ? `${(vehicleInfo.engineCapacity / 1000).toFixed(1)}L` : (historyInfo?.engineSize || 'Engine size unavailable'),
-          transmission: historyInfo?.transmission || 'Manual',
-          co2Emissions: vehicleInfo?.co2Emissions || '155',
-          taxStatus: vehicleInfo?.taxStatus || 'Untaxed',
-          motStatus: vehicleInfo?.motStatus || 'Not valid',
-          
-          // Metadata for display logic
-          _dataSource: {
-            dvla: dvlaSuccess,
-            history: historySuccess,
-            fallback: false
-          },
-          _completeness: completeness
-        };
-        
-        console.log('Raw vehicle info from DVLA:', vehicleInfo);
-        console.log('Raw history info:', historyInfo);
-        console.log('Vehicle data merged successfully:', mergedData);
-        setVehicleData(mergedData);
-      } else {
-        // Both APIs failed - show error
-        console.error('Both DVLA and History APIs failed');
-        setError('Unable to fetch vehicle data. Please check the registration number and try again.');
-        setVehicleData(null);
-      }
     } catch (err) {
-      console.error('Unexpected error in fetchVehicleData:', err);
-      setError('An unexpected error occurred. Please try again.');
+      console.error('Error in fetchVehicleData:', err);
+      setError('Unable to prepare payment page. Please try again.');
       setVehicleData(null);
     } finally {
       setIsLoading(false);

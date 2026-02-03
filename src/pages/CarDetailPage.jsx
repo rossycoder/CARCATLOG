@@ -192,6 +192,18 @@ const CarDetailPage = () => {
 
             {/* Title and Price - AutoTrader Format */}
             <div className="car-header">
+              {/* Write-off Warning Badge - Show for CAT A, B, S, N */}
+              {car.historyCheckId && 
+               car.historyCheckId.writeOffCategory && 
+               ['A', 'B', 'S', 'N'].includes(car.historyCheckId.writeOffCategory.toUpperCase()) && (
+                <div className="write-off-warning-badge">
+                  <span className="warning-icon">⚠️</span>
+                  <span className="warning-text">
+                    CAT {car.historyCheckId.writeOffCategory.toUpperCase()}
+                  </span>
+                </div>
+              )}
+              
               <h1 className="car-make-model">
                 {car.make} {car.model}
               </h1>
@@ -294,6 +306,25 @@ const CarDetailPage = () => {
                   <div className="spec-details">
                     <span className="spec-label">Body colour</span>
                     <span className="spec-value">{car.color}</span>
+                  </div>
+                </div>
+
+                {/* MOT Due Information */}
+                <div className="spec-item">
+                  <span className="spec-icon">🔍</span>
+                  <div className="spec-details">
+                    <span className="spec-label">MOT Due</span>
+                    <span className="spec-value">
+                      {car.motDue || car.motExpiry ? (
+                        new Date(car.motDue || car.motExpiry).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric'
+                        })
+                      ) : (
+                        'Contact seller for MOT details'
+                      )}
+                    </span>
                   </div>
                 </div>
 
@@ -444,12 +475,13 @@ const CarDetailPage = () => {
             {/* Vehicle History Section - Always show, component handles missing VRM */}
             <VehicleHistorySection 
               vrm={car.registrationNumber || car.vrm}
-              historyCheckId={car.historyCheckId}
+              carData={car}
             />
 
             {/* MOT History Section - Always show, component handles missing VRM */}
             <MOTHistorySection 
               vrm={car.registrationNumber || car.vrm}
+              carData={car}
             />
 
             {/* Meet the Seller Section */}

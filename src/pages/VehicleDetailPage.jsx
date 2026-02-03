@@ -32,26 +32,23 @@ const VehicleDetailPage = () => {
     try {
       console.log(`Fetching vehicle data for registration: ${reg}`);
       
-      // Make parallel API calls to DVLA and vehicle history services
-      const results = await Promise.allSettled([
-        lookupVehicle(reg, 0), // DVLA service
-        checkVehicleHistory(reg, false) // History service
-      ]);
+      // Don't make API calls for detail page - use existing data
+      console.log('⚠️ Skipping API calls to avoid charges - detail page should use database data');
       
-      // Process results
-      const [dvlaResult, historyResult] = results;
-      
-      // Extract successful data
-      const dvlaData = dvlaResult.status === 'fulfilled' ? dvlaResult.value : null;
-      const historyData = historyResult.status === 'fulfilled' ? historyResult.value : null;
-      
-      console.log('DVLA Result:', dvlaData);
-      console.log('History Result:', historyData);
+      // For detail page, we should fetch from our database instead of external APIs
+      // This is just a placeholder - the actual car detail should come from database
+      const placeholderData = {
+        registrationNumber: reg,
+        make: 'Vehicle',
+        model: 'Details',
+        year: new Date().getFullYear(),
+        message: 'Vehicle details should be loaded from database, not external APIs'
+      };
       
       // Combine and process the data
-      const combinedData = combineVehicleData(dvlaData, historyData, reg);
+      const combinedData = combineVehicleData(null, null, reg);
       
-      setVehicleData(combinedData.vehicleData);
+      setVehicleData(combinedData.vehicleData || placeholderData);
       
     } catch (err) {
       console.error('Error fetching vehicle data:', err);

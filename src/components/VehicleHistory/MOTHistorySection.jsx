@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './MOTHistorySection.css';
 
-const MOTHistorySection = ({ vrm }) => {
+const MOTHistorySection = ({ vrm, carData }) => {
   const [motHistory, setMotHistory] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -9,53 +9,91 @@ const MOTHistorySection = ({ vrm }) => {
 
   useEffect(() => {
     console.log('MOTHistorySection - VRM prop:', vrm);
+    console.log('MOTHistorySection - Car data:', carData);
+    
     if (vrm) {
-      fetchMOTHistory();
+      loadMOTHistory();
     } else {
       console.warn('MOTHistorySection - No VRM provided');
       setIsLoading(false);
       setError('No vehicle registration provided');
     }
-  }, [vrm]);
+  }, [vrm, carData]);
 
-  const fetchMOTHistory = async (testVrm = null) => {
+  const loadMOTHistory = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      let vrmToUse = testVrm || vrm;
       
-      // Clean VRM: remove spaces and convert to uppercase
-      if (vrmToUse) {
-        vrmToUse = vrmToUse.replace(/\s+/g, '').toUpperCase();
-      }
-      
-      console.log('Fetching MOT history for VRM:', vrmToUse);
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const url = `${API_BASE_URL}/vehicle-history/mot/${vrmToUse}`;
-      console.log('MOT API URL:', url);
-      
-      const response = await fetch(url);
-      console.log('MOT API Response status:', response.status);
-      
-      const result = await response.json();
-      console.log('MOT API Result:', result);
-      
-      if (!response.ok) {
-        // Handle 404 - vehicle not found
-        if (response.status === 404) {
-          setError({
-            message: result.error || 'No MOT history found for this vehicle',
-            nextSteps: result.nextSteps || [],
-            isNotFound: true
+      // First try to use MOT data from car document or vehicle history
+      if (carData) {
+        console.log('[MOTHistory] Checking car data for MOT information');
+        console.log('[MOTHistory] Car data keys:', Object.keys(carData));
+        
+        // Check if MOT history array exists in car document
+        if (carData.motHistory && Array.isArray(carData.motHistory) && carData.motHistory.length > 0) {
+          console.log('[MOTHistory] Using MOT history array from car document:', carData.motHistory.length, 'tests');
+          setMotHistory({
+            tests: carData.motHistory,
+            currentStatus: carData.motStatus || 'Unknown',
+            expiryDate: carData.motExpiry || carData.motDue || carData.motExpiryDate,
+            message: 'MOT history from vehicle database',
+            source: 'car_document'
           });
+          setIsLoading(false);
           return;
         }
         
-        // Handle other errors
-        throw new Error(result.error || 'Failed to fetch MOT history');
+        // Check if MOT history is in the populated vehicle history
+        if (carData.historyCheckId && carData.historyCheckId.motHistory && 
+            Array.isArray(carData.historyCheckId.motHistory) && carData.historyCheckId.motHistory.length > 0) {
+          console.log('[MOTHistory] Using MOT history from vehicle history document:', carData.historyCheckId.motHistory.length, 'tests');
+          setMotHistory({
+            tests: carData.historyCheckId.motHistory,
+            currentStatus: carData.historyCheckId.motStatus || carData.motStatus || 'Unknown',
+            expiryDate: carData.historyCheckId.motExpiryDate || carData.motExpiry || carData.motDue,
+            message: 'MOT history from vehicle history database',
+            source: 'vehicle_history'
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        // Check for basic MOT status fields (fallback)
+        console.log('[MOTHistory] MOT fields check:', {
+          motStatus: carData.motStatus,
+          motExpiryDate: carData.motExpiryDate,
+          motDue: carData.motDue,
+          motExpiry: carData.motExpiry
+        });
+        
+        if (carData.motStatus || carData.motExpiryDate || carData.motDue || carData.motExpiry) {
+          console.log('[MOTHistory] Using basic MOT data from car document');
+          const motStatus = carData.motStatus || 'Unknown';
+          const expiryDate = carData.motExpiryDate || carData.motDue || carData.motExpiry;
+          
+          setMotHistory({
+            tests: [],
+            currentStatus: motStatus,
+            expiryDate: expiryDate,
+            message: 'Basic MOT information from vehicle database (detailed history not available)',
+            source: 'car_document_basic'
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log('[MOTHistory] Car data structure:', JSON.stringify(carData, null, 2));
       }
       
-      setMotHistory(result.data || result);
+      // If no MOT data found in car document, show informative message
+      console.log('[MOTHistory] No MOT data found in car document');
+      setMotHistory({
+        tests: [],
+        currentStatus: 'Information not available',
+        message: 'MOT information is not available for this vehicle. This may be because the vehicle is new, recently imported, or MOT data has not been updated.',
+        source: 'not_found'
+      });
     } catch (err) {
       console.error('Error fetching MOT history:', err);
       setError({

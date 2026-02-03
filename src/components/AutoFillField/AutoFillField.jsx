@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Info } from 'lucide-react';
 import './AutoFillField.css';
 
@@ -15,10 +15,18 @@ const AutoFillField = ({
   step,
   disabled = false
 }) => {
+  const [inputValue, setInputValue] = useState(value || '');
   const isAutoFilled = !!source;
 
+  // Update internal state when value prop changes
+  useEffect(() => {
+    setInputValue(value || '');
+  }, [value]);
+
   const handleChange = (e) => {
-    onChange(e.target.value);
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    onChange(newValue);
   };
 
   return (
@@ -37,7 +45,7 @@ const AutoFillField = ({
       <div className="auto-fill-input-wrapper">
         <input
           type={type}
-          value={value || ''}
+          value={inputValue}
           onChange={handleChange}
           placeholder={placeholder}
           min={min}

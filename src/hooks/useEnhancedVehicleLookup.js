@@ -32,6 +32,7 @@ const useEnhancedVehicleLookup = () => {
       
       console.log('✨ Extracted clean data:', cleanData);
       console.log('📊 Field sources:', cleanData.fieldSources);
+      console.log('🏃 Running costs in clean data:', cleanData.runningCosts);
       
       setVehicleData(cleanData);
       setDataSources(data.dataSources || data.data?.dataSources || { dvla: false, checkCarDetails: false });
@@ -78,7 +79,11 @@ const useEnhancedVehicleLookup = () => {
     // CRITICAL FIX: Preserve valuation object as-is (it's already in correct format)
     if (data.valuation && typeof data.valuation === 'object') {
       extracted.valuation = data.valuation;
-      console.log('💰 Preserved valuation object:', extracted.valuation);
+    }
+    
+    // CRITICAL FIX: Preserve running costs object as-is
+    if (data.runningCosts && typeof data.runningCosts === 'object') {
+      extracted.runningCosts = data.runningCosts;
     }
 
     return extracted;

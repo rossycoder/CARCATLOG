@@ -29,8 +29,8 @@ const PaymentSuccessPage = () => {
       setIsLoading(true);
       console.log('Fetching comprehensive vehicle data for:', registration);
       
-      // Use enhanced lookup API (CheckCarDetails) instead of DVLA
-      const response = await carService.enhancedLookup(registration, 0);
+      // Use basic lookup API for display (comprehensive data fetched via webhook)
+      const response = await carService.basicLookup(registration, 0);
       
       console.log('Enhanced API Response:', response);
       

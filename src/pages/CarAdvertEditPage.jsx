@@ -4,19 +4,25 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import advertService from '../services/advertService';
 import uploadService from '../services/uploadService';
-import useEnhancedVehicleLookup from '../hooks/useEnhancedVehicleLookup';
 import AutoFillField from '../components/AutoFillField/AutoFillField';
+import useEnhancedVehicleLookup from '../hooks/useEnhancedVehicleLookup';
 import './CarAdvertEditPage.css';
 
 const CarAdvertEditPage = () => {
   const { advertId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { lookupVehicle, loading: apiLoading, error: apiError, vehicleData: enhancedData, sources: fieldSources, dataSources } = useEnhancedVehicleLookup();
   
-  console.log('🔍 Hook state - enhancedData:', enhancedData);
-  console.log('🔍 Hook state - fieldSources:', fieldSources);
-  console.log('🔍 Hook state - dataSources:', dataSources);
+  // Enhanced vehicle lookup hook
+  const {
+    loading: apiLoading,
+    error: apiError,
+    vehicleData: enhancedData,
+    dataSources,
+    sources: fieldSources,
+    lookupVehicle,
+    reset: resetLookup
+  } = useEnhancedVehicleLookup();
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -48,7 +54,7 @@ const CarAdvertEditPage = () => {
   // Expandable sections state
   const [expandedSections, setExpandedSections] = useState({
     features: false,
-    runningCosts: false,
+    runningCosts: true, // Expand by default to show running costs data
     video: false
   });
   
@@ -56,6 +62,12 @@ const CarAdvertEditPage = () => {
   const [isPriceEditing, setIsPriceEditing] = useState(false);
   const [videoUrlTimeout, setVideoUrlTimeout] = useState(null);
   const [runningCostsTimeout, setRunningCostsTimeout] = useState(null);
+  const [featureSaveTimeout, setFeatureSaveTimeout] = useState(null);
+  
+  // Enhanced data processing state
+  const [enhancedDataProcessed, setEnhancedDataProcessed] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Show popup when page loads
   useEffect(() => {
@@ -66,13 +78,8 @@ const CarAdvertEditPage = () => {
 
   // Auto-fill data when enhanced data is received from API
   useEffect(() => {
-    if (enhancedData && !apiLoading) {
-      console.log('✨ Enhanced data received');
-      console.log('📊 Data sources:', dataSources);
-      console.log('🔧 Field sources available:', !!fieldSources);
-      console.log('🚗 Enhanced data:', enhancedData);
-      console.log('💰 Valuation data:', enhancedData.valuation);
-      console.log('💰 Mileage used for valuation:', enhancedData.valuation?.mileage);
+    if (enhancedData && !apiLoading && !enhancedDataProcessed) {
+      setEnhancedDataProcessed(true); // Prevent duplicate processing
       
       // PRIORITY FIX: Extract and set PRIVATE price IMMEDIATELY
       if (enhancedData.valuation?.estimatedValue) {
@@ -80,22 +87,11 @@ const CarAdvertEditPage = () => {
         // Use PRIVATE for display (individual seller price)
         const displayPrice = valuation.private || valuation.Private || valuation.retail;
         
-        console.log('💰💰 FOUND PRICE:', displayPrice, '(Private preferred)');
-        console.log('💰💰 Full valuation:', valuation);
-        console.log('💰💰 Mileage used:', enhancedData.valuation.mileage);
-        console.log('💰💰 Current advertData.price:', advertData.price);
-        
         if (displayPrice) {
-          console.log(`💰💰 FORCE UPDATING PRICE: £${advertData.price} → £${displayPrice}`);
-          
-          setAdvertData(prev => {
-            console.log('💰💰 Previous price:', prev.price);
-            console.log('💰💰 New price:', displayPrice);
-            return {
-              ...prev,
-              price: displayPrice
-            };
-          });
+          setAdvertData(prev => ({
+            ...prev,
+            price: displayPrice
+          }));
           
           setVehicleData(prev => ({
             ...prev,
@@ -103,94 +99,31 @@ const CarAdvertEditPage = () => {
             allValuations: valuation,
             valuationConfidence: enhancedData.valuation.confidence || 'medium'
           }));
-          
-          console.log('💰💰 Price update completed!');
-        }
-        
-        // SKIP the duplicate update below - we already set the price
-        return;
-      }
-      
-      // This code below will NOT run if valuation exists (early return above)
-      if (enhancedData.valuation?.estimatedValue) {
-        // For private sellers, prefer PRIVATE price, then RETAIL, then TRADE
-        // estimatedValue might be an object with retail/trade/private values
-        const priceValue = typeof enhancedData.valuation.estimatedValue === 'object'
-          ? (enhancedData.valuation.estimatedValue.private || 
-             enhancedData.valuation.estimatedValue.Private ||
-             enhancedData.valuation.estimatedValue.retail || 
-             enhancedData.valuation.estimatedValue.trade)
-          : enhancedData.valuation.estimatedValue;
-          
-        console.log('💰 Auto-filling price from API (PRIVATE preferred):', priceValue);
-        console.log('💰 Full valuation object:', enhancedData.valuation);
-        console.log('💰 Valuation confidence:', enhancedData.valuation.confidence);
-        console.log('💰 All valuation prices:', {
-          private: enhancedData.valuation.estimatedValue?.private,
-          retail: enhancedData.valuation.estimatedValue?.retail,
-          trade: enhancedData.valuation.estimatedValue?.trade
-        });
-        
-        // Update price if:
-        // 1. Price is empty/null/undefined, OR
-        // 2. Current price doesn't match private price (wrong price in database)
-        const shouldUpdatePrice = (advertData.price === null || advertData.price === undefined || advertData.price === '') ||
-                                 (priceValue && advertData.price !== priceValue);
-        
-        if (priceValue && shouldUpdatePrice) {
-          console.log(`💰 Updating price: £${advertData.price || 'empty'} → £${priceValue} (Private Sale)`);
-          setAdvertData(prev => ({
-            ...prev,
-            price: priceValue
-          }));
-          
-          // Also update vehicleData with estimated value
-          setVehicleData(prev => ({
-            ...prev,
-            estimatedValue: priceValue,
-            valuationConfidence: enhancedData.valuation.confidence || 'medium',
-            allValuations: enhancedData.valuation.estimatedValue
-          }));
         }
       }
-      
-      // Note: MOT data is not available from the API
-      // MOT information should be stored in the database when the vehicle is created
-      console.log('ℹ️ MOT data is not provided by the vehicle lookup API');
-      console.log('📋 MOT data should be in vehicleData from database:', {
-        motDue: vehicleData?.motDue,
-        motStatus: vehicleData?.motStatus,
-        motExpiry: vehicleData?.motExpiry
-      });
       
       // Auto-fill running costs
       if (enhancedData.runningCosts) {
-        console.log('💰 Running costs from API:');
-        console.log('  - Urban:', enhancedData.runningCosts.fuelEconomy?.urban, 'mpg');
-        console.log('  - Extra Urban:', enhancedData.runningCosts.fuelEconomy?.extraUrban, 'mpg');
-        console.log('  - Combined:', enhancedData.runningCosts.fuelEconomy?.combined, 'mpg');
-        console.log('  - CO2:', enhancedData.runningCosts.co2Emissions, 'g/km');
-        console.log('  - Annual Tax: £', enhancedData.runningCosts.annualTax);
-        console.log('  - Insurance Group:', enhancedData.runningCosts.insuranceGroup || 'N/A');
-        
-        setAdvertData(prev => ({
-          ...prev,
-          runningCosts: {
+        setAdvertData(prev => {
+          const newRunningCosts = {
             fuelEconomy: {
-              urban: enhancedData.runningCosts?.fuelEconomy?.urban || prev.runningCosts.fuelEconomy.urban,
-              extraUrban: enhancedData.runningCosts?.fuelEconomy?.extraUrban || prev.runningCosts.fuelEconomy.extraUrban,
-              combined: enhancedData.runningCosts?.fuelEconomy?.combined || prev.runningCosts.fuelEconomy.combined
+              urban: String(enhancedData.runningCosts?.fuelEconomy?.urban || prev.runningCosts.fuelEconomy.urban || ''),
+              extraUrban: String(enhancedData.runningCosts?.fuelEconomy?.extraUrban || prev.runningCosts.fuelEconomy.extraUrban || ''),
+              combined: String(enhancedData.runningCosts?.fuelEconomy?.combined || prev.runningCosts.fuelEconomy.combined || '')
             },
-            annualTax: enhancedData.runningCosts?.annualTax || prev.runningCosts.annualTax,
-            insuranceGroup: enhancedData.runningCosts?.insuranceGroup || prev.runningCosts.insuranceGroup,
-            co2Emissions: enhancedData.runningCosts?.co2Emissions || prev.runningCosts.co2Emissions
-          }
-        }));
-        
-        console.log('✅ Running costs auto-filled successfully');
+            annualTax: String(enhancedData.runningCosts?.annualTax || prev.runningCosts.annualTax || ''),
+            insuranceGroup: String(enhancedData.runningCosts?.insuranceGroup || prev.runningCosts.insuranceGroup || ''),
+            co2Emissions: String(enhancedData.runningCosts?.co2Emissions || prev.runningCosts.co2Emissions || '')
+          };
+          
+          return {
+            ...prev,
+            runningCosts: newRunningCosts
+          };
+        });
       }
     }
-  }, [enhancedData, apiLoading]);
+  }, [enhancedData, apiLoading, enhancedDataProcessed]);
 
   const loadAdvertData = useCallback(async () => {
     try {
@@ -234,7 +167,9 @@ const CarAdvertEditPage = () => {
             advertStatus: vehicleData.advertStatus,
             isDealerListing: vehicleData.isDealerListing,
             dealerId: vehicleData.dealerId,
-            willShowSaveButton: vehicleData.advertStatus === 'active' || vehicleData.isDealerListing
+            hasAdvertisingPackage: !!vehicleData.advertisingPackage?.packageId,
+            packageId: vehicleData.advertisingPackage?.packageId,
+            willShowSaveButton: vehicleData.isDealerListing || !!vehicleData.advertisingPackage?.packageId
           });
           
           // Populate form fields with existing data
@@ -260,61 +195,166 @@ const CarAdvertEditPage = () => {
             features: vehicleData.features || [],
             runningCosts: {
               fuelEconomy: {
-                urban: vehicleData.runningCosts?.fuelEconomy?.urban || vehicleData.fuelEconomyUrban || '',
-                extraUrban: vehicleData.runningCosts?.fuelEconomy?.extraUrban || vehicleData.fuelEconomyExtraUrban || '',
-                combined: vehicleData.runningCosts?.fuelEconomy?.combined || vehicleData.fuelEconomyCombined || ''
+                urban: String(vehicleData.runningCosts?.fuelEconomy?.urban || ''),
+                extraUrban: String(vehicleData.runningCosts?.fuelEconomy?.extraUrban || ''),
+                combined: String(vehicleData.runningCosts?.fuelEconomy?.combined || '')
               },
-              annualTax: vehicleData.runningCosts?.annualTax || vehicleData.annualTax || '',
-              insuranceGroup: vehicleData.runningCosts?.insuranceGroup || vehicleData.insuranceGroup || '',
-              co2Emissions: vehicleData.runningCosts?.co2Emissions || vehicleData.co2Emissions || ''
+              annualTax: String(vehicleData.runningCosts?.annualTax || ''),
+              insuranceGroup: String(vehicleData.runningCosts?.insuranceGroup || ''),
+              co2Emissions: String(vehicleData.runningCosts?.co2Emissions || '')
             },
             videoUrl: vehicleData.videoUrl || ''
           });
           
           console.log('✅ Form fields populated with existing data');
+          console.log('🏃 Running costs populated:', {
+            combined: String(vehicleData.runningCosts?.fuelEconomy?.combined || ''),
+            annualTax: String(vehicleData.runningCosts?.annualTax || ''),
+            co2Emissions: String(vehicleData.runningCosts?.co2Emissions || '')
+          });
+          console.log('🏃 Full advertData.runningCosts:', {
+            fuelEconomy: {
+              urban: String(vehicleData.runningCosts?.fuelEconomy?.urban || ''),
+              extraUrban: String(vehicleData.runningCosts?.fuelEconomy?.extraUrban || ''),
+              combined: String(vehicleData.runningCosts?.fuelEconomy?.combined || '')
+            },
+            annualTax: String(vehicleData.runningCosts?.annualTax || ''),
+            insuranceGroup: String(vehicleData.runningCosts?.insuranceGroup || ''),
+            co2Emissions: String(vehicleData.runningCosts?.co2Emissions || '')
+          });
+          console.log('🔍 fieldSources state:', fieldSources);
+          console.log('🔍 fieldSources.runningCosts:', fieldSources?.runningCosts);
           
-          // Fetch MOT data if registration exists
+          // Don't fetch MOT data to avoid API charges
+          // For new users: MOT data should come from the initial vehicle lookup API call
+          // For existing cars: MOT data should already be in the car document from when payment was completed
           if (vehicleData.registrationNumber) {
-            fetchMOTData(vehicleData.registrationNumber);
+            console.log('⚠️ Skipping MOT API call to avoid charges');
+            console.log('💡 MOT data should be available in car document already or from initial lookup');
           }
           
-          // Fetch enhanced data if registration exists
-          if (vehicleData.registrationNumber && !enhancedData) {
-            console.log('🚗 Fetching enhanced data for:', vehicleData.registrationNumber, 'with mileage:', vehicleData.mileage);
+          // Check if we need to fetch enhanced data (valuation and running costs)
+          // IMPORTANT: For new users, we should fetch from API since data isn't in database yet
+          // For existing cars with payment completed, data should be in database already
+          const needsValuation = !vehicleData.valuation?.privatePrice && !vehicleData.allValuations?.private;
+          const needsRunningCosts = !vehicleData.runningCosts?.annualTax;
+          const needsEnhancedData = needsValuation || needsRunningCosts;
+          
+          // Check if this is a new user car (no payment completed yet)
+          const isNewUserCar = vehicleData.advertStatus === 'draft' || vehicleData.advertStatus === 'pending_payment';
+          
+          console.log('🔍 Enhanced data check:', {
+            needsValuation,
+            needsRunningCosts,
+            needsEnhancedData,
+            isNewUserCar,
+            advertStatus: vehicleData.advertStatus,
+            hasValuation: !!vehicleData.valuation?.privatePrice,
+            hasRunningCosts: !!vehicleData.runningCosts?.annualTax
+          });
+          
+          // Only fetch enhanced data for new user cars or if data is missing
+          if (vehicleData.registrationNumber && (isNewUserCar || needsEnhancedData)) {
+            if (isNewUserCar) {
+              console.log('🆕 New user car detected - fetching fresh API data for running costs and valuation');
+            } else {
+              console.log('🔍 Existing car missing data - fetching enhanced data...');
+            }
+            
             try {
-              await lookupVehicle(vehicleData.registrationNumber, vehicleData.mileage);
-              console.log('✅ Enhanced data fetched successfully');
-            } catch (apiErr) {
-              console.error('❌ Enhanced lookup failed:', apiErr);
+              const enhancedVehicleData = await lookupVehicle(vehicleData.registrationNumber, vehicleData.mileage);
+              console.log('✅ Enhanced data fetched:', enhancedVehicleData);
+              console.log('🔍 Enhanced data runningCosts check:', {
+                hasRunningCosts: !!enhancedVehicleData.runningCosts,
+                runningCostsValue: enhancedVehicleData.runningCosts,
+                runningCostsType: typeof enhancedVehicleData.runningCosts
+              });
               
-              // FALLBACK: Try direct valuation API
-              console.log('🔄 Trying direct valuation API as fallback...');
-              try {
-                const valuationResponse = await api.post('/vehicle-valuation', {
-                  vrm: vehicleData.registrationNumber,
-                  mileage: vehicleData.mileage || 50000
-                });
+              // Update vehicle data with enhanced information
+              if (enhancedVehicleData.valuation) {
+                setVehicleData(prev => ({
+                  ...prev,
+                  valuation: enhancedVehicleData.valuation,
+                  allValuations: enhancedVehicleData.valuation.estimatedValue,
+                  estimatedValue: enhancedVehicleData.valuation.estimatedValue?.private || 
+                                enhancedVehicleData.valuation.estimatedValue?.retail ||
+                                enhancedVehicleData.valuation.estimatedValue
+                }));
                 
-                if (valuationResponse.data?.success && valuationResponse.data?.data?.estimatedValue) {
-                  const privatePrice = valuationResponse.data.data.estimatedValue.private;
-                  console.log('✅ Got private price from valuation API:', privatePrice);
-                  
-                  // Update price immediately
+                // Update price with private valuation
+                const privatePrice = enhancedVehicleData.valuation.estimatedValue?.private ||
+                                   enhancedVehicleData.valuation.estimatedValue?.retail ||
+                                   enhancedVehicleData.valuation.estimatedValue;
+                
+                if (privatePrice) {
                   setAdvertData(prev => ({
                     ...prev,
                     price: privatePrice
                   }));
-                  
-                  setVehicleData(prev => ({
-                    ...prev,
-                    estimatedValue: privatePrice,
-                    allValuations: valuationResponse.data.data.estimatedValue
-                  }));
                 }
-              } catch (valuationErr) {
-                console.error('❌ Valuation API also failed:', valuationErr);
               }
+              
+              // Update running costs
+              if (enhancedVehicleData.runningCosts) {
+                console.log('🏃 Updating running costs from enhanced data:', enhancedVehicleData.runningCosts);
+                
+                setAdvertData(prev => {
+                  const newRunningCosts = {
+                    fuelEconomy: {
+                      urban: String(enhancedVehicleData.runningCosts.fuelEconomy?.urban || ''),
+                      extraUrban: String(enhancedVehicleData.runningCosts.fuelEconomy?.extraUrban || ''),
+                      combined: String(enhancedVehicleData.runningCosts.fuelEconomy?.combined || '')
+                    },
+                    annualTax: String(enhancedVehicleData.runningCosts.annualTax || ''),
+                    insuranceGroup: String(enhancedVehicleData.runningCosts.insuranceGroup || ''),
+                    co2Emissions: String(enhancedVehicleData.runningCosts.co2Emissions || '')
+                  };
+                  
+                  console.log('🏃 New running costs to set:', newRunningCosts);
+                  
+                  return {
+                    ...prev,
+                    runningCosts: newRunningCosts
+                  };
+                });
+              } else {
+                console.log('⚠️ No running costs in enhanced data');
+              }
+              
+              // Update MOT data if available
+              if (enhancedVehicleData.motStatus || enhancedVehicleData.motDue || enhancedVehicleData.motExpiry) {
+                console.log('🔧 Updating MOT data from enhanced data');
+                setVehicleData(prev => ({
+                  ...prev,
+                  motStatus: enhancedVehicleData.motStatus || prev.motStatus,
+                  motDue: enhancedVehicleData.motDue || enhancedVehicleData.motExpiry || prev.motDue,
+                  motExpiry: enhancedVehicleData.motExpiry || enhancedVehicleData.motDue || prev.motExpiry
+                }));
+              } else if (enhancedVehicleData.year >= 2020) {
+                // For new cars (2020+), calculate MOT due date (3 years from first registration)
+                const motDueYear = enhancedVehicleData.year + 3;
+                const motDueDate = `${motDueYear}-10-31`; // Approximate date
+                console.log(`🔧 Setting MOT due for new car: ${motDueDate}`);
+                setVehicleData(prev => ({
+                  ...prev,
+                  motStatus: 'Not due',
+                  motDue: motDueDate,
+                  motExpiry: motDueDate
+                }));
+              } else {
+                console.log('🔧 No MOT data available, setting default message');
+                setVehicleData(prev => ({
+                  ...prev,
+                  motStatus: 'Contact seller',
+                  motDue: null,
+                  motExpiry: null
+                }));
+              }
+            } catch (enhancedError) {
+              console.warn('⚠️ Failed to fetch enhanced data:', enhancedError.message);
             }
+          } else {
+            console.log('⚠️ Skipping enhanced data fetch - data already available in database or no registration');
           }
           
           setIsLoading(false);
@@ -336,44 +376,122 @@ const CarAdvertEditPage = () => {
         
         setVehicleData(response.data.vehicleData);
         
-        // Fetch MOT data from API if registration number exists
+        // Don't fetch MOT data from API to avoid charges
+        // For new users: MOT data should come from the initial vehicle lookup API call
+        // For existing cars: MOT data should already be in the car document from when payment was completed
         if (response.data.vehicleData?.registrationNumber) {
-          fetchMOTData(response.data.vehicleData.registrationNumber);
+          console.log('⚠️ Skipping MOT API call to avoid charges');
+          console.log('💡 MOT data should be available in car document already or from initial lookup');
         }
         
-        // Fetch enhanced data from CheckCarDetails API if registration number exists
-        // Only fetch if we haven't already fetched it
-        if (response.data.vehicleData?.registrationNumber && !enhancedData) {
-          console.log('🚗 Fetching enhanced data for:', response.data.vehicleData.registrationNumber, 'with mileage:', response.data.vehicleData.mileage);
-          try {
-            await lookupVehicle(response.data.vehicleData.registrationNumber, response.data.vehicleData.mileage);
-          } catch (apiErr) {
-            console.warn('⚠️ Enhanced lookup failed, continuing without it:', apiErr.message);
+        // Check if we need to fetch enhanced data (valuation and running costs)
+        // IMPORTANT: For new users, we should fetch from API since data isn't in database yet
+        // For existing cars with payment completed, data should be in database already
+        const needsValuation = !response.data.vehicleData?.valuation?.privatePrice && 
+                               !response.data.vehicleData?.allValuations?.private;
+        const needsRunningCosts = !response.data.vehicleData?.runningCosts?.annualTax;
+        const needsEnhancedData = needsValuation || needsRunningCosts;
+        
+        // Check if this is a new user car (no payment completed yet)
+        const isNewUserCar = response.data.vehicleData?.advertStatus === 'draft' || 
+                            response.data.vehicleData?.advertStatus === 'pending_payment';
+        
+        console.log('🔍 Enhanced data check (fallback):', {
+          needsValuation,
+          needsRunningCosts,
+          needsEnhancedData,
+          isNewUserCar,
+          advertStatus: response.data.vehicleData?.advertStatus,
+          hasValuation: !!response.data.vehicleData?.valuation?.privatePrice,
+          hasRunningCosts: !!response.data.vehicleData?.runningCosts?.annualTax
+        });
+        
+        // Only fetch enhanced data for new user cars or if data is missing
+        if (response.data.vehicleData?.registrationNumber && (isNewUserCar || needsEnhancedData)) {
+          if (isNewUserCar) {
+            console.log('🆕 New user car detected (fallback) - fetching fresh API data for running costs and valuation');
+          } else {
+            console.log('🔍 Existing car missing data (fallback) - fetching enhanced data...');
           }
+          
+          try {
+            const enhancedVehicleData = await lookupVehicle(
+              response.data.vehicleData.registrationNumber, 
+              response.data.vehicleData.mileage
+            );
+            console.log('✅ Enhanced data fetched:', enhancedVehicleData);
+            
+            // Update vehicle data with enhanced information
+            if (enhancedVehicleData.valuation) {
+              setVehicleData(prev => ({
+                ...prev,
+                valuation: enhancedVehicleData.valuation,
+                allValuations: enhancedVehicleData.valuation.estimatedValue,
+                estimatedValue: enhancedVehicleData.valuation.estimatedValue?.private || 
+                              enhancedVehicleData.valuation.estimatedValue?.retail ||
+                              enhancedVehicleData.valuation.estimatedValue
+              }));
+              
+              // Update price with private valuation
+              const privatePrice = enhancedVehicleData.valuation.estimatedValue?.private ||
+                                 enhancedVehicleData.valuation.estimatedValue?.retail ||
+                                 enhancedVehicleData.valuation.estimatedValue;
+              
+              if (privatePrice) {
+                console.log('💰 Updating price from enhanced data:', privatePrice);
+                setAdvertData(prev => ({
+                  ...prev,
+                  price: privatePrice
+                }));
+              }
+            }
+            
+            // Update running costs
+            if (enhancedVehicleData.runningCosts) {
+              setAdvertData(prev => {
+                const newRunningCosts = {
+                  fuelEconomy: {
+                    urban: String(enhancedVehicleData.runningCosts.fuelEconomy?.urban || prev.runningCosts.fuelEconomy.urban || ''),
+                    extraUrban: String(enhancedVehicleData.runningCosts.fuelEconomy?.extraUrban || prev.runningCosts.fuelEconomy.extraUrban || ''),
+                    combined: String(enhancedVehicleData.runningCosts.fuelEconomy?.combined || prev.runningCosts.fuelEconomy.combined || '')
+                  },
+                  annualTax: String(enhancedVehicleData.runningCosts.annualTax || prev.runningCosts.annualTax || ''),
+                  insuranceGroup: String(enhancedVehicleData.runningCosts.insuranceGroup || prev.runningCosts.insuranceGroup || ''),
+                  co2Emissions: String(enhancedVehicleData.runningCosts.co2Emissions || prev.runningCosts.co2Emissions || '')
+                };
+                
+                return {
+                  ...prev,
+                  runningCosts: newRunningCosts
+                };
+              });
+            }
+          } catch (enhancedError) {
+            console.warn('⚠️ Failed to fetch enhanced data:', enhancedError.message);
+          }
+        } else {
+          console.log('⚠️ Skipping enhanced data fetch - data already available in database or no registration');
         }
         
         // Handle price carefully - prefer PRIVATE sale price
         // Priority: privatePrice > allValuations.private > advertData.price > estimatedValue
-        // TEMPORARY FIX: If no private price found, check if we have enhanced valuation data
         let priceValue = response.data.vehicleData?.valuation?.privatePrice ||
                         response.data.vehicleData?.allValuations?.private ||
+                        response.data.vehicleData?.estimatedValue?.private ||
+                        response.data.vehicleData?.estimatedValue?.retail ||
                         response.data.advertData?.price;
-        
-        // If still no price and we have enhanced data with valuation, use that
-        if ((!priceValue || priceValue === 3719) && enhancedData?.valuation?.estimatedValue) {
-          const apiPrivatePrice = typeof enhancedData.valuation.estimatedValue === 'object'
-            ? enhancedData.valuation.estimatedValue.private
-            : null;
-          
-          if (apiPrivatePrice) {
-            console.log('💰 Using private price from API valuation:', apiPrivatePrice);
-            priceValue = apiPrivatePrice;
-          }
-        }
         
         if (priceValue === null || priceValue === undefined) {
           priceValue = response.data.vehicleData?.estimatedValue;
         }
+        
+        // If still no price, try enhanced data
+        if ((priceValue === null || priceValue === undefined) && enhancedVehicleData?.valuation) {
+          priceValue = enhancedVehicleData.valuation.estimatedValue?.private ||
+                      enhancedVehicleData.valuation.estimatedValue?.retail ||
+                      enhancedVehicleData.valuation.estimatedValue;
+        }
+        
         if (priceValue === null || priceValue === undefined) {
           priceValue = '';
         }
@@ -383,7 +501,6 @@ const CarAdvertEditPage = () => {
         console.log('   - allValuations.private:', response.data.vehicleData?.allValuations?.private);
         console.log('   - advertPrice:', response.data.advertData?.price);
         console.log('   - estimatedValue:', response.data.vehicleData?.estimatedValue);
-        console.log('   - API valuation:', enhancedData?.valuation?.estimatedValue);
         console.log('   - FINAL PRICE USED:', priceValue);
         
         setAdvertData({
@@ -396,13 +513,13 @@ const CarAdvertEditPage = () => {
           features: response.data.advertData?.features || [],
           runningCosts: response.data.advertData?.runningCosts || {
             fuelEconomy: { 
-              urban: response.data.vehicleData?.fuelEconomyUrban || '', 
-              extraUrban: response.data.vehicleData?.fuelEconomyExtraUrban || '', 
-              combined: response.data.vehicleData?.fuelEconomyCombined || '' 
+              urban: String(response.data.vehicleData?.runningCosts?.fuelEconomy?.urban || response.data.vehicleData?.fuelEconomyUrban || ''), 
+              extraUrban: String(response.data.vehicleData?.runningCosts?.fuelEconomy?.extraUrban || response.data.vehicleData?.fuelEconomyExtraUrban || ''), 
+              combined: String(response.data.vehicleData?.runningCosts?.fuelEconomy?.combined || response.data.vehicleData?.fuelEconomyCombined || '') 
             },
-            annualTax: response.data.vehicleData?.annualTax || '',
-            insuranceGroup: response.data.vehicleData?.insuranceGroup || '',
-            co2Emissions: response.data.vehicleData?.co2Emissions || ''
+            annualTax: String(response.data.vehicleData?.runningCosts?.annualTax || response.data.vehicleData?.annualTax || ''),
+            insuranceGroup: String(response.data.vehicleData?.runningCosts?.insuranceGroup || response.data.vehicleData?.insuranceGroup || ''),
+            co2Emissions: String(response.data.vehicleData?.runningCosts?.co2Emissions || response.data.vehicleData?.co2Emissions || '')
           },
           videoUrl: response.data.advertData?.videoUrl || ''
         });
@@ -420,38 +537,35 @@ const CarAdvertEditPage = () => {
       console.log('🏁 Setting isLoading to false');
       setIsLoading(false);
     }
-  }, [advertId, navigate, enhancedData]);
+  }, [advertId, navigate, lookupVehicle]);
 
   // Fetch MOT data from API
   const fetchMOTData = async (vrm) => {
-    try {
-      setMotLoading(true);
-      const cleanVrm = vrm.replace(/\s+/g, '').toUpperCase();
-      console.log('🔧 Fetching MOT data for:', cleanVrm);
-      
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${API_BASE_URL}/vehicle-history/mot/${cleanVrm}`);
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ MOT data fetched:', result);
-        setMotData(result.data || result);
-      } else {
-        console.warn('⚠️ MOT data not available');
-        setMotData(null);
-      }
-    } catch (error) {
-      console.error('❌ Error fetching MOT data:', error);
-      setMotData(null);
-    } finally {
-      setMotLoading(false);
-    }
+    console.log('⚠️ MOT API call disabled to avoid charges');
+    console.log('💡 MOT data should be available in car document already');
+    console.log('� VRM requested:', vrm);
+    
+    // Set loading to false and empty data
+    setMotLoading(false);
+    setMotData({
+      tests: [],
+      message: 'MOT data should be available in the car listing data'
+    });
   };
 
   // Load advert data on mount - only once
   useEffect(() => {
     loadAdvertData();
   }, [advertId]); // Only depend on advertId, not loadAdvertData
+  
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (videoUrlTimeout) clearTimeout(videoUrlTimeout);
+      if (runningCostsTimeout) clearTimeout(runningCostsTimeout);
+      if (featureSaveTimeout) clearTimeout(featureSaveTimeout);
+    };
+  }, [videoUrlTimeout, runningCostsTimeout, featureSaveTimeout]);
 
   const handleInputChange = (field, value) => {
     setAdvertData(prev => ({
@@ -527,7 +641,7 @@ const CarAdvertEditPage = () => {
     handleInputChange('price', vehicleData.estimatedValue || '');
   };
   
-  // Handle feature toggle
+  // Handle feature toggle with debounced save
   const toggleFeature = async (feature) => {
     const newFeatures = advertData.features.includes(feature)
       ? advertData.features.filter(f => f !== feature)
@@ -538,13 +652,26 @@ const CarAdvertEditPage = () => {
       features: newFeatures
     }));
     
-    // Auto-save to database
-    try {
-      await advertService.updateAdvert(advertId, { ...advertData, features: newFeatures }, vehicleData);
-      console.log('Features saved successfully');
-    } catch (error) {
-      console.error('Error saving features:', error);
-    }
+    // Debounce the save operation to prevent concurrent updates
+    if (featureSaveTimeout) clearTimeout(featureSaveTimeout);
+    
+    const timeout = setTimeout(async () => {
+      try {
+        console.log('🔧 Saving features (debounced):', { features: newFeatures });
+        console.log('🔧 Advert ID:', advertId);
+        
+        // Only send the features that changed, not all advertData
+        const updateData = { features: newFeatures };
+        
+        await advertService.updateAdvert(advertId, updateData, vehicleData);
+        console.log('Features saved successfully');
+      } catch (error) {
+        console.error('Error saving features:', error);
+        console.error('Error details:', error.response?.data);
+      }
+    }, 500); // Wait 500ms before saving to batch multiple feature changes
+    
+    setFeatureSaveTimeout(timeout);
   };
   
   // Handle video URL with auto-save
@@ -606,9 +733,6 @@ const CarAdvertEditPage = () => {
     }, 1000);
     setRunningCostsTimeout(timeout);
   };
-
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handlePhotoUpload = async (event) => {
     const files = Array.from(event.target.files);
@@ -1041,50 +1165,53 @@ const CarAdvertEditPage = () => {
               <div className="spec-item">
                 <label>MOT Due</label>
                 <span>
-                  {motLoading ? (
-                    'Loading...'
-                  ) : motData?.mot?.motDueDate ? (
-                    (() => {
+                  {(() => {
+                    // Debug MOT data
+                    console.log('🔧 MOT Debug:', {
+                      motLoading,
+                      motData,
+                      vehicleDataMotDue: vehicleData.motDue,
+                      vehicleDataMotExpiry: vehicleData.motExpiry,
+                      vehicleDataMotStatus: vehicleData.motStatus
+                    });
+                    
+                    if (motLoading) {
+                      return 'Loading...';
+                    } else if (motData?.mot?.motDueDate) {
                       const dateStr = motData.mot.motDueDate;
                       const [year, month, day] = dateStr.split('-').map(Number);
                       const date = new Date(year, month - 1, day);
                       return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                    })()
-                  ) : motData?.expiryDate ? (
-                    (() => {
+                    } else if (motData?.expiryDate) {
                       const dateStr = motData.expiryDate;
                       const [year, month, day] = dateStr.split('-').map(Number);
                       const date = new Date(year, month - 1, day);
                       return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                    })()
-                  ) : motData?.mot?.motStatus ? (
-                    motData.mot.motStatus
-                  ) : vehicleData.motDue ? (
-                    (() => {
+                    } else if (motData?.mot?.motStatus) {
+                      return motData.mot.motStatus;
+                    } else if (vehicleData.motDue) {
                       const dateStr = vehicleData.motDue;
-                      if (typeof dateStr === 'string' && dateStr.includes('-')) {
-                        const [year, month, day] = dateStr.split('-').map(Number);
-                        const date = new Date(year, month - 1, day);
-                        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                      if (typeof dateStr === 'string') {
+                        // Handle both ISO strings and date-only strings
+                        const date = new Date(dateStr);
+                        if (!isNaN(date.getTime())) {
+                          return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                        }
                       }
                       return dateStr;
-                    })()
-                  ) : vehicleData.motExpiry ? (
-                    (() => {
+                    } else if (vehicleData.motExpiry) {
                       const dateValue = vehicleData.motExpiry;
-                      if (typeof dateValue === 'string' && dateValue.includes('-')) {
-                        const [year, month, day] = dateValue.split('-').map(Number);
-                        const date = new Date(year, month - 1, day);
-                        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                      } else if (dateValue instanceof Date || !isNaN(Date.parse(dateValue))) {
+                      if (typeof dateValue === 'string' || dateValue instanceof Date || !isNaN(Date.parse(dateValue))) {
                         const date = new Date(dateValue);
-                        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                        if (!isNaN(date.getTime())) {
+                          return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                        }
                       }
                       return dateValue;
-                    })()
-                  ) : (
-                    'Contact seller for MOT details'
-                  )}
+                    } else {
+                      return 'Contact seller for MOT details';
+                    }
+                  })()}
                 </span>
               </div>
               <div className="spec-item">
@@ -1331,8 +1458,16 @@ const CarAdvertEditPage = () => {
               </p>
             )}
             
-            {/* Show different button based on car status or dealer listing */}
-            {(carStatus === 'active' || isDealerCar) ? (
+            {/* Show different button based on payment completion or dealer listing */}
+            {/* 
+              Show "Save Changes" if:
+              1. Car is a dealer listing (isDealerCar = true), OR
+              2. Car has completed payment (has advertisingPackage with packageId)
+              
+              Show "I'm happy with my ad" if:
+              1. New user car without payment completed
+            */}
+            {(isDealerCar || (vehicleData?.advertisingPackage?.packageId)) ? (
               <button
                 onClick={handleSave}
                 disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}

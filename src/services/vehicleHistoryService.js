@@ -15,24 +15,45 @@ export const getVehicleHistory = async (vrm) => {
 };
 
 /**
- * Perform new vehicle history check
- * @param {string} vrm - Vehicle Registration Mark
- * @param {boolean|number} forceRefresh - Force new check (can be boolean or timestamp)
+ * Get cached vehicle history (no API calls)
+ * @param {string} vrm - Vehicle registration mark
+ * @returns {Promise<Object>} Cached vehicle history data
+ */
+export const getCachedVehicleHistory = async (vrm) => {
+  try {
+    const response = await api.get(`/vehicle-history/cached/${vrm}`);
+    return response.data;
+  } catch (error) {
+    const errorData = error.response?.data || {};
+    const enhancedError = new Error(errorData.error || error.message || 'No cached vehicle history available');
+    enhancedError.status = error.response?.status;
+    throw enhancedError;
+  }
+};
+
+/**
+ * Check vehicle history (makes API call - use sparingly)
+ * @param {string} vrm - Vehicle registration mark
+ * @param {boolean} forceRefresh - Force new API call (admin only)
  * @returns {Promise<Object>} Vehicle history data
  */
 export const checkVehicleHistory = async (vrm, forceRefresh = false) => {
   try {
-    // Always force refresh to get latest data from database
-    const shouldForceRefresh = forceRefresh === true || typeof forceRefresh === 'number';
-    
-    // Add cache-busting parameter
-    const timestamp = typeof forceRefresh === 'number' ? forceRefresh : Date.now();
-    
+    // For regular users, always use cached data to avoid API charges
+    if (!forceRefresh) {
+      return await getCachedVehicleHistory(vrm);
+    }
+
+    // Admin-only API call with special header
     const response = await api.post('/vehicle-history/check', {
       vrm,
-      forceRefresh: shouldForceRefresh,
-      _t: timestamp, // Cache buster
+      forceRefresh: true
+    }, {
+      headers: {
+        'x-admin-request': 'true' // Required for API calls
+      }
     });
+    
     return response.data;
   } catch (error) {
     // Extract error details from response
@@ -120,6 +141,7 @@ export const getComprehensiveVehicleData = async (vrm) => {
 
 export default {
   getVehicleHistory,
+  getCachedVehicleHistory,
   checkVehicleHistory,
   getMOTHistory,
   getVehicleRegistration,

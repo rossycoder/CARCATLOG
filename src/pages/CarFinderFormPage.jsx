@@ -6,22 +6,92 @@ import { useTradeDealerContext } from '../context/TradeDealerContext';
 import { useAuth } from '../context/AuthContext';
 import './CarFinderFormPage.css';
 
-// Helper to format vehicle data from enhanced API response
-const formatVehicleDetails = (enhancedData, registration, mileage) => {
-  // Helper to extract value from {value, source} format or direct value
-  const getValue = (field) => {
-    if (field === null || field === undefined) return null;
-    if (typeof field === 'object' && field.value !== undefined) {
-      return field.value;
-    }
-    return field;
-  };
-
+// Helper to format vehicle data from basic API response (CarFinder - no expensive data)
+const formatVehicleDetailsFromBasic = (basicData, registration, mileage) => {
   // Helper to check if value is valid (not null, undefined, or 'Unknown')
   const isValidValue = (value) => {
     return value !== null && value !== undefined && value !== 'Unknown' && value !== '';
   };
 
+  console.log('=== FORMATTING BASIC VEHICLE DATA FOR CARFINDER ===');
+  console.log('Basic Data:', basicData);
+  
+  // Basic data is already unwrapped from the API, so we can use it directly
+  
+  // Create a descriptive model if not available
+  const getModelDisplay = () => {
+    const model = basicData.model;
+    if (isValidValue(model)) {
+      return model;
+    }
+    // If no model, create descriptive text from available data
+    const parts = [];
+    const engineSize = basicData.engineSize;
+    const fuelType = basicData.fuelType;
+    
+    if (engineSize) {
+      parts.push(engineSize);
+    }
+    if (isValidValue(fuelType)) {
+      parts.push(fuelType);
+    }
+    return parts.length > 0 ? parts.join(' ') : null;
+  };
+
+  // Get body type with better fallback
+  const getBodyType = () => {
+    const bodyType = basicData.bodyType;
+    if (isValidValue(bodyType) && bodyType !== 'M1') {
+      return bodyType;
+    }
+    return null;
+  };
+
+  // Ensure all values are properly formatted and not undefined
+  const result = {
+    registration: registration,
+    mileage: mileage,
+    make: isValidValue(basicData.make) ? String(basicData.make) : null,
+    model: getModelDisplay() ? String(getModelDisplay()) : null,
+    variant: isValidValue(basicData.variant) ? String(basicData.variant) : null,
+    year: isValidValue(basicData.year) ? Number(basicData.year) : null,
+    color: isValidValue(basicData.color) ? String(basicData.color) : null,
+    fuelType: isValidValue(basicData.fuelType) ? String(basicData.fuelType) : null,
+    transmission: isValidValue(basicData.transmission) ? String(basicData.transmission) : 'Manual',
+    engineSize: isValidValue(basicData.engineSize) ? String(basicData.engineSize) : null,
+    doors: isValidValue(basicData.doors) ? Number(basicData.doors) : null,
+    bodyType: getBodyType() ? String(getBodyType()) : null,
+    seats: isValidValue(basicData.seats) ? Number(basicData.seats) : null,
+    gearbox: isValidValue(basicData.gearbox) ? String(basicData.gearbox) : null,
+    emissionClass: isValidValue(basicData.emissionClass) ? String(basicData.emissionClass) : null,
+    co2Emissions: isValidValue(basicData.co2Emissions) ? Number(basicData.co2Emissions) : null,
+    
+    // These fields are not available in basic lookup (will be fetched when car is saved)
+    previousOwners: null,
+    motDue: null,
+    taxDue: null,
+    euroStatus: null,
+    estimatedValue: null
+  };
+
+  // Log the result to debug any remaining issues
+  console.log('Final formatted vehicle data for CarFinder:', result);
+  
+  return result;
+};
+
+// Helper to format vehicle data from enhanced API response (already unwrapped by backend)
+const formatVehicleDetails = (enhancedData, registration, mileage) => {
+  // Helper to check if value is valid (not null, undefined, or 'Unknown')
+  const isValidValue = (value) => {
+    return value !== null && value !== undefined && value !== 'Unknown' && value !== '';
+  };
+
+  console.log('=== FORMATTING ENHANCED VEHICLE DATA ===');
+  console.log('Enhanced Data:', enhancedData);
+  
+  // Enhanced data is already unwrapped by the backend, so we can use it directly
+  
   // Enhanced valuation extraction - prefer PRIVATE price for private sellers
   const getEstimatedValue = () => {
     console.log('=== EXTRACTING VALUATION (PRIVATE PREFERRED) ===');
@@ -83,17 +153,17 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
 
   // Create a descriptive model if not available
   const getModelDisplay = () => {
-    const model = getValue(enhancedData.model);
+    const model = enhancedData.model;
     if (isValidValue(model)) {
       return model;
     }
     // If no model, create descriptive text from available data
     const parts = [];
-    const engineSize = getValue(enhancedData.engineSize);
-    const fuelType = getValue(enhancedData.fuelType);
+    const engineSize = enhancedData.engineSize;
+    const fuelType = enhancedData.fuelType;
     
     if (engineSize) {
-      parts.push(`${(engineSize / 1000).toFixed(1)}L`);
+      parts.push(`${parseFloat(engineSize).toFixed(1)}L`);
     }
     if (isValidValue(fuelType)) {
       parts.push(fuelType);
@@ -103,7 +173,7 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
 
   // Get body type with better fallback
   const getBodyType = () => {
-    const bodyType = getValue(enhancedData.bodyType);
+    const bodyType = enhancedData.bodyType;
     if (isValidValue(bodyType) && bodyType !== 'M1') {
       return bodyType;
     }
@@ -112,50 +182,60 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
 
   // Get engine size display
   const getEngineSize = () => {
-    const engineSize = getValue(enhancedData.engineSize);
-    if (engineSize) {
-      // engineSize from API is already in litres, no need to divide
+    const engineSize = enhancedData.engineSize;
+    if (engineSize && engineSize > 0) {
+      // engineSize from API is already in litres
       return `${parseFloat(engineSize).toFixed(1)}L`;
     }
     return null;
   };
 
-  const make = getValue(enhancedData.make);
+  // Extract all fields from unwrapped enhanced data
+  const make = enhancedData.make;
   const model = getModelDisplay();
-  const year = getValue(enhancedData.year);
-  const color = getValue(enhancedData.color);
-  const fuelType = getValue(enhancedData.fuelType);
-  const transmission = getValue(enhancedData.transmission);
+  const variant = enhancedData.variant || enhancedData.modelVariant;
+  const year = enhancedData.year;
+  const color = enhancedData.color;
+  const fuelType = enhancedData.fuelType;
+  const transmission = enhancedData.transmission;
   const engineSize = getEngineSize();
-  const doors = getValue(enhancedData.doors);
+  const doors = enhancedData.doors;
   const bodyType = getBodyType();
-  const seats = getValue(enhancedData.seats);
-  const previousOwners = getValue(enhancedData.previousOwners);
-  const gearbox = getValue(enhancedData.gearbox);
-  const emissionClass = getValue(enhancedData.emissionClass);
+  const seats = enhancedData.seats;
+  const previousOwners = enhancedData.previousOwners || enhancedData.numberOfPreviousKeepers;
+  const gearbox = enhancedData.gearbox;
+  const emissionClass = enhancedData.emissionClass;
+  const co2Emissions = enhancedData.runningCosts?.co2Emissions || enhancedData.co2Emissions;
 
-  return {
+  // Ensure all values are properly formatted
+  const result = {
     registration: registration,
     mileage: mileage,
-    make: isValidValue(make) ? make : null,
-    model: model || null,
-    year: isValidValue(year) ? year : null,
-    color: isValidValue(color) ? color : null,
-    fuelType: isValidValue(fuelType) ? fuelType : null,
-    transmission: isValidValue(transmission) ? transmission : 'Manual',
-    engineSize: engineSize || null,
-    doors: isValidValue(doors) ? doors : null,
-    bodyType: bodyType || null,
-    previousOwners: isValidValue(previousOwners) ? previousOwners : null,
-    seats: isValidValue(seats) ? seats : null,
-    gearbox: isValidValue(gearbox) ? gearbox : null,
-    emissionClass: isValidValue(emissionClass) ? emissionClass : null,
+    make: isValidValue(make) ? String(make) : null,
+    model: model ? String(model) : null,
+    variant: isValidValue(variant) ? String(variant) : null,
+    year: isValidValue(year) ? Number(year) : null,
+    color: isValidValue(color) ? String(color) : null,
+    fuelType: isValidValue(fuelType) ? String(fuelType) : null,
+    transmission: isValidValue(transmission) ? String(transmission) : 'Manual',
+    engineSize: engineSize ? String(engineSize) : null,
+    doors: isValidValue(doors) ? Number(doors) : null,
+    bodyType: bodyType ? String(bodyType) : null,
+    previousOwners: isValidValue(previousOwners) ? Number(previousOwners) : null,
+    seats: isValidValue(seats) ? Number(seats) : null,
+    gearbox: isValidValue(gearbox) ? String(gearbox) : null,
+    emissionClass: isValidValue(emissionClass) ? String(emissionClass) : null,
     motDue: null,
     taxDue: null,
-    co2Emissions: getValue(enhancedData.runningCosts?.co2Emissions) || null,
+    co2Emissions: isValidValue(co2Emissions) ? Number(co2Emissions) : null,
     euroStatus: null,
     estimatedValue: getEstimatedValue()
   };
+
+  // Log the result to debug any remaining object issues
+  console.log('Final formatted vehicle data:', result);
+  
+  return result;
 };
 
 const CarFinderFormPage = () => {
@@ -328,18 +408,19 @@ const CarFinderFormPage = () => {
     setIsLoading(true);
     
     try {
-      // Call enhanced vehicle service
-      console.log('Looking up vehicle from enhanced service...');
-      const response = await carService.enhancedLookup(
+      // Call basic vehicle service for CarFinder (cheap API - no expensive history/MOT)
+      console.log('Looking up vehicle from basic service for CarFinder...');
+      const response = await carService.basicLookup(
         formData.registrationNumber,
         formData.mileage
       );
       
       if (response.success && response.data) {
-        console.log('Enhanced API response:', response.data);
+        console.log('Basic API response:', response.data);
+        console.log('From cache:', response.fromCache, 'API calls:', response.apiCalls, 'Cost: £' + response.cost);
         
-        // Format the enhanced response directly
-        const vehicleData = formatVehicleDetails(
+        // Format the basic response (data is already unwrapped)
+        const vehicleData = formatVehicleDetailsFromBasic(
           response.data,
           formData.registrationNumber,
           formData.mileage

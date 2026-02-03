@@ -108,6 +108,12 @@ export const carService = {
     return response.data;
   },
 
+  // Basic vehicle lookup for CarFinder (cheap API - only basic data)
+  basicLookup: async (registrationNumber, mileage) => {
+    const response = await api.get(`/vehicles/basic-lookup/${registrationNumber}?mileage=${mileage}`);
+    return response.data;
+  },
+
   // Enhanced vehicle lookup (CheckCarDetails + Valuation)
   enhancedLookup: async (registrationNumber, mileage) => {
     const response = await api.get(`/vehicles/enhanced-lookup/${registrationNumber}?mileage=${mileage}`);

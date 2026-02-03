@@ -15,7 +15,7 @@ const SEOHelmet = ({
 }) => {
   const siteUrl = 'https://carcatlog.vercel.app';
   const fullUrl = url ? `${siteUrl}${url}` : siteUrl;
-  const fullImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
+  const fullImage = image && image.startsWith('http') ? image : `${siteUrl}${image || '/og-image.jpg'}`;
 
   return (
     <Helmet>

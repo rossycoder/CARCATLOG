@@ -25,8 +25,8 @@ const VehicleCheckPage = () => {
     try {
       console.log('Fetching comprehensive vehicle data for:', registrationNumber);
       
-      // Use enhanced vehicle service to get complete data
-      const response = await carService.enhancedLookup(registrationNumber, 0);
+      // Use basic vehicle service for vehicle check (cheap API - no expensive history/MOT)
+      const response = await carService.basicLookup(registrationNumber, 0);
       
       if (response.success && response.data) {
         console.log('Enhanced vehicle data received:', response.data);

@@ -4,71 +4,54 @@ import { validateVehicleHistory, formatValidationResults } from '../../utils/veh
 import DataQualityWarning from './DataQualityWarning';
 import './VehicleHistorySection.css';
 
-const VehicleHistorySection = ({ vrm }) => {
+const VehicleHistorySection = ({ vrm, carData }) => {
   const [historyData, setHistoryData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedCheck, setExpandedCheck] = useState(null);
 
   useEffect(() => {
-    const fetchHistoryData = async () => {
+    const loadHistoryData = async () => {
       try {
         setIsLoading(true);
         setError(null);
         
-        // Force fresh data - add timestamp to prevent caching
-        const timestamp = new Date().getTime();
-        const result = await checkVehicleHistory(vrm, timestamp);
-        const data = result.data || result;
+        // Only use vehicle history data from car document (no API calls)
+        if (carData && carData.historyCheckId) {
+          console.log('[VehicleHistory] Using vehicle history from car data:', carData.historyCheckId);
+          setHistoryData(carData.historyCheckId);
+          setIsLoading(false);
+          return;
+        }
         
-        // Debug log to see what data we're receiving
-        console.log('[VehicleHistory] Received data for', vrm, ':', {
-          numberOfPreviousKeepers: data.numberOfPreviousKeepers,
-          previousOwners: data.previousOwners,
-          numberOfOwners: data.numberOfOwners,
-          checkDate: data.checkDate,
-          fullData: data
+        // If no history data in car document, show informative message
+        console.log('[VehicleHistory] No vehicle history found in car data for:', vrm);
+        setError({
+          message: 'Vehicle history information is not available for this vehicle',
+          nextSteps: [
+            'Vehicle history may not have been purchased yet',
+            'Contact the seller for vehicle history information',
+            'Check back later as history may be updated'
+          ],
+          isNotFound: true
         });
         
-        setHistoryData(data);
       } catch (err) {
-        // Check if it's a service unavailable error (daily limit)
-        if (err.status === 503 || err.isServiceUnavailable) {
-          setError({
-            message: err.message || 'Vehicle history service is temporarily unavailable',
-            nextSteps: err.nextSteps || [
-              'Try again in 24 hours',
-              'Contact the seller for vehicle history information'
-            ],
-            isServiceUnavailable: true
-          });
-        }
-        // Check if it's a 404 error
-        else if (err.status === 404 || err.message.includes('404') || err.message.includes('not found')) {
-          setError({
-            message: err.message || 'No vehicle history found for this registration',
-            nextSteps: err.nextSteps || [
-              'Verify the registration number is correct',
-              'Request vehicle history documents from the seller'
-            ],
-            isNotFound: true
-          });
-        } else {
-          setError({
-            message: err.message || 'Unable to load vehicle history',
-            nextSteps: ['Try again later', 'Contact support if the problem persists'],
-            isNotFound: false
-          });
-        }
+        console.error('[VehicleHistory] Error loading history data:', err);
+        setError({
+          message: err.message || 'Unable to load vehicle history',
+          nextSteps: ['Try again later', 'Contact support if the problem persists'],
+          isNotFound: false
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
     if (vrm) {
-      fetchHistoryData();
+      loadHistoryData();
     }
-  }, [vrm]);
+  }, [vrm, carData]);
 
   if (!vrm) {
     return (
