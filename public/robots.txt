@@ -1,0 +1,20 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and private pages
+Disallow: /trade/
+Disallow: /my-listings
+Disallow: /saved-cars
+Disallow: /signin
+Disallow: /signup
+Disallow: /auth/
+Disallow: /verify-email
+Disallow: /reset-password
+Disallow: /vehicle-check/payment/
+
+# Sitemap location
+Sitemap: https://carcatlog.vercel.app/api/seo/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
