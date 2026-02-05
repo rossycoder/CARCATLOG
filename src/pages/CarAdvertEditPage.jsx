@@ -1376,6 +1376,16 @@ const CarAdvertEditPage = () => {
                         }
                       }
                       return dateValue;
+                    } else if (vehicleData.motHistory && vehicleData.motHistory.length > 0) {
+                      // BONUS TIP: Extract from motHistory array if motDue/motExpiry not set
+                      const latestTest = vehicleData.motHistory[0];
+                      if (latestTest && latestTest.expiryDate) {
+                        const date = new Date(latestTest.expiryDate);
+                        if (!isNaN(date.getTime())) {
+                          return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                        }
+                      }
+                      return 'Contact seller for MOT details';
                     } else {
                       return 'Contact seller for MOT details';
                     }

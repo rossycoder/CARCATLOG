@@ -276,27 +276,32 @@ const CarAdvertisingPricesPage = () => {
     });
     
     // Extract numeric valuation from various possible sources
+    // CRITICAL FIX: Prioritize actual valuation fields over user-entered price
     let valuation = null;
     
-    // Try multiple sources for the valuation - prioritize vehicleData.price (which contains the backend valuation)
-    if (vehicleData?.price && typeof vehicleData.price === 'number') {
-      valuation = vehicleData.price;
-      console.log('✅ Using vehicleData.price:', valuation);
-    } else if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
+    // Try valuation fields FIRST (these are the actual vehicle worth, not asking price)
+    if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
       valuation = vehicleData.allValuations.private;
       console.log('✅ Using vehicleData.allValuations.private:', valuation);
     } else if (vehicleData?.valuation?.estimatedValue?.private && typeof vehicleData.valuation.estimatedValue.private === 'number') {
       valuation = vehicleData.valuation.estimatedValue.private;
       console.log('✅ Using vehicleData.valuation.estimatedValue.private:', valuation);
+    } else if (vehicleData?.estimatedValue && typeof vehicleData.estimatedValue === 'number') {
+      valuation = vehicleData.estimatedValue;
+      console.log('✅ Using vehicleData.estimatedValue:', valuation);
     } else if (vehicleValuation && typeof vehicleValuation === 'number') {
       valuation = vehicleValuation;
       console.log('✅ Using vehicleValuation:', valuation);
-    } else if (advertData?.price && typeof advertData.price === 'number') {
-      valuation = advertData.price;
-      console.log('✅ Using advertData.price:', valuation);
     } else if (vehicleData?.valuation?.estimatedValue?.retail && typeof vehicleData.valuation.estimatedValue.retail === 'number') {
       valuation = vehicleData.valuation.estimatedValue.retail;
       console.log('✅ Using vehicleData.valuation.estimatedValue.retail:', valuation);
+    } else if (vehicleData?.price && typeof vehicleData.price === 'number') {
+      // LAST RESORT: Use user-entered price only if no valuation available
+      valuation = vehicleData.price;
+      console.log('⚠️  Using vehicleData.price (user-entered, not valuation):', valuation);
+    } else if (advertData?.price && typeof advertData.price === 'number') {
+      valuation = advertData.price;
+      console.log('⚠️  Using advertData.price (user-entered, not valuation):', valuation);
     }
     
     console.log('💰 Valuation extraction debug:', {
@@ -364,21 +369,24 @@ const CarAdvertisingPricesPage = () => {
     
     // If price range is locked (auto-selected), recalculate for new seller type
     if (isPriceRangeLocked) {
-      // Extract numeric valuation using the same logic as useEffect - prioritize vehicleData.price
+      // Extract numeric valuation - CRITICAL FIX: Prioritize actual valuation over user price
       let valuation = null;
       
-      if (vehicleData?.price && typeof vehicleData.price === 'number') {
-        valuation = vehicleData.price;
-      } else if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
+      if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
         valuation = vehicleData.allValuations.private;
       } else if (vehicleData?.valuation?.estimatedValue?.private && typeof vehicleData.valuation.estimatedValue.private === 'number') {
         valuation = vehicleData.valuation.estimatedValue.private;
+      } else if (vehicleData?.estimatedValue && typeof vehicleData.estimatedValue === 'number') {
+        valuation = vehicleData.estimatedValue;
       } else if (vehicleValuation && typeof vehicleValuation === 'number') {
         valuation = vehicleValuation;
-      } else if (advertData?.price && typeof advertData.price === 'number') {
-        valuation = advertData.price;
       } else if (vehicleData?.valuation?.estimatedValue?.retail && typeof vehicleData.valuation.estimatedValue.retail === 'number') {
         valuation = vehicleData.valuation.estimatedValue.retail;
+      } else if (vehicleData?.price && typeof vehicleData.price === 'number') {
+        // LAST RESORT: Use user-entered price only if no valuation available
+        valuation = vehicleData.price;
+      } else if (advertData?.price && typeof advertData.price === 'number') {
+        valuation = advertData.price;
       }
       
       if (valuation && !isNaN(valuation) && valuation > 0) {
@@ -452,19 +460,22 @@ const CarAdvertisingPricesPage = () => {
       // Extract the actual vehicle value for backend validation
       let actualVehicleValue = null;
       
-      // Use the same extraction logic as the useEffect - prioritize vehicleData.price
-      if (vehicleData?.price && typeof vehicleData.price === 'number') {
-        actualVehicleValue = vehicleData.price;
-      } else if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
+      // CRITICAL FIX: Prioritize actual valuation over user-entered price
+      if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
         actualVehicleValue = vehicleData.allValuations.private;
       } else if (vehicleData?.valuation?.estimatedValue?.private && typeof vehicleData.valuation.estimatedValue.private === 'number') {
         actualVehicleValue = vehicleData.valuation.estimatedValue.private;
+      } else if (vehicleData?.estimatedValue && typeof vehicleData.estimatedValue === 'number') {
+        actualVehicleValue = vehicleData.estimatedValue;
       } else if (vehicleValuation && typeof vehicleValuation === 'number') {
         actualVehicleValue = vehicleValuation;
-      } else if (advertData?.price && typeof advertData.price === 'number') {
-        actualVehicleValue = advertData.price;
       } else if (vehicleData?.valuation?.estimatedValue?.retail && typeof vehicleData.valuation.estimatedValue.retail === 'number') {
         actualVehicleValue = vehicleData.valuation.estimatedValue.retail;
+      } else if (vehicleData?.price && typeof vehicleData.price === 'number') {
+        // LAST RESORT: Use user-entered price only if no valuation available
+        actualVehicleValue = vehicleData.price;
+      } else if (advertData?.price && typeof advertData.price === 'number') {
+        actualVehicleValue = advertData.price;
       }
       
       console.log('💰 Payment request vehicle value extraction:', {
@@ -668,66 +679,16 @@ const CarAdvertisingPricesPage = () => {
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
-            {/* Debug button for testing */}
-            {process.env.NODE_ENV === 'development' && (
-              <button 
-                type="button" 
-                onClick={() => {
-                  console.log('🔧 DEBUG: Manual price range recalculation triggered');
-                  console.log('Current vehicleData:', vehicleData);
-                  console.log('Current priceRange:', priceRange);
-                  console.log('Current sellerType:', sellerType);
-                  
-                  let valuation = null;
-                  if (vehicleData?.price && typeof vehicleData.price === 'number') {
-                    valuation = vehicleData.price;
-                    console.log('🔧 DEBUG: Found vehicleData.price:', valuation);
-                  } else if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
-                    valuation = vehicleData.allValuations.private;
-                    console.log('🔧 DEBUG: Found vehicleData.allValuations.private:', valuation);
-                  } else if (vehicleData?.valuation?.estimatedValue?.private && typeof vehicleData.valuation.estimatedValue.private === 'number') {
-                    valuation = vehicleData.valuation.estimatedValue.private;
-                    console.log('🔧 DEBUG: Found vehicleData.valuation.estimatedValue.private:', valuation);
-                  }
-                  
-                  if (valuation) {
-                    const calculatedRange = calculatePriceRange(valuation, sellerType === 'trade');
-                    console.log('🔧 DEBUG: Calculated range:', calculatedRange);
-                    console.log('🔧 DEBUG: Setting price range and locking...');
-                    setPriceRange(calculatedRange);
-                    setIsPriceRangeLocked(true);
-                    
-                    // Force a re-render by updating a dummy state
-                    setTimeout(() => {
-                      console.log('🔧 DEBUG: Price range after update:', calculatedRange);
-                      console.log('🔧 DEBUG: Is locked:', true);
-                    }, 100);
-                  } else {
-                    console.log('🔧 DEBUG: No valuation found');
-                  }
-                }}
-                style={{ 
-                  marginTop: '0.5rem', 
-                  padding: '0.25rem 0.5rem', 
-                  fontSize: '0.75rem',
-                  backgroundColor: '#f0f0f0',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                🔧 DEBUG: Recalculate Price Range
-              </button>
-            )}
             {isPriceRangeLocked && (
               <p className="helper-text" style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>
                 Price range is automatically selected based on your vehicle's estimated private sale value of £{(
-                  vehicleData?.price ||
                   vehicleData?.allValuations?.private || 
                   vehicleData?.valuation?.estimatedValue?.private || 
+                  vehicleData?.estimatedValue ||
                   vehicleValuation || 
-                  advertData?.price || 
-                  vehicleData?.valuation?.estimatedValue?.retail
+                  vehicleData?.valuation?.estimatedValue?.retail ||
+                  vehicleData?.price ||
+                  advertData?.price
                 )?.toLocaleString()}
               </p>
             )}

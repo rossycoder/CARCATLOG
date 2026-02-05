@@ -446,6 +446,13 @@ const CarDetailPage = () => {
                           month: 'short',
                           year: 'numeric'
                         })
+                      ) : car.motHistory && car.motHistory.length > 0 && car.motHistory[0].expiryDate ? (
+                        // BONUS TIP: Fallback to motHistory array if motDue not set
+                        new Date(car.motHistory[0].expiryDate).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric'
+                        })
                       ) : (
                         'Contact seller for MOT details'
                       )}
