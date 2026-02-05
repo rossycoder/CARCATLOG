@@ -16,13 +16,29 @@ const VehicleLookupForm = () => {
 
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const response = await axios.post(`${API_BASE_URL}/vehicles/lookup`, {
-        registrationNumber: registrationNumber.trim(),
-        mileage: parseInt(mileage)
+      // Use dvla-lookup endpoint instead of lookup (no payment required)
+      const response = await axios.post(`${API_BASE_URL}/vehicles/dvla-lookup`, {
+        registrationNumber: registrationNumber.trim()
       });
 
       if (response.data.success) {
-        setVehicleData(response.data.vehicle);
+        // Map the response data to match expected format
+        const vehicleData = response.data.vehicle || response.data.data;
+        setVehicleData({
+          registrationNumber: registrationNumber.toUpperCase(),
+          mileage: parseInt(mileage),
+          make: vehicleData.make,
+          model: vehicleData.model,
+          year: vehicleData.yearOfManufacture,
+          color: vehicleData.colour,
+          fuelType: vehicleData.fuelType,
+          engineSize: vehicleData.engineCapacity ? (vehicleData.engineCapacity / 1000).toFixed(1) : null,
+          co2Emissions: vehicleData.co2Emissions,
+          taxStatus: vehicleData.taxStatus,
+          motStatus: vehicleData.motStatus,
+          transmission: vehicleData.transmission,
+          bodyType: vehicleData.bodyType
+        });
       }
     } catch (err) {
       console.error('Vehicle lookup error:', err);
