@@ -122,50 +122,71 @@ export const vanService = {
     return response.data;
   },
 
-  // DVLA vehicle lookup (works for vans too)
-  dvlaLookup: async (registrationNumber, mileage) => {
-    const response = await api.post('/vehicles/dvla-lookup', {
-      registrationNumber,
-      mileage
-    });
-    return response.data;
-  },
-
-  // Lookup van by registration number
+  // Lookup van by registration number using optimized DVLA-first approach
   lookupVanByRegistration: async (registrationNumber, mileage) => {
     try {
-      const response = await api.post('/vehicles/dvla-lookup', {
-        registrationNumber,
-        mileage
-      });
+      // Use the new optimized van lookup endpoint (FREE DVLA API first)
+      const response = await api.get(`/vans/basic-lookup/${registrationNumber}?mileage=${mileage}`);
       
       if (response.data.success && response.data.data) {
-        // Map DVLA data to van-specific format
-        const dvlaData = response.data.data;
+        // Map optimized response to van-specific format
+        const vanData = response.data.data;
         return {
           success: true,
           data: {
-            registration: dvlaData.registrationNumber || registrationNumber.toUpperCase(),
-            mileage: mileage,
-            make: dvlaData.make || 'Unknown',
-            model: dvlaData.model || 'Unknown',
-            year: dvlaData.year || dvlaData.yearOfManufacture || new Date().getFullYear(),
-            color: dvlaData.color || dvlaData.colour || 'Not specified',
-            fuelType: dvlaData.fuelType || 'Diesel',
-            vanType: dvlaData.vanType || dvlaData.bodyType || 'Panel Van',
-            payloadCapacity: dvlaData.payloadCapacity || dvlaData.grossWeight || 'Unknown',
-            previousOwners: dvlaData.previousOwners || 'Unknown',
-            motDue: dvlaData.motExpiryDate || dvlaData.motDue || 'Unknown',
-            taxDue: dvlaData.taxDueDate || dvlaData.taxDue || 'Unknown',
-            taxStatus: dvlaData.taxStatus || 'Unknown',
-            motStatus: dvlaData.motStatus || 'Unknown'
-          }
+            registration: vanData.registration || registrationNumber.toUpperCase(),
+            mileage: vanData.mileage || mileage,
+            make: vanData.make || 'Unknown',
+            model: vanData.model || 'Unknown',
+            year: vanData.year || new Date().getFullYear(),
+            color: vanData.color || 'Not specified',
+            fuelType: vanData.fuelType || 'Diesel',
+            vanType: vanData.vanType || vanData.bodyType || 'Panel Van',
+            transmission: vanData.transmission || 'Manual',
+            engineSize: vanData.engineSize || 'Unknown',
+            estimatedValue: vanData.estimatedValue || null,
+            
+            // Van-specific fields
+            payloadCapacity: vanData.payloadCapacity || 'Unknown',
+            loadLength: vanData.loadLength || null,
+            loadWidth: vanData.loadWidth || null,
+            loadHeight: vanData.loadHeight || null,
+            wheelbase: vanData.wheelbase || null,
+            roofHeight: vanData.roofHeight || null,
+            
+            // Additional data if available
+            variant: vanData.variant || null,
+            bodyType: vanData.bodyType || null,
+            doors: vanData.doors || null,
+            seats: vanData.seats || 2,
+            emissionClass: vanData.emissionClass || null,
+            co2Emissions: vanData.co2Emissions || null,
+            urbanMpg: vanData.urbanMpg || null,
+            extraUrbanMpg: vanData.extraUrbanMpg || null,
+            combinedMpg: vanData.combinedMpg || null,
+            annualTax: vanData.annualTax || null,
+            insuranceGroup: vanData.insuranceGroup || null,
+            
+            // Legacy fields for compatibility
+            previousOwners: 'Unknown',
+            motDue: 'Unknown',
+            taxDue: 'Unknown',
+            taxStatus: 'Unknown',
+            motStatus: 'Unknown'
+          },
+          metadata: response.data.metadata
         };
       }
       return response.data;
     } catch (error) {
       throw error;
     }
+  },
+
+  // DVLA vehicle lookup (DEPRECATED - use lookupVanByRegistration instead)
+  dvlaLookup: async (registrationNumber, mileage) => {
+    console.warn('⚠️ dvlaLookup is deprecated. Use lookupVanByRegistration for optimized DVLA-first lookup.');
+    return vanService.lookupVanByRegistration(registrationNumber, mileage);
   }
 };
 

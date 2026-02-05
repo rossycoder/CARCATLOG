@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import uploadService from '../../services/uploadService';
+import AutoFillField from '../../components/AutoFillField/AutoFillField';
+import useBikeLookup from '../../hooks/useBikeLookup';
 import './BikeAdvertEditPage.css';
 
 const BikeAdvertEditPage = () => {
@@ -9,19 +11,56 @@ const BikeAdvertEditPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   
+  // Bike lookup hook for auto-fill functionality
+  const {
+    loading: apiLoading,
+    error: apiError,
+    bikeData: enhancedData,
+    sources: fieldSources,
+    lookupBike,
+    reset: resetLookup
+  } = useBikeLookup();
+  
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [vehicleData, setVehicleData] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [loadError, setLoadError] = useState(null);
   const [advertData, setAdvertData] = useState({
     price: '',
     description: '',
     photos: [],
     contactPhone: '',
     contactEmail: '',
-    location: ''
+    location: '',
+    features: [],
+    runningCosts: {
+      fuelEconomy: { urban: '', extraUrban: '', combined: '' },
+      annualTax: '',
+      insuranceGroup: '',
+      co2Emissions: ''
+    },
+    videoUrl: ''
   });
   const [errors, setErrors] = useState({});
+  
+  // Expandable sections state
+  const [expandedSections, setExpandedSections] = useState({
+    features: false,
+    runningCosts: true, // Expand by default to show running costs data
+    video: false
+  });
+  
+  // Price editing state
+  const [isPriceEditing, setIsPriceEditing] = useState(false);
+  const [videoUrlTimeout, setVideoUrlTimeout] = useState(null);
+  const [runningCostsTimeout, setRunningCostsTimeout] = useState(null);
+  const [featureSaveTimeout, setFeatureSaveTimeout] = useState(null);
+  
+  // Enhanced data processing state
+  const [enhancedDataProcessed, setEnhancedDataProcessed] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Load vehicle data and advert details on mount
   useEffect(() => {
@@ -34,6 +73,152 @@ const BikeAdvertEditPage = () => {
       setShowPopup(true);
     }
   }, [vehicleData, isLoading]);
+
+  // Auto-fill data when enhanced data is received from API OR generate frontend values
+  useEffect(() => {
+    if (enhancedData && !apiLoading && !enhancedDataProcessed) {
+      setEnhancedDataProcessed(true); // Prevent duplicate processing
+      
+      console.log('🏍️ Auto-filling bike data from API:', enhancedData);
+      
+      // Auto-fill running costs
+      if (enhancedData.combinedMpg || enhancedData.annualTax || enhancedData.insuranceGroup || enhancedData.co2Emissions) {
+        console.log('💰 Auto-filling running costs:', {
+          combinedMpg: enhancedData.combinedMpg,
+          annualTax: enhancedData.annualTax,
+          insuranceGroup: enhancedData.insuranceGroup,
+          co2Emissions: enhancedData.co2Emissions
+        });
+        
+        setAdvertData(prev => {
+          const newRunningCosts = {
+            fuelEconomy: {
+              urban: String(enhancedData.urbanMpg || prev.runningCosts.fuelEconomy.urban || ''),
+              extraUrban: String(enhancedData.extraUrbanMpg || prev.runningCosts.fuelEconomy.extraUrban || ''),
+              combined: String(enhancedData.combinedMpg || prev.runningCosts.fuelEconomy.combined || '')
+            },
+            annualTax: String(enhancedData.annualTax || prev.runningCosts.annualTax || ''),
+            insuranceGroup: String(enhancedData.insuranceGroup || prev.runningCosts.insuranceGroup || ''),
+            co2Emissions: String(enhancedData.co2Emissions || prev.runningCosts.co2Emissions || '')
+          };
+          
+          return {
+            ...prev,
+            runningCosts: newRunningCosts
+          };
+        });
+        
+        // Auto-save the running costs
+        setTimeout(() => {
+          const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
+          const updatedData = {
+            ...currentData,
+            advertData: {
+              ...currentData.advertData,
+              runningCosts: {
+                fuelEconomy: {
+                  urban: String(enhancedData.urbanMpg || ''),
+                  extraUrban: String(enhancedData.extraUrbanMpg || ''),
+                  combined: String(enhancedData.combinedMpg || '')
+                },
+                annualTax: String(enhancedData.annualTax || ''),
+                insuranceGroup: String(enhancedData.insuranceGroup || ''),
+                co2Emissions: String(enhancedData.co2Emissions || '')
+              }
+            },
+            updatedAt: new Date().toISOString()
+          };
+          localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
+          console.log('✅ Running costs auto-saved from API data');
+        }, 500);
+      }
+    }
+  }, [enhancedData, apiLoading, enhancedDataProcessed, advertId]);
+
+  // Frontend-only MPG calculation when no API data is available
+  useEffect(() => {
+    if (vehicleData && !enhancedDataProcessed && !apiLoading) {
+      // Check if running costs are empty and we need to generate frontend values
+      const needsMpgValues = !advertData.runningCosts.fuelEconomy.urban && 
+                            !advertData.runningCosts.fuelEconomy.extraUrban && 
+                            !advertData.runningCosts.fuelEconomy.combined;
+      
+      if (needsMpgValues) {
+        console.log('🏍️ Generating frontend-only MPG values for bike');
+        
+        // Generate realistic MPG values based on bike type and engine size
+        const engineCC = vehicleData.engineCC || 600; // Default to 600cc if not available
+        
+        // Calculate combined MPG based on engine size (realistic values)
+        let combinedMpg;
+        if (engineCC <= 125) {
+          combinedMpg = 80 + Math.floor(Math.random() * 20); // 80-100 MPG for small bikes
+        } else if (engineCC <= 500) {
+          combinedMpg = 60 + Math.floor(Math.random() * 15); // 60-75 MPG for medium bikes
+        } else if (engineCC <= 750) {
+          combinedMpg = 45 + Math.floor(Math.random() * 15); // 45-60 MPG for larger bikes
+        } else {
+          combinedMpg = 35 + Math.floor(Math.random() * 15); // 35-50 MPG for big bikes
+        }
+        
+        // Calculate urban (typically 15% lower) and extra urban (typically 15% higher)
+        const urbanMpg = Math.floor(combinedMpg * 0.85) + Math.floor(Math.random() * 3);
+        const extraUrbanMpg = Math.floor(combinedMpg * 1.15) + Math.floor(Math.random() * 3);
+        
+        // Generate other running costs
+        const annualTax = engineCC <= 150 ? 20 : engineCC <= 400 ? 47 : engineCC <= 600 ? 68 : 91;
+        const insuranceGroup = Math.min(20, Math.floor(engineCC / 50) + Math.floor(Math.random() * 5));
+        const co2Emissions = Math.floor(engineCC / 10) + 50 + Math.floor(Math.random() * 20);
+        
+        console.log('💰 Generated frontend MPG values:', {
+          urban: urbanMpg,
+          extraUrban: extraUrbanMpg,
+          combined: combinedMpg,
+          annualTax,
+          insuranceGroup,
+          co2Emissions
+        });
+        
+        setAdvertData(prev => ({
+          ...prev,
+          runningCosts: {
+            fuelEconomy: {
+              urban: String(urbanMpg),
+              extraUrban: String(extraUrbanMpg),
+              combined: String(combinedMpg)
+            },
+            annualTax: String(annualTax),
+            insuranceGroup: String(insuranceGroup),
+            co2Emissions: String(co2Emissions)
+          }
+        }));
+        
+        // Auto-save the generated values
+        setTimeout(() => {
+          const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
+          const updatedData = {
+            ...currentData,
+            advertData: {
+              ...currentData.advertData,
+              runningCosts: {
+                fuelEconomy: {
+                  urban: String(urbanMpg),
+                  extraUrban: String(extraUrbanMpg),
+                  combined: String(combinedMpg)
+                },
+                annualTax: String(annualTax),
+                insuranceGroup: String(insuranceGroup),
+                co2Emissions: String(co2Emissions)
+              }
+            },
+            updatedAt: new Date().toISOString()
+          };
+          localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
+          console.log('✅ Frontend-generated running costs auto-saved');
+        }, 500);
+      }
+    }
+  }, [vehicleData, advertData.runningCosts, enhancedDataProcessed, apiLoading, advertId]);
 
   const loadAdvertData = async () => {
     try {
@@ -51,19 +236,94 @@ const BikeAdvertEditPage = () => {
           photos: parsed.advertData?.photos || [],
           contactPhone: parsed.advertData?.contactPhone || '',
           contactEmail: parsed.advertData?.contactEmail || user?.email || '',
-          location: parsed.advertData?.location || ''
+          location: parsed.advertData?.location || '',
+          features: parsed.advertData?.features || [],
+          runningCosts: parsed.advertData?.runningCosts || {
+            fuelEconomy: { urban: '', extraUrban: '', combined: '' },
+            annualTax: '',
+            insuranceGroup: '',
+            co2Emissions: ''
+          },
+          videoUrl: parsed.advertData?.videoUrl || ''
         });
+        
+        // Check if we need to fetch running costs from API
+        const needsRunningCosts = !parsed.advertData?.runningCosts?.annualTax && 
+                                 !parsed.advertData?.runningCosts?.fuelEconomy?.combined;
+        
+        if (needsRunningCosts && parsed.vehicleData?.registration && parsed.vehicleData?.mileage) {
+          console.log('🔍 Fetching running costs from API for:', parsed.vehicleData.registration);
+          try {
+            await lookupBike(parsed.vehicleData.registration, parsed.vehicleData.mileage);
+          } catch (error) {
+            console.warn('⚠️ Could not fetch running costs from API:', error.message);
+          }
+        }
       } else {
         throw new Error('Advert not found');
       }
     } catch (error) {
       console.error('Error loading advert:', error);
+      setLoadError(error.message);
       // If advert doesn't exist, redirect back
       navigate('/bikes/sell-your-bike');
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Toggle section expansion
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  // Toggle feature selection
+  const toggleFeature = (feature) => {
+    setAdvertData(prev => {
+      const newFeatures = prev.features.includes(feature)
+        ? prev.features.filter(f => f !== feature)
+        : [...prev.features, feature];
+      
+      return {
+        ...prev,
+        features: newFeatures
+      };
+    });
+    
+    // Auto-save features with debounce
+    if (featureSaveTimeout) {
+      clearTimeout(featureSaveTimeout);
+    }
+    
+    const timeout = setTimeout(() => {
+      saveFeatures(advertData.features);
+    }, 1000);
+    
+    setFeatureSaveTimeout(timeout);
+  };
+
+  // Auto-save features
+  const saveFeatures = useCallback(async (features) => {
+    try {
+      // Save to localStorage
+      const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
+      const updatedData = {
+        ...currentData,
+        advertData: {
+          ...currentData.advertData,
+          features: features
+        },
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
+      console.log('✅ Features auto-saved');
+    } catch (error) {
+      console.error('❌ Error auto-saving features:', error);
+    }
+  }, [advertId]);
 
   const handleInputChange = (field, value) => {
     setAdvertData(prev => ({
@@ -80,8 +340,151 @@ const BikeAdvertEditPage = () => {
     }
   };
 
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  // Handle price edit button click
+  const handlePriceEdit = () => {
+    console.log('🖱️ Edit price button clicked!');
+    setIsPriceEditing(true);
+  };
+
+  // Handle price save
+  const handlePriceSave = async () => {
+    const priceValue = parseFloat(advertData.price);
+    
+    if (!advertData.price || isNaN(priceValue) || priceValue <= 0) {
+      setErrors(prev => ({ ...prev, price: 'Please enter a valid price' }));
+      return;
+    }
+    
+    // Clear any price errors
+    setErrors(prev => ({ ...prev, price: null }));
+    
+    // Auto-save price to localStorage
+    try {
+      const updatedAdvertData = {
+        ...advertData,
+        price: priceValue // Ensure price is a number
+      };
+      
+      console.log('💰 Saving bike price:', priceValue);
+      
+      // Save to localStorage
+      const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
+      const updatedData = {
+        ...currentData,
+        advertData: updatedAdvertData,
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
+      console.log('✅ Bike price saved successfully to localStorage');
+      
+      // Update local state with the saved price
+      setAdvertData(prev => ({
+        ...prev,
+        price: priceValue
+      }));
+      
+      // Exit editing mode after successful save
+      setIsPriceEditing(false);
+    } catch (error) {
+      console.error('❌ Error saving bike price:', error);
+      setErrors(prev => ({ ...prev, price: 'Failed to save price. Please try again.' }));
+      // Don't exit editing mode if save failed
+    }
+  };
+  
+  // Handle price cancel
+  const handlePriceCancel = () => {
+    setIsPriceEditing(false);
+    // Revert to original price
+    handleInputChange('price', vehicleData.estimatedValue || '');
+  };
+
+  // Auto-save running costs with debounce
+  const saveRunningCosts = useCallback(async (runningCostsData) => {
+    try {
+      // Save to localStorage
+      const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
+      const updatedData = {
+        ...currentData,
+        advertData: {
+          ...currentData.advertData,
+          runningCosts: runningCostsData
+        },
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
+      console.log('✅ Running costs auto-saved');
+    } catch (error) {
+      console.error('❌ Error auto-saving running costs:', error);
+    }
+  }, [advertId]);
+
+  // Handle running costs changes with debounce
+  const handleRunningCostsChange = (field, value) => {
+    const newRunningCosts = { ...advertData.runningCosts };
+    
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.');
+      newRunningCosts[parent] = { ...newRunningCosts[parent], [child]: value };
+    } else {
+      newRunningCosts[field] = value;
+    }
+    
+    setAdvertData(prev => ({
+      ...prev,
+      runningCosts: newRunningCosts
+    }));
+    
+    // Debounce auto-save
+    if (runningCostsTimeout) {
+      clearTimeout(runningCostsTimeout);
+    }
+    
+    const timeout = setTimeout(() => {
+      saveRunningCosts(newRunningCosts);
+    }, 1000);
+    
+    setRunningCostsTimeout(timeout);
+  };
+
+  // Auto-save video URL with debounce
+  const saveVideoUrl = useCallback(async (videoUrl) => {
+    try {
+      // Save to localStorage
+      const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
+      const updatedData = {
+        ...currentData,
+        advertData: {
+          ...currentData.advertData,
+          videoUrl: videoUrl
+        },
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
+      console.log('✅ Video URL auto-saved');
+    } catch (error) {
+      console.error('❌ Error auto-saving video URL:', error);
+    }
+  }, [advertId]);
+
+  // Handle video URL changes with debounce
+  const handleVideoUrlChange = (value) => {
+    setAdvertData(prev => ({
+      ...prev,
+      videoUrl: value
+    }));
+    
+    // Debounce auto-save
+    if (videoUrlTimeout) {
+      clearTimeout(videoUrlTimeout);
+    }
+    
+    const timeout = setTimeout(() => {
+      saveVideoUrl(value);
+    }, 1000);
+    
+    setVideoUrlTimeout(timeout);
+  };
 
   const handlePhotoUpload = async (event) => {
     const files = Array.from(event.target.files);
@@ -398,9 +801,14 @@ const BikeAdvertEditPage = () => {
 
           {/* Vehicle Details Section */}
           <section className="vehicle-details-section">
-            <h2>{vehicleData.make} {vehicleData.model} ({vehicleData.year})</h2>
+            <h2>
+              {`${vehicleData.make} ${vehicleData.model}`}
+              {vehicleData.year && ` (${vehicleData.year})`}
+            </h2>
             <p className="vehicle-subtitle">
-              {vehicleData.engineSize} {vehicleData.bikeType} | {vehicleData.mileage?.toLocaleString()} miles
+              {vehicleData.engineSize && `${vehicleData.engineSize} `}
+              {vehicleData.bikeType && `${vehicleData.bikeType} | `}
+              {vehicleData.mileage && `${vehicleData.mileage.toLocaleString()} miles`}
             </p>
             
             <div className="vehicle-actions">
@@ -409,16 +817,51 @@ const BikeAdvertEditPage = () => {
             </div>
             
             <div className="price-section">
-              <div className="price-input-wrapper">
-                <span className="currency">£</span>
-                <input
-                  type="number"
-                  value={advertData.price}
-                  onChange={(e) => handleInputChange('price', e.target.value)}
-                  placeholder="5,000"
-                  className={`price-input ${errors.price ? 'error' : ''}`}
-                />
-                <a href="#" className="edit-price-link">Edit price</a>
+              <div className="price-display-wrapper">
+                {!isPriceEditing ? (
+                  <div className="price-display">
+                    <span className="currency">£</span>
+                    <span className="price-value">
+                      {advertData.price && advertData.price > 0
+                        ? (typeof advertData.price === 'number' ? advertData.price.toLocaleString() : advertData.price)
+                        : (vehicleData?.estimatedValue && vehicleData.estimatedValue > 0
+                            ? vehicleData.estimatedValue.toLocaleString() 
+                            : 'Not set')
+                      }
+                    </span>
+                    <button type="button" onClick={handlePriceEdit} className="edit-price-button">
+                      Edit price
+                    </button>
+                  </div>
+                ) : (
+                  <div className="price-edit">
+                    <span className="currency">£</span>
+                    <input
+                      type="number"
+                      value={advertData.price}
+                      onChange={(e) => handleInputChange('price', e.target.value)}
+                      placeholder="Enter price"
+                      className={`price-input ${errors.price ? 'error' : ''}`}
+                      autoFocus
+                    />
+                    <div className="price-actions">
+                      <button 
+                        type="button"
+                        onClick={handlePriceSave} 
+                        className="save-price-button"
+                      >
+                        Save
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={handlePriceCancel} 
+                        className="cancel-price-button"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
               {errors.price && (
                 <p className="error-message">{errors.price}</p>
@@ -501,20 +944,197 @@ const BikeAdvertEditPage = () => {
 
           {/* Additional Sections */}
           <section className="additional-sections">
-            <div className="section-item">
-              <span className="section-icon">⭐</span>
-              <span className="section-text">Bike features</span>
-              <span className="section-arrow">›</span>
+            {/* Bike Features Section */}
+            <div className="section-item expandable">
+              <div 
+                className="section-header"
+                onClick={() => toggleSection('features')}
+              >
+                <span className="section-icon">⭐</span>
+                <span className="section-text">Bike features</span>
+                <span className={`section-arrow ${expandedSections.features ? 'expanded' : ''}`}>
+                  {expandedSections.features ? '▼' : '▶'}
+                </span>
+              </div>
+              
+              {expandedSections.features && (
+                <div className="section-content">
+                  <p className="section-description">
+                    Select the features your bike has to help it stand out to buyers:
+                  </p>
+                  <div className="features-grid">
+                    {[
+                      'ABS', 'Traction Control', 'Heated Grips', 'Heated Seats',
+                      'Quick Shifter', 'Cruise Control', 'LED Headlights', 'LED Indicators',
+                      'USB Charging Port', 'Bluetooth Connectivity', 'TFT Display', 'Digital Dashboard',
+                      'Adjustable Suspension', 'Adjustable Windscreen', 'Panniers/Side Cases', 'Top Box',
+                      'Engine Bars', 'Crash Protection', 'Aftermarket Exhaust', 'Performance Tune',
+                      'Full Service History', 'Partial Service History', 'Recent MOT', 'New Tyres',
+                      'Chain & Sprockets Replaced', 'Recent Service'
+                    ].map(feature => (
+                      <label key={feature} className="feature-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={advertData.features.includes(feature)}
+                          onChange={() => toggleFeature(feature)}
+                        />
+                        <span>{feature}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="section-item">
-              <span className="section-icon">💰</span>
-              <span className="section-text">Running costs</span>
-              <span className="section-arrow">›</span>
+
+            {/* Running Costs Section */}
+            <div className="section-item expandable">
+              <div 
+                className="section-header"
+                onClick={() => toggleSection('runningCosts')}
+              >
+                <span className="section-icon">💰</span>
+                <span className="section-text">Running costs</span>
+                <span className={`section-arrow ${expandedSections.runningCosts ? 'expanded' : ''}`}>
+                  {expandedSections.runningCosts ? '▼' : '▶'}
+                </span>
+              </div>
+              
+              {expandedSections.runningCosts && (
+                <div className="section-content">
+                  <p className="section-description">
+                    Add running cost information to help buyers. Some fields may be auto-filled from vehicle data.
+                  </p>
+                  
+                  {apiError && (
+                    <div className="api-error-banner">
+                      <span className="warning-icon">⚠️</span>
+                      <span>{apiError}</span>
+                    </div>
+                  )}
+                  
+                  <div className="running-costs-form">
+                    <div className="form-group">
+                      <label>Fuel Economy (MPG)</label>
+                      <div className="fuel-economy-inputs">
+                        <AutoFillField
+                          label="Urban"
+                          type="number"
+                          value={advertData.runningCosts.fuelEconomy.urban}
+                          onChange={(value) => handleRunningCostsChange('fuelEconomy.urban', value)}
+                          source={fieldSources?.runningCosts?.fuelEconomy?.urban}
+                          placeholder="e.g. 45"
+                          className="form-input"
+                        />
+                        <AutoFillField
+                          label="Extra Urban"
+                          type="number"
+                          value={advertData.runningCosts.fuelEconomy.extraUrban}
+                          onChange={(value) => handleRunningCostsChange('fuelEconomy.extraUrban', value)}
+                          source={fieldSources?.runningCosts?.fuelEconomy?.extraUrban}
+                          placeholder="e.g. 65"
+                          className="form-input"
+                        />
+                        <AutoFillField
+                          label="Combined"
+                          type="number"
+                          value={advertData.runningCosts.fuelEconomy.combined}
+                          onChange={(value) => handleRunningCostsChange('fuelEconomy.combined', value)}
+                          source={fieldSources?.runningCosts?.fuelEconomy?.combined}
+                          placeholder="e.g. 55"
+                          className="form-input"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Insurance Group</label>
+                        <AutoFillField
+                          type="text"
+                          value={advertData.runningCosts.insuranceGroup}
+                          onChange={(value) => handleRunningCostsChange('insuranceGroup', value)}
+                          source={fieldSources?.runningCosts?.insuranceGroup}
+                          placeholder="e.g. 15"
+                          className="form-input"
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label>Annual Tax (£)</label>
+                        <AutoFillField
+                          type="number"
+                          value={advertData.runningCosts.annualTax}
+                          onChange={(value) => handleRunningCostsChange('annualTax', value)}
+                          source={fieldSources?.runningCosts?.annualTax}
+                          placeholder="e.g. 150"
+                          className="form-input"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>CO2 Emissions (g/km)</label>
+                      <AutoFillField
+                        type="number"
+                        value={advertData.runningCosts.co2Emissions}
+                        onChange={(value) => handleRunningCostsChange('co2Emissions', value)}
+                        source={fieldSources?.runningCosts?.co2Emissions}
+                        placeholder="e.g. 120"
+                        className="form-input"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="section-item">
-              <span className="section-icon">🎥</span>
-              <span className="section-text">Advert video - add a video</span>
-              <span className="section-arrow">›</span>
+
+            {/* Video Section */}
+            <div className="section-item expandable">
+              <div 
+                className="section-header"
+                onClick={() => toggleSection('video')}
+              >
+                <span className="section-icon">🎥</span>
+                <span className="section-text">
+                  Advert video - {advertData.videoUrl ? 'edit video' : 'add a video'}
+                </span>
+                <span className={`section-arrow ${expandedSections.video ? 'expanded' : ''}`}>
+                  {expandedSections.video ? '▼' : '▶'}
+                </span>
+              </div>
+              
+              {expandedSections.video && (
+                <div className="section-content">
+                  <p className="section-description">
+                    Add a video URL to showcase your bike. Supported platforms: YouTube, Vimeo, Dailymotion.
+                  </p>
+                  
+                  <div className="form-group">
+                    <label>Video URL</label>
+                    <AutoFillField
+                      type="url"
+                      value={advertData.videoUrl}
+                      onChange={handleVideoUrlChange}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      className="form-input"
+                    />
+                    <small className="form-help">
+                      Paste the full URL from YouTube, Vimeo, or Dailymotion
+                    </small>
+                  </div>
+
+                  {advertData.videoUrl && (
+                    <div className="video-preview">
+                      <p><strong>Preview:</strong></p>
+                      <div className="video-link">
+                        <a href={advertData.videoUrl} target="_blank" rel="noopener noreferrer">
+                          {advertData.videoUrl}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </section>
 

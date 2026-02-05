@@ -392,7 +392,7 @@ function SavedCarsPage() {
                   <div className="car-location">
                     <span className="location-icon">📍</span>
                     <span>
-                      {extractTownName(car.locationName) || car.postcode?.split(' ')[0] || 'Location'}
+                      {extractTownName(car.locationName) || 'Location not available'}
                     </span>
                   </div>
                 </div>

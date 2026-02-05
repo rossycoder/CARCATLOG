@@ -188,7 +188,11 @@ const NewCarsPage = () => {
                       <div className="price-col">
                         <span className="price-label">{car.fuelType}</span>
                         <span className="price-label">{car.transmission}</span>
-                        <span className="price-period">{car.color}</span>
+                        <span className="price-period">
+                          {car.color && car.color !== 'Not specified' && car.color !== 'null' && car.color !== 'undefined' && car.color.trim() !== ''
+                            ? car.color 
+                            : 'Not specified'}
+                        </span>
                       </div>
                     </div>
                     <h3 className="lease-title">{car.make} {car.model}</h3>

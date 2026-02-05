@@ -24,18 +24,12 @@ const formatVehicleDetailsFromBasic = (basicData, registration, mileage) => {
     if (isValidValue(model)) {
       return model;
     }
-    // If no model, create descriptive text from available data
-    const parts = [];
-    const engineSize = basicData.engineSize;
-    const fuelType = basicData.fuelType;
     
-    if (engineSize) {
-      parts.push(engineSize);
-    }
-    if (isValidValue(fuelType)) {
-      parts.push(fuelType);
-    }
-    return parts.length > 0 ? parts.join(' ') : null;
+    // CRITICAL FIX: Don't create fake models from fuel type
+    // If no model is available, return null and let the backend handle it
+    // The old logic was creating "ELECTRICITY" models for electric vehicles
+    console.log('⚠️ No model available from API - returning null instead of creating fake model');
+    return null;
   };
 
   // Get body type with better fallback

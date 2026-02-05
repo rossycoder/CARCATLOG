@@ -111,8 +111,9 @@ export const generateSubtitle = (vehicle) => {
 /**
  * Generate variant display for detail page
  * Shows the complete derivative/trim information in AutoTrader format
- * Format: "EngineSize Variant BodyStyle"
- * Example: "1.6 TDI S 5dr" or "2.0 320d M Sport 4dr"
+ * Format: "EngineSize Variant BodyStyle" for ICE vehicles
+ * Format: "Variant BodyStyle" for electric vehicles
+ * Example: "1.6 TDI S 5dr" or "M50 5dr" (BMW i4 M50)
  * 
  * @param {object} vehicle - Vehicle data object
  * @returns {string} - Formatted variant
@@ -120,24 +121,32 @@ export const generateSubtitle = (vehicle) => {
 export const generateVariantDisplay = (vehicle) => {
   const parts = [];
   
-  // Engine size (without 'L' suffix for AutoTrader style)
-  if (vehicle.engineSize) {
+  // Engine size (without 'L' suffix for AutoTrader style) - only for non-electric
+  if (vehicle.engineSize && vehicle.fuelType !== 'Electric') {
     const size = parseFloat(vehicle.engineSize);
     if (!isNaN(size)) {
       parts.push(size.toFixed(1));
     }
   }
   
-  // Variant/trim - this should contain fuel type + trim (e.g., "TDI S" or "320d M Sport")
-  if (vehicle.variant && vehicle.variant !== 'null' && vehicle.variant !== 'undefined' && vehicle.variant.trim() !== '') {
+  // Variant/trim - this should contain fuel type + trim (e.g., "TDI S" or "320d M Sport" or "M50")
+  if (vehicle.variant && 
+      vehicle.variant !== 'null' && 
+      vehicle.variant !== 'undefined' && 
+      vehicle.variant !== vehicle.fuelType &&
+      vehicle.variant.trim() !== '') {
     parts.push(vehicle.variant);
-  } else if (vehicle.submodel && vehicle.submodel !== 'null' && vehicle.submodel !== 'undefined' && vehicle.submodel.trim() !== '') {
-    // Use submodel if available
+  } else if (vehicle.submodel && 
+             vehicle.submodel !== 'null' && 
+             vehicle.submodel !== 'undefined' && 
+             vehicle.submodel !== vehicle.fuelType &&
+             vehicle.submodel.trim() !== '') {
+    // Use submodel if available and different from fuel type
     parts.push(vehicle.submodel);
   } else {
-    // Fallback: build from fuel type if no variant
+    // Fallback: build from fuel type if no variant (but not for electric)
     // Only add fuel type if it's not already obvious from engine size
-    if (vehicle.fuelType && vehicle.fuelType !== 'Petrol') {
+    if (vehicle.fuelType && vehicle.fuelType !== 'Petrol' && vehicle.fuelType !== 'Electric') {
       parts.push(vehicle.fuelType);
     }
   }
@@ -175,11 +184,16 @@ export const generateVariantDisplay = (vehicle) => {
 export const extractTownName = (locationName) => {
   if (!locationName) return '';
   
+  // Remove "unparished area" and similar descriptors
+  let cleanName = locationName
+    .replace(/,?\s*unparished area/gi, '')
+    .replace(/,?\s*\(unparished area\)/gi, '')
+    .trim();
+  
   // Split by comma to get parts
-  const parts = locationName.split(',').map(part => part.trim());
+  const parts = cleanName.split(',').map(part => part.trim());
   
   // Remove parts that look like postcodes (e.g., SS11TH, SS1 1TH)
-  // Remove descriptive parts like "unparished area"
   const cleanParts = parts.filter(part => {
     // Skip if it looks like a postcode (alphanumeric with optional space)
     if (/^[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}$/i.test(part)) {
@@ -189,8 +203,8 @@ export const extractTownName = (locationName) => {
     if (/^[A-Z]{1,2}\d{1,2}[A-Z]?\d[A-Z]{2}$/i.test(part)) {
       return false;
     }
-    // Skip descriptive terms
-    if (part.toLowerCase().includes('unparished area')) {
+    // Skip empty parts
+    if (!part) {
       return false;
     }
     return true;

@@ -87,15 +87,19 @@ const CarAdvertEditPage = () => {
         // Use PRIVATE for display (individual seller price)
         const displayPrice = valuation.private || valuation.Private || valuation.retail;
         
-        if (displayPrice) {
-          setAdvertData(prev => ({
-            ...prev,
-            price: displayPrice
-          }));
+        if (displayPrice && displayPrice > 0) {
+          console.log('💰 Setting price from enhanced data:', displayPrice, 'type:', typeof displayPrice);
+          setAdvertData(prev => {
+            console.log('💰 Previous price:', prev.price, 'type:', typeof prev.price);
+            return {
+              ...prev,
+              price: parseFloat(displayPrice) // Ensure it's a number
+            };
+          });
           
           setVehicleData(prev => ({
             ...prev,
-            estimatedValue: displayPrice,
+            estimatedValue: parseFloat(displayPrice),
             allValuations: valuation,
             valuationConfidence: enhancedData.valuation.confidence || 'medium'
           }));
@@ -176,7 +180,7 @@ const CarAdvertEditPage = () => {
           // Prefer private sale price if available
           const preferredPrice = enhancedVehicleData.valuation?.privatePrice || 
                                 enhancedVehicleData.allValuations?.private || 
-                                enhancedVehicleData.price || '';
+                                enhancedVehicleData.price || 0;
           
           console.log('💰 Setting price field to:', preferredPrice);
           console.log('💰 Available prices:', {
@@ -185,8 +189,13 @@ const CarAdvertEditPage = () => {
             dbPrice: enhancedVehicleData.price
           });
           
-          setAdvertData({
-            price: preferredPrice,
+          // Ensure price is a valid number
+          const finalPrice = preferredPrice && preferredPrice > 0 ? parseFloat(preferredPrice) : 0;
+          console.log('💰 Final price being set:', finalPrice, 'type:', typeof finalPrice);
+          
+          setAdvertData(prev => ({
+            ...prev,
+            price: finalPrice,
             description: vehicleData.description || '',
             photos: vehicleData.images || [],
             contactPhone: vehicleData.sellerContact?.phoneNumber || '',
@@ -204,7 +213,12 @@ const CarAdvertEditPage = () => {
               co2Emissions: String(vehicleData.runningCosts?.co2Emissions || '')
             },
             videoUrl: vehicleData.videoUrl || ''
-          });
+          }));
+          
+          // Add a timeout to log the state after it's been set
+          setTimeout(() => {
+            console.log('💰 State updated - advertData.price is now:', finalPrice);
+          }, 100);
           
           console.log('✅ Form fields populated with existing data');
           console.log('🏃 Running costs populated:', {
@@ -553,6 +567,47 @@ const CarAdvertEditPage = () => {
     });
   };
 
+  // Auto-fix price if it's not set but we have valuation data
+  useEffect(() => {
+    if (vehicleData && (!advertData.price || advertData.price <= 0 || typeof advertData.price !== 'number')) {
+      // Try multiple sources for price in order of preference
+      const availablePrice = vehicleData.valuation?.estimatedValue?.private || 
+                           vehicleData.valuation?.estimatedValue?.retail ||
+                           vehicleData.valuation?.privatePrice || 
+                           vehicleData.allValuations?.private || 
+                           vehicleData.estimatedValue || 
+                           vehicleData.price;
+      
+      if (availablePrice && availablePrice > 0) {
+        const numericPrice = parseFloat(availablePrice);
+        if (!isNaN(numericPrice) && numericPrice > 0) {
+          console.log('🔧 Auto-fixing price - setting to:', numericPrice);
+          console.log('🔧 Price source:', {
+            'valuation.estimatedValue.private': vehicleData.valuation?.estimatedValue?.private,
+            'valuation.estimatedValue.retail': vehicleData.valuation?.estimatedValue?.retail,
+            'valuation.privatePrice': vehicleData.valuation?.privatePrice,
+            'allValuations.private': vehicleData.allValuations?.private,
+            'estimatedValue': vehicleData.estimatedValue,
+            'price': vehicleData.price,
+            'selectedPrice': numericPrice
+          });
+          setAdvertData(prev => ({
+            ...prev,
+            price: numericPrice
+          }));
+        }
+      } else {
+        console.log('⚠️ No valid price found in any source:', {
+          'valuation.estimatedValue': vehicleData.valuation?.estimatedValue,
+          'valuation.privatePrice': vehicleData.valuation?.privatePrice,
+          'allValuations.private': vehicleData.allValuations?.private,
+          'estimatedValue': vehicleData.estimatedValue,
+          'price': vehicleData.price
+        });
+      }
+    }
+  }, [vehicleData, advertData.price]);
+
   // Load advert data on mount - only once
   useEffect(() => {
     loadAdvertData();
@@ -568,10 +623,28 @@ const CarAdvertEditPage = () => {
   }, [videoUrlTimeout, runningCostsTimeout, featureSaveTimeout]);
 
   const handleInputChange = (field, value) => {
-    setAdvertData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    // Special handling for price field to ensure it's always a valid number
+    if (field === 'price') {
+      const numericValue = parseFloat(value);
+      if (!isNaN(numericValue) && numericValue >= 0) {
+        setAdvertData(prev => ({
+          ...prev,
+          [field]: numericValue
+        }));
+      } else if (value === '' || value === null || value === undefined) {
+        // Allow empty values for editing
+        setAdvertData(prev => ({
+          ...prev,
+          [field]: ''
+        }));
+      }
+      // Ignore invalid values (don't update state)
+    } else {
+      setAdvertData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
     
     // Clear error when user starts typing
     if (errors[field]) {
@@ -1065,13 +1138,67 @@ const CarAdvertEditPage = () => {
               {`${vehicleData.make} ${vehicleData.model}`}
             </h2>
             <p className="vehicle-subtitle">
-              {[
-                vehicleData.engineSize ? `${parseFloat(vehicleData.engineSize).toFixed(1)}L` : null,
-                vehicleData.variant && vehicleData.variant !== 'null' && vehicleData.variant !== 'undefined' ? vehicleData.variant : null,
-                vehicleData.fuelType,
-                vehicleData.transmission,
-                vehicleData.mileage ? `${vehicleData.mileage.toLocaleString()} miles` : null
-              ].filter(Boolean).join(' | ')}
+              {(() => {
+                const parts = [];
+                
+                // Add engine size for non-electric vehicles
+                if (vehicleData.engineSize && vehicleData.fuelType !== 'Electric') {
+                  parts.push(`${parseFloat(vehicleData.engineSize).toFixed(1)}L`);
+                }
+                
+                // Add variant if available and meaningful
+                if (vehicleData.variant && 
+                    vehicleData.variant !== 'null' && 
+                    vehicleData.variant !== 'undefined' && 
+                    vehicleData.variant !== vehicleData.fuelType) {
+                  parts.push(vehicleData.variant);
+                }
+                
+                // Add fuel type only if not obvious from variant or context
+                const shouldShowFuelType = vehicleData.fuelType && (() => {
+                  const fuelType = vehicleData.fuelType.toLowerCase();
+                  const variant = (vehicleData.variant || '').toLowerCase();
+                  
+                  // Don't show fuel type if it's already implied by variant
+                  if (variant.includes('tdi') || variant.includes('diesel')) return false;
+                  if (variant.includes('tsi') || variant.includes('gti') || variant.includes('petrol')) return false;
+                  if (variant.includes('electric') || fuelType === 'electric') return false;
+                  if (variant.includes('hybrid')) return false;
+                  
+                  // BMW diesel models (320d, 520d, etc.) - 'd' suffix indicates diesel
+                  if (fuelType === 'diesel' && variant.match(/\d+d\b/i)) return false;
+                  
+                  // BMW petrol models (320i, 520i, etc.) - 'i' suffix indicates petrol
+                  if (fuelType === 'petrol' && variant.match(/\d+i\b/i)) return false;
+                  
+                  // For BMW electric models (i3, i4, iX, etc.), don't show "Electric"
+                  if (fuelType === 'electric' && (
+                    vehicleData.make === 'BMW' && (
+                      vehicleData.model?.toLowerCase().startsWith('i') ||
+                      variant.match(/^(m\d+|i\d+)$/i)
+                    )
+                  )) return false;
+                  
+                  return true;
+                })();
+                
+                if (shouldShowFuelType) {
+                  parts.push(vehicleData.fuelType);
+                }
+                
+                // Add transmission
+                if (vehicleData.transmission) {
+                  const transmission = vehicleData.transmission.charAt(0).toUpperCase() + vehicleData.transmission.slice(1);
+                  parts.push(transmission);
+                }
+                
+                // Add mileage
+                if (vehicleData.mileage) {
+                  parts.push(`${vehicleData.mileage.toLocaleString()} miles`);
+                }
+                
+                return parts.filter(Boolean).join(' | ');
+              })()}
             </p>
             
             <div className="vehicle-actions">
@@ -1085,12 +1212,53 @@ const CarAdvertEditPage = () => {
                   <div className="price-display">
                     <span className="currency">£</span>
                     <span className="price-value">
-                      {advertData.price && advertData.price > 0
-                        ? (typeof advertData.price === 'number' ? advertData.price.toLocaleString() : advertData.price)
-                        : (vehicleData?.estimatedValue && vehicleData.estimatedValue > 0
-                            ? vehicleData.estimatedValue.toLocaleString() 
-                            : 'Not set')
-                      }
+                      {(() => {
+                        // Debug logging
+                        console.log('🔍 DEBUG: advertData.price =', advertData.price, 'type:', typeof advertData.price);
+                        console.log('🔍 DEBUG: vehicleData?.estimatedValue =', vehicleData?.estimatedValue);
+                        console.log('🔍 DEBUG: vehicleData?.allValuations =', vehicleData?.allValuations);
+                        console.log('🔍 DEBUG: vehicleData?.valuation =', vehicleData?.valuation);
+                        
+                        // Try multiple sources for the price
+                        let displayPrice = null;
+                        
+                        // 1. Try advertData.price (should be set from backend)
+                        if (advertData.price && (typeof advertData.price === 'number' ? advertData.price > 0 : parseFloat(advertData.price) > 0)) {
+                          displayPrice = typeof advertData.price === 'number' ? advertData.price : parseFloat(advertData.price);
+                        }
+                        // 2. Try vehicleData.valuation.estimatedValue.private
+                        else if (vehicleData?.valuation?.estimatedValue?.private && vehicleData.valuation.estimatedValue.private > 0) {
+                          displayPrice = vehicleData.valuation.estimatedValue.private;
+                        }
+                        // 3. Try vehicleData.valuation.estimatedValue.retail
+                        else if (vehicleData?.valuation?.estimatedValue?.retail && vehicleData.valuation.estimatedValue.retail > 0) {
+                          displayPrice = vehicleData.valuation.estimatedValue.retail;
+                        }
+                        // 4. Try vehicleData.valuation.privatePrice
+                        else if (vehicleData?.valuation?.privatePrice && vehicleData.valuation.privatePrice > 0) {
+                          displayPrice = vehicleData.valuation.privatePrice;
+                        }
+                        // 5. Try vehicleData.allValuations.private
+                        else if (vehicleData?.allValuations?.private && vehicleData.allValuations.private > 0) {
+                          displayPrice = vehicleData.allValuations.private;
+                        }
+                        // 6. Try vehicleData.estimatedValue
+                        else if (vehicleData?.estimatedValue && vehicleData.estimatedValue > 0) {
+                          displayPrice = vehicleData.estimatedValue;
+                        }
+                        // 7. Try vehicleData.price (database price)
+                        else if (vehicleData?.price && vehicleData.price > 0) {
+                          displayPrice = vehicleData.price;
+                        }
+                        
+                        console.log('🔍 DEBUG: Final displayPrice =', displayPrice);
+                        
+                        if (displayPrice && displayPrice > 0) {
+                          return displayPrice.toLocaleString();
+                        } else {
+                          return 'Not set';
+                        }
+                      })()}
                     </span>
                     <button type="button" onClick={handlePriceEdit} className="edit-price-button">
                       Edit price

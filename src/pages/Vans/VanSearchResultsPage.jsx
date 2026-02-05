@@ -483,8 +483,8 @@ function VanSearchResultsPage() {
                   <div className="car-location">
                     <span className="location-icon">📍</span>
                     <span>
-                      {extractTownName(van.locationName) || van.postcode?.split(' ')[0] || 'Location'}
-                      {van.distance > 0 && ` (${(van.distance || 0).toFixed(0)} miles)`}
+                      {extractTownName(van.locationName) || 'Location not available'}
+                      {van.distance > 0 && ` • ${(van.distance || 0).toFixed(0)} miles away`}
                     </span>
                   </div>
                 </div>

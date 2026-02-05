@@ -472,8 +472,8 @@ function BikeSearchResultsPage() {
                   <div className="car-location">
                     <span className="location-icon">📍</span>
                     <span>
-                      {extractTownName(bike.locationName) || bike.postcode?.split(' ')[0] || 'Location'}
-                      {bike.distance > 0 && ` (${(bike.distance || 0).toFixed(0)} miles)`}
+                      {extractTownName(bike.locationName) || 'Location not available'}
+                      {bike.distance > 0 && ` • ${(bike.distance || 0).toFixed(0)} miles away`}
                     </span>
                   </div>
                 </div>

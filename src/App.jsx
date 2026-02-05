@@ -36,6 +36,7 @@ import ContactPage from './pages/ContactPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import AboutPage from './pages/AboutPage'
+import ElectricVehicleDemo from './pages/ElectricVehicleDemo'
 
 // Terms and Conditions Pages
 import AdvertisingTermsPage from './pages/TermsAndConditions/AdvertisingTermsPage'
@@ -135,6 +136,7 @@ function App() {
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/electric-vehicle-demo" element={<ElectricVehicleDemo />} />
               
               {/* Terms and Conditions Routes */}
               <Route path="/terms-and-conditions/advertising" element={<AdvertisingTermsPage />} />

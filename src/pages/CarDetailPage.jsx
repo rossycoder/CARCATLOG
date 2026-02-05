@@ -5,6 +5,8 @@ import { vehicleSchema, breadcrumbSchema } from '../utils/seoSchemas';
 import VehicleHistorySection from '../components/VehicleHistory/VehicleHistorySection';
 import MOTHistorySection from '../components/VehicleHistory/MOTHistorySection';
 import LocationDisplay from '../components/Location/LocationDisplay';
+import ElectricVehicleCharging from '../components/ElectricVehicleCharging';
+import ElectricVehicleRunningCosts from '../components/ElectricVehicleRunningCosts';
 import { generateVariantDisplay, extractTownName } from '../utils/vehicleFormatter';
 import './CarDetailPage.css';
 
@@ -83,6 +85,69 @@ const CarDetailPage = () => {
 
   const formatMileage = (mileage) => {
     return new Intl.NumberFormat('en-GB').format(mileage);
+  };
+
+  // Generate comprehensive title for ALL vehicles (AutoTrader style)
+  // Examples:
+  // Electric: "M50 83.9kWh Gran Coupe Auto AWD 5dr"
+  // Petrol/Diesel: "2.2 i-DTEC ES GT Tourer Euro 5 5dr"
+  const generateComprehensiveVehicleTitle = (car) => {
+    const parts = [];
+    
+    // For NON-ELECTRIC vehicles: Add engine size first
+    if (car.fuelType !== 'Electric' && car.engineSize) {
+      const size = parseFloat(car.engineSize);
+      if (!isNaN(size) && size > 0) {
+        parts.push(size.toFixed(1));
+      }
+    }
+    
+    // Add variant if available (contains fuel type + trim like "i-DTEC ES GT" or "M50")
+    if (car.variant && car.variant !== 'null' && car.variant !== 'undefined') {
+      parts.push(car.variant);
+    }
+    
+    // For ELECTRIC vehicles: Add battery capacity
+    if (car.fuelType === 'Electric') {
+      const batteryCapacity = car.batteryCapacity || car.runningCosts?.batteryCapacity;
+      if (batteryCapacity) {
+        parts.push(`${batteryCapacity}kWh`);
+      }
+    }
+    
+    // Add body type (Gran Coupe, Tourer, Estate, etc.)
+    if (car.bodyType && car.bodyType !== 'null' && car.bodyType !== 'undefined') {
+      parts.push(car.bodyType);
+    }
+    
+    // Add transmission (Auto/Manual)
+    if (car.transmission) {
+      const trans = car.transmission.toLowerCase();
+      if (trans === 'automatic' || trans === 'auto') {
+        parts.push('Auto');
+      } else if (trans === 'manual') {
+        parts.push('Manual');
+      } else {
+        parts.push(car.transmission);
+      }
+    }
+    
+    // Add emission class (Euro 5, Euro 6, etc.) - for non-electric vehicles
+    if (car.fuelType !== 'Electric' && car.emissionClass && car.emissionClass.includes('Euro')) {
+      parts.push(car.emissionClass);
+    }
+    
+    // Add drive type if available (AWD, FWD, RWD, 4WD)
+    if (car.driveType) {
+      parts.push(car.driveType);
+    }
+    
+    // Add doors (5dr, 3dr, etc.)
+    if (car.doors) {
+      parts.push(`${car.doors}dr`);
+    }
+    
+    return parts.length > 0 ? parts.join(' ') : null;
   };
 
   if (isLoading) {
@@ -257,7 +322,7 @@ const CarDetailPage = () => {
                 {car.make} {car.model}
               </h1>
               <h2 className="car-variant-line">
-                {car.displayTitle || generateVariantDisplay(car)}
+                {generateComprehensiveVehicleTitle(car) || car.displayTitle || generateVariantDisplay(car)}
               </h2>
               <div className="price-tag">
                 {formatPrice(car.price)}
@@ -300,17 +365,24 @@ const CarDetailPage = () => {
                     <span className="spec-value">{car.bodyType ? car.bodyType.charAt(0).toUpperCase() + car.bodyType.slice(1).toLowerCase() : 'Hatchback'}</span>
                   </div>
                 </div>
-
+                {/* Engine size for NON-ELECTRIC cars, Range for ELECTRIC cars */}
                 <div className="spec-item">
-                  <span className="spec-icon">🔧</span>
+                  <span className="spec-icon">{car.fuelType === 'Electric' ? '🔋' : '🔧'}</span>
                   <div className="spec-details">
-                    <span className="spec-label">Engine size</span>
+                    <span className="spec-label">
+                      {car.fuelType === 'Electric' ? 'Electric Range' : 'Engine size'}
+                    </span>
                     <span className="spec-value">
-                      {car.engineSize 
-                        ? (car.engineSize.toString().includes('L') 
-                            ? car.engineSize 
-                            : `${car.engineSize}L`)
-                        : 'N/A'}
+                      {car.fuelType === 'Electric' 
+                        ? (car.electricRange || car.runningCosts?.electricRange 
+                            ? `${car.electricRange || car.runningCosts?.electricRange} miles` 
+                            : 'N/A')
+                        : (car.engineSize 
+                            ? (car.engineSize.toString().includes('L') 
+                                ? car.engineSize 
+                                : `${car.engineSize}L`)
+                            : 'N/A')
+                      }
                     </span>
                   </div>
                 </div>
@@ -354,7 +426,11 @@ const CarDetailPage = () => {
                   <span className="spec-icon">🎨</span>
                   <div className="spec-details">
                     <span className="spec-label">Body colour</span>
-                    <span className="spec-value">{car.color}</span>
+                    <span className="spec-value">
+                      {car.color && car.color !== 'Not specified' && car.color !== 'null' && car.color !== 'undefined' && car.color.trim() !== ''
+                        ? car.color 
+                        : 'Not specified'}
+                    </span>
                   </div>
                 </div>
 
@@ -431,73 +507,134 @@ const CarDetailPage = () => {
               </div>
             )}
 
-            {/* Running Costs Section */}
-            {car.runningCosts && (car.runningCosts.fuelEconomy?.combined || car.runningCosts.co2Emissions || car.runningCosts.insuranceGroup || car.runningCosts.annualTax) && (
-              <div className="running-costs-section">
-                <h2>Running Costs</h2>
-                <div className="running-costs-grid">
-                  {car.runningCosts.fuelEconomy?.combined && (
-                    <div className="cost-item">
-                      <span className="cost-icon">⛽</span>
-                      <div className="cost-details">
-                        <span className="cost-label">Fuel Economy (Combined)</span>
-                        <span className="cost-value">{car.runningCosts.fuelEconomy.combined} mpg</span>
+            {/* Running Costs Section - For ALL cars (Electric and Non-Electric) */}
+            {car.runningCosts && (
+              <div className="running-costs-section-new">
+                <h2>Running costs</h2>
+                <div className="running-costs-horizontal">
+                  <div className="running-cost-item">
+                    <div className="cost-icon-wrapper">
+                      <svg className="cost-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                      </svg>
+                    </div>
+                    <div className="cost-content">
+                      <div className="cost-label">CO₂ emissions</div>
+                      <div className="cost-value">
+                        {car.fuelType === 'Electric' ? '0g/km' : (car.runningCosts?.co2Emissions ? `${car.runningCosts.co2Emissions}g/km` : 'N/A')}
                       </div>
                     </div>
-                  )}
+                  </div>
 
-                  {car.runningCosts.fuelEconomy?.urban && (
-                    <div className="cost-item">
-                      <span className="cost-icon">🏙️</span>
-                      <div className="cost-details">
-                        <span className="cost-label">Fuel Economy (Urban)</span>
-                        <span className="cost-value">{car.runningCosts.fuelEconomy.urban} mpg</span>
-                      </div>
+                  <div className="running-cost-item">
+                    <div className="cost-icon-wrapper">
+                      <svg className="cost-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      </svg>
                     </div>
-                  )}
+                    <div className="cost-content">
+                      <div className="cost-label">Insurance group</div>
+                      <div className="cost-value">{(car.runningCosts?.insuranceGroup || car.insuranceGroup) || 'N/A'}</div>
+                    </div>
+                  </div>
 
-                  {car.runningCosts.fuelEconomy?.extraUrban && (
-                    <div className="cost-item">
-                      <span className="cost-icon">🛣️</span>
-                      <div className="cost-details">
-                        <span className="cost-label">Fuel Economy (Extra Urban)</span>
-                        <span className="cost-value">{car.runningCosts.fuelEconomy.extraUrban} mpg</span>
+                  <div className="running-cost-item">
+                    <div className="cost-icon-wrapper">
+                      <svg className="cost-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M16 8l-4 4-4-4"/>
+                      </svg>
+                    </div>
+                    <div className="cost-content">
+                      <div className="cost-label">Tax per year</div>
+                      <div className="cost-value">
+                        {(car.runningCosts?.annualTax || car.annualTax) ? formatPrice(car.runningCosts?.annualTax || car.annualTax) : 'N/A'}
                       </div>
                     </div>
-                  )}
-
-                  {car.runningCosts.co2Emissions && (
-                    <div className="cost-item">
-                      <span className="cost-icon">🌱</span>
-                      <div className="cost-details">
-                        <span className="cost-label">CO2 Emissions</span>
-                        <span className="cost-value">{car.runningCosts.co2Emissions}g/km</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {car.runningCosts.insuranceGroup && (
-                    <div className="cost-item">
-                      <span className="cost-icon">🛡️</span>
-                      <div className="cost-details">
-                        <span className="cost-label">Insurance Group</span>
-                        <span className="cost-value">{car.runningCosts.insuranceGroup}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {car.runningCosts.annualTax && (
-                    <div className="cost-item">
-                      <span className="cost-icon">💷</span>
-                      <div className="cost-details">
-                        <span className="cost-label">Annual Tax</span>
-                        <span className="cost-value">{formatPrice(car.runningCosts.annualTax)}</span>
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
+
+                {car.fuelType !== 'Electric' && car.runningCosts?.fuelEconomy && (car.runningCosts.fuelEconomy.combined || car.runningCosts.fuelEconomy.urban || car.runningCosts.fuelEconomy.extraUrban) && (
+                  <div className="additional-running-costs">
+                    <div className="fuel-economy-grid">
+                      {car.runningCosts.fuelEconomy.combined && (
+                        <div className="fuel-economy-item">
+                          <span className="fuel-icon">⛽</span>
+                          <div className="fuel-details">
+                            <span className="fuel-label">Combined MPG</span>
+                            <span className="fuel-value">{car.runningCosts.fuelEconomy.combined} mpg</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {car.runningCosts.fuelEconomy.urban && (
+                        <div className="fuel-economy-item">
+                          <span className="fuel-icon">🏙️</span>
+                          <div className="fuel-details">
+                            <span className="fuel-label">Urban MPG</span>
+                            <span className="fuel-value">{car.runningCosts.fuelEconomy.urban} mpg</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {car.runningCosts.fuelEconomy.extraUrban && (
+                        <div className="fuel-economy-item">
+                          <span className="fuel-icon">🛣️</span>
+                          <div className="fuel-details">
+                            <span className="fuel-label">Extra Urban MPG</span>
+                            <span className="fuel-value">{car.runningCosts.fuelEconomy.extraUrban} mpg</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {car.fuelType === 'Electric' && (car.runningCosts?.electricRange || car.runningCosts?.batteryCapacity || car.runningCosts?.chargingTime || car.electricRange || car.batteryCapacity || car.chargingTime) && (
+                  <div className="additional-running-costs">
+                    <div className="fuel-economy-grid">
+                      {(car.runningCosts?.electricRange || car.electricRange) && (
+                        <div className="fuel-economy-item">
+                          <span className="fuel-icon">🔋</span>
+                          <div className="fuel-details">
+                            <span className="fuel-label">Electric Range</span>
+                            <span className="fuel-value">{car.runningCosts?.electricRange || car.electricRange} miles</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {(car.runningCosts?.batteryCapacity || car.batteryCapacity) && (
+                        <div className="fuel-economy-item">
+                          <span className="fuel-icon">🔋</span>
+                          <div className="fuel-details">
+                            <span className="fuel-label">Battery Capacity</span>
+                            <span className="fuel-value">{car.runningCosts?.batteryCapacity || car.batteryCapacity} kWh</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {(car.runningCosts?.chargingTime || car.chargingTime) && (
+                        <div className="fuel-economy-item">
+                          <span className="fuel-icon">⚡</span>
+                          <div className="fuel-details">
+                            <span className="fuel-label">Charging Time</span>
+                            <span className="fuel-value">{car.runningCosts?.chargingTime || car.chargingTime} hours</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
+
+            {/* Electric Vehicle Charging Information - Only for Electric Cars */}
+            <ElectricVehicleCharging vehicle={car} />
+
+            {/* Electric Vehicle Running Costs - Only for Electric Cars */}
+            <ElectricVehicleRunningCosts vehicle={car} />
 
             {/* Vehicle Features Section */}
             {showAllFeatures && car.features && car.features.length > 0 && (
