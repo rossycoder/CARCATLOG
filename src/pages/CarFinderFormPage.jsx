@@ -684,6 +684,22 @@ const CarFinderFormPage = () => {
                 </div>
               )}
 
+              {vehicleDetails.seats && (
+                <div className="detail-item">
+                  <label className="detail-label">Seats</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="detail-input"
+                      value={vehicleDetails.seats}
+                      onChange={(e) => setVehicleDetails({...vehicleDetails, seats: e.target.value})}
+                    />
+                  ) : (
+                    <p className="detail-value">{vehicleDetails.seats}</p>
+                  )}
+                </div>
+              )}
+
               {vehicleDetails.bodyType && (
                 <div className="detail-item">
                   <label className="detail-label">Body Type</label>

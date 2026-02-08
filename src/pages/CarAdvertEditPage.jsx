@@ -1428,7 +1428,7 @@ const CarAdvertEditPage = () => {
               <div className="spec-item">
                 <label>Emission Class</label>
                 <span>
-                  {enhancedData?.emissionClass || vehicleData.emissionClass || 'N/A'}
+                  {enhancedData?.emissionClass || vehicleData.emissionClass || '-'}
                 </span>
               </div>
             </div>
