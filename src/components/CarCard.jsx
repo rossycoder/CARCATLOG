@@ -130,70 +130,65 @@ const CarCard = ({ car }) => {
           {car.displayTitle || (() => {
             const parts = [];
             
-            // For electric vehicles, show range instead of engine size
-            if (car.fuelType === 'Electric') {
-              if (car.electricRange || car.runningCosts?.electricRange) {
-                const range = car.electricRange || car.runningCosts?.electricRange;
-                parts.push(`${range} miles range`);
-              }
-            } else {
-              // Add engine size for non-electric vehicles
-              if (car.engineSize) {
-                parts.push(`${car.engineSize}L`);
+            // For NON-ELECTRIC vehicles: Add engine size first
+            if (car.fuelType !== 'Electric' && car.engineSize) {
+              const size = parseFloat(car.engineSize);
+              if (!isNaN(size) && size > 0) {
+                parts.push(size.toFixed(1));
               }
             }
             
-            // Add variant if available and meaningful
+            // Add variant if available (contains trim + fuel type like "i-VTEC Type S GT" or "TDI S")
             if (car.variant && 
-                car.variant !== car.fuelType && 
                 car.variant !== 'null' && 
-                car.variant !== 'undefined') {
+                car.variant !== 'undefined' && 
+                car.variant.trim() !== '') {
               parts.push(car.variant);
             } else if (car.submodel && 
-                       car.submodel !== car.fuelType && 
                        car.submodel !== 'null' && 
-                       car.submodel !== 'undefined') {
+                       car.submodel !== 'undefined' && 
+                       car.submodel.trim() !== '') {
               parts.push(car.submodel);
             }
             
-            // Add fuel type only if not obvious from variant or context
-            const shouldShowFuelType = car.fuelType && (() => {
-              const fuelType = car.fuelType.toLowerCase();
-              const variant = (car.variant || car.submodel || '').toLowerCase();
-              
-              // Don't show fuel type if it's already implied by variant
-              if (variant.includes('tdi') || variant.includes('diesel')) return false;
-              if (variant.includes('tsi') || variant.includes('gti') || variant.includes('petrol')) return false;
-              if (variant.includes('electric') || fuelType === 'electric') return false;
-              if (variant.includes('hybrid')) return false;
-              
-              // BMW diesel models (320d, 520d, etc.) - 'd' suffix indicates diesel
-              if (fuelType === 'diesel' && variant.match(/\d+d\b/i)) return false;
-              
-              // BMW petrol models (320i, 520i, etc.) - 'i' suffix indicates petrol
-              if (fuelType === 'petrol' && variant.match(/\d+i\b/i)) return false;
-              
-              // For BMW electric models (i3, i4, iX, etc.), don't show "Electric"
-              if (fuelType === 'electric' && (
-                car.make === 'BMW' && (
-                  car.model?.toLowerCase().startsWith('i') ||
-                  variant.match(/^(m\d+|i\d+)$/i)
-                )
-              )) return false;
-              
-              return true;
-            })();
-            
-            if (shouldShowFuelType) {
-              parts.push(car.fuelType);
+            // For ELECTRIC vehicles: Add range
+            if (car.fuelType === 'Electric') {
+              const range = car.electricRange || car.runningCosts?.electricRange;
+              if (range) {
+                parts.push(`${range} miles`);
+              }
             }
             
-            // Add doors
+            // Add body type if not already in variant
+            if (car.bodyType && car.bodyType !== 'null' && car.bodyType !== 'undefined') {
+              const bodyTypeInVariant = car.variant && 
+                car.variant.toUpperCase().includes(car.bodyType.toUpperCase());
+              
+              if (!bodyTypeInVariant) {
+                // Map body types to short form
+                const bodyType = car.bodyType.toLowerCase();
+                if (bodyType.includes('hatchback')) {
+                  // Don't add "Hatchback" - doors will show it
+                } else if (bodyType.includes('saloon') || bodyType.includes('sedan')) {
+                  parts.push('Saloon');
+                } else if (bodyType.includes('estate')) {
+                  parts.push('Estate');
+                } else if (bodyType.includes('coupe')) {
+                  parts.push('Coupe');
+                } else if (bodyType.includes('convertible') || bodyType.includes('cabriolet')) {
+                  parts.push('Convertible');
+                } else if (bodyType.includes('suv')) {
+                  parts.push('SUV');
+                }
+              }
+            }
+            
+            // Add doors (3dr, 5dr, etc.)
             if (car.doors) {
               parts.push(`${car.doors}dr`);
             }
             
-            return parts.filter(Boolean).join(' | ');
+            return parts.filter(Boolean).join(' ');
           })()}
         </p>
         

@@ -39,6 +39,7 @@ const CarAdvertEditPage = () => {
     contactEmail: '',
     location: '',
     features: [],
+    serviceHistory: 'Contact seller', // Default service history
     runningCosts: {
       fuelEconomy: { urban: '', extraUrban: '', combined: '' },
       annualTax: '',
@@ -525,6 +526,24 @@ const CarAdvertEditPage = () => {
           contactEmail: response.data.advertData?.contactEmail || user?.email || '',
           location: response.data.advertData?.location?.postcode || response.data.advertData?.location || '',
           features: response.data.advertData?.features || [],
+          serviceHistory: (() => {
+            // Check if serviceHistory is already set in advertData or vehicleData
+            if (response.data.advertData?.serviceHistory) {
+              return response.data.advertData.serviceHistory;
+            }
+            if (response.data.vehicleData?.serviceHistory) {
+              return response.data.vehicleData.serviceHistory;
+            }
+            // Check features for service history checkboxes
+            const features = response.data.advertData?.features || [];
+            if (features.includes('Full service history')) {
+              return 'Full service history';
+            }
+            if (features.includes('Partial service history')) {
+              return 'Partial service history';
+            }
+            return 'Contact seller';
+          })(),
           runningCosts: response.data.advertData?.runningCosts || {
             fuelEconomy: { 
               urban: String(response.data.vehicleData?.runningCosts?.fuelEconomy?.urban || response.data.vehicleData?.fuelEconomyUrban || ''), 
@@ -720,9 +739,46 @@ const CarAdvertEditPage = () => {
       ? advertData.features.filter(f => f !== feature)
       : [...advertData.features, feature];
     
+    // Determine service history based on feature selection
+    let serviceHistory = 'Contact seller'; // Default
+    
+    // Check if user is toggling service history features
+    if (feature === 'Full service history' || feature === 'Partial service history') {
+      // If adding Full service history
+      if (feature === 'Full service history' && !advertData.features.includes(feature)) {
+        serviceHistory = 'Full service history';
+        // Remove Partial service history if it exists
+        const index = newFeatures.indexOf('Partial service history');
+        if (index > -1) {
+          newFeatures.splice(index, 1);
+        }
+      }
+      // If adding Partial service history
+      else if (feature === 'Partial service history' && !advertData.features.includes(feature)) {
+        serviceHistory = 'Partial service history';
+        // Remove Full service history if it exists
+        const index = newFeatures.indexOf('Full service history');
+        if (index > -1) {
+          newFeatures.splice(index, 1);
+        }
+      }
+      // If removing either, set to Contact seller
+      else {
+        serviceHistory = 'Contact seller';
+      }
+    } else {
+      // For other features, maintain current service history
+      if (newFeatures.includes('Full service history')) {
+        serviceHistory = 'Full service history';
+      } else if (newFeatures.includes('Partial service history')) {
+        serviceHistory = 'Partial service history';
+      }
+    }
+    
     setAdvertData(prev => ({
       ...prev,
-      features: newFeatures
+      features: newFeatures,
+      serviceHistory: serviceHistory
     }));
     
     // Debounce the save operation to prevent concurrent updates
@@ -730,14 +786,17 @@ const CarAdvertEditPage = () => {
     
     const timeout = setTimeout(async () => {
       try {
-        console.log('🔧 Saving features (debounced):', { features: newFeatures });
+        console.log('🔧 Saving features (debounced):', { features: newFeatures, serviceHistory });
         console.log('🔧 Advert ID:', advertId);
         
-        // Only send the features that changed, not all advertData
-        const updateData = { features: newFeatures };
+        // Send both features and serviceHistory
+        const updateData = { 
+          features: newFeatures,
+          serviceHistory: serviceHistory
+        };
         
         await advertService.updateAdvert(advertId, updateData, vehicleData);
-        console.log('Features saved successfully');
+        console.log('Features and service history saved successfully');
       } catch (error) {
         console.error('Error saving features:', error);
         console.error('Error details:', error.response?.data);

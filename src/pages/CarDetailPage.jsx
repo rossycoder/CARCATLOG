@@ -102,24 +102,16 @@ const CarDetailPage = () => {
         // Check if variant already contains engine size info (common for vans like "35 L2H2")
         const variantHasEngineInfo = car.variant && /^\d+/.test(car.variant);
         if (!variantHasEngineInfo) {
-          parts.push(size.toFixed(1));
+          // If engine size is > 100, it's in CC, convert to litres
+          const sizeInLitres = size > 100 ? size / 1000 : size;
+          parts.push(sizeInLitres.toFixed(1));
         }
       }
     }
     
-    // Add variant if available (contains fuel type + trim like "i-DTEC ES GT" or "M50" or "35 L2H2 PRIME PV")
+    // Add variant if available (contains fuel type + trim like "i-DTEC ES GT" or "M50" or "35 L2H2 PRIME PV PANEL VAN")
     if (car.variant && car.variant !== 'null' && car.variant !== 'undefined' && car.variant.trim() !== '') {
-      // Clean up variant - remove redundant body type if it's already in bodyType field
-      let cleanVariant = car.variant.trim();
-      if (car.bodyType && cleanVariant.toUpperCase().includes(car.bodyType.toUpperCase())) {
-        // Don't remove body type from variant for vans - it's part of the model designation
-        if (!car.bodyType.toUpperCase().includes('VAN')) {
-          cleanVariant = cleanVariant.replace(new RegExp(car.bodyType, 'gi'), '').trim();
-        }
-      }
-      if (cleanVariant) {
-        parts.push(cleanVariant);
-      }
+      parts.push(car.variant.trim());
     }
     
     // For ELECTRIC vehicles: Add battery capacity
@@ -130,10 +122,12 @@ const CarDetailPage = () => {
       }
     }
     
-    // Add body type (Gran Coupe, Tourer, Estate, Panel Van, etc.)
-    // Skip if body type is already in variant (common for vans)
+    // Add body type ONLY if it's NOT already in the variant
+    // For vans, "PANEL VAN" is often part of the variant, so don't duplicate
     if (car.bodyType && car.bodyType !== 'null' && car.bodyType !== 'undefined') {
-      const bodyTypeInVariant = car.variant && car.variant.toUpperCase().includes(car.bodyType.toUpperCase());
+      const bodyTypeInVariant = car.variant && 
+        car.variant.toUpperCase().includes(car.bodyType.toUpperCase());
+      
       if (!bodyTypeInVariant) {
         parts.push(car.bodyType);
       }
