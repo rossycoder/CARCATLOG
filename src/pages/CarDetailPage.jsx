@@ -91,20 +91,35 @@ const CarDetailPage = () => {
   // Examples:
   // Electric: "M50 83.9kWh Gran Coupe Auto AWD 5dr"
   // Petrol/Diesel: "2.2 i-DTEC ES GT Tourer Euro 5 5dr"
+  // Van: "35 L2H2 PRIME PV PANEL VAN Manual 5dr"
   const generateComprehensiveVehicleTitle = (car) => {
     const parts = [];
     
-    // For NON-ELECTRIC vehicles: Add engine size first
+    // For NON-ELECTRIC vehicles: Add engine size first (but not for vans if variant already contains it)
     if (car.fuelType !== 'Electric' && car.engineSize) {
       const size = parseFloat(car.engineSize);
       if (!isNaN(size) && size > 0) {
-        parts.push(size.toFixed(1));
+        // Check if variant already contains engine size info (common for vans like "35 L2H2")
+        const variantHasEngineInfo = car.variant && /^\d+/.test(car.variant);
+        if (!variantHasEngineInfo) {
+          parts.push(size.toFixed(1));
+        }
       }
     }
     
-    // Add variant if available (contains fuel type + trim like "i-DTEC ES GT" or "M50")
-    if (car.variant && car.variant !== 'null' && car.variant !== 'undefined') {
-      parts.push(car.variant);
+    // Add variant if available (contains fuel type + trim like "i-DTEC ES GT" or "M50" or "35 L2H2 PRIME PV")
+    if (car.variant && car.variant !== 'null' && car.variant !== 'undefined' && car.variant.trim() !== '') {
+      // Clean up variant - remove redundant body type if it's already in bodyType field
+      let cleanVariant = car.variant.trim();
+      if (car.bodyType && cleanVariant.toUpperCase().includes(car.bodyType.toUpperCase())) {
+        // Don't remove body type from variant for vans - it's part of the model designation
+        if (!car.bodyType.toUpperCase().includes('VAN')) {
+          cleanVariant = cleanVariant.replace(new RegExp(car.bodyType, 'gi'), '').trim();
+        }
+      }
+      if (cleanVariant) {
+        parts.push(cleanVariant);
+      }
     }
     
     // For ELECTRIC vehicles: Add battery capacity
@@ -115,9 +130,13 @@ const CarDetailPage = () => {
       }
     }
     
-    // Add body type (Gran Coupe, Tourer, Estate, etc.)
+    // Add body type (Gran Coupe, Tourer, Estate, Panel Van, etc.)
+    // Skip if body type is already in variant (common for vans)
     if (car.bodyType && car.bodyType !== 'null' && car.bodyType !== 'undefined') {
-      parts.push(car.bodyType);
+      const bodyTypeInVariant = car.variant && car.variant.toUpperCase().includes(car.bodyType.toUpperCase());
+      if (!bodyTypeInVariant) {
+        parts.push(car.bodyType);
+      }
     }
     
     // Add transmission (Auto/Manual)

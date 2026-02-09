@@ -283,7 +283,17 @@ const MOTHistorySection = ({ vrm, carData }) => {
         </div>
       ) : (
         <div className="no-mot-history">
-          <p>No MOT history available for this vehicle.</p>
+          {motHistory.currentStatus === 'Valid' && motHistory.expiryDate ? (
+            <>
+              <p>No MOT history available for this vehicle.</p>
+              <p className="mot-info-text">
+                This vehicle is too new to have MOT history. New vehicles don't require an MOT until they are 3 years old.
+                The first MOT will be due on {formatDate(motHistory.expiryDate)}.
+              </p>
+            </>
+          ) : (
+            <p>No MOT history available for this vehicle.</p>
+          )}
         </div>
       )}
 
