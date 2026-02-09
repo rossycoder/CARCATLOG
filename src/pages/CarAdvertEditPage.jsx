@@ -1141,53 +1141,40 @@ const CarAdvertEditPage = () => {
               {(() => {
                 const parts = [];
                 
-                // Add engine size for non-electric vehicles
-                if (vehicleData.engineSize && vehicleData.fuelType !== 'Electric') {
-                  parts.push(`${parseFloat(vehicleData.engineSize).toFixed(1)}L`);
+                // Use displayTitle if available (AutoTrader format: "3.0 530d xDrive M Sport 5dr")
+                if (vehicleData.displayTitle && 
+                    vehicleData.displayTitle !== 'null' && 
+                    vehicleData.displayTitle !== 'undefined') {
+                  parts.push(vehicleData.displayTitle);
+                } else {
+                  // Fallback: construct from individual fields
+                  // Add engine size for non-electric vehicles
+                  if (vehicleData.engineSize && vehicleData.fuelType !== 'Electric') {
+                    parts.push(`${parseFloat(vehicleData.engineSize).toFixed(1)}L`);
+                  }
+                  
+                  // Add variant if available and meaningful
+                  if (vehicleData.variant && 
+                      vehicleData.variant !== 'null' && 
+                      vehicleData.variant !== 'undefined' && 
+                      vehicleData.variant !== vehicleData.fuelType) {
+                    parts.push(vehicleData.variant);
+                  }
                 }
                 
-                // Add variant if available and meaningful
-                if (vehicleData.variant && 
-                    vehicleData.variant !== 'null' && 
-                    vehicleData.variant !== 'undefined' && 
-                    vehicleData.variant !== vehicleData.fuelType) {
-                  parts.push(vehicleData.variant);
-                }
+                // Add transmission ONLY if not already in displayTitle/variant
+                const displayTitleLower = (vehicleData.displayTitle || '').toLowerCase();
+                const variantLower = (vehicleData.variant || '').toLowerCase();
+                const transmissionInTitle = displayTitleLower.includes('auto') || 
+                                           displayTitleLower.includes('manual') ||
+                                           displayTitleLower.includes('cvt') ||
+                                           displayTitleLower.includes('dsg') ||
+                                           variantLower.includes('auto') ||
+                                           variantLower.includes('manual') ||
+                                           variantLower.includes('cvt') ||
+                                           variantLower.includes('dsg');
                 
-                // Add fuel type only if not obvious from variant or context
-                const shouldShowFuelType = vehicleData.fuelType && (() => {
-                  const fuelType = vehicleData.fuelType.toLowerCase();
-                  const variant = (vehicleData.variant || '').toLowerCase();
-                  
-                  // Don't show fuel type if it's already implied by variant
-                  if (variant.includes('tdi') || variant.includes('diesel')) return false;
-                  if (variant.includes('tsi') || variant.includes('gti') || variant.includes('petrol')) return false;
-                  if (variant.includes('electric') || fuelType === 'electric') return false;
-                  if (variant.includes('hybrid')) return false;
-                  
-                  // BMW diesel models (320d, 520d, etc.) - 'd' suffix indicates diesel
-                  if (fuelType === 'diesel' && variant.match(/\d+d\b/i)) return false;
-                  
-                  // BMW petrol models (320i, 520i, etc.) - 'i' suffix indicates petrol
-                  if (fuelType === 'petrol' && variant.match(/\d+i\b/i)) return false;
-                  
-                  // For BMW electric models (i3, i4, iX, etc.), don't show "Electric"
-                  if (fuelType === 'electric' && (
-                    vehicleData.make === 'BMW' && (
-                      vehicleData.model?.toLowerCase().startsWith('i') ||
-                      variant.match(/^(m\d+|i\d+)$/i)
-                    )
-                  )) return false;
-                  
-                  return true;
-                })();
-                
-                if (shouldShowFuelType) {
-                  parts.push(vehicleData.fuelType);
-                }
-                
-                // Add transmission
-                if (vehicleData.transmission) {
+                if (vehicleData.transmission && !transmissionInTitle) {
                   const transmission = vehicleData.transmission.charAt(0).toUpperCase() + vehicleData.transmission.slice(1);
                   parts.push(transmission);
                 }
@@ -1365,8 +1352,11 @@ const CarAdvertEditPage = () => {
                         if (!isNaN(date.getTime())) {
                           return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
                         }
+                      } else if (typeof dateStr === 'object' && dateStr !== null) {
+                        // Handle wrapped object format {value: 'date'}
+                        return 'Contact seller for MOT details';
                       }
-                      return dateStr;
+                      return 'Contact seller for MOT details';
                     } else if (vehicleData.motExpiry) {
                       const dateValue = vehicleData.motExpiry;
                       if (typeof dateValue === 'string' || dateValue instanceof Date || !isNaN(Date.parse(dateValue))) {
@@ -1374,8 +1364,11 @@ const CarAdvertEditPage = () => {
                         if (!isNaN(date.getTime())) {
                           return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
                         }
+                      } else if (typeof dateValue === 'object' && dateValue !== null) {
+                        // Handle wrapped object format {value: 'date'}
+                        return 'Contact seller for MOT details';
                       }
-                      return dateValue;
+                      return 'Contact seller for MOT details';
                     } else if (vehicleData.motHistory && vehicleData.motHistory.length > 0) {
                       // BONUS TIP: Extract from motHistory array if motDue/motExpiry not set
                       const latestTest = vehicleData.motHistory[0];

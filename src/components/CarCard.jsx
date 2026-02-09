@@ -126,7 +126,8 @@ const CarCard = ({ car }) => {
       <div className="car-content">
         <h3 className="car-title">{car.make} {car.model}</h3>
         <p className="car-subtitle">
-          {(() => {
+          {/* Use displayTitle from backend (Autotrader format) if available */}
+          {car.displayTitle || (() => {
             const parts = [];
             
             // For electric vehicles, show range instead of engine size
