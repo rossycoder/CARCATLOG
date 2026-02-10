@@ -1209,7 +1209,17 @@ const CarAdvertEditPage = () => {
                   // Fallback: construct from individual fields
                   // Add engine size for non-electric vehicles
                   if (vehicleData.engineSize && vehicleData.fuelType !== 'Electric') {
-                    parts.push(`${parseFloat(vehicleData.engineSize).toFixed(1)}L`);
+                    const size = parseFloat(vehicleData.engineSize);
+                    // If size > 100, it's in CC, convert to litres
+                    const sizeInLitres = size > 100 ? size / 1000 : size;
+                    // Round to nearest 0.5 (2.947 -> 3.0, 2.494 -> 2.5, 1.596 -> 1.6)
+                    const rounded = Math.round(sizeInLitres * 2) / 2;
+                    parts.push(`${rounded.toFixed(1)}L`);
+                  }
+                  
+                  // Add fuel type for better search filtering (Petrol, Diesel, Hybrid)
+                  if (vehicleData.fuelType && vehicleData.fuelType !== 'Electric') {
+                    parts.push(vehicleData.fuelType);
                   }
                   
                   // Add variant if available and meaningful
@@ -1456,9 +1466,14 @@ const CarAdvertEditPage = () => {
                 <label>Engine</label>
                 <span>
                   {vehicleData.engineSize 
-                    ? (vehicleData.engineSize.toString().includes('L') 
-                        ? vehicleData.engineSize 
-                        : `${vehicleData.engineSize}L`)
+                    ? (() => {
+                        const size = parseFloat(vehicleData.engineSize);
+                        // If size > 100, it's in CC, convert to litres
+                        const sizeInLitres = size > 100 ? size / 1000 : size;
+                        // Round to nearest 0.5 (2.947 -> 3.0, 2.494 -> 2.5, 1.596 -> 1.6)
+                        const rounded = Math.round(sizeInLitres * 2) / 2;
+                        return `${rounded.toFixed(1)}L`;
+                      })()
                     : '4.4L'}
                 </span>
               </div>

@@ -104,10 +104,16 @@ const CarDetailPage = () => {
         if (!variantHasEngineInfo) {
           // If engine size is > 100, it's in CC, convert to litres
           const sizeInLitres = size > 100 ? size / 1000 : size;
-          // Round UP to 1 decimal place (2.494 -> 2.5, not 2.4)
-          parts.push(Math.ceil(sizeInLitres * 10) / 10);
+          // Round to nearest 0.5 (2.947 -> 3.0, 2.494 -> 2.5, 1.596 -> 1.6)
+          const rounded = Math.round(sizeInLitres * 2) / 2;
+          parts.push(rounded.toFixed(1));
         }
       }
+    }
+    
+    // Add fuel type for better search filtering (Petrol, Diesel, Hybrid)
+    if (car.fuelType && car.fuelType !== 'Electric') {
+      parts.push(car.fuelType);
     }
     
     // Add variant if available (contains fuel type + trim like "i-DTEC ES GT" or "M50" or "35 L2H2 PRIME PV PANEL VAN")
@@ -392,9 +398,14 @@ const CarDetailPage = () => {
                             ? `${car.electricRange || car.runningCosts?.electricRange} miles` 
                             : 'N/A')
                         : (car.engineSize 
-                            ? (car.engineSize.toString().includes('L') 
-                                ? car.engineSize 
-                                : `${car.engineSize}L`)
+                            ? (() => {
+                                const size = parseFloat(car.engineSize);
+                                // If size > 100, it's in CC, convert to litres
+                                const sizeInLitres = size > 100 ? size / 1000 : size;
+                                // Round to nearest 0.5 (2.947 -> 3.0, 2.494 -> 2.5, 1.596 -> 1.6)
+                                const rounded = Math.round(sizeInLitres * 2) / 2;
+                                return `${rounded.toFixed(1)}L`;
+                              })()
                             : 'N/A')
                       }
                     </span>
