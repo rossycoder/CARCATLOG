@@ -104,7 +104,8 @@ const CarDetailPage = () => {
         if (!variantHasEngineInfo) {
           // If engine size is > 100, it's in CC, convert to litres
           const sizeInLitres = size > 100 ? size / 1000 : size;
-          parts.push(sizeInLitres.toFixed(1));
+          // Round UP to 1 decimal place (2.494 -> 2.5, not 2.4)
+          parts.push(Math.ceil(sizeInLitres * 10) / 10);
         }
       }
     }

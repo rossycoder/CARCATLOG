@@ -280,7 +280,10 @@ const CarAdvertisingPricesPage = () => {
     let valuation = null;
     
     // Try valuation fields FIRST (these are the actual vehicle worth, not asking price)
-    if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
+    if (vehicleData?.valuation?.privatePrice && typeof vehicleData.valuation.privatePrice === 'number') {
+      valuation = vehicleData.valuation.privatePrice;
+      console.log('✅ Using vehicleData.valuation.privatePrice:', valuation);
+    } else if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
       valuation = vehicleData.allValuations.private;
       console.log('✅ Using vehicleData.allValuations.private:', valuation);
     } else if (vehicleData?.valuation?.estimatedValue?.private && typeof vehicleData.valuation.estimatedValue.private === 'number') {
@@ -306,6 +309,7 @@ const CarAdvertisingPricesPage = () => {
     
     console.log('💰 Valuation extraction debug:', {
       vehicleValuation,
+      'vehicleData.valuation.privatePrice': vehicleData?.valuation?.privatePrice,
       'advertData.price': advertData?.price,
       'vehicleData.valuation.estimatedValue': vehicleData?.valuation?.estimatedValue,
       'vehicleData.allValuations': vehicleData?.allValuations,
