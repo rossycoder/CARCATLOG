@@ -44,9 +44,11 @@ const CarAdvertisingPricesPage = () => {
     'vehicleValuation type': typeof vehicleValuation
   });
 
-  // Fetch advert data if not passed via state (to get photos)
+  // Fetch advert data ONLY if not passed via state AND no vehicleData exists
+  // CRITICAL FIX: Prevent duplicate API calls by checking both advertData AND vehicleData
   useEffect(() => {
-    if (advertId && !advertData) {
+    // Only fetch if we have advertId but BOTH advertData AND vehicleData are missing
+    if (advertId && !advertData && !vehicleData) {
       console.log('📸 Fetching advert data for advertId:', advertId);
       advertService.getAdvert(advertId)
         .then(response => {
@@ -59,10 +61,12 @@ const CarAdvertisingPricesPage = () => {
         .catch(error => {
           console.error('Failed to fetch advert data:', error);
         });
-    } else if (advertData) {
-      console.log('📸 Using advertData from navigation state with', advertData.photos?.length || 0, 'photos');
+    } else if (advertData || vehicleData) {
+      console.log('✅ Using data from navigation state - NO API CALL NEEDED');
+      console.log('📸 advertData photos:', advertData?.photos?.length || 0);
+      console.log('🚗 vehicleData available:', !!vehicleData);
     }
-  }, [advertId, advertData]);
+  }, [advertId]); // Removed advertData from dependencies to prevent loops
 
   // Private seller pricing tiers (prices in GBP)
   const privatePricingTiers = {
