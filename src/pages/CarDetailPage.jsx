@@ -111,9 +111,20 @@ const CarDetailPage = () => {
       }
     }
     
-    // Add fuel type for better search filtering (Petrol, Diesel, Hybrid)
+    // Add fuel type for better search filtering
+    // For hybrids, show "Petrol Hybrid" or "Diesel Hybrid" (AutoTrader format)
     if (car.fuelType && car.fuelType !== 'Electric') {
-      parts.push(car.fuelType);
+      if (car.fuelType === 'Hybrid') {
+        // Check if it's petrol or diesel hybrid from variant or default to Petrol Hybrid
+        const variantLower = (car.variant || '').toLowerCase();
+        if (variantLower.includes('diesel') || variantLower.includes('tdi') || variantLower.includes('hdi')) {
+          parts.push('Diesel Hybrid');
+        } else {
+          parts.push('Petrol Hybrid');
+        }
+      } else {
+        parts.push(car.fuelType);
+      }
     }
     
     // Add variant if available (contains fuel type + trim like "i-DTEC ES GT" or "M50" or "35 L2H2 PRIME PV PANEL VAN")

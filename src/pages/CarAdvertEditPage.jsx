@@ -1217,9 +1217,20 @@ const CarAdvertEditPage = () => {
                     parts.push(`${rounded.toFixed(1)}L`);
                   }
                   
-                  // Add fuel type for better search filtering (Petrol, Diesel, Hybrid)
+                  // Add fuel type for better search filtering
+                  // For hybrids, show "Petrol Hybrid" or "Diesel Hybrid" (AutoTrader format)
                   if (vehicleData.fuelType && vehicleData.fuelType !== 'Electric') {
-                    parts.push(vehicleData.fuelType);
+                    if (vehicleData.fuelType === 'Hybrid') {
+                      // Check if it's petrol or diesel hybrid from variant or default to Petrol Hybrid
+                      const variantLower = (vehicleData.variant || '').toLowerCase();
+                      if (variantLower.includes('diesel') || variantLower.includes('tdi') || variantLower.includes('hdi')) {
+                        parts.push('Diesel Hybrid');
+                      } else {
+                        parts.push('Petrol Hybrid');
+                      }
+                    } else {
+                      parts.push(vehicleData.fuelType);
+                    }
                   }
                   
                   // Add variant if available and meaningful
