@@ -151,6 +151,14 @@ const CarCard = ({ car }) => {
               parts.push(car.submodel);
             }
             
+            // Add fuel type (especially important for hybrids)
+            if (car.fuelType && car.fuelType !== 'null' && car.fuelType !== 'undefined') {
+              // Show fuel type for hybrids and electric vehicles
+              if (car.fuelType.toLowerCase().includes('hybrid') || car.fuelType === 'Electric') {
+                parts.push(car.fuelType);
+              }
+            }
+            
             // For ELECTRIC vehicles: Add range
             if (car.fuelType === 'Electric') {
               const range = car.electricRange || car.runningCosts?.electricRange;
@@ -180,6 +188,18 @@ const CarCard = ({ car }) => {
                 } else if (bodyType.includes('suv')) {
                   parts.push('SUV');
                 }
+              }
+            }
+            
+            // Add transmission
+            if (car.transmission && car.transmission !== 'null' && car.transmission !== 'undefined') {
+              const trans = car.transmission.toLowerCase();
+              if (trans.includes('auto')) {
+                parts.push('Auto');
+              } else if (trans.includes('manual')) {
+                parts.push('Manual');
+              } else if (trans.includes('semi')) {
+                parts.push('Semi-Auto');
               }
             }
             

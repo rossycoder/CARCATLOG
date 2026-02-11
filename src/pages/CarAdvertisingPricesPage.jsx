@@ -241,9 +241,15 @@ const CarAdvertisingPricesPage = () => {
 
   // Calculate the appropriate price range based on vehicle valuation
   const calculatePriceRange = (valuation, isTradeType) => {
-    if (!valuation || isNaN(valuation)) return null;
+    console.log('📊 calculatePriceRange called with:', { valuation, isTradeType, type: typeof valuation });
+    
+    if (!valuation || isNaN(valuation)) {
+      console.log('❌ Invalid valuation:', valuation);
+      return null;
+    }
     
     const value = parseFloat(valuation);
+    console.log('💰 Parsed value:', value);
     
     if (isTradeType) {
       // Trade pricing tiers
@@ -257,15 +263,29 @@ const CarAdvertisingPricesPage = () => {
       return 'over-17000';
     } else {
       // Private pricing tiers
-      if (value < 1000) return 'under-1000';
-      if (value <= 2999) return '1000-2999';
-      if (value <= 4999) return '3000-4999';
-      if (value <= 6999) return '5000-6999';
-      if (value <= 9999) return '7000-9999';
-      if (value <= 12999) return '10000-12999';
-      if (value <= 16999) return '13000-16999';
-      if (value <= 24999) return '17000-24999';
-      return 'over-24995';
+      let selectedRange;
+      if (value < 1000) {
+        selectedRange = 'under-1000';
+      } else if (value <= 2999) {
+        selectedRange = '1000-2999';
+      } else if (value <= 4999) {
+        selectedRange = '3000-4999';
+      } else if (value <= 6999) {
+        selectedRange = '5000-6999';
+      } else if (value <= 9999) {
+        selectedRange = '7000-9999';
+      } else if (value <= 12999) {
+        selectedRange = '10000-12999';
+      } else if (value <= 16999) {
+        selectedRange = '13000-16999';
+      } else if (value <= 24999) {
+        selectedRange = '17000-24999';
+      } else {
+        selectedRange = 'over-24995';
+      }
+      
+      console.log(`✅ Selected range for £${value}: ${selectedRange}`);
+      return selectedRange;
     }
   };
 
@@ -280,54 +300,45 @@ const CarAdvertisingPricesPage = () => {
     });
     
     // Extract numeric valuation from various possible sources
-    // CRITICAL FIX: Prioritize actual valuation fields over user-entered price
+    // CRITICAL FIX: Use user's entered price if no valuation available
     let valuation = null;
+    let valuationSource = 'none';
     
     // Try valuation fields FIRST (these are the actual vehicle worth, not asking price)
-    if (vehicleData?.valuation?.privatePrice && typeof vehicleData.valuation.privatePrice === 'number') {
-      valuation = vehicleData.valuation.privatePrice;
-      console.log('✅ Using vehicleData.valuation.privatePrice:', valuation);
-    } else if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
+    if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number' && vehicleData.allValuations.private > 0) {
       valuation = vehicleData.allValuations.private;
-      console.log('✅ Using vehicleData.allValuations.private:', valuation);
-    } else if (vehicleData?.valuation?.estimatedValue?.private && typeof vehicleData.valuation.estimatedValue.private === 'number') {
+      valuationSource = 'allValuations.private';
+    } else if (vehicleData?.valuation?.estimatedValue?.private && typeof vehicleData.valuation.estimatedValue.private === 'number' && vehicleData.valuation.estimatedValue.private > 0) {
       valuation = vehicleData.valuation.estimatedValue.private;
-      console.log('✅ Using vehicleData.valuation.estimatedValue.private:', valuation);
-    } else if (vehicleData?.estimatedValue && typeof vehicleData.estimatedValue === 'number') {
+      valuationSource = 'valuation.estimatedValue.private';
+    } else if (vehicleData?.estimatedValue && typeof vehicleData.estimatedValue === 'number' && vehicleData.estimatedValue > 0) {
       valuation = vehicleData.estimatedValue;
-      console.log('✅ Using vehicleData.estimatedValue:', valuation);
-    } else if (vehicleValuation && typeof vehicleValuation === 'number') {
+      valuationSource = 'estimatedValue';
+    } else if (vehicleValuation && typeof vehicleValuation === 'number' && vehicleValuation > 0) {
       valuation = vehicleValuation;
-      console.log('✅ Using vehicleValuation:', valuation);
-    } else if (vehicleData?.valuation?.estimatedValue?.retail && typeof vehicleData.valuation.estimatedValue.retail === 'number') {
-      valuation = vehicleData.valuation.estimatedValue.retail;
-      console.log('✅ Using vehicleData.valuation.estimatedValue.retail:', valuation);
-    } else if (vehicleData?.price && typeof vehicleData.price === 'number') {
-      // LAST RESORT: Use user-entered price only if no valuation available
+      valuationSource = 'vehicleValuation prop';
+    } else if (vehicleData?.price && typeof vehicleData.price === 'number' && vehicleData.price > 0) {
+      // Use user-entered price if no valuation available
       valuation = vehicleData.price;
-      console.log('⚠️  Using vehicleData.price (user-entered, not valuation):', valuation);
-    } else if (advertData?.price && typeof advertData.price === 'number') {
+      valuationSource = 'vehicleData.price (user-entered)';
+    } else if (advertData?.price && typeof advertData.price === 'number' && advertData.price > 0) {
       valuation = advertData.price;
-      console.log('⚠️  Using advertData.price (user-entered, not valuation):', valuation);
+      valuationSource = 'advertData.price (user-entered)';
     }
     
-    console.log('💰 Valuation extraction debug:', {
-      vehicleValuation,
-      'vehicleData.valuation.privatePrice': vehicleData?.valuation?.privatePrice,
-      'advertData.price': advertData?.price,
-      'vehicleData.valuation.estimatedValue': vehicleData?.valuation?.estimatedValue,
-      'vehicleData.allValuations': vehicleData?.allValuations,
-      'vehicleData.estimatedValue': vehicleData?.estimatedValue,
-      'vehicleData.estimatedValue type': typeof vehicleData?.estimatedValue,
+    console.log('💰 Valuation extraction result:', {
+      valuation,
+      valuationSource,
       'vehicleData.price': vehicleData?.price,
-      'extracted valuation': valuation,
-      'valuation type': typeof valuation
+      'advertData.price': advertData?.price,
+      'vehicleData.allValuations': vehicleData?.allValuations,
+      'vehicleData.estimatedValue': vehicleData?.estimatedValue
     });
     
     if (valuation && !isNaN(valuation) && valuation > 0) {
       const calculatedRange = calculatePriceRange(valuation, sellerType === 'trade');
       if (calculatedRange) {
-        console.log(`🔒 Auto-selecting price range: ${calculatedRange} for valuation: £${valuation} (seller type: ${sellerType})`);
+        console.log(`🔒 Auto-selecting price range: ${calculatedRange} for valuation: £${valuation} (source: ${valuationSource}, seller type: ${sellerType})`);
         console.log(`🔒 Current priceRange state before update: ${priceRange}`);
         
         // FORCE UPDATE: Always set the calculated range regardless of current state
