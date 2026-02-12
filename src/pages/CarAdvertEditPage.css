@@ -1182,3 +1182,74 @@
 .back-button:hover {
   background-color: #e0e0e0;
 }
+
+/* Edit Actions for Vehicle Details */
+.edit-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.edit-actions .save-button,
+.edit-actions .cancel-button {
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.edit-actions .save-button {
+  background-color: #1a4ba0;
+  color: white;
+}
+
+.edit-actions .save-button:hover {
+  background-color: #153a7f;
+}
+
+.edit-actions .cancel-button {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.edit-actions .cancel-button:hover {
+  background-color: #e0e0e0;
+}
+
+/* Edit Input Fields */
+.edit-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #1a4ba0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: #153a7f;
+}
+
+.edit-input[type="date"] {
+  cursor: pointer;
+}
+
+.edit-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.edit-input[type="number"]::-webkit-outer-spin-button,
+.edit-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+select.edit-input {
+  cursor: pointer;
+  background-color: white;
+}

@@ -370,18 +370,29 @@ const VehicleHistorySection = ({ vrm, carData }) => {
             <span className="stat-label">Service history</span>
             <span className="stat-value">
               {(() => {
+                // PRIORITY 1: Check carData.serviceHistory (from Car model - user editable)
+                if (carData?.serviceHistory && 
+                    carData.serviceHistory !== 'Contact seller' && 
+                    carData.serviceHistory !== 'Unknown' &&
+                    carData.serviceHistory !== 'unknown') {
+                  return carData.serviceHistory;
+                }
+                
+                // PRIORITY 2: Check historyData.serviceHistory (from VehicleHistory)
                 const serviceHistory = historyData.serviceHistory;
-                // Check if service history is meaningful (not default placeholder)
                 if (serviceHistory && 
                     serviceHistory !== 'Contact seller' && 
                     serviceHistory !== 'Unknown' &&
                     serviceHistory !== 'unknown') {
                   return serviceHistory;
                 }
-                // Check boolean flag
+                
+                // PRIORITY 3: Check boolean flag
                 if (historyData.hasServiceHistory === true) {
                   return 'Available';
                 }
+                
+                // Default
                 return 'Contact seller';
               })()}
             </span>

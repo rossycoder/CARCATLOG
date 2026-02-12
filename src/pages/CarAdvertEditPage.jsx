@@ -65,6 +65,15 @@ const CarAdvertEditPage = () => {
   const [runningCostsTimeout, setRunningCostsTimeout] = useState(null);
   const [featureSaveTimeout, setFeatureSaveTimeout] = useState(null);
   
+  // Vehicle details editing state (service history, MOT, seats)
+  const [isVehicleDetailsEditing, setIsVehicleDetailsEditing] = useState(false);
+  const [editableVehicleData, setEditableVehicleData] = useState({
+    serviceHistory: '',
+    motDue: '',
+    seats: '',
+    fuelType: ''
+  });
+  
   // Enhanced data processing state
   const [enhancedDataProcessed, setEnhancedDataProcessed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -733,6 +742,87 @@ const CarAdvertEditPage = () => {
     handleInputChange('price', vehicleData.estimatedValue || '');
   };
   
+  // Handle vehicle details edit (service history, MOT, seats)
+  const handleVehicleDetailsEdit = () => {
+    console.log('🖱️ Edit vehicle details button clicked!');
+    
+    // Initialize editable data with current values
+    setEditableVehicleData({
+      serviceHistory: advertData.serviceHistory || 'Contact seller',
+      motDue: vehicleData.motDue || vehicleData.motExpiry || '',
+      seats: vehicleData.seats || '',
+      fuelType: vehicleData.fuelType || 'Petrol'
+    });
+    
+    setIsVehicleDetailsEditing(true);
+  };
+  
+  // Handle vehicle details save
+  const handleVehicleDetailsSave = async () => {
+    try {
+      console.log('💾 Saving vehicle details:', editableVehicleData);
+      
+      // Validate seats (must be between 2-9)
+      if (editableVehicleData.seats && (editableVehicleData.seats < 2 || editableVehicleData.seats > 9)) {
+        setErrors(prev => ({ ...prev, seats: 'Seats must be between 2 and 9' }));
+        return;
+      }
+      
+      // Clear any errors
+      setErrors(prev => ({ ...prev, seats: null, serviceHistory: null, motDue: null, fuelType: null }));
+      
+      // Update both Car and VehicleHistory models
+      const updateData = {
+        serviceHistory: editableVehicleData.serviceHistory,
+        seats: editableVehicleData.seats ? parseInt(editableVehicleData.seats) : vehicleData.seats,
+        fuelType: editableVehicleData.fuelType
+      };
+      
+      // If MOT date is provided, update it
+      if (editableVehicleData.motDue) {
+        updateData.motDue = editableVehicleData.motDue;
+        updateData.motExpiry = editableVehicleData.motDue;
+      }
+      
+      // Save to backend (will update both Car and VehicleHistory)
+      const response = await advertService.updateAdvert(advertId, updateData, {
+        ...vehicleData,
+        ...updateData
+      });
+      
+      console.log('✅ Vehicle details saved successfully:', response);
+      
+      // Update local state
+      setVehicleData(prev => ({
+        ...prev,
+        ...updateData
+      }));
+      
+      setAdvertData(prev => ({
+        ...prev,
+        serviceHistory: editableVehicleData.serviceHistory
+      }));
+      
+      // Exit editing mode
+      setIsVehicleDetailsEditing(false);
+    } catch (error) {
+      console.error('❌ Error saving vehicle details:', error);
+      setErrors(prev => ({ ...prev, vehicleDetails: 'Failed to save. Please try again.' }));
+    }
+  };
+  
+  // Handle vehicle details cancel
+  const handleVehicleDetailsCancel = () => {
+    setIsVehicleDetailsEditing(false);
+    // Reset editable data
+    setEditableVehicleData({
+      serviceHistory: advertData.serviceHistory || 'Contact seller',
+      motDue: vehicleData.motDue || vehicleData.motExpiry || '',
+      seats: vehicleData.seats || '',
+      fuelType: vehicleData.fuelType || 'Petrol'
+    });
+  };
+  
   // Handle feature toggle with debounced save
   const toggleFeature = async (feature) => {
     const newFeatures = advertData.features.includes(feature)
@@ -1393,81 +1483,138 @@ const CarAdvertEditPage = () => {
           <section className="specifications-section">
             <h3>Overview</h3>
             <div className="spec-actions">
-              <a href="#" className="edit-link">Edit service history, MOT and seats</a>
+              {!isVehicleDetailsEditing ? (
+                <a href="#" className="edit-link" onClick={(e) => { e.preventDefault(); handleVehicleDetailsEdit(); }}>
+                  Edit service history, MOT, seats and fuel type
+                </a>
+              ) : (
+                <div className="edit-actions">
+                  <button type="button" onClick={handleVehicleDetailsSave} className="save-button">
+                    Save
+                  </button>
+                  <button type="button" onClick={handleVehicleDetailsCancel} className="cancel-button">
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
             
             <div className="spec-grid">
               <div className="spec-item">
                 <label>MOT Due</label>
-                <span>
-                  {(() => {
-                    // Debug MOT data
-                    console.log('🔧 MOT Debug:', {
-                      motLoading,
-                      motData,
-                      vehicleDataMotDue: vehicleData.motDue,
-                      vehicleDataMotExpiry: vehicleData.motExpiry,
-                      vehicleDataMotStatus: vehicleData.motStatus
-                    });
-                    
-                    if (motLoading) {
-                      return 'Loading...';
-                    } else if (motData?.mot?.motDueDate) {
-                      const dateStr = motData.mot.motDueDate;
-                      const [year, month, day] = dateStr.split('-').map(Number);
-                      const date = new Date(year, month - 1, day);
-                      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                    } else if (motData?.expiryDate) {
-                      const dateStr = motData.expiryDate;
-                      const [year, month, day] = dateStr.split('-').map(Number);
-                      const date = new Date(year, month - 1, day);
-                      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                    } else if (motData?.mot?.motStatus) {
-                      return motData.mot.motStatus;
-                    } else if (vehicleData.motDue) {
-                      const dateStr = vehicleData.motDue;
-                      if (typeof dateStr === 'string') {
-                        // Handle both ISO strings and date-only strings
-                        const date = new Date(dateStr);
-                        if (!isNaN(date.getTime())) {
-                          return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                {!isVehicleDetailsEditing ? (
+                  <span>
+                    {(() => {
+                      // Debug MOT data
+                      console.log('🔧 MOT Debug:', {
+                        motLoading,
+                        motData,
+                        vehicleDataMotDue: vehicleData.motDue,
+                        vehicleDataMotExpiry: vehicleData.motExpiry,
+                        vehicleDataMotStatus: vehicleData.motStatus
+                      });
+                      
+                      if (motLoading) {
+                        return 'Loading...';
+                      } else if (motData?.mot?.motDueDate) {
+                        const dateStr = motData.mot.motDueDate;
+                        const [year, month, day] = dateStr.split('-').map(Number);
+                        const date = new Date(year, month - 1, day);
+                        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                      } else if (motData?.expiryDate) {
+                        const dateStr = motData.expiryDate;
+                        const [year, month, day] = dateStr.split('-').map(Number);
+                        const date = new Date(year, month - 1, day);
+                        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                      } else if (motData?.mot?.motStatus) {
+                        return motData.mot.motStatus;
+                      } else if (vehicleData.motDue) {
+                        const dateStr = vehicleData.motDue;
+                        if (typeof dateStr === 'string') {
+                          // Handle both ISO strings and date-only strings
+                          const date = new Date(dateStr);
+                          if (!isNaN(date.getTime())) {
+                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                          }
+                        } else if (typeof dateStr === 'object' && dateStr !== null) {
+                          // Handle wrapped object format {value: 'date'}
+                          return 'Contact seller for MOT details';
                         }
-                      } else if (typeof dateStr === 'object' && dateStr !== null) {
-                        // Handle wrapped object format {value: 'date'}
+                        return 'Contact seller for MOT details';
+                      } else if (vehicleData.motExpiry) {
+                        const dateValue = vehicleData.motExpiry;
+                        if (typeof dateValue === 'string' || dateValue instanceof Date || !isNaN(Date.parse(dateValue))) {
+                          const date = new Date(dateValue);
+                          if (!isNaN(date.getTime())) {
+                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                          }
+                        } else if (typeof dateValue === 'object' && dateValue !== null) {
+                          // Handle wrapped object format {value: 'date'}
+                          return 'Contact seller for MOT details';
+                        }
+                        return 'Contact seller for MOT details';
+                      } else if (vehicleData.motHistory && vehicleData.motHistory.length > 0) {
+                        // BONUS TIP: Extract from motHistory array if motDue/motExpiry not set
+                        const latestTest = vehicleData.motHistory[0];
+                        if (latestTest && latestTest.expiryDate) {
+                          const date = new Date(latestTest.expiryDate);
+                          if (!isNaN(date.getTime())) {
+                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                          }
+                        }
+                        return 'Contact seller for MOT details';
+                      } else {
                         return 'Contact seller for MOT details';
                       }
-                      return 'Contact seller for MOT details';
-                    } else if (vehicleData.motExpiry) {
-                      const dateValue = vehicleData.motExpiry;
-                      if (typeof dateValue === 'string' || dateValue instanceof Date || !isNaN(Date.parse(dateValue))) {
-                        const date = new Date(dateValue);
-                        if (!isNaN(date.getTime())) {
-                          return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                        }
-                      } else if (typeof dateValue === 'object' && dateValue !== null) {
-                        // Handle wrapped object format {value: 'date'}
-                        return 'Contact seller for MOT details';
-                      }
-                      return 'Contact seller for MOT details';
-                    } else if (vehicleData.motHistory && vehicleData.motHistory.length > 0) {
-                      // BONUS TIP: Extract from motHistory array if motDue/motExpiry not set
-                      const latestTest = vehicleData.motHistory[0];
-                      if (latestTest && latestTest.expiryDate) {
-                        const date = new Date(latestTest.expiryDate);
-                        if (!isNaN(date.getTime())) {
-                          return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                        }
-                      }
-                      return 'Contact seller for MOT details';
-                    } else {
-                      return 'Contact seller for MOT details';
-                    }
-                  })()}
-                </span>
+                    })()}
+                  </span>
+                ) : (
+                  <input
+                    type="date"
+                    value={editableVehicleData.motDue ? new Date(editableVehicleData.motDue).toISOString().split('T')[0] : ''}
+                    onChange={(e) => setEditableVehicleData(prev => ({ ...prev, motDue: e.target.value }))}
+                    className="edit-input"
+                  />
+                )}
+              </div>
+              <div className="spec-item">
+                <label>Service History</label>
+                {!isVehicleDetailsEditing ? (
+                  <span>{advertData.serviceHistory || 'Contact seller'}</span>
+                ) : (
+                  <select
+                    value={editableVehicleData.serviceHistory}
+                    onChange={(e) => setEditableVehicleData(prev => ({ ...prev, serviceHistory: e.target.value }))}
+                    className="edit-input"
+                  >
+                    <option value="Contact seller">Contact seller</option>
+                    <option value="Full service history">Full service history</option>
+                    <option value="Partial service history">Partial service history</option>
+                    <option value="No service history">No service history</option>
+                  </select>
+                )}
               </div>
               <div className="spec-item">
                 <label>Fuel type</label>
-                <span>{vehicleData.fuelType || 'Petrol'}</span>
+                {!isVehicleDetailsEditing ? (
+                  <span>{vehicleData.fuelType || 'Petrol'}</span>
+                ) : (
+                  <select
+                    value={editableVehicleData.fuelType}
+                    onChange={(e) => setEditableVehicleData(prev => ({ ...prev, fuelType: e.target.value }))}
+                    className="edit-input"
+                  >
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Electric">Electric</option>
+                    <option value="Hybrid">Hybrid</option>
+                    <option value="Petrol Hybrid">Petrol Hybrid</option>
+                    <option value="Diesel Hybrid">Diesel Hybrid</option>
+                    <option value="Plug-in Hybrid">Plug-in Hybrid</option>
+                    <option value="Petrol Plug-in Hybrid">Petrol Plug-in Hybrid</option>
+                    <option value="Diesel Plug-in Hybrid">Diesel Plug-in Hybrid</option>
+                  </select>
+                )}
               </div>
               <div className="spec-item">
                 <label>Body type</label>
@@ -1501,7 +1648,18 @@ const CarAdvertEditPage = () => {
               </div>
               <div className="spec-item">
                 <label>Seats</label>
-                <span>{vehicleData.seats || '5'}</span>
+                {!isVehicleDetailsEditing ? (
+                  <span>{vehicleData.seats || '5'}</span>
+                ) : (
+                  <input
+                    type="number"
+                    min="2"
+                    max="9"
+                    value={editableVehicleData.seats}
+                    onChange={(e) => setEditableVehicleData(prev => ({ ...prev, seats: e.target.value }))}
+                    className="edit-input"
+                  />
+                )}
               </div>
               <div className="spec-item">
                 <label>Emission Class</label>

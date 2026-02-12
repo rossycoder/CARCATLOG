@@ -104,9 +104,8 @@ const CarDetailPage = () => {
         if (!variantHasEngineInfo) {
           // If engine size is > 100, it's in CC, convert to litres
           const sizeInLitres = size > 100 ? size / 1000 : size;
-          // Round to nearest 0.5 (2.947 -> 3.0, 2.494 -> 2.5, 1.596 -> 1.6)
-          const rounded = Math.round(sizeInLitres * 2) / 2;
-          parts.push(rounded.toFixed(1));
+          // Use 1 decimal precision (1.598 -> 1.6)
+          parts.push(sizeInLitres.toFixed(1));
         }
       }
     }
@@ -413,9 +412,8 @@ const CarDetailPage = () => {
                                 const size = parseFloat(car.engineSize);
                                 // If size > 100, it's in CC, convert to litres
                                 const sizeInLitres = size > 100 ? size / 1000 : size;
-                                // Round to nearest 0.5 (2.947 -> 3.0, 2.494 -> 2.5, 1.596 -> 1.6)
-                                const rounded = Math.round(sizeInLitres * 2) / 2;
-                                return `${rounded.toFixed(1)}L`;
+                                // Use 1 decimal precision (1.598 -> 1.6L)
+                                return `${sizeInLitres.toFixed(1)}L`;
                               })()
                             : 'N/A')
                       }
