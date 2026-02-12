@@ -463,6 +463,14 @@ function SearchResultsPage() {
       case 'year-new':
         results.sort((a, b) => b.year - a.year);
         break;
+      case 'date-newest':
+        // Sort by creation date (newest first)
+        results.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        break;
+      case 'date-oldest':
+        // Sort by creation date (oldest first)
+        results.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        break;
       case 'distance':
       default:
         results.sort((a, b) => a.distance - b.distance);

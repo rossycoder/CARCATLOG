@@ -318,6 +318,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               <option value="year-old">Year: Oldest First</option>
               <option value="mileage-low">Mileage: Low to High</option>
               <option value="mileage-high">Mileage: High to Low</option>
+              <option value="date-newest">Date Listed: Newest First</option>
+              <option value="date-oldest">Date Listed: Oldest First</option>
             </select>
           </div>
 
