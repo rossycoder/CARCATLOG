@@ -80,6 +80,7 @@ function SearchResultsPage() {
     const yearToParam = params.get('yearTo');
     const mileageFromParam = params.get('mileageFrom');
     const mileageToParam = params.get('mileageTo');
+    const sortByParam = params.get('sortBy'); // Get sort parameter
     const openFilterParam = params.get('openFilter'); // Check if filter should auto-open
 
     console.log('SearchResultsPage mounted with params:', {
@@ -100,6 +101,7 @@ function SearchResultsPage() {
       yearToParam,
       mileageFromParam,
       mileageToParam,
+      sortByParam,
       openFilterParam,
       urlSearch: location.search,
       locationState: location.state
@@ -109,6 +111,12 @@ function SearchResultsPage() {
     if (openFilterParam === 'true') {
       console.log('Auto-opening filter modal due to openFilter=true parameter');
       setShowFilterModal(true);
+    }
+
+    // Update sortBy filter if provided in URL
+    if (sortByParam) {
+      console.log('Setting sortBy from URL:', sortByParam);
+      setFilters(prev => ({ ...prev, sortBy: sortByParam }));
     }
 
     // Build filter params object

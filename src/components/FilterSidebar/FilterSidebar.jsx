@@ -27,7 +27,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     }
   });
   const [filters, setFilters] = useState({
-    sort: 'relevance',
+    sortBy: 'relevance',
     distance: 'national',
     postcode: '',
     make: '',
@@ -54,7 +54,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       setFilters({
-        sort: searchParams.get('sort') || 'relevance',
+        sortBy: searchParams.get('sortBy') || 'relevance',
         distance: searchParams.get('distance') || 'national',
         postcode: searchParams.get('postcode') || '',
         make: searchParams.get('make') || '',
@@ -217,7 +217,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
 
   const handleClearAll = () => {
     setFilters({
-      sort: 'relevance',
+      sortBy: 'relevance',
       distance: 'national',
       postcode: '',
       make: '',
@@ -253,7 +253,13 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     const params = new URLSearchParams();
     
     Object.entries(filters).forEach(([key, value]) => {
-      if (value && value !== 'relevance' && value !== 'national') {
+      // Always include sortBy, even if it's 'relevance'
+      if (key === 'sortBy' && value) {
+        params.append(key, value);
+        console.log(`[FilterSidebar] Adding param: ${key} = ${value}`);
+      }
+      // For other fields, skip empty values and defaults
+      else if (value && value !== 'national') {
         params.append(key, value);
         console.log(`[FilterSidebar] Adding param: ${key} = ${value}`);
       }
@@ -308,8 +314,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
             </label>
             <select 
               className="filter-select"
-              value={filters.sort}
-              onChange={(e) => handleChange('sort', e.target.value)}
+              value={filters.sortBy}
+              onChange={(e) => handleChange('sortBy', e.target.value)}
             >
               <option value="relevance">Relevance</option>
               <option value="price-low">Price: Low to High</option>
