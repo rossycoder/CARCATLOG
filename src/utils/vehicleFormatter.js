@@ -221,3 +221,29 @@ export default {
   generateVariantDisplay,
   extractTownName
 };
+
+/**
+ * Format color to proper case (Title Case)
+ * Converts "GREY" to "Grey", "BLUE" to "Blue", etc.
+ * Handles multi-word colors like "DARK BLUE" to "Dark Blue"
+ * 
+ * @param {string} color - Color string from database
+ * @returns {string} - Formatted color in proper case
+ */
+export const formatColor = (color) => {
+  if (!color || 
+      color === 'Not specified' || 
+      color === 'null' || 
+      color === 'undefined' || 
+      typeof color !== 'string' ||
+      color.trim() === '') {
+    return 'Not specified';
+  }
+  
+  // Convert to proper case (Title Case)
+  return color
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};

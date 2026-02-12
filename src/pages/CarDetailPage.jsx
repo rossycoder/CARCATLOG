@@ -7,7 +7,7 @@ import MOTHistorySection from '../components/VehicleHistory/MOTHistorySection';
 import LocationDisplay from '../components/Location/LocationDisplay';
 import ElectricVehicleCharging from '../components/ElectricVehicleCharging';
 import ElectricVehicleRunningCosts from '../components/ElectricVehicleRunningCosts';
-import { generateVariantDisplay, extractTownName } from '../utils/vehicleFormatter';
+import { generateVariantDisplay, extractTownName, formatColor } from '../utils/vehicleFormatter';
 import './CarDetailPage.css';
 
 const CarDetailPage = () => {
@@ -461,9 +461,7 @@ const CarDetailPage = () => {
                   <div className="spec-details">
                     <span className="spec-label">Body colour</span>
                     <span className="spec-value">
-                      {car.color && car.color !== 'Not specified' && car.color !== 'null' && car.color !== 'undefined' && car.color.trim() !== ''
-                        ? car.color 
-                        : 'Not specified'}
+                      {formatColor(car.color)}
                     </span>
                   </div>
                 </div>
