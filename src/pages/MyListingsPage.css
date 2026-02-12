@@ -318,3 +318,38 @@
     width: 100%;
   }
 }
+
+/* Admin View Styles */
+.page-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.listing-owner {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  background: #fff3cd;
+  border-left: 3px solid #ffc107;
+  border-radius: 4px;
+}
+
+.owner-badge {
+  font-size: 0.85rem;
+  color: #856404;
+  font-weight: 600;
+}
+
+/* Admin view alert */
+.admin-alert {
+  background: #d1ecf1;
+  border: 1px solid #bee5eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  color: #0c5460;
+}
+
+.admin-alert strong {
+  font-weight: 700;
+}

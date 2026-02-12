@@ -10,6 +10,7 @@ function MyListingsPage() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isAdminView, setIsAdminView] = useState(false);
 
   useEffect(() => {
     // Wait for auth to load
@@ -34,6 +35,11 @@ function MyListingsPage() {
       const response = await api.get('/vehicles/my-listings');
       console.log('[MyListings] Response:', response.data);
       setListings(response.data.listings || []);
+      setIsAdminView(response.data.isAdmin || false);
+      
+      if (response.data.isAdmin) {
+        console.log('[MyListings] Admin view: Showing all listings from all users');
+      }
     } catch (err) {
       console.error('[MyListings] Error fetching listings:', err);
       console.error('[MyListings] Error response:', err.response?.data);
@@ -134,9 +140,10 @@ function MyListingsPage() {
     <div className="my-listings-page">
       <div className="container">
         <div className="page-header">
-          <h1>My Listings</h1>
+          <h1>{isAdminView ? '🔐 Admin: All Listings' : 'My Listings'}</h1>
           <p className="listings-count">
             {listings.length} listing{listings.length !== 1 ? 's' : ''}
+            {isAdminView && ' (from all users)'}
           </p>
         </div>
 
@@ -176,6 +183,14 @@ function MyListingsPage() {
                   <p className="listing-subtitle">
                     {listing.year} • {listing.registrationNumber || 'N/A'}
                   </p>
+
+                  {isAdminView && listing.ownerEmail && (
+                    <div className="listing-owner">
+                      <span className="owner-badge">
+                        👤 {listing.ownerName || listing.ownerEmail}
+                      </span>
+                    </div>
+                  )}
 
                   <div className="listing-specs">
                     <span>{listing.mileage?.toLocaleString() || '0'} miles</span>
