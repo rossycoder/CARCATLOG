@@ -1628,9 +1628,8 @@ const CarAdvertEditPage = () => {
                         const size = parseFloat(vehicleData.engineSize);
                         // If size > 100, it's in CC, convert to litres
                         const sizeInLitres = size > 100 ? size / 1000 : size;
-                        // Round to nearest 0.5 (2.947 -> 3.0, 2.494 -> 2.5, 1.596 -> 1.6)
-                        const rounded = Math.round(sizeInLitres * 2) / 2;
-                        return `${rounded.toFixed(1)}L`;
+                        // Use 1 decimal precision (2.184 -> 2.2L)
+                        return `${sizeInLitres.toFixed(1)}L`;
                       })()
                     : '4.4L'}
                 </span>

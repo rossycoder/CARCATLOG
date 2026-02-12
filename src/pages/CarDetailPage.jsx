@@ -485,9 +485,16 @@ const CarDetailPage = () => {
                           month: 'short',
                           year: 'numeric'
                         })
-                      ) : (
-                        'Contact seller for MOT details'
-                      )}
+                      ) : (() => {
+                        // Check if vehicle is new (less than 3 years old)
+                        const currentYear = new Date().getFullYear();
+                        const vehicleAge = currentYear - car.year;
+                        
+                        if (vehicleAge < 3) {
+                          return 'Not required (new vehicle)';
+                        }
+                        return 'Contact seller for MOT details';
+                      })()}
                     </span>
                   </div>
                 </div>
