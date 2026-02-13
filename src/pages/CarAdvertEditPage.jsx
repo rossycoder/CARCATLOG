@@ -1621,17 +1621,22 @@ const CarAdvertEditPage = () => {
                 <span>{vehicleData.bodyType || 'Saloon'}</span>
               </div>
               <div className="spec-item">
-                <label>Engine</label>
+                <label>{vehicleData.fuelType === 'Electric' ? 'Electric Range' : 'Engine'}</label>
                 <span>
-                  {vehicleData.engineSize 
-                    ? (() => {
-                        const size = parseFloat(vehicleData.engineSize);
-                        // If size > 100, it's in CC, convert to litres
-                        const sizeInLitres = size > 100 ? size / 1000 : size;
-                        // Use 1 decimal precision (2.184 -> 2.2L)
-                        return `${sizeInLitres.toFixed(1)}L`;
-                      })()
-                    : '4.4L'}
+                  {vehicleData.fuelType === 'Electric' 
+                    ? (vehicleData.electricRange || vehicleData.runningCosts?.electricRange 
+                        ? `${vehicleData.electricRange || vehicleData.runningCosts?.electricRange} miles` 
+                        : 'N/A')
+                    : (vehicleData.engineSize 
+                        ? (() => {
+                            const size = parseFloat(vehicleData.engineSize);
+                            // If size > 100, it's in CC, convert to litres
+                            const sizeInLitres = size > 100 ? size / 1000 : size;
+                            // Use 1 decimal precision (2.184 -> 2.2L)
+                            return `${sizeInLitres.toFixed(1)}L`;
+                          })()
+                        : '4.4L')
+                  }
                 </span>
               </div>
               <div className="spec-item">
