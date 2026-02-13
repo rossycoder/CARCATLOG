@@ -97,6 +97,7 @@ const VanAdvertisingPricesPage = () => {
         duration: pkg.duration,
         durationDays: pkg.durationDays,
         advertId: advertId || null,
+        userId: user?._id || user?.id || null, // Add userId from authenticated user
         advertData: advertData || {
           price: null,
           description: null,
@@ -111,7 +112,7 @@ const VanAdvertisingPricesPage = () => {
         },
         contactDetails: contactDetails || {
           phoneNumber: null,
-          email: null,
+          email: user?.email || null, // Use user email if available
           postcode: null,
           allowEmailContact: false
         },

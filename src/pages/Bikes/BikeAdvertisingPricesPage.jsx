@@ -96,6 +96,7 @@ const BikeAdvertisingPricesPage = () => {
         price: pkg.priceInPence,
         duration: pkg.duration,
         advertId: advertId || null,
+        userId: user?._id || user?.id || null, // Add userId from authenticated user
         advertData: advertData || {
           price: null,
           description: null,
@@ -110,7 +111,7 @@ const BikeAdvertisingPricesPage = () => {
         },
         contactDetails: contactDetails || {
           phoneNumber: null,
-          email: null,
+          email: user?.email || null, // Use user email if available
           postcode: null,
           allowEmailContact: false
         }

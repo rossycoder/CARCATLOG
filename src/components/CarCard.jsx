@@ -9,14 +9,37 @@ const CarCard = ({ car }) => {
   const { user } = useAuth();
   const [saved, setSaved] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [renderError, setRenderError] = useState(null);
 
   // Debug: Check if distance is coming
   console.log('CarCard - car data:', {
+    reg: car.registrationNumber,
     make: car.make,
     model: car.model,
     distance: car.distance,
-    locationName: car.locationName
+    locationName: car.locationName,
+    writeOff: car.historyCheckId?.writeOffCategory
   });
+
+  // Safety check: Ensure car has required data
+  if (!car || !car.make || !car.model) {
+    console.error('❌ CarCard: Missing required data', car);
+    return null;
+  }
+
+  // If there was a render error, show error card
+  if (renderError) {
+    console.error('❌ CarCard render error for', car.registrationNumber, renderError);
+    return (
+      <div className="car-card" style={{border: '2px solid red', padding: '20px'}}>
+        <h3>Error rendering car</h3>
+        <p>{car.registrationNumber} - {car.make} {car.model}</p>
+        <p style={{color: 'red', fontSize: '12px'}}>{renderError.message}</p>
+      </div>
+    );
+  }
+
+  try {
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -254,6 +277,11 @@ const CarCard = ({ car }) => {
       </div>
     </Link>
   );
+  } catch (error) {
+    console.error('❌ CarCard caught error:', error, car.registrationNumber);
+    setRenderError(error);
+    return null;
+  }
 };
 
 export default CarCard;

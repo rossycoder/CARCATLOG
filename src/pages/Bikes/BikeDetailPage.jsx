@@ -1,64 +1,70 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { bikeService } from '../../services/bikeService';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import SEOHelmet from '../../components/SEO/SEOHelmet';
 import { vehicleSchema, breadcrumbSchema } from '../../utils/seoSchemas';
 import VehicleHistorySection from '../../components/VehicleHistory/VehicleHistorySection';
 import MOTHistorySection from '../../components/VehicleHistory/MOTHistorySection';
 import LocationDisplay from '../../components/Location/LocationDisplay';
-import { extractTownName } from '../../utils/vehicleFormatter';
-import './BikeDetailPage.css';
+import { generateVariantDisplay, extractTownName, formatColor } from '../../utils/vehicleFormatter';
+import '../CarDetailPage.css'; // Reuse car detail page styles
 
 const BikeDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [bike, setBike] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isSaved, setIsSaved] = useState(false);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  // Function to handle back navigation intelligently
+  const handleBackClick = () => {
+    if (location.state?.from) {
+      navigate(location.state.from);
+    } else if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/bikes/search-results');
+    }
+  };
+
   useEffect(() => {
     fetchBikeDetails();
-    checkIfSaved();
   }, [id]);
 
   const fetchBikeDetails = async () => {
     try {
       setIsLoading(true);
-      const response = await bikeService.getBikeById(id);
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       
-      if (response.success) {
-        setBike(response.data);
-        document.title = `${response.data.make} ${response.data.model} | CarCatALog`;
-      } else {
-        setError('Bike not found');
+      const userPostcode = localStorage.getItem('userPostcode');
+      
+      let url = `${API_BASE_URL}/bikes/${id}`;
+      if (userPostcode) {
+        url += `?postcode=${encodeURIComponent(userPostcode)}`;
       }
+      
+      console.log('Fetching bike details from:', url);
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error('Bike not found');
+      }
+      
+      const data = await response.json();
+      console.log('✅ Bike data loaded successfully');
+      console.log('🖼️ Images:', data.data.images?.length || 0, 'found');
+      setBike(data.data);
     } catch (err) {
-      setError(err.message || 'Failed to load bike details');
+      console.error('Error fetching bike details:', err);
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const checkIfSaved = () => {
-    const saved = JSON.parse(localStorage.getItem('savedBikes') || '[]');
-    setIsSaved(saved.includes(id));
-  };
-
-  const handleSave = () => {
-    const saved = JSON.parse(localStorage.getItem('savedBikes') || '[]');
-    if (isSaved) {
-      const updated = saved.filter(bikeId => bikeId !== id);
-      localStorage.setItem('savedBikes', JSON.stringify(updated));
-    } else {
-      saved.push(id);
-      localStorage.setItem('savedBikes', JSON.stringify(saved));
-    }
-    setIsSaved(!isSaved);
   };
 
   const formatPrice = (price) => {
@@ -74,9 +80,43 @@ const BikeDetailPage = () => {
     return new Intl.NumberFormat('en-GB').format(mileage);
   };
 
+  // Generate comprehensive title for bikes
+  const generateComprehensiveBikeTitle = (bike) => {
+    const parts = [];
+    
+    // Add engine CC
+    if (bike.engineCC) {
+      parts.push(`${bike.engineCC}cc`);
+    }
+    
+    // Add variant if available
+    if (bike.variant && bike.variant !== 'null' && bike.variant !== 'undefined' && bike.variant.trim() !== '') {
+      parts.push(bike.variant.trim());
+    }
+    
+    // Add bike type
+    if (bike.bikeType) {
+      parts.push(bike.bikeType);
+    }
+    
+    // Add transmission
+    if (bike.transmission) {
+      const trans = bike.transmission.toLowerCase();
+      if (trans === 'automatic' || trans === 'auto') {
+        parts.push('Auto');
+      } else if (trans === 'manual') {
+        parts.push('Manual');
+      } else {
+        parts.push(bike.transmission);
+      }
+    }
+    
+    return parts.length > 0 ? parts.join(' ') : null;
+  };
+
   if (isLoading) {
     return (
-      <div className="bike-detail-page">
+      <div className="car-detail-page">
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Loading bike details...</p>
@@ -87,12 +127,12 @@ const BikeDetailPage = () => {
 
   if (error || !bike) {
     return (
-      <div className="bike-detail-page">
+      <div className="car-detail-page">
         <div className="error-container">
-          <h2>🏍️ Bike Not Found</h2>
+          <h2>Bike Not Found</h2>
           <p>{error || 'The bike you are looking for does not exist.'}</p>
-          <button onClick={() => navigate('/bikes')} className="back-btn">
-            Back to Bikes
+          <button onClick={() => navigate('/bikes/search-results')} className="back-btn">
+            Back to Results
           </button>
         </div>
       </div>
@@ -101,28 +141,28 @@ const BikeDetailPage = () => {
 
   const images = bike.images && bike.images.length > 0 
     ? bike.images 
-    : ['/images/dummy/placeholder-bike.jpg'];
+    : ['/images/dummy/red-car.png'];
 
   // Handle image error
   const handleImageError = (e) => {
     console.error('Main image failed to load:', getCurrentImage());
     setImageError(true);
     if (e && e.target) {
-      e.target.src = '/images/dummy/placeholder-bike.jpg';
+      e.target.src = '/images/dummy/red-car.png';
     }
   };
 
   // Get current image with fallback
   const getCurrentImage = () => {
     if (imageError || !images[currentImageIndex]) {
-      return '/images/dummy/placeholder-bike.jpg';
+      return '/images/dummy/red-car.png';
     }
     return images[currentImageIndex];
   };
 
   // Generate SEO data
   const bikeTitle = `${bike.year} ${bike.make} ${bike.model}${bike.submodel ? ` ${bike.submodel}` : ''}`;
-  const bikeDescription = `${bikeTitle} for sale. ${formatMileage(bike.mileage)} miles, ${bike.fuelType}, ${bike.transmission}. ${bike.description ? bike.description.substring(0, 100) : 'View full details and contact seller.'}`;
+  const bikeDescription = `${bikeTitle} for sale. ${formatMileage(bike.mileage)} miles, ${bike.engineCC}cc, ${bike.transmission}. ${bike.description ? bike.description.substring(0, 100) : 'View full details and contact seller.'}`;
   const bikeLocation = extractTownName(bike.locationName) || 'UK';
 
   return (
@@ -130,7 +170,7 @@ const BikeDetailPage = () => {
       <SEOHelmet 
         title={`${bikeTitle} for Sale in ${bikeLocation} | ${formatPrice(bike.price)} | CarCatlog`}
         description={bikeDescription}
-        keywords={`${bike.make} ${bike.model}, ${bike.year} ${bike.make}, ${bike.fuelType} bike, ${bike.transmission} bike, used ${bike.make}, bikes for sale ${bikeLocation}`}
+        keywords={`${bike.make} ${bike.model}, ${bike.year} ${bike.make}, ${bike.engineCC}cc bike, ${bike.transmission} bike, used ${bike.make}, bikes for sale ${bikeLocation}`}
         url={`/bikes/${bike._id}`}
         image={images[0]}
         schema={{
@@ -139,18 +179,18 @@ const BikeDetailPage = () => {
             vehicleSchema(bike),
             breadcrumbSchema([
               { name: 'Home', url: '/' },
-              { name: 'Used Bikes', url: '/bikes' },
+              { name: 'Bikes', url: '/bikes' },
               { name: bikeTitle, url: `/bikes/${bike._id}` }
             ])
           ]
         }}
       />
-      <div className="bike-detail-page">
-      <div className="detail-container">
-        {/* Back Button */}
-        <button onClick={() => navigate(-1)} className="back-to-results">
-          ← Back to results
-        </button>
+      <div className="car-detail-page">
+        <div className="detail-container">
+          {/* Back Button */}
+          <button onClick={handleBackClick} className="back-to-results">
+            ← Back to results
+          </button>
 
         {/* Image Gallery */}
         <div className="image-gallery">
@@ -159,7 +199,7 @@ const BikeDetailPage = () => {
               src={getCurrentImage()} 
               alt={`${bike.make} ${bike.model}${bike.submodel ? ` ${bike.submodel}` : ''}`}
               onError={handleImageError}
-              onLoad={() => {}} // Image loaded successfully
+              onLoad={() => {}}
               style={{
                 width: '100%',
                 height: '100%',
@@ -167,18 +207,12 @@ const BikeDetailPage = () => {
                 background: '#f5f5f5'
               }}
             />
-            <button className="gallery-btn">
+            <button className="gallery-btn" onClick={() => {}}>
               📷 Gallery
             </button>
             <span className="image-counter">
               🖼️ {images.length}
             </span>
-            <button 
-              className={`save-floating-btn ${isSaved ? 'saved' : ''}`}
-              onClick={handleSave}
-            >
-              {isSaved ? '♥' : '♡'}
-            </button>
           </div>
           
           {images.length > 1 && (
@@ -192,7 +226,7 @@ const BikeDetailPage = () => {
                   onClick={() => setCurrentImageIndex(index)}
                   onError={(e) => {
                     console.error('Thumbnail image failed to load:', img);
-                    e.target.src = '/images/dummy/placeholder-bike.jpg';
+                    e.target.src = '/images/dummy/red-car.png';
                   }}
                   style={{
                     width: '100px',
@@ -219,7 +253,7 @@ const BikeDetailPage = () => {
         <div className="content-grid">
           {/* Left Column - Bike Details */}
           <div className="left-column">
-            {/* Location - Enhanced with distance */}
+            {/* Location - AutoTrader Style */}
             <div className="location-info">
               <span className="location-label">From</span>
               <span className="location-value">
@@ -233,26 +267,14 @@ const BikeDetailPage = () => {
               </span>
             </div>
 
-            {/* Title and Price - Enhanced with write-off warning */}
-            <div className="bike-header">
-              {/* Write-off Warning Badge - Show for CAT A, B, S, N, D */}
-              {bike.historyCheckId && 
-               bike.historyCheckId.writeOffCategory && 
-               ['A', 'B', 'S', 'N', 'D'].includes(bike.historyCheckId.writeOffCategory.toUpperCase()) && (
-                <div className="write-off-warning-badge">
-                  <span className="warning-icon">⚠️</span>
-                  <span className="warning-text">
-                    CAT {bike.historyCheckId.writeOffCategory.toUpperCase()}
-                  </span>
-                </div>
-              )}
-              
-              <h1 className="bike-title">
-                {bike.make} {bike.model}{bike.submodel ? ` ${bike.submodel}` : ''}
+            {/* Title and Price - AutoTrader Format */}
+            <div className="car-header">
+              <h1 className="car-make-model">
+                {bike.make} {bike.model}
               </h1>
-              <p className="bike-subtitle">
-                {bike.year} • {bike.engineCC ? `${bike.engineCC}cc` : ''} {bike.bikeType || 'Motorcycle'}
-              </p>
+              <h2 className="car-variant-line">
+                {generateComprehensiveBikeTitle(bike) || bike.displayTitle || generateVariantDisplay(bike)}
+              </h2>
               <div className="price-tag">
                 {formatPrice(bike.price)}
               </div>
@@ -274,13 +296,13 @@ const BikeDetailPage = () => {
                 <div className="spec-item">
                   <span className="spec-icon">📅</span>
                   <div className="spec-details">
-                    <span className="spec-label">Year</span>
-                    <span className="spec-value">{bike.year}</span>
+                    <span className="spec-label">Registration</span>
+                    <span className="spec-value">{bike.year} ({bike.registrationNumber || 'N/A'})</span>
                   </div>
                 </div>
 
                 <div className="spec-item">
-                  <span className="spec-icon">⛽</span>
+                  <span className="spec-icon">⚙️</span>
                   <div className="spec-details">
                     <span className="spec-label">Fuel type</span>
                     <span className="spec-value">{bike.fuelType || 'Petrol'}</span>
@@ -291,47 +313,37 @@ const BikeDetailPage = () => {
                   <span className="spec-icon">🏍️</span>
                   <div className="spec-details">
                     <span className="spec-label">Bike type</span>
-                    <span className="spec-value">{bike.bikeType || 'Motorcycle'}</span>
+                    <span className="spec-value">{bike.bikeType || 'Sport'}</span>
                   </div>
                 </div>
 
-                {bike.engineCC && (
-                  <div className="spec-item">
-                    <span className="spec-icon">🔧</span>
-                    <div className="spec-details">
-                      <span className="spec-label">Engine</span>
-                      <span className="spec-value">{bike.engineCC}cc</span>
-                    </div>
+                <div className="spec-item">
+                  <span className="spec-icon">🔧</span>
+                  <div className="spec-details">
+                    <span className="spec-label">Engine</span>
+                    <span className="spec-value">{bike.engineCC}cc</span>
                   </div>
-                )}
+                </div>
+
+                <div className="spec-item">
+                  <span className="spec-icon">⚙️</span>
+                  <div className="spec-details">
+                    <span className="spec-label">Gearbox</span>
+                    <span className="spec-value">
+                      {bike.transmission ? bike.transmission.charAt(0).toUpperCase() + bike.transmission.slice(1).toLowerCase() : 'Manual'}
+                    </span>
+                  </div>
+                </div>
 
                 <div className="spec-item">
                   <span className="spec-icon">🎨</span>
                   <div className="spec-details">
-                    <span className="spec-label">Colour</span>
-                    <span className="spec-value">{bike.color || 'N/A'}</span>
+                    <span className="spec-label">Body colour</span>
+                    <span className="spec-value">
+                      {formatColor(bike.color)}
+                    </span>
                   </div>
                 </div>
-
-                {bike.transmission && (
-                  <div className="spec-item">
-                    <span className="spec-icon">⚙️</span>
-                    <div className="spec-details">
-                      <span className="spec-label">Gearbox</span>
-                      <span className="spec-value">{bike.transmission}</span>
-                    </div>
-                  </div>
-                )}
-
-                {bike.condition && (
-                  <div className="spec-item">
-                    <span className="spec-icon">✨</span>
-                    <div className="spec-details">
-                      <span className="spec-label">Condition</span>
-                      <span className="spec-value">{bike.condition}</span>
-                    </div>
-                  </div>
-                )}
 
                 {/* MOT Due Information */}
                 <div className="spec-item">
@@ -345,9 +357,21 @@ const BikeDetailPage = () => {
                           month: 'short',
                           year: 'numeric'
                         })
-                      ) : (
-                        'Contact seller for MOT details'
-                      )}
+                      ) : bike.motHistory && bike.motHistory.length > 0 && bike.motHistory[0].expiryDate ? (
+                        new Date(bike.motHistory[0].expiryDate).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric'
+                        })
+                      ) : (() => {
+                        const currentYear = new Date().getFullYear();
+                        const vehicleAge = currentYear - bike.year;
+                        
+                        if (vehicleAge < 3) {
+                          return 'Not required (new vehicle)';
+                        }
+                        return 'Contact seller for MOT details';
+                      })()}
                     </span>
                   </div>
                 </div>
@@ -367,7 +391,6 @@ const BikeDetailPage = () => {
                 className="view-all-specs"
                 onClick={() => {
                   setShowAllFeatures(true);
-                  // Scroll to features section
                   setTimeout(() => {
                     const featuresSection = document.querySelector('.features-section');
                     if (featuresSection) {
@@ -376,7 +399,7 @@ const BikeDetailPage = () => {
                   }, 100);
                 }}
               >
-                ≡ View all spec and features →
+                ≡ Display all specs and features →
               </button>
             </div>
 
@@ -388,70 +411,20 @@ const BikeDetailPage = () => {
               </div>
             )}
 
-            {/* Running Costs Section */}
-            {bike.runningCosts && (bike.runningCosts.fuelEconomy?.combined || bike.runningCosts.co2Emissions || bike.runningCosts.insuranceGroup || bike.runningCosts.annualTax) && (
-              <div className="running-costs-section">
-                <h2>Running Costs</h2>
-                <div className="running-costs-grid">
-                  {bike.runningCosts.fuelEconomy?.combined && (
-                    <div className="cost-item">
-                      <span className="cost-icon">⛽</span>
-                      <div className="cost-details">
-                        <span className="cost-label">Fuel Economy (Combined)</span>
-                        <span className="cost-value">{bike.runningCosts.fuelEconomy.combined} mpg</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {bike.runningCosts.fuelEconomy?.urban && (
-                    <div className="cost-item">
-                      <span className="cost-icon">🏙️</span>
-                      <div className="cost-details">
-                        <span className="cost-label">Fuel Economy (Urban)</span>
-                        <span className="cost-value">{bike.runningCosts.fuelEconomy.urban} mpg</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {bike.runningCosts.fuelEconomy?.extraUrban && (
-                    <div className="cost-item">
-                      <span className="cost-icon">🛣️</span>
-                      <div className="cost-details">
-                        <span className="cost-label">Fuel Economy (Extra Urban)</span>
-                        <span className="cost-value">{bike.runningCosts.fuelEconomy.extraUrban} mpg</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {bike.runningCosts.co2Emissions && (
-                    <div className="cost-item">
-                      <span className="cost-icon">🌱</span>
-                      <div className="cost-details">
-                        <span className="cost-label">CO2 Emissions</span>
-                        <span className="cost-value">{bike.runningCosts.co2Emissions}g/km</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {bike.runningCosts.insuranceGroup && (
-                    <div className="cost-item">
-                      <span className="cost-icon">🛡️</span>
-                      <div className="cost-details">
-                        <span className="cost-label">Insurance Group</span>
-                        <span className="cost-value">{bike.runningCosts.insuranceGroup}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {bike.runningCosts.annualTax && (
-                    <div className="cost-item">
-                      <span className="cost-icon">💷</span>
-                      <div className="cost-details">
-                        <span className="cost-label">Annual Tax</span>
-                        <span className="cost-value">{formatPrice(bike.runningCosts.annualTax)}</span>
-                      </div>
-                    </div>
-                  )}
+            {/* YouTube Video Section */}
+            {bike.videoUrl && (
+              <div className="video-section">
+                <h2>Video</h2>
+                <div className="video-container">
+                  <iframe
+                    width="100%"
+                    height="400"
+                    src={bike.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                    title="Bike Video"
+                    style={{ border: 0 }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
                 </div>
               </div>
             )}
@@ -478,28 +451,27 @@ const BikeDetailPage = () => {
               distance={bike.distance}
             />
 
-            {/* Vehicle History Section - Always show, component handles missing VRM */}
+            {/* Vehicle History Section */}
             <VehicleHistorySection 
               vrm={bike.registrationNumber || bike.vrm}
-              historyCheckId={bike.historyCheckId}
+              carData={bike}
             />
 
-            {/* MOT History Section - Always show, component handles missing VRM */}
+            {/* MOT History Section */}
             <MOTHistorySection 
               vrm={bike.registrationNumber || bike.vrm}
+              carData={bike}
             />
 
-            {/* Meet the Seller Section - After MOT History */}
+            {/* Meet the Seller Section */}
             <div className="meet-seller-section">
               <h2>Meet the seller</h2>
               
               <div className="seller-details">
-                {/* Seller Type Badge */}
                 <span className="seller-type-badge">
                   {bike.sellerType === 'trade' || bike.sellerContact?.type === 'trade' ? 'Trade' : 'Private'}
                 </span>
                 
-                {/* Trade Dealer - Show Logo and Business Info */}
                 {(bike.sellerType === 'trade' || bike.sellerContact?.type === 'trade') && (
                   <div className="trade-seller-details">
                     {bike.dealerLogo && (
@@ -510,40 +482,52 @@ const BikeDetailPage = () => {
                     {bike.sellerContact?.businessName && (
                       <div className="dealer-business-name">{bike.sellerContact.businessName}</div>
                     )}
-                    <div className="dealer-location">
-                      📍 {extractTownName(bike.locationName) || 'Location available'}
-                    </div>
+                    {bike.sellerContact?.businessAddress && (
+                      <div className="dealer-business-address">
+                        {bike.sellerContact.businessAddress.street && (
+                          <div>{bike.sellerContact.businessAddress.street}</div>
+                        )}
+                        {bike.sellerContact.businessAddress.city && (
+                          <div>{bike.sellerContact.businessAddress.city}</div>
+                        )}
+                        {bike.sellerContact.businessAddress.postcode && (
+                          <div>{bike.sellerContact.businessAddress.postcode}</div>
+                        )}
+                        {bike.sellerContact.businessAddress.country && (
+                          <div>{bike.sellerContact.businessAddress.country}</div>
+                        )}
+                      </div>
+                    )}
+                    {!bike.sellerContact?.businessAddress && (
+                      <div className="dealer-location">
+                        📍 {extractTownName(bike.locationName) || 'Location available'}
+                        {bike.distance && bike.distance > 0 && (
+                          <> • <span className="distance-highlight">{Math.round(bike.distance)} miles away</span></>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
                 
-                {/* Private Seller */}
                 {(bike.sellerType === 'private' || bike.sellerContact?.type === 'private') && (
                   <div className="private-seller-details">
                     <div className="private-seller-label">Private Seller</div>
                     <div className="private-seller-location">
                       📍 {extractTownName(bike.locationName) || 'Location available'}
+                      {bike.distance && bike.distance > 0 && (
+                        <> • <span className="distance-highlight">{Math.round(bike.distance)} miles away</span></>
+                      )}
                     </div>
                   </div>
                 )}
 
-                {/* Contact Buttons */}
                 <div className="seller-contact-buttons">
-                  <button className="message-seller-btn">
-                    ✉️ Message seller
-                  </button>
-
                   {(bike.sellerContact?.phoneNumber || bike.phoneNumber) && (
                     <button className="call-seller-btn">
                       📞 {bike.sellerContact?.phoneNumber || bike.phoneNumber}
                     </button>
                   )}
                 </div>
-
-                {(bike.sellerContact?.phoneNumber || bike.phoneNumber) && (
-                  <div className="seller-protection-notice">
-                    Seller's number has been protected. <a href="#">Learn more</a>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -561,43 +545,22 @@ const BikeDetailPage = () => {
                   <div className="business-name">{bike.sellerContact.businessName}</div>
                 )}
                 <div className="seller-location">
-                  {extractTownName(bike.locationName)}{bike.distance ? ` • ${bike.distance} miles away` : ''}
+                  {extractTownName(bike.locationName)}
+                  {bike.distance && bike.distance > 0 && (
+                    <span className="distance-highlight"> • {Math.round(bike.distance)} miles away</span>
+                  )}
                 </div>
               </div>
-
-              <button className="message-btn">
-                ✉️ Message
-              </button>
 
               {(bike.sellerContact?.phoneNumber || bike.phoneNumber) && (
                 <button className="phone-btn">
                   📞 {bike.sellerContact?.phoneNumber || bike.phoneNumber}
                 </button>
               )}
-
-              <div className="seller-notice">
-                Seller's number has been protected. <a href="#">Learn more</a>
-              </div>
             </div>
-
-            {/* Quick Actions */}
-            <div className="quick-actions">
-              <button 
-                className={`action-btn save ${isSaved ? 'saved' : ''}`}
-                onClick={handleSave}
-              >
-                {isSaved ? '♥ Saved' : '♡ Save this bike'}
-              </button>
-              <button className="action-btn share">
-                🔗 Share
-              </button>
-              <button className="action-btn print">
-                🖨️ Print
-              </button>
-            </div>
-          </div>
           </div>
         </div>
+      </div>
       </div>
     </>
   );

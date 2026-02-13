@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import useBikeLookup from '../../hooks/useBikeLookup';
 import './SellYourBikePage.css';
 
 // Utility component for the "How to sell" steps
@@ -28,8 +29,9 @@ const GuideCard = ({ icon, title, description }) => (
 const SellYourBikePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { loading, error: apiError, bikeData, lookupBike, reset } = useBikeLookup();
   
-  // Get passed state from navigation (from advertising prices page)
+  // Get passed state from navigation
   const passedRegistration = location.state?.registrationNumber || '';
   const passedMileage = location.state?.mileage || '';
   
@@ -37,6 +39,8 @@ const SellYourBikePage = () => {
   const [mileage, setMileage] = useState(passedMileage);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showBikeDetails, setShowBikeDetails] = useState(false);
+  const [fetchedBikeData, setFetchedBikeData] = useState(null);
 
   // Update form when passed state changes
   useEffect(() => {
@@ -131,37 +135,112 @@ const SellYourBikePage = () => {
     }
     
     setIsLoading(true);
+    setShowBikeDetails(false);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('🔍 Looking up bike:', registration, 'with mileage:', mileage);
       
-      const vehicleData = generateMockBikeData(registration, mileage);
-      const advertId = uuidv4();
+      // Call real API to lookup bike
+      const result = await lookupBike(registration, mileage);
       
-      const bikeAdvertData = {
-        id: advertId,
-        vehicleData: vehicleData,
-        advertData: {
-          price: '',
-          description: '',
-          photos: [],
-          contactPhone: '',
-          contactEmail: '',
-          location: ''
-        },
-        status: 'draft',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
-      localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(bikeAdvertData));
-      navigate(`/bikes/selling/advert/edit/${advertId}`);
+      if (result) {
+        console.log('✅ Bike data received:', result);
+        setFetchedBikeData(result);
+        setShowBikeDetails(true);
+      }
     } catch (error) {
-      console.error('Error creating bike advert:', error);
-      alert('An error occurred. Please try again.');
+      console.error('❌ Error looking up bike:', error);
+      setErrors({ 
+        registration: error.message || 'Failed to fetch bike data. Please try again.' 
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleContinueToAdvert = () => {
+    if (!fetchedBikeData) return;
+    
+    const advertId = uuidv4();
+    
+    // Helper function to safely extract value
+    const getValue = (field) => {
+      if (field === null || field === undefined) return null;
+      if (typeof field === 'object' && field !== null && 'value' in field) {
+        return field.value;
+      }
+      return field;
+    };
+    
+    // Prepare bike advert data with fetched information
+    const bikeAdvertData = {
+      id: advertId,
+      vehicleData: {
+        registration: registration.toUpperCase(),
+        mileage: mileage,
+        make: getValue(fetchedBikeData.make) || 'Unknown',
+        model: getValue(fetchedBikeData.model) || 'Unknown',
+        year: getValue(fetchedBikeData.year) || new Date().getFullYear(),
+        color: getValue(fetchedBikeData.color) || 'Not specified',
+        fuelType: getValue(fetchedBikeData.fuelType) || 'Petrol',
+        engineCC: getValue(fetchedBikeData.engineCC) || getValue(fetchedBikeData.engineSize),
+        engineSize: getValue(fetchedBikeData.engineSize) || (getValue(fetchedBikeData.engineCC) ? `${getValue(fetchedBikeData.engineCC)}cc` : null),
+        bikeType: getValue(fetchedBikeData.bikeType) || 'Sport',
+        transmission: getValue(fetchedBikeData.transmission) || 'Manual',
+        variant: getValue(fetchedBikeData.variant),
+        previousOwners: getValue(fetchedBikeData.previousOwners),
+        motDue: getValue(fetchedBikeData.motDue) || getValue(fetchedBikeData.motExpiry) || getValue(fetchedBikeData.motExpiryDate),
+        estimatedValue: fetchedBikeData.valuation?.estimatedValue?.private || 
+                       fetchedBikeData.estimatedValue || 
+                       null,
+        // Running costs
+        combinedMpg: getValue(fetchedBikeData.combinedMpg) || 
+                    getValue(fetchedBikeData.runningCosts?.fuelEconomy?.combined),
+        urbanMpg: getValue(fetchedBikeData.urbanMpg) || 
+                 getValue(fetchedBikeData.runningCosts?.fuelEconomy?.urban),
+        extraUrbanMpg: getValue(fetchedBikeData.extraUrbanMpg) || 
+                      getValue(fetchedBikeData.runningCosts?.fuelEconomy?.extraUrban),
+        co2Emissions: getValue(fetchedBikeData.co2Emissions) || 
+                     getValue(fetchedBikeData.runningCosts?.co2Emissions),
+        annualTax: getValue(fetchedBikeData.annualTax) || 
+                  getValue(fetchedBikeData.runningCosts?.annualTax),
+        insuranceGroup: getValue(fetchedBikeData.insuranceGroup) || 
+                       getValue(fetchedBikeData.runningCosts?.insuranceGroup)
+      },
+      advertData: {
+        price: '',
+        description: '',
+        photos: [],
+        contactPhone: '',
+        contactEmail: '',
+        location: ''
+      },
+      status: 'draft',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    console.log('💾 Saving bike advert data:', bikeAdvertData);
+    localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(bikeAdvertData));
+    navigate(`/bikes/selling/advert/edit/${advertId}`);
+  };
+
+  const formatPrice = (price) => {
+    if (!price) return 'N/A';
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price);
+  };
+
+  const getValue = (field) => {
+    if (field === null || field === undefined) return null;
+    if (typeof field === 'object' && field !== null && 'value' in field) {
+      return field.value;
+    }
+    return field;
   };
 
   const sellSteps = [
@@ -275,10 +354,17 @@ const SellYourBikePage = () => {
                 <button 
                   className="sell-bike-button"
                   onClick={handleSellMyBike}
-                  disabled={isLoading}
+                  disabled={isLoading || loading}
                 >
-                  {isLoading ? 'Finding your bike...' : 'Sell My Bike'}
+                  {isLoading || loading ? 'Finding your bike...' : 'Sell My Bike'}
                 </button>
+                
+                {apiError && (
+                  <div className="error-banner">
+                    <span className="error-icon">⚠️</span>
+                    <p>{apiError}</p>
+                  </div>
+                )}
                 
                 <a href="/bikes/advertising-prices" className="advertising-link">
                   View Bike Advertising Packages →
@@ -288,6 +374,134 @@ const SellYourBikePage = () => {
         </div>
         </div>
       </section>
+
+      {/* Bike Details Section - Show after successful lookup */}
+      {showBikeDetails && fetchedBikeData && (
+        <section className="bike-details-section">
+          <div className="bike-details-container">
+            <div className="bike-details-card">
+              <div className="details-header">
+                <h2>✓ Bike Found</h2>
+                <p className="vrm-display">{registration.toUpperCase()}</p>
+              </div>
+
+              <div className="bike-info-grid">
+                {/* Basic Information */}
+                <div className="info-section">
+                  <h3>Basic Information</h3>
+                  <div className="info-items">
+                    <div className="info-item">
+                      <span className="info-label">Make</span>
+                      <span className="info-value">{getValue(fetchedBikeData.make) || 'Unknown'}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Model</span>
+                      <span className="info-value">{getValue(fetchedBikeData.model) || 'Unknown'}</span>
+                    </div>
+                    {getValue(fetchedBikeData.variant) && (
+                      <div className="info-item">
+                        <span className="info-label">Variant</span>
+                        <span className="info-value">{getValue(fetchedBikeData.variant)}</span>
+                      </div>
+                    )}
+                    <div className="info-item">
+                      <span className="info-label">Year</span>
+                      <span className="info-value">{getValue(fetchedBikeData.year)}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Colour</span>
+                      <span className="info-value">{getValue(fetchedBikeData.color) || 'Not specified'}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Mileage</span>
+                      <span className="info-value">{parseInt(mileage).toLocaleString()} miles</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Technical Specs */}
+                <div className="info-section">
+                  <h3>Technical Specifications</h3>
+                  <div className="info-items">
+                    <div className="info-item">
+                      <span className="info-label">Fuel Type</span>
+                      <span className="info-value">{getValue(fetchedBikeData.fuelType) || 'Petrol'}</span>
+                    </div>
+                    {(getValue(fetchedBikeData.engineCC) || getValue(fetchedBikeData.engineSize)) && (
+                      <div className="info-item">
+                        <span className="info-label">Engine</span>
+                        <span className="info-value">
+                          {getValue(fetchedBikeData.engineCC) || getValue(fetchedBikeData.engineSize)}cc
+                        </span>
+                      </div>
+                    )}
+                    <div className="info-item">
+                      <span className="info-label">Transmission</span>
+                      <span className="info-value">{getValue(fetchedBikeData.transmission) || 'Manual'}</span>
+                    </div>
+                    {getValue(fetchedBikeData.bikeType) && (
+                      <div className="info-item">
+                        <span className="info-label">Bike Type</span>
+                        <span className="info-value">{getValue(fetchedBikeData.bikeType)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Valuation */}
+                {fetchedBikeData.valuation?.estimatedValue && (
+                  <div className="info-section">
+                    <h3>Estimated Value</h3>
+                    <div className="info-items">
+                      {fetchedBikeData.valuation.estimatedValue.private && (
+                        <div className="info-item highlight">
+                          <span className="info-label">Private Sale</span>
+                          <span className="info-value price">
+                            {formatPrice(fetchedBikeData.valuation.estimatedValue.private)}
+                          </span>
+                        </div>
+                      )}
+                      {fetchedBikeData.valuation.estimatedValue.retail && (
+                        <div className="info-item">
+                          <span className="info-label">Dealer Price</span>
+                          <span className="info-value">{formatPrice(fetchedBikeData.valuation.estimatedValue.retail)}</span>
+                        </div>
+                      )}
+                      {fetchedBikeData.valuation.estimatedValue.partExchange && (
+                        <div className="info-item">
+                          <span className="info-label">Part Exchange</span>
+                          <span className="info-value">{formatPrice(fetchedBikeData.valuation.estimatedValue.partExchange)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="details-actions">
+                <button 
+                  className="continue-btn primary"
+                  onClick={handleContinueToAdvert}
+                >
+                  Continue to Create Advert →
+                </button>
+                <button 
+                  className="continue-btn secondary"
+                  onClick={() => {
+                    setShowBikeDetails(false);
+                    setFetchedBikeData(null);
+                    setRegistration('');
+                    setMileage('');
+                    reset();
+                  }}
+                >
+                  Check Another Bike
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Section 2: Advertising Card */}
       <section className="advertising-card-section">

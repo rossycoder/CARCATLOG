@@ -53,6 +53,7 @@ import BikeAdvertEditPage from './pages/Bikes/BikeAdvertEditPage'
 import BikeSellerContactPage from './pages/Bikes/BikeSellerContactPage'
 import BikeAdvertisingPricesPage from './pages/Bikes/BikeAdvertisingPricesPage'
 import BikeAdvertPaymentSuccessPage from './pages/Bikes/BikeAdvertPaymentSuccessPage'
+import BikeCheckPage from './pages/Bikes/BikeCheckPage'
 
 // Van Pages
 import VansPage from './pages/Vans/VansPage'
@@ -147,6 +148,7 @@ function App() {
               <Route path="/bikes/new-bikes" element={<NewBikesPage />} />
               <Route path="/bikes/sell-your-bike" element={<SellYourBikePage />} />
               <Route path="/bikes/find-your-bike" element={<BikeFinderFormPage />} />
+              <Route path="/bikes/check" element={<BikeCheckPage />} />
               <Route path="/bikes/selling/advert/edit/:advertId" element={<BikeAdvertEditPage />} />
               <Route path="/bikes/selling/advert/contact/:advertId" element={<BikeSellerContactPage />} />
               <Route path="/bikes/advertising-prices" element={<BikeAdvertisingPricesPage />} />

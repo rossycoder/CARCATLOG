@@ -898,7 +898,12 @@ const BikeAdvertEditPage = () => {
             <div className="spec-grid">
               <div className="spec-item">
                 <label>MOT Due</label>
-                <span>{vehicleData.motDue || 'Not available'}</span>
+                <span>
+                  {vehicleData.motDue || 
+                   vehicleData.motExpiry || 
+                   vehicleData.motExpiryDate || 
+                   'Contact seller for MOT details'}
+                </span>
               </div>
               <div className="spec-item">
                 <label>Fuel type</label>
@@ -910,7 +915,10 @@ const BikeAdvertEditPage = () => {
               </div>
               <div className="spec-item">
                 <label>Engine</label>
-                <span>{vehicleData.engineSize || 'Not specified'}</span>
+                <span>
+                  {vehicleData.engineSize || 
+                   (vehicleData.engineCC ? `${vehicleData.engineCC}cc` : 'Not specified')}
+                </span>
               </div>
               <div className="spec-item">
                 <label>Color</label>
