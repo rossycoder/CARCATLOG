@@ -1685,19 +1685,19 @@ const CarAdvertEditPage = () => {
                 {!isVehicleDetailsEditing ? (
                   <span>
                     {(() => {
-                      // Debug MOT data
-                      console.log('🔧 MOT Debug on CarAdvertEditPage:', {
-                        motLoading,
-                        motData,
-                        vehicleDataMotDue: vehicleData.motDue,
-                        vehicleDataMotExpiry: vehicleData.motExpiry,
-                        vehicleDataMotStatus: vehicleData.motStatus,
-                        vehicleDataMotHistory: vehicleData.motHistory?.length,
-                        fullVehicleData: vehicleData
+                      // CRITICAL DEBUG: Log ALL MOT-related data
+                      console.log('🔧 MOT Display Debug:', {
+                        'vehicleData exists': !!vehicleData,
+                        'vehicleData.motDue': vehicleData?.motDue,
+                        'vehicleData.motExpiry': vehicleData?.motExpiry,
+                        'vehicleData.motStatus': vehicleData?.motStatus,
+                        'vehicleData.motHistory length': vehicleData?.motHistory?.length,
+                        'vehicleData.motHistory[0]': vehicleData?.motHistory?.[0],
+                        'Full vehicleData keys': vehicleData ? Object.keys(vehicleData) : []
                       });
                       
                       // Priority 1: Check vehicleData.motDue (from database)
-                      if (vehicleData.motDue) {
+                      if (vehicleData?.motDue) {
                         const dateStr = vehicleData.motDue;
                         if (typeof dateStr === 'string' || dateStr instanceof Date) {
                           const date = new Date(dateStr);
@@ -1709,7 +1709,7 @@ const CarAdvertEditPage = () => {
                       }
                       
                       // Priority 2: Check vehicleData.motExpiry (from database)
-                      if (vehicleData.motExpiry) {
+                      if (vehicleData?.motExpiry) {
                         const dateValue = vehicleData.motExpiry;
                         if (typeof dateValue === 'string' || dateValue instanceof Date) {
                           const date = new Date(dateValue);
@@ -1721,7 +1721,7 @@ const CarAdvertEditPage = () => {
                       }
                       
                       // Priority 3: Check motHistory array (from database)
-                      if (vehicleData.motHistory && vehicleData.motHistory.length > 0) {
+                      if (vehicleData?.motHistory && vehicleData.motHistory.length > 0) {
                         const latestTest = vehicleData.motHistory[0];
                         if (latestTest && latestTest.expiryDate) {
                           const date = new Date(latestTest.expiryDate);
@@ -1733,7 +1733,7 @@ const CarAdvertEditPage = () => {
                       }
                       
                       // Fallback - MOT data will be fetched and saved on page load
-                      console.log('⚠️ No MOT data in database yet (will be fetched automatically)');
+                      console.log('⚠️ No MOT data found - showing fallback message');
                       return 'Contact seller for MOT details';
                     })()}
                   </span>
