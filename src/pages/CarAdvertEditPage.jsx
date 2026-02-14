@@ -405,10 +405,15 @@ const CarAdvertEditPage = () => {
                   motHistory: enhancedVehicleData.motHistory || vehicleData.motHistory || []
                 };
                 
-                // Update frontend state
+                // CRITICAL: Update frontend state while preserving valuation
                 setVehicleData(prev => ({
                   ...prev,
-                  ...motDataToSave
+                  ...motDataToSave,
+                  // Explicitly preserve valuation data
+                  valuation: prev.valuation,
+                  estimatedValue: prev.estimatedValue,
+                  allValuations: prev.allValuations,
+                  price: prev.price
                 }));
                 
                 // CRITICAL: Save MOT data to database immediately
@@ -443,10 +448,15 @@ const CarAdvertEditPage = () => {
                     
                     console.log('✅ MOT data fetched from DVLA:', dvlaMotData);
                     
-                    // Update frontend state
+                    // CRITICAL: Update frontend state while preserving valuation
                     setVehicleData(prev => ({
                       ...prev,
-                      ...dvlaMotData
+                      ...dvlaMotData,
+                      // Explicitly preserve valuation data
+                      valuation: prev.valuation,
+                      estimatedValue: prev.estimatedValue,
+                      allValuations: prev.allValuations,
+                      price: prev.price
                     }));
                     
                     // Save to database
@@ -472,10 +482,15 @@ const CarAdvertEditPage = () => {
                   motExpiry: motDueDate
                 };
                 
-                // Update frontend state
+                // CRITICAL: Update frontend state while preserving valuation
                 setVehicleData(prev => ({
                   ...prev,
-                  ...newCarMotData
+                  ...newCarMotData,
+                  // Explicitly preserve valuation data
+                  valuation: prev.valuation,
+                  estimatedValue: prev.estimatedValue,
+                  allValuations: prev.allValuations,
+                  price: prev.price
                 }));
                 
                 // CRITICAL: Save calculated MOT data to database
@@ -519,7 +534,20 @@ const CarAdvertEditPage = () => {
         console.log('Advert Data:', response.data.advertData);
         console.log('Estimated Value:', response.data.vehicleData?.estimatedValue);
         
-        setVehicleData(response.data.vehicleData);
+        // CRITICAL: Merge with existing vehicleData to preserve any data already loaded
+        setVehicleData(prev => ({
+          ...prev,
+          ...response.data.vehicleData,
+          // Preserve valuation if it exists in prev
+          valuation: response.data.vehicleData.valuation || prev?.valuation,
+          estimatedValue: response.data.vehicleData.estimatedValue || prev?.estimatedValue,
+          allValuations: response.data.vehicleData.allValuations || prev?.allValuations,
+          // Preserve MOT data if it exists in prev
+          motDue: response.data.vehicleData.motDue || prev?.motDue,
+          motExpiry: response.data.vehicleData.motExpiry || prev?.motExpiry,
+          motStatus: response.data.vehicleData.motStatus || prev?.motStatus,
+          motHistory: response.data.vehicleData.motHistory || prev?.motHistory
+        }));
         
         // Don't fetch MOT data from API to avoid charges
         // For new users: MOT data should come from the initial vehicle lookup API call
@@ -662,7 +690,15 @@ const CarAdvertEditPage = () => {
                   };
                   
                   console.log('✅ MOT from DVLA (fallback):', dvlaMotData);
-                  setVehicleData(prev => ({ ...prev, ...dvlaMotData }));
+                  setVehicleData(prev => ({ 
+                    ...prev, 
+                    ...dvlaMotData,
+                    // Explicitly preserve valuation data
+                    valuation: prev.valuation,
+                    estimatedValue: prev.estimatedValue,
+                    allValuations: prev.allValuations,
+                    price: prev.price
+                  }));
                   await api.patch(`/vehicles/${advertId}`, dvlaMotData);
                   console.log('✅ DVLA MOT saved (fallback)');
                 }
