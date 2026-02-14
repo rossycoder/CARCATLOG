@@ -298,15 +298,25 @@ const CarAdvertEditPage = () => {
           
           // CRITICAL: Check if MOT data is missing
           const needsMOTData = !vehicleData.motDue && !vehicleData.motExpiry;
+          
+          // CRITICAL: Check if MOT history exists (even if motDue is missing)
+          const hasMOTHistory = vehicleData.motHistory && vehicleData.motHistory.length > 0;
+          
           console.log('🔧 MOT Check:', {
             motDue: vehicleData.motDue,
             motExpiry: vehicleData.motExpiry,
+            motHistoryCount: vehicleData.motHistory?.length || 0,
             needsMOTData,
-            willFetchMOT: needsMOTData && vehicleData.registrationNumber
+            hasMOTHistory,
+            willFetchMOT: needsMOTData && !hasMOTHistory && vehicleData.registrationNumber
           });
           
+          // CRITICAL: Don't fetch if MOT history already exists (prevents duplicate API calls)
+          const shouldFetchMOT = needsMOTData && !hasMOTHistory;
+          
           // Only fetch enhanced data for new user cars or if data is missing
-          if (vehicleData.registrationNumber && (isNewUserCar || needsEnhancedData || needsMOTData)) {
+          // IMPORTANT: Skip if MOT history already exists to prevent duplicate API calls
+          if (vehicleData.registrationNumber && (isNewUserCar || needsEnhancedData || shouldFetchMOT)) {
             if (isNewUserCar) {
               console.log('🆕 New user car detected - fetching fresh API data for running costs and valuation');
             } else if (needsMOTData) {
@@ -382,9 +392,12 @@ const CarAdvertEditPage = () => {
                 console.log('⚠️ No running costs in enhanced data');
               }
               
-              // Update MOT data if available AND save to database
-              if (enhancedVehicleData.motStatus || enhancedVehicleData.motDue || enhancedVehicleData.motExpiry) {
-                console.log('🔧 Updating MOT data from enhanced data');
+              // CRITICAL: Only update MOT data if it doesn't already exist in database
+              // This prevents duplicate API calls and overwrites
+              const hasMOTDataInDB = vehicleData.motHistory && vehicleData.motHistory.length > 0;
+              
+              if (!hasMOTDataInDB && (enhancedVehicleData.motStatus || enhancedVehicleData.motDue || enhancedVehicleData.motExpiry)) {
+                console.log('🔧 Updating MOT data from enhanced data (first time)');
                 const motDataToSave = {
                   motStatus: enhancedVehicleData.motStatus || vehicleData.motStatus,
                   motDue: enhancedVehicleData.motDue || enhancedVehicleData.motExpiry || vehicleData.motDue,
@@ -411,6 +424,8 @@ const CarAdvertEditPage = () => {
                 } catch (saveError) {
                   console.error('❌ Failed to save MOT data to database:', saveError.message);
                 }
+              } else if (hasMOTDataInDB) {
+                console.log('✅ MOT data already exists in database - skipping update to prevent duplicate API calls');
               } else {
                 // FALLBACK: Try fetching MOT from DVLA if CheckCarDetails didn't have it
                 console.log('⚠️ No MOT data from CheckCarDetails, trying DVLA...');
@@ -606,9 +621,11 @@ const CarAdvertEditPage = () => {
               });
             }
             
-            // CRITICAL: Handle MOT data in fallback path too
-            if (enhancedVehicleData.motStatus || enhancedVehicleData.motDue || enhancedVehicleData.motExpiry) {
-              console.log('🔧 Updating MOT data from enhanced data (fallback)');
+            // CRITICAL: Only update MOT data in fallback if it doesn't already exist
+            const hasMOTDataInDB = response.data.vehicleData?.motHistory && response.data.vehicleData.motHistory.length > 0;
+            
+            if (!hasMOTDataInDB && (enhancedVehicleData.motStatus || enhancedVehicleData.motDue || enhancedVehicleData.motExpiry)) {
+              console.log('🔧 Updating MOT data from enhanced data (fallback - first time)');
               setVehicleData(prev => ({
                 ...prev,
                 motStatus: enhancedVehicleData.motStatus,
@@ -627,6 +644,8 @@ const CarAdvertEditPage = () => {
               } catch (saveError) {
                 console.error('❌ Failed to save MOT data (fallback):', saveError.message);
               }
+            } else if (hasMOTDataInDB) {
+              console.log('✅ MOT data already exists in database (fallback) - skipping update');
             } else {
               // DVLA Fallback in advert service path
               console.log('⚠️ No MOT from CheckCarDetails (fallback), trying DVLA...');
