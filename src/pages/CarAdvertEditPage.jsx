@@ -160,6 +160,14 @@ const CarAdvertEditPage = () => {
           console.log('✅ Vehicle found in vehicles collection');
           const vehicleData = vehicleResponse.data.data;
           
+          // CRITICAL DEBUG: Check what price data is in database
+          console.log('💰 Database price data:', {
+            price: vehicleData.price,
+            estimatedValue: vehicleData.estimatedValue,
+            valuation: vehicleData.valuation,
+            allValuations: vehicleData.allValuations
+          });
+          
           // Ensure allValuations and valuation are properly structured
           const enhancedVehicleData = {
             ...vehicleData,
@@ -170,7 +178,12 @@ const CarAdvertEditPage = () => {
               trade: vehicleData.valuation.partExchangePrice
             } : vehicleData.allValuations,
             // Keep original estimatedValue as fallback
-            estimatedValue: vehicleData.valuation?.privatePrice || vehicleData.estimatedValue
+            estimatedValue: vehicleData.valuation?.privatePrice || vehicleData.estimatedValue,
+            // CRITICAL: Preserve MOT data from database
+            motDue: vehicleData.motDue,
+            motExpiry: vehicleData.motExpiry,
+            motStatus: vehicleData.motStatus,
+            motHistory: vehicleData.motHistory
           };
           
           setVehicleData(enhancedVehicleData);
@@ -278,13 +291,26 @@ const CarAdvertEditPage = () => {
             isNewUserCar,
             advertStatus: vehicleData.advertStatus,
             hasValuation: !!vehicleData.valuation?.privatePrice,
-            hasRunningCosts: !!vehicleData.runningCosts?.annualTax
+            hasRunningCosts: !!vehicleData.runningCosts?.annualTax,
+            hasMOTData: !!(vehicleData.motDue || vehicleData.motExpiry),
+            registrationNumber: vehicleData.registrationNumber
+          });
+          
+          // CRITICAL: Check if MOT data is missing
+          const needsMOTData = !vehicleData.motDue && !vehicleData.motExpiry;
+          console.log('🔧 MOT Check:', {
+            motDue: vehicleData.motDue,
+            motExpiry: vehicleData.motExpiry,
+            needsMOTData,
+            willFetchMOT: needsMOTData && vehicleData.registrationNumber
           });
           
           // Only fetch enhanced data for new user cars or if data is missing
-          if (vehicleData.registrationNumber && (isNewUserCar || needsEnhancedData)) {
+          if (vehicleData.registrationNumber && (isNewUserCar || needsEnhancedData || needsMOTData)) {
             if (isNewUserCar) {
               console.log('🆕 New user car detected - fetching fresh API data for running costs and valuation');
+            } else if (needsMOTData) {
+              console.log('🔧 MOT data missing - fetching from API...');
             } else {
               console.log('🔍 Existing car missing data - fetching enhanced data...');
             }
@@ -314,11 +340,18 @@ const CarAdvertEditPage = () => {
                                    enhancedVehicleData.valuation.estimatedValue?.retail ||
                                    enhancedVehicleData.valuation.estimatedValue;
                 
-                if (privatePrice) {
+                if (privatePrice && privatePrice > 0) {
                   setAdvertData(prev => ({
                     ...prev,
                     price: privatePrice
                   }));
+                  console.log('✅ Price set from valuation:', privatePrice);
+                }
+              } else {
+                // No valuation available - keep existing price or let user set manually
+                console.log('⚠️ No valuation data available - user must set price manually');
+                if (!vehicleData.price || vehicleData.price === 0) {
+                  console.log('💡 Tip: Research similar vehicles to set a fair price');
                 }
               }
               
@@ -349,26 +382,95 @@ const CarAdvertEditPage = () => {
                 console.log('⚠️ No running costs in enhanced data');
               }
               
-              // Update MOT data if available
+              // Update MOT data if available AND save to database
               if (enhancedVehicleData.motStatus || enhancedVehicleData.motDue || enhancedVehicleData.motExpiry) {
                 console.log('🔧 Updating MOT data from enhanced data');
+                const motDataToSave = {
+                  motStatus: enhancedVehicleData.motStatus || vehicleData.motStatus,
+                  motDue: enhancedVehicleData.motDue || enhancedVehicleData.motExpiry || vehicleData.motDue,
+                  motExpiry: enhancedVehicleData.motExpiry || enhancedVehicleData.motDue || vehicleData.motExpiry,
+                  motHistory: enhancedVehicleData.motHistory || vehicleData.motHistory || []
+                };
+                
+                // Update frontend state
                 setVehicleData(prev => ({
                   ...prev,
-                  motStatus: enhancedVehicleData.motStatus || prev.motStatus,
-                  motDue: enhancedVehicleData.motDue || enhancedVehicleData.motExpiry || prev.motDue,
-                  motExpiry: enhancedVehicleData.motExpiry || enhancedVehicleData.motDue || prev.motExpiry
+                  ...motDataToSave
                 }));
-              } else if (enhancedVehicleData.year >= 2020) {
+                
+                // CRITICAL: Save MOT data to database immediately
+                try {
+                  console.log('💾 Saving MOT data to database...');
+                  await api.patch(`/vehicles/${advertId}`, {
+                    motStatus: motDataToSave.motStatus,
+                    motDue: motDataToSave.motDue,
+                    motExpiry: motDataToSave.motExpiry,
+                    motHistory: motDataToSave.motHistory
+                  });
+                  console.log('✅ MOT data saved to database successfully');
+                } catch (saveError) {
+                  console.error('❌ Failed to save MOT data to database:', saveError.message);
+                }
+              } else {
+                // FALLBACK: Try fetching MOT from DVLA if CheckCarDetails didn't have it
+                console.log('⚠️ No MOT data from CheckCarDetails, trying DVLA...');
+                try {
+                  const dvlaResponse = await api.post('/vehicles/dvla-lookup', {
+                    registrationNumber: vehicleData.registrationNumber
+                  });
+                  
+                  if (dvlaResponse.data?.data?.motExpiryDate) {
+                    const dvlaMotData = {
+                      motStatus: dvlaResponse.data.data.motStatus || 'Valid',
+                      motDue: dvlaResponse.data.data.motExpiryDate,
+                      motExpiry: dvlaResponse.data.data.motExpiryDate
+                    };
+                    
+                    console.log('✅ MOT data fetched from DVLA:', dvlaMotData);
+                    
+                    // Update frontend state
+                    setVehicleData(prev => ({
+                      ...prev,
+                      ...dvlaMotData
+                    }));
+                    
+                    // Save to database
+                    await api.patch(`/vehicles/${advertId}`, dvlaMotData);
+                    console.log('✅ DVLA MOT data saved to database');
+                  } else {
+                    console.log('⚠️ No MOT data available from DVLA either');
+                  }
+                } catch (dvlaError) {
+                  console.error('❌ Failed to fetch MOT from DVLA:', dvlaError.message);
+                }
+              }
+              
+              if (enhancedVehicleData.year >= 2020) {
                 // For new cars (2020+), calculate MOT due date (3 years from first registration)
                 const motDueYear = enhancedVehicleData.year + 3;
                 const motDueDate = `${motDueYear}-10-31`; // Approximate date
                 console.log(`🔧 Setting MOT due for new car: ${motDueDate}`);
-                setVehicleData(prev => ({
-                  ...prev,
+                
+                const newCarMotData = {
                   motStatus: 'Not due',
                   motDue: motDueDate,
                   motExpiry: motDueDate
+                };
+                
+                // Update frontend state
+                setVehicleData(prev => ({
+                  ...prev,
+                  ...newCarMotData
                 }));
+                
+                // CRITICAL: Save calculated MOT data to database
+                try {
+                  console.log('💾 Saving calculated MOT data to database...');
+                  await api.patch(`/vehicles/${advertId}`, newCarMotData);
+                  console.log('✅ Calculated MOT data saved to database successfully');
+                } catch (saveError) {
+                  console.error('❌ Failed to save calculated MOT data:', saveError.message);
+                }
               } else {
                 console.log('🔧 No MOT data available, setting default message');
                 setVehicleData(prev => ({
@@ -434,8 +536,17 @@ const CarAdvertEditPage = () => {
           hasRunningCosts: !!response.data.vehicleData?.runningCosts?.annualTax
         });
         
+        // CRITICAL: Also check for MOT data in fallback path
+        const needsMOTData = !response.data.vehicleData?.motDue && !response.data.vehicleData?.motExpiry;
+        console.log('🔧 MOT Check (fallback):', {
+          motDue: response.data.vehicleData?.motDue,
+          motExpiry: response.data.vehicleData?.motExpiry,
+          needsMOTData,
+          willFetchMOT: needsMOTData && response.data.vehicleData?.registrationNumber
+        });
+        
         // Only fetch enhanced data for new user cars or if data is missing
-        if (response.data.vehicleData?.registrationNumber && (isNewUserCar || needsEnhancedData)) {
+        if (response.data.vehicleData?.registrationNumber && (isNewUserCar || needsEnhancedData || needsMOTData)) {
           if (isNewUserCar) {
             console.log('🆕 New user car detected (fallback) - fetching fresh API data for running costs and valuation');
           } else {
@@ -493,6 +604,52 @@ const CarAdvertEditPage = () => {
                   runningCosts: newRunningCosts
                 };
               });
+            }
+            
+            // CRITICAL: Handle MOT data in fallback path too
+            if (enhancedVehicleData.motStatus || enhancedVehicleData.motDue || enhancedVehicleData.motExpiry) {
+              console.log('🔧 Updating MOT data from enhanced data (fallback)');
+              setVehicleData(prev => ({
+                ...prev,
+                motStatus: enhancedVehicleData.motStatus,
+                motDue: enhancedVehicleData.motDue || enhancedVehicleData.motExpiry,
+                motExpiry: enhancedVehicleData.motExpiry || enhancedVehicleData.motDue
+              }));
+              
+              // Save to database
+              try {
+                await api.patch(`/vehicles/${advertId}`, {
+                  motStatus: enhancedVehicleData.motStatus,
+                  motDue: enhancedVehicleData.motDue || enhancedVehicleData.motExpiry,
+                  motExpiry: enhancedVehicleData.motExpiry || enhancedVehicleData.motDue
+                });
+                console.log('✅ MOT data saved (fallback)');
+              } catch (saveError) {
+                console.error('❌ Failed to save MOT data (fallback):', saveError.message);
+              }
+            } else {
+              // DVLA Fallback in advert service path
+              console.log('⚠️ No MOT from CheckCarDetails (fallback), trying DVLA...');
+              try {
+                const dvlaResponse = await api.post('/vehicles/dvla-lookup', {
+                  registrationNumber: response.data.vehicleData.registrationNumber
+                });
+                
+                if (dvlaResponse.data?.data?.motExpiryDate) {
+                  const dvlaMotData = {
+                    motStatus: dvlaResponse.data.data.motStatus || 'Valid',
+                    motDue: dvlaResponse.data.data.motExpiryDate,
+                    motExpiry: dvlaResponse.data.data.motExpiryDate
+                  };
+                  
+                  console.log('✅ MOT from DVLA (fallback):', dvlaMotData);
+                  setVehicleData(prev => ({ ...prev, ...dvlaMotData }));
+                  await api.patch(`/vehicles/${advertId}`, dvlaMotData);
+                  console.log('✅ DVLA MOT saved (fallback)');
+                }
+              } catch (dvlaError) {
+                console.error('❌ DVLA MOT fetch failed (fallback):', dvlaError.message);
+              }
             }
           } catch (enhancedError) {
             console.warn('⚠️ Failed to fetch enhanced data:', enhancedError.message);
@@ -1510,13 +1667,14 @@ const CarAdvertEditPage = () => {
                   <span>
                     {(() => {
                       // Debug MOT data
-                      console.log('🔧 MOT Debug:', {
+                      console.log('🔧 MOT Debug on CarAdvertEditPage:', {
                         motLoading,
                         motData,
                         vehicleDataMotDue: vehicleData.motDue,
                         vehicleDataMotExpiry: vehicleData.motExpiry,
                         vehicleDataMotStatus: vehicleData.motStatus,
-                        vehicleDataMotHistory: vehicleData.motHistory?.length
+                        vehicleDataMotHistory: vehicleData.motHistory?.length,
+                        fullVehicleData: vehicleData
                       });
                       
                       // Priority 1: Check vehicleData.motDue (from database)
@@ -1525,6 +1683,7 @@ const CarAdvertEditPage = () => {
                         if (typeof dateStr === 'string' || dateStr instanceof Date) {
                           const date = new Date(dateStr);
                           if (!isNaN(date.getTime())) {
+                            console.log('✅ Using vehicleData.motDue:', date);
                             return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
                           }
                         }
@@ -1536,6 +1695,7 @@ const CarAdvertEditPage = () => {
                         if (typeof dateValue === 'string' || dateValue instanceof Date) {
                           const date = new Date(dateValue);
                           if (!isNaN(date.getTime())) {
+                            console.log('✅ Using vehicleData.motExpiry:', date);
                             return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
                           }
                         }
@@ -1547,29 +1707,14 @@ const CarAdvertEditPage = () => {
                         if (latestTest && latestTest.expiryDate) {
                           const date = new Date(latestTest.expiryDate);
                           if (!isNaN(date.getTime())) {
+                            console.log('✅ Using vehicleData.motHistory[0].expiryDate:', date);
                             return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
                           }
                         }
                       }
                       
-                      // Priority 4: Check motData from API call
-                      if (motLoading) {
-                        return 'Loading...';
-                      } else if (motData?.mot?.motDueDate) {
-                        const dateStr = motData.mot.motDueDate;
-                        const [year, month, day] = dateStr.split('-').map(Number);
-                        const date = new Date(year, month - 1, day);
-                        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                      } else if (motData?.expiryDate) {
-                        const dateStr = motData.expiryDate;
-                        const [year, month, day] = dateStr.split('-').map(Number);
-                        const date = new Date(year, month - 1, day);
-                        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                      } else if (motData?.mot?.motStatus) {
-                        return motData.mot.motStatus;
-                      }
-                      
-                      // Fallback
+                      // Fallback - MOT data will be fetched and saved on page load
+                      console.log('⚠️ No MOT data in database yet (will be fetched automatically)');
                       return 'Contact seller for MOT details';
                     })()}
                   </span>
@@ -1670,12 +1815,15 @@ const CarAdvertEditPage = () => {
                   />
                 )}
               </div>
-              <div className="spec-item">
-                <label>Emission Class</label>
-                <span>
-                  {enhancedData?.emissionClass || vehicleData.emissionClass || '-'}
-                </span>
-              </div>
+              {/* Only show Emission Class if data is available */}
+              {(enhancedData?.emissionClass || vehicleData.emissionClass) && (
+                <div className="spec-item">
+                  <label>Emission Class</label>
+                  <span>
+                    {enhancedData?.emissionClass || vehicleData.emissionClass}
+                  </span>
+                </div>
+              )}
             </div>
           </section>
 
