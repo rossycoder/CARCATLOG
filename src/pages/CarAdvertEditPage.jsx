@@ -183,7 +183,11 @@ const CarAdvertEditPage = () => {
             dealerId: vehicleData.dealerId,
             hasAdvertisingPackage: !!vehicleData.advertisingPackage?.packageId,
             packageId: vehicleData.advertisingPackage?.packageId,
-            willShowSaveButton: vehicleData.isDealerListing || !!vehicleData.advertisingPackage?.packageId
+            willShowSaveButton: vehicleData.isDealerListing || !!vehicleData.advertisingPackage?.packageId,
+            motDue: vehicleData.motDue,
+            motExpiry: vehicleData.motExpiry,
+            motStatus: vehicleData.motStatus,
+            motHistoryLength: vehicleData.motHistory?.length || 0
           });
           
           // Populate form fields with existing data
@@ -1511,9 +1515,44 @@ const CarAdvertEditPage = () => {
                         motData,
                         vehicleDataMotDue: vehicleData.motDue,
                         vehicleDataMotExpiry: vehicleData.motExpiry,
-                        vehicleDataMotStatus: vehicleData.motStatus
+                        vehicleDataMotStatus: vehicleData.motStatus,
+                        vehicleDataMotHistory: vehicleData.motHistory?.length
                       });
                       
+                      // Priority 1: Check vehicleData.motDue (from database)
+                      if (vehicleData.motDue) {
+                        const dateStr = vehicleData.motDue;
+                        if (typeof dateStr === 'string' || dateStr instanceof Date) {
+                          const date = new Date(dateStr);
+                          if (!isNaN(date.getTime())) {
+                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                          }
+                        }
+                      }
+                      
+                      // Priority 2: Check vehicleData.motExpiry (from database)
+                      if (vehicleData.motExpiry) {
+                        const dateValue = vehicleData.motExpiry;
+                        if (typeof dateValue === 'string' || dateValue instanceof Date) {
+                          const date = new Date(dateValue);
+                          if (!isNaN(date.getTime())) {
+                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                          }
+                        }
+                      }
+                      
+                      // Priority 3: Check motHistory array (from database)
+                      if (vehicleData.motHistory && vehicleData.motHistory.length > 0) {
+                        const latestTest = vehicleData.motHistory[0];
+                        if (latestTest && latestTest.expiryDate) {
+                          const date = new Date(latestTest.expiryDate);
+                          if (!isNaN(date.getTime())) {
+                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                          }
+                        }
+                      }
+                      
+                      // Priority 4: Check motData from API call
                       if (motLoading) {
                         return 'Loading...';
                       } else if (motData?.mot?.motDueDate) {
@@ -1528,44 +1567,10 @@ const CarAdvertEditPage = () => {
                         return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
                       } else if (motData?.mot?.motStatus) {
                         return motData.mot.motStatus;
-                      } else if (vehicleData.motDue) {
-                        const dateStr = vehicleData.motDue;
-                        if (typeof dateStr === 'string') {
-                          // Handle both ISO strings and date-only strings
-                          const date = new Date(dateStr);
-                          if (!isNaN(date.getTime())) {
-                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                          }
-                        } else if (typeof dateStr === 'object' && dateStr !== null) {
-                          // Handle wrapped object format {value: 'date'}
-                          return 'Contact seller for MOT details';
-                        }
-                        return 'Contact seller for MOT details';
-                      } else if (vehicleData.motExpiry) {
-                        const dateValue = vehicleData.motExpiry;
-                        if (typeof dateValue === 'string' || dateValue instanceof Date || !isNaN(Date.parse(dateValue))) {
-                          const date = new Date(dateValue);
-                          if (!isNaN(date.getTime())) {
-                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                          }
-                        } else if (typeof dateValue === 'object' && dateValue !== null) {
-                          // Handle wrapped object format {value: 'date'}
-                          return 'Contact seller for MOT details';
-                        }
-                        return 'Contact seller for MOT details';
-                      } else if (vehicleData.motHistory && vehicleData.motHistory.length > 0) {
-                        // BONUS TIP: Extract from motHistory array if motDue/motExpiry not set
-                        const latestTest = vehicleData.motHistory[0];
-                        if (latestTest && latestTest.expiryDate) {
-                          const date = new Date(latestTest.expiryDate);
-                          if (!isNaN(date.getTime())) {
-                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                          }
-                        }
-                        return 'Contact seller for MOT details';
-                      } else {
-                        return 'Contact seller for MOT details';
                       }
+                      
+                      // Fallback
+                      return 'Contact seller for MOT details';
                     })()}
                   </span>
                 ) : (
