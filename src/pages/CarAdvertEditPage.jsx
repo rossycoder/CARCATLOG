@@ -2009,6 +2009,17 @@ const CarAdvertEditPage = () => {
                     />
                     
                     <AutoFillField
+                      label="Insurance Group"
+                      type="number"
+                      value={advertData.runningCosts.insuranceGroup}
+                      onChange={(value) => handleRunningCostsChange('insuranceGroup', value)}
+                      source={fieldSources?.runningCosts?.insuranceGroup}
+                      placeholder="e.g. 15"
+                      min="1"
+                      max="50"
+                    />
+                    
+                    <AutoFillField
                       label="CO2 Emissions"
                       type="number"
                       value={advertData.runningCosts.co2Emissions}
