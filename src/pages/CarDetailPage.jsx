@@ -335,10 +335,10 @@ const CarDetailPage = () => {
 
             {/* Title and Price - AutoTrader Format */}
             <div className="car-header">
-              {/* Write-off Warning Badge - Show for CAT A, B, S, N, D */}
+              {/* Write-off Warning Badge - Show for CAT A, B, C, S, N, D */}
               {car.historyCheckId && 
                car.historyCheckId.writeOffCategory && 
-               ['A', 'B', 'S', 'N', 'D'].includes(car.historyCheckId.writeOffCategory.toUpperCase()) && (
+               ['A', 'B', 'C', 'S', 'N', 'D'].includes(car.historyCheckId.writeOffCategory.toUpperCase()) && (
                 <div className="write-off-warning-badge">
                   <span className="warning-icon">⚠️</span>
                   <span className="warning-text">
