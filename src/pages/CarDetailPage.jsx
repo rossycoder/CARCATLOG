@@ -56,7 +56,14 @@ const CarDetailPage = () => {
       
       console.log('Fetching car details from:', url);
       
-      const response = await fetch(url);
+      // CRITICAL: Add cache-busting headers to prevent stale data
+      const response = await fetch(url, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
       
       if (!response.ok) {
         throw new Error('Car not found');
@@ -65,6 +72,7 @@ const CarDetailPage = () => {
       const data = await response.json();
       console.log('✅ Car data loaded successfully');
       console.log('🖼️ Images:', data.data.images?.length || 0, 'found');
+      console.log('⛽ Fuel Type:', data.data.fuelType); // Log fuel type for debugging
       setCar(data.data);
     } catch (err) {
       console.error('Error fetching car details:', err);

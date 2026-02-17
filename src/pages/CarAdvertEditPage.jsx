@@ -987,12 +987,20 @@ const CarAdvertEditPage = () => {
       // Clear any errors
       setErrors(prev => ({ ...prev, seats: null, serviceHistory: null, motDue: null, fuelType: null }));
       
+      // CRITICAL DEBUG: Log what we're about to save
+      console.log('🔍 Saving vehicle details:');
+      console.log('   editableVehicleData.fuelType:', editableVehicleData.fuelType);
+      console.log('   vehicleData.fuelType:', vehicleData.fuelType);
+      console.log('   Full editableVehicleData:', editableVehicleData);
+      
       // Update both Car and VehicleHistory models
       const updateData = {
         serviceHistory: editableVehicleData.serviceHistory,
         seats: editableVehicleData.seats ? parseInt(editableVehicleData.seats) : vehicleData.seats,
-        fuelType: editableVehicleData.fuelType
+        fuelType: editableVehicleData.fuelType || vehicleData.fuelType // Fallback to current if empty
       };
+      
+      console.log('💾 Update data being sent:', updateData);
       
       // If MOT date is provided, update it
       if (editableVehicleData.motDue) {
@@ -1019,6 +1027,8 @@ const CarAdvertEditPage = () => {
         serviceHistory: editableVehicleData.serviceHistory
       }));
       
+      console.log('✅ Local state updated with new fuel type:', updateData.fuelType);
+      
       // Exit editing mode
       setIsVehicleDetailsEditing(false);
     } catch (error) {
@@ -1031,12 +1041,14 @@ const CarAdvertEditPage = () => {
   const handleVehicleDetailsCancel = () => {
     setIsVehicleDetailsEditing(false);
     // Reset editable data
-    setEditableVehicleData({
+    const resetData = {
       serviceHistory: advertData.serviceHistory || 'Contact seller',
       motDue: vehicleData.motDue || vehicleData.motExpiry || '',
       seats: vehicleData.seats || '',
       fuelType: vehicleData.fuelType || 'Petrol'
-    });
+    };
+    console.log('🔄 Resetting editable data:', resetData);
+    setEditableVehicleData(resetData);
   };
   
   // Handle feature toggle with debounced save
@@ -1806,7 +1818,24 @@ const CarAdvertEditPage = () => {
                 ) : (
                   <select
                     value={editableVehicleData.fuelType}
-                    onChange={(e) => setEditableVehicleData(prev => ({ ...prev, fuelType: e.target.value }))}
+                    onChange={(e) => {
+                      const newFuelType = e.target.value;
+                      console.log('🔄 Fuel type changed to:', newFuelType);
+                      
+                      // Update editableVehicleData
+                      setEditableVehicleData(prev => {
+                        const updated = { ...prev, fuelType: newFuelType };
+                        console.log('✅ Updated editableVehicleData:', updated);
+                        return updated;
+                      });
+                      
+                      // CRITICAL: Also update vehicleData immediately so auto-saves use correct value
+                      setVehicleData(prev => {
+                        const updated = { ...prev, fuelType: newFuelType };
+                        console.log('✅ Updated vehicleData.fuelType:', newFuelType);
+                        return updated;
+                      });
+                    }}
                     className="edit-input"
                   >
                     <option value="Petrol">Petrol</option>
