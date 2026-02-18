@@ -61,6 +61,10 @@ function SearchResultsPage() {
   }, [savedCars, filteredResults]);
 
   useEffect(() => {
+    console.log('🔵 SearchResultsPage useEffect TRIGGERED');
+    console.log('🔵 location.search:', location.search);
+    console.log('🔵 location.state:', location.state);
+    
     // Get search parameters from URL or location state
     const params = new URLSearchParams(location.search);
     const postcodeParam = params.get('postcode') || location.state?.postcode;
@@ -74,6 +78,9 @@ function SearchResultsPage() {
     const seatsParam = params.get('seats');
     const gearboxParam = params.get('gearbox');
     const fuelTypeParam = params.get('fuelType');
+    const engineSizeParam = params.get('engineSize');
+    const sellerTypeParam = params.get('sellerType');
+    const writeOffStatusParam = params.get('writeOffStatus');
     const priceFromParam = params.get('priceFrom');
     const priceToParam = params.get('priceTo');
     const yearFromParam = params.get('yearFrom');
@@ -83,7 +90,7 @@ function SearchResultsPage() {
     const sortByParam = params.get('sortBy'); // Get sort parameter
     const openFilterParam = params.get('openFilter'); // Check if filter should auto-open
 
-    console.log('SearchResultsPage mounted with params:', {
+    console.log('🔵 SearchResultsPage mounted with params:', {
       postcodeParam,
       radiusParam,
       makeParam,
@@ -95,6 +102,9 @@ function SearchResultsPage() {
       seatsParam,
       gearboxParam,
       fuelTypeParam,
+      engineSizeParam,
+      sellerTypeParam,
+      writeOffStatusParam,
       priceFromParam,
       priceToParam,
       yearFromParam,
@@ -130,6 +140,9 @@ function SearchResultsPage() {
       seats: seatsParam,
       gearbox: gearboxParam,
       fuelType: fuelTypeParam,
+      engineSize: engineSizeParam,
+      sellerType: sellerTypeParam,
+      writeOffStatus: writeOffStatusParam,
       priceFrom: priceFromParam,
       priceTo: priceToParam,
       yearFrom: yearFromParam,
@@ -233,6 +246,57 @@ function SearchResultsPage() {
           console.log('Results after mileageTo filter:', results.length);
         }
         
+        // Seller type filter - client-side
+        if (filterParams.sellerType) {
+          if (filterParams.sellerType === 'private') {
+            // Private sellers: exclude cars with dealerId or isDealerListing=true
+            results = results.filter(car => 
+              !car.dealerId && 
+              !car.isDealerListing && 
+              car.sellerContact?.type !== 'trade'
+            );
+            console.log('Results after sellerType=private filter:', results.length);
+          } else if (filterParams.sellerType === 'trade') {
+            // Trade sellers: has dealerId OR isDealerListing=true OR sellerContact.type='trade'
+            results = results.filter(car => 
+              car.dealerId || 
+              car.isDealerListing === true || 
+              car.sellerContact?.type === 'trade'
+            );
+            console.log('Results after sellerType=trade filter:', results.length);
+          }
+        }
+        
+        // Write-off status filter - client-side
+        if (filterParams.writeOffStatus) {
+          if (filterParams.writeOffStatus === 'exclude') {
+            // Exclude written off vehicles
+            results = results.filter(car => {
+              // If no history data, include the car (assume clean)
+              if (!car.historyCheckId) return true;
+              
+              // If history data exists, check write-off category
+              const writeOffCategory = car.historyCheckId.writeOffCategory;
+              return !writeOffCategory || 
+                     writeOffCategory === 'none' || 
+                     writeOffCategory === 'unknown';
+            });
+            console.log('Results after writeOffStatus=exclude filter:', results.length);
+          } else if (filterParams.writeOffStatus === 'only') {
+            // Show only written off vehicles
+            results = results.filter(car => {
+              // Must have history data with write-off category
+              if (!car.historyCheckId) return false;
+              
+              const writeOffCategory = car.historyCheckId.writeOffCategory;
+              return writeOffCategory && 
+                     writeOffCategory !== 'none' && 
+                     writeOffCategory !== 'unknown';
+            });
+            console.log('Results after writeOffStatus=only filter:', results.length);
+          }
+        }
+        
         // If no results found, load all cars from database
         if (results.length === 0) {
           console.log(`⚠️ No results in ${searchRadius} miles radius`);
@@ -271,6 +335,7 @@ function SearchResultsPage() {
   };
 
   const loadAllCars = async (filterParams = {}) => {
+    console.log('🟢 loadAllCars called with filterParams:', filterParams);
     setLoading(true);
     setError('');
 
@@ -285,6 +350,9 @@ function SearchResultsPage() {
       if (filterParams.seats) apiFilterParams.seats = filterParams.seats;
       if (filterParams.gearbox) apiFilterParams.gearbox = filterParams.gearbox;
       if (filterParams.fuelType) apiFilterParams.fuelType = filterParams.fuelType;
+      if (filterParams.engineSize) apiFilterParams.engineSize = filterParams.engineSize;
+      if (filterParams.sellerType) apiFilterParams.sellerType = filterParams.sellerType;
+      if (filterParams.writeOffStatus) apiFilterParams.writeOffStatus = filterParams.writeOffStatus;
       if (filterParams.priceFrom) apiFilterParams.priceFrom = filterParams.priceFrom;
       if (filterParams.priceTo) apiFilterParams.priceTo = filterParams.priceTo;
       if (filterParams.yearFrom) apiFilterParams.yearFrom = filterParams.yearFrom;
@@ -292,6 +360,7 @@ function SearchResultsPage() {
       if (filterParams.mileageFrom) apiFilterParams.mileageFrom = filterParams.mileageFrom;
       if (filterParams.mileageTo) apiFilterParams.mileageTo = filterParams.mileageTo;
       
+      console.log('🟢 Calling carService.searchCars with:', apiFilterParams);
       const response = await carService.searchCars(apiFilterParams);
       
       // Backend returns: { success: true, cars: [...], total: X }
@@ -336,6 +405,9 @@ function SearchResultsPage() {
       if (filterParams.seats) apiFilterParams.seats = filterParams.seats;
       if (filterParams.gearbox) apiFilterParams.gearbox = filterParams.gearbox;
       if (filterParams.fuelType) apiFilterParams.fuelType = filterParams.fuelType;
+      if (filterParams.engineSize) apiFilterParams.engineSize = filterParams.engineSize;
+      if (filterParams.sellerType) apiFilterParams.sellerType = filterParams.sellerType;
+      if (filterParams.writeOffStatus) apiFilterParams.writeOffStatus = filterParams.writeOffStatus;
       if (filterParams.priceFrom) apiFilterParams.priceFrom = filterParams.priceFrom;
       if (filterParams.priceTo) apiFilterParams.priceTo = filterParams.priceTo;
       if (filterParams.yearFrom) apiFilterParams.yearFrom = filterParams.yearFrom;
