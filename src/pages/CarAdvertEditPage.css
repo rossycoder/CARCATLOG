@@ -1253,3 +1253,123 @@ select.edit-input {
   cursor: pointer;
   background-color: white;
 }
+
+/* Business Information Section */
+.business-info-section {
+  background: white;
+  border-radius: 8px;
+  padding: 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.business-info-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+}
+
+.business-info-section .section-note {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.business-info-section .form-group {
+  margin-bottom: 20px;
+}
+
+.business-info-section .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.optional {
+  color: #999;
+  font-weight: normal;
+  font-size: 13px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #1a4ba0;
+}
+
+.form-input[type="file"] {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.logo-preview {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.logo-preview img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px;
+  background: white;
+}
+
+.remove-logo-btn {
+  padding: 8px 16px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.remove-logo-btn:hover {
+  background: #c82333;
+}
+
+.trade-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  margin-top: 16px;
+}
+
+.indicator-icon {
+  color: #28a745;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.indicator-text {
+  color: #155724;
+  font-size: 14px;
+  font-weight: 500;
+}

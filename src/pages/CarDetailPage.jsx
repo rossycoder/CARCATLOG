@@ -7,6 +7,7 @@ import MOTHistorySection from '../components/VehicleHistory/MOTHistorySection';
 import LocationDisplay from '../components/Location/LocationDisplay';
 import ElectricVehicleCharging from '../components/ElectricVehicleCharging';
 import ElectricVehicleRunningCosts from '../components/ElectricVehicleRunningCosts';
+import FinanceCalculator from '../components/FinanceCalculator';
 import { generateVariantDisplay, extractTownName, formatColor } from '../utils/vehicleFormatter';
 import './CarDetailPage.css';
 
@@ -21,6 +22,16 @@ const CarDetailPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
   const [imageError, setImageError] = useState(false);
+
+  // Helper function to check if vehicle is electric or plug-in hybrid (has charging capability)
+  const isElectricOrPluginHybrid = (fuelType) => {
+    if (!fuelType) return false;
+    return fuelType === 'Electric' || 
+           fuelType === 'Plug-in Hybrid' ||
+           fuelType === 'Petrol Plug-in Hybrid' ||
+           fuelType === 'Diesel Plug-in Hybrid' ||
+           fuelType.toLowerCase().includes('plug-in');
+  };
 
   // Function to handle back navigation intelligently
   const handleBackClick = () => {
@@ -103,8 +114,8 @@ const CarDetailPage = () => {
   const generateComprehensiveVehicleTitle = (car) => {
     const parts = [];
     
-    // For NON-ELECTRIC vehicles: Add engine size first (but not for vans if variant already contains it)
-    if (car.fuelType !== 'Electric' && car.engineSize) {
+    // For NON-ELECTRIC/NON-PHEV vehicles: Add engine size first (but not for vans if variant already contains it)
+    if (!isElectricOrPluginHybrid(car.fuelType) && car.engineSize) {
       const size = parseFloat(car.engineSize);
       if (!isNaN(size) && size > 0) {
         // Check if variant already contains engine size info (common for vans like "35 L2H2")
@@ -120,7 +131,7 @@ const CarDetailPage = () => {
     
     // Add fuel type for better search filtering
     // For hybrids, show "Petrol Hybrid" or "Diesel Hybrid" (AutoTrader format)
-    if (car.fuelType && car.fuelType !== 'Electric') {
+    if (car.fuelType && !isElectricOrPluginHybrid(car.fuelType)) {
       if (car.fuelType === 'Hybrid') {
         // Check if it's petrol or diesel hybrid from variant or default to Petrol Hybrid
         const variantLower = (car.variant || '').toLowerCase();
@@ -139,8 +150,8 @@ const CarDetailPage = () => {
       parts.push(car.variant.trim());
     }
     
-    // For ELECTRIC vehicles: Add battery capacity
-    if (car.fuelType === 'Electric') {
+    // For ELECTRIC/PHEV vehicles: Add battery capacity
+    if (isElectricOrPluginHybrid(car.fuelType)) {
       const batteryCapacity = car.batteryCapacity || car.runningCosts?.batteryCapacity;
       if (batteryCapacity) {
         parts.push(`${batteryCapacity}kWh`);
@@ -170,8 +181,8 @@ const CarDetailPage = () => {
       }
     }
     
-    // Add emission class (Euro 5, Euro 6, etc.) - for non-electric vehicles
-    if (car.fuelType !== 'Electric' && car.emissionClass && car.emissionClass.includes('Euro')) {
+    // Add emission class (Euro 5, Euro 6, etc.) - for non-electric/non-PHEV vehicles
+    if (!isElectricOrPluginHybrid(car.fuelType) && car.emissionClass && car.emissionClass.includes('Euro')) {
       parts.push(car.emissionClass);
     }
     
@@ -403,15 +414,15 @@ const CarDetailPage = () => {
                     <span className="spec-value">{car.bodyType ? car.bodyType.charAt(0).toUpperCase() + car.bodyType.slice(1).toLowerCase() : 'Hatchback'}</span>
                   </div>
                 </div>
-                {/* Engine size for NON-ELECTRIC cars, Range for ELECTRIC cars */}
+                {/* Engine size for NON-ELECTRIC/NON-PHEV cars, Range for ELECTRIC/PHEV cars */}
                 <div className="spec-item">
-                  <span className="spec-icon">{car.fuelType === 'Electric' ? '🔋' : '🔧'}</span>
+                  <span className="spec-icon">{isElectricOrPluginHybrid(car.fuelType) ? '🔋' : '🔧'}</span>
                   <div className="spec-details">
                     <span className="spec-label">
-                      {car.fuelType === 'Electric' ? 'Electric Range' : 'Engine size'}
+                      {isElectricOrPluginHybrid(car.fuelType) ? 'Electric Range' : 'Engine size'}
                     </span>
                     <span className="spec-value">
-                      {car.fuelType === 'Electric' 
+                      {isElectricOrPluginHybrid(car.fuelType) 
                         ? (car.electricRange || car.runningCosts?.electricRange 
                             ? `${car.electricRange || car.runningCosts?.electricRange} miles` 
                             : 'N/A')
@@ -577,7 +588,7 @@ const CarDetailPage = () => {
                     <div className="cost-content">
                       <div className="cost-label">CO₂ emissions</div>
                       <div className="cost-value">
-                        {car.fuelType === 'Electric' ? '0g/km' : (car.runningCosts?.co2Emissions ? `${car.runningCosts.co2Emissions}g/km` : 'N/A')}
+                        {isElectricOrPluginHybrid(car.fuelType) && car.fuelType === 'Electric' ? '0g/km' : (car.runningCosts?.co2Emissions ? `${car.runningCosts.co2Emissions}g/km` : 'N/A')}
                       </div>
                     </div>
                   </div>
@@ -610,7 +621,7 @@ const CarDetailPage = () => {
                   </div>
                 </div>
 
-                {car.fuelType !== 'Electric' && car.runningCosts?.fuelEconomy && (car.runningCosts.fuelEconomy.combined || car.runningCosts.fuelEconomy.urban || car.runningCosts.fuelEconomy.extraUrban) && (
+                {!isElectricOrPluginHybrid(car.fuelType) && car.runningCosts?.fuelEconomy && (car.runningCosts.fuelEconomy.combined || car.runningCosts.fuelEconomy.urban || car.runningCosts.fuelEconomy.extraUrban) && (
                   <div className="additional-running-costs">
                     <div className="fuel-economy-grid">
                       {car.runningCosts.fuelEconomy.combined && (
@@ -646,7 +657,7 @@ const CarDetailPage = () => {
                   </div>
                 )}
 
-                {car.fuelType === 'Electric' && (car.runningCosts?.electricRange || car.runningCosts?.batteryCapacity || car.runningCosts?.chargingTime || car.electricRange || car.batteryCapacity || car.chargingTime) && (
+                {isElectricOrPluginHybrid(car.fuelType) && (car.runningCosts?.electricRange || car.runningCosts?.batteryCapacity || car.runningCosts?.chargingTime || car.electricRange || car.batteryCapacity || car.chargingTime) && (
                   <div className="additional-running-costs">
                     <div className="fuel-economy-grid">
                       {(car.runningCosts?.electricRange || car.electricRange) && (
@@ -689,6 +700,14 @@ const CarDetailPage = () => {
 
             {/* Electric Vehicle Running Costs - Only for Electric Cars */}
             <ElectricVehicleRunningCosts vehicle={car} />
+
+            {/* Finance Calculator - For ALL cars */}
+            <FinanceCalculator 
+              price={car.price || car.estimatedValue || 10000}
+              apr={car.year ? (new Date().getFullYear() - car.year <= 3 ? 8.9 : new Date().getFullYear() - car.year <= 6 ? 9.9 : 11.9) : 9.9}
+              minDepositPercent={0}
+              maxDepositPercent={50}
+            />
 
             {/* Vehicle Features Section */}
             {showAllFeatures && car.features && car.features.length > 0 && (
@@ -737,13 +756,25 @@ const CarDetailPage = () => {
                 {/* Trade Dealer - Show Logo and Business Info */}
                 {(car.sellerType === 'trade' || car.sellerContact?.type === 'trade') && (
                   <div className="trade-seller-details">
-                    {car.dealerLogo && (
+                    {car.sellerContact?.businessLogo && (
                       <div className="dealer-logo-display">
-                        <img src={car.dealerLogo} alt={car.sellerContact?.businessName || 'Dealer'} />
+                        <img src={car.sellerContact.businessLogo} alt={car.sellerContact?.businessName || 'Dealer'} />
                       </div>
                     )}
                     {car.sellerContact?.businessName && (
                       <div className="dealer-business-name">{car.sellerContact.businessName}</div>
+                    )}
+                    {car.sellerContact?.businessWebsite && (
+                      <div className="dealer-website">
+                        <a 
+                          href={car.sellerContact.businessWebsite} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="dealer-website-link"
+                        >
+                          🌐 Visit Website →
+                        </a>
+                      </div>
                     )}
                     {car.sellerContact?.businessAddress && (
                       <div className="dealer-business-address">
@@ -775,6 +806,7 @@ const CarDetailPage = () => {
                 {/* Private Seller */}
                 {(car.sellerType === 'private' || car.sellerContact?.type === 'private') && (
                   <div className="private-seller-details">
+                    <div className="private-seller-icon">👤</div>
                     <div className="private-seller-label">Private Seller</div>
                     <div className="private-seller-location">
                       📍 {extractTownName(car.locationName) || 'Location available'}

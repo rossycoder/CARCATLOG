@@ -726,6 +726,13 @@
   padding: 16px;
   background: #f8f9fa;
   border-radius: 8px;
+  align-items: center;
+  text-align: center;
+}
+
+.private-seller-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
 }
 
 .private-seller-label {
@@ -747,6 +754,29 @@
   color: #0066cc;
   font-weight: 600;
   margin-left: 0;
+}
+
+/* Dealer Website Link */
+.dealer-website {
+  margin-top: 8px;
+}
+
+.dealer-website-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.dealer-website-link:hover {
+  background: #0056b3;
 }
 
 /* Contact Buttons in Meet Seller Section */

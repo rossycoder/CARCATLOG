@@ -46,7 +46,10 @@ const CarAdvertEditPage = () => {
       insuranceGroup: '',
       co2Emissions: ''
     },
-    videoUrl: ''
+    videoUrl: '',
+    businessName: '',
+    businessLogo: '',
+    businessWebsite: ''
   });
   const [errors, setErrors] = useState({});
   const [motData, setMotData] = useState(null);
@@ -78,6 +81,60 @@ const CarAdvertEditPage = () => {
   const [enhancedDataProcessed, setEnhancedDataProcessed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Logo upload handler
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+    
+    try {
+      setIsUploading(true);
+      console.log('📤 Uploading business logo...');
+      
+      // Convert file to base64
+      const base64Image = await uploadService.fileToBase64(file);
+      console.log('✅ File converted to base64, length:', base64Image.length);
+      
+      // Upload to backend
+      const response = await uploadService.uploadImage(base64Image, advertId);
+      console.log('📡 Upload response:', response);
+      
+      if (response.success && response.url) {
+        setAdvertData(prev => ({
+          ...prev,
+          businessLogo: response.url
+        }));
+        console.log('✅ Business logo uploaded successfully:', response.url);
+      } else if (response.data && response.data.url) {
+        // Handle nested response structure
+        setAdvertData(prev => ({
+          ...prev,
+          businessLogo: response.data.url
+        }));
+        console.log('✅ Business logo uploaded successfully (nested):', response.data.url);
+      } else {
+        console.error('❌ Upload response missing URL:', response);
+        throw new Error(response.message || 'Upload failed - no URL returned');
+      }
+    } catch (error) {
+      console.error('❌ Logo upload failed:', error);
+      alert('Failed to upload logo. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   // Show popup when page loads
   useEffect(() => {
@@ -1331,6 +1388,15 @@ const CarAdvertEditPage = () => {
   };
 
   const handlePublish = () => {
+    console.log('📤 Publishing advert with data:', {
+      advertDataKeys: Object.keys(advertData),
+      businessName: advertData.businessName,
+      businessLogo: advertData.businessLogo,
+      businessWebsite: advertData.businessWebsite,
+      hasLogo: !!(advertData.businessLogo && advertData.businessLogo.trim()),
+      hasWebsite: !!(advertData.businessWebsite && advertData.businessWebsite.trim())
+    });
+    
     // Navigate to seller contact details page
     navigate(`/selling/advert/contact/${advertId}`, {
       state: {
@@ -1928,6 +1994,83 @@ const CarAdvertEditPage = () => {
               <p className="error-message">{errors.description}</p>
             )}
             <a href="#" className="add-description-link">Add description</a>
+          </section>
+
+          {/* Business Information Section */}
+          <section className="business-info-section">
+            <h3>Business Information (Optional)</h3>
+            <p className="section-note">
+              Add business details to list as a trade seller. If you add a logo or website, your listing will automatically be marked as "Trade".
+            </p>
+            
+            <div className="form-group">
+              <label htmlFor="businessName">
+                Business Name <span className="optional">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                id="businessName"
+                value={advertData.businessName}
+                onChange={(e) => setAdvertData({
+                  ...advertData,
+                  businessName: e.target.value
+                })}
+                placeholder="e.g., ABC Motors Ltd"
+                className="form-input"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="businessWebsite">
+                Business Website <span className="optional">(Optional)</span>
+              </label>
+              <input
+                type="url"
+                id="businessWebsite"
+                value={advertData.businessWebsite}
+                onChange={(e) => setAdvertData({
+                  ...advertData,
+                  businessWebsite: e.target.value
+                })}
+                placeholder="https://www.yourbusiness.com"
+                className="form-input"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="businessLogo">
+                Business Logo <span className="optional">(Optional)</span>
+              </label>
+              <input
+                type="file"
+                id="businessLogo"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="form-input"
+              />
+              {advertData.businessLogo && (
+                <div className="logo-preview">
+                  <img src={advertData.businessLogo} alt="Business logo" />
+                  <button
+                    type="button"
+                    onClick={() => setAdvertData({...advertData, businessLogo: ''})}
+                    className="remove-logo-btn"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            {/* Auto-detection indicator */}
+            {(advertData.businessLogo || advertData.businessWebsite) && (
+              <div className="trade-indicator">
+                <span className="indicator-icon">✓</span>
+                <span className="indicator-text">
+                  Your listing will appear as a trade seller
+                </span>
+              </div>
+            )}
           </section>
 
           {/* Additional Sections */}

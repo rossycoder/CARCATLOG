@@ -355,6 +355,35 @@ const CarAdvertisingPricesPage = () => {
     }
   }, [vehicleValuation, advertData, vehicleData, sellerType]); // Removed priceRange from dependencies to prevent loops
 
+  // Auto-detect seller type based on business info
+  useEffect(() => {
+    console.log('🔍 Auto-detection check:', {
+      hasAdvertData: !!advertData,
+      hasVehicleData: !!vehicleData,
+      businessLogo: advertData?.businessLogo,
+      businessWebsite: advertData?.businessWebsite,
+      vehicleBusinessLogo: vehicleData?.sellerContact?.businessLogo,
+      vehicleBusinessWebsite: vehicleData?.sellerContact?.businessWebsite
+    });
+    
+    // Check both advertData and vehicleData for business info
+    const hasLogo = (advertData?.businessLogo && advertData.businessLogo.trim() !== '') ||
+                    (vehicleData?.sellerContact?.businessLogo && vehicleData.sellerContact.businessLogo.trim() !== '');
+    const hasWebsite = (advertData?.businessWebsite && advertData.businessWebsite.trim() !== '') ||
+                       (vehicleData?.sellerContact?.businessWebsite && vehicleData.sellerContact.businessWebsite.trim() !== '');
+    
+    if (hasLogo || hasWebsite) {
+      setSellerType('trade');
+      console.log('✅ Auto-detected as TRADE seller (has logo or website)');
+      console.log('   Logo:', hasLogo ? '✓' : '✗');
+      console.log('   Website:', hasWebsite ? '✓' : '✗');
+    } else if (advertData || vehicleData) {
+      // Only set to private if we have data but no business info
+      setSellerType('private');
+      console.log('✅ Auto-detected as PRIVATE seller (no business info)');
+    }
+  }, [advertData, vehicleData]);
+
   // Separate effect to handle initial price range setting when vehicleData becomes available
   useEffect(() => {
     if (vehicleData?.price && typeof vehicleData.price === 'number' && priceRange === 'under-1000') {

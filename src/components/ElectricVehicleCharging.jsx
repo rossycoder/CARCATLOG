@@ -2,8 +2,18 @@ import React from 'react';
 import { FaHome, FaChargingStation, FaBolt, FaClock, FaPlug } from 'react-icons/fa';
 
 const ElectricVehicleCharging = ({ vehicle }) => {
-  // Check if this is an electric vehicle
-  if (vehicle.fuelType !== 'Electric') {
+  // Helper function to check if vehicle is electric or plug-in hybrid (has charging capability)
+  const isElectricOrPluginHybrid = (fuelType) => {
+    if (!fuelType) return false;
+    return fuelType === 'Electric' || 
+           fuelType === 'Plug-in Hybrid' ||
+           fuelType === 'Petrol Plug-in Hybrid' ||
+           fuelType === 'Diesel Plug-in Hybrid' ||
+           fuelType.toLowerCase().includes('plug-in');
+  };
+
+  // Check if this is an electric vehicle or plug-in hybrid
+  if (!isElectricOrPluginHybrid(vehicle.fuelType)) {
     return null;
   }
 
