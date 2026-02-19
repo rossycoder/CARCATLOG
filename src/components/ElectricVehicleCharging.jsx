@@ -30,6 +30,11 @@ const ElectricVehicleCharging = ({ vehicle }) => {
     fastChargingCapability: vehicle.fastChargingCapability || vehicle.runningCosts?.fastChargingCapability || 'Fast Charging Compatible'
   };
 
+  // CRITICAL: Don't show charging info if range is 0 or missing (prevents Infinity errors)
+  if (!chargingData.electricRange || chargingData.electricRange === 0 || !chargingData.batteryCapacity || chargingData.batteryCapacity === 0) {
+    return null;
+  }
+
   // Calculate charging costs (UK average rates)
   const homeElectricityRate = 0.30; // £0.30 per kWh
   const publicChargingRate = 0.45; // £0.45 per kWh

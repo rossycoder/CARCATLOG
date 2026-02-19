@@ -84,6 +84,9 @@ const CarDetailPage = () => {
       console.log('✅ Car data loaded successfully');
       console.log('🖼️ Images:', data.data.images?.length || 0, 'found');
       console.log('⛽ Fuel Type:', data.data.fuelType); // Log fuel type for debugging
+      console.log('👤 Seller Contact:', JSON.stringify(data.data.sellerContact, null, 2));
+      console.log('🏢 Business Logo:', data.data.sellerContact?.businessLogo);
+      console.log('🌐 Business Website:', data.data.sellerContact?.businessWebsite);
       setCar(data.data);
     } catch (err) {
       console.error('Error fetching car details:', err);

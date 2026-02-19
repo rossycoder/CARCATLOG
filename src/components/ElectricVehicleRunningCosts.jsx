@@ -24,6 +24,11 @@ const ElectricVehicleRunningCosts = ({ vehicle }) => {
   const annualTax = vehicle.annualTax || runningCosts.annualTax || 0;
   const insuranceGroup = vehicle.insuranceGroup || runningCosts.insuranceGroup || 'N/A';
 
+  // CRITICAL: Don't show cost analysis if range is 0 or missing (prevents Infinity errors)
+  if (!electricRange || electricRange === 0 || !batteryCapacity || batteryCapacity === 0) {
+    return null;
+  }
+
   // Calculate annual costs (based on 10,000 miles per year)
   const annualMiles = 10000;
   const homeElectricityRate = 0.30; // £0.30 per kWh
