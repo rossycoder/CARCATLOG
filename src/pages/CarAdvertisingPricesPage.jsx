@@ -384,6 +384,39 @@ const CarAdvertisingPricesPage = () => {
     }
   }, [advertData, vehicleData]);
 
+  // Check if user has NO business info (should default to Private and disable Trade)
+  const hasNoBusinessInfo = () => {
+    const hasLogo = (advertData?.businessLogo && advertData.businessLogo.trim() !== '') ||
+                    (vehicleData?.sellerContact?.businessLogo && vehicleData.sellerContact.businessLogo.trim() !== '');
+    const hasWebsite = (advertData?.businessWebsite && advertData.businessWebsite.trim() !== '') ||
+                       (vehicleData?.sellerContact?.businessWebsite && vehicleData.sellerContact.businessWebsite.trim() !== '');
+    const hasBusinessName = (advertData?.businessName && advertData.businessName.trim() !== '') ||
+                           (vehicleData?.sellerContact?.businessName && vehicleData.sellerContact.businessName.trim() !== '');
+    
+    // If NO business info at all, return true (should be Private only)
+    return !hasLogo && !hasWebsite && !hasBusinessName;
+  };
+
+  // Check if user HAS business info (should lock to Trade)
+  const isTradeSellerLocked = () => {
+    return !hasNoBusinessInfo(); // If has business info, lock to Trade
+  };
+
+  // Auto-set seller type based on business info
+  useEffect(() => {
+    if (isTradeSellerLocked() && sellerType !== 'trade') {
+      // Has business info, force to Trade
+      console.log('🔒 Auto-setting seller type to Trade (has business info)');
+      setSellerType('trade');
+    } else if (hasNoBusinessInfo() && sellerType !== 'private') {
+      // No business info, force to Private
+      console.log('🔒 Auto-setting seller type to Private (no business info)');
+      setSellerType('private');
+    }
+  }, [advertData?.businessLogo, advertData?.businessWebsite, advertData?.businessName, 
+      vehicleData?.sellerContact?.businessLogo, vehicleData?.sellerContact?.businessWebsite, 
+      vehicleData?.sellerContact?.businessName]);
+
   // Separate effect to handle initial price range setting when vehicleData becomes available
   useEffect(() => {
     if (vehicleData?.price && typeof vehicleData.price === 'number' && priceRange === 'under-1000') {
@@ -669,6 +702,7 @@ const CarAdvertisingPricesPage = () => {
               <button 
                 type="button"
                 onClick={() => handleSellerTypeChange('trade')}
+                disabled={hasNoBusinessInfo()}
                 style={{ 
                   padding: '14px 40px', 
                   borderTop: sellerType === 'trade' ? '2px solid #1a1a2e' : '1px solid #ddd',
@@ -676,18 +710,20 @@ const CarAdvertisingPricesPage = () => {
                   borderLeft: sellerType === 'trade' ? '2px solid #1a1a2e' : '1px solid #ddd',
                   borderRight: 'none',
                   borderRadius: '8px 0 0 8px',
-                  background: 'white',
+                  background: sellerType === 'trade' ? 'white' : (hasNoBusinessInfo() ? '#f5f5f5' : 'white'),
                   color: '#1a1a2e',
-                  cursor: 'pointer',
+                  cursor: hasNoBusinessInfo() ? 'not-allowed' : 'pointer',
                   fontSize: '1rem',
-                  fontWeight: sellerType === 'trade' ? '500' : '400'
+                  fontWeight: sellerType === 'trade' ? '500' : '400',
+                  opacity: hasNoBusinessInfo() ? 0.5 : 1
                 }}
               >
-                Trade
+                Trade {hasNoBusinessInfo() && '🔒'}
               </button>
               <button 
                 type="button"
                 onClick={() => handleSellerTypeChange('private')}
+                disabled={isTradeSellerLocked()}
                 style={{ 
                   padding: '14px 40px', 
                   borderTop: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
@@ -695,16 +731,22 @@ const CarAdvertisingPricesPage = () => {
                   borderLeft: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
                   borderRight: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
                   borderRadius: '0 8px 8px 0',
-                  background: 'white',
+                  background: sellerType === 'private' ? 'white' : (isTradeSellerLocked() ? '#f5f5f5' : 'white'),
                   color: '#1a1a2e',
-                  cursor: 'pointer',
+                  cursor: isTradeSellerLocked() ? 'not-allowed' : 'pointer',
                   fontSize: '1rem',
-                  fontWeight: sellerType === 'private' ? '500' : '400'
+                  fontWeight: sellerType === 'private' ? '500' : '400',
+                  opacity: isTradeSellerLocked() ? 0.5 : 1
                 }}
               >
-                Private
+                Private {isTradeSellerLocked() && '🔒'}
               </button>
             </div>
+            {isTradeSellerLocked() && (
+              <p style={{ fontSize: '0.875rem', color: '#666', marginTop: '8px', marginBottom: 0, display: 'none' }}>
+                {/* Message hidden as per user request */}
+              </p>
+            )}
           </div>
 
           <div className="filter-group">

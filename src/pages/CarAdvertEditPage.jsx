@@ -111,19 +111,27 @@ const CarAdvertEditPage = () => {
       const response = await uploadService.uploadImage(base64Image, advertId);
       console.log('📡 Upload response:', response);
       
-      if (response.success && response.url) {
-        setAdvertData(prev => ({
-          ...prev,
-          businessLogo: response.url
-        }));
-        console.log('✅ Business logo uploaded successfully:', response.url);
-      } else if (response.data && response.data.url) {
-        // Handle nested response structure
-        setAdvertData(prev => ({
-          ...prev,
-          businessLogo: response.data.url
-        }));
-        console.log('✅ Business logo uploaded successfully (nested):', response.data.url);
+      const logoUrl = response.data?.url || response.url;
+      console.log('🔗 Logo URL extracted:', logoUrl);
+      
+      if (logoUrl) {
+        const updatedAdvertData = {
+          ...advertData,
+          businessLogo: logoUrl
+        };
+        
+        setAdvertData(updatedAdvertData);
+        console.log('✅ Business logo uploaded successfully:', logoUrl);
+        
+        // CRITICAL: Auto-save business logo to database
+        try {
+          console.log('💾 Auto-saving business logo to database...');
+          await advertService.updateAdvert(advertId, updatedAdvertData, vehicleData);
+          console.log('✅ Business logo saved to database');
+        } catch (saveError) {
+          console.error('❌ Failed to save business logo:', saveError);
+          // Don't show error to user - logo is uploaded, just not saved yet
+        }
       } else {
         console.error('❌ Upload response missing URL:', response);
         throw new Error(response.message || 'Upload failed - no URL returned');
@@ -135,6 +143,24 @@ const CarAdvertEditPage = () => {
       setIsUploading(false);
     }
   };
+
+  // Auto-save business info with debounce
+  useEffect(() => {
+    // Only auto-save if advertId exists and business info has changed
+    if (!advertId || !advertData.businessName && !advertData.businessWebsite) return;
+    
+    const timeout = setTimeout(async () => {
+      try {
+        console.log('💾 Auto-saving business info...');
+        await advertService.updateAdvert(advertId, advertData, vehicleData);
+        console.log('✅ Business info saved successfully');
+      } catch (error) {
+        console.error('❌ Failed to save business info:', error);
+      }
+    }, 1000); // 1 second debounce
+    
+    return () => clearTimeout(timeout);
+  }, [advertData.businessName, advertData.businessWebsite]);
 
   // Show popup when page loads
   useEffect(() => {
@@ -828,15 +854,25 @@ const CarAdvertEditPage = () => {
           })(),
           runningCosts: response.data.advertData?.runningCosts || {
             fuelEconomy: { 
-              urban: String(response.data.vehicleData?.runningCosts?.fuelEconomy?.urban || response.data.vehicleData?.fuelEconomyUrban || ''), 
-              extraUrban: String(response.data.vehicleData?.runningCosts?.fuelEconomy?.extraUrban || response.data.vehicleData?.fuelEconomyExtraUrban || ''), 
-              combined: String(response.data.vehicleData?.runningCosts?.fuelEconomy?.combined || response.data.vehicleData?.fuelEconomyCombined || '') 
+              urban: (response.data.vehicleData?.runningCosts?.fuelEconomy?.urban ?? response.data.vehicleData?.fuelEconomyUrban ?? '') === null ? '' : String(response.data.vehicleData?.runningCosts?.fuelEconomy?.urban ?? response.data.vehicleData?.fuelEconomyUrban ?? ''), 
+              extraUrban: (response.data.vehicleData?.runningCosts?.fuelEconomy?.extraUrban ?? response.data.vehicleData?.fuelEconomyExtraUrban ?? '') === null ? '' : String(response.data.vehicleData?.runningCosts?.fuelEconomy?.extraUrban ?? response.data.vehicleData?.fuelEconomyExtraUrban ?? ''), 
+              combined: (response.data.vehicleData?.runningCosts?.fuelEconomy?.combined ?? response.data.vehicleData?.fuelEconomyCombined ?? '') === null ? '' : String(response.data.vehicleData?.runningCosts?.fuelEconomy?.combined ?? response.data.vehicleData?.fuelEconomyCombined ?? '') 
             },
-            annualTax: String(response.data.vehicleData?.runningCosts?.annualTax || response.data.vehicleData?.annualTax || ''),
-            insuranceGroup: String(response.data.vehicleData?.runningCosts?.insuranceGroup || response.data.vehicleData?.insuranceGroup || ''),
-            co2Emissions: String(response.data.vehicleData?.runningCosts?.co2Emissions || response.data.vehicleData?.co2Emissions || '')
+            annualTax: (response.data.vehicleData?.runningCosts?.annualTax ?? response.data.vehicleData?.annualTax ?? '') === null ? '' : String(response.data.vehicleData?.runningCosts?.annualTax ?? response.data.vehicleData?.annualTax ?? ''),
+            insuranceGroup: (response.data.vehicleData?.runningCosts?.insuranceGroup ?? response.data.vehicleData?.insuranceGroup ?? '') === null ? '' : String(response.data.vehicleData?.runningCosts?.insuranceGroup ?? response.data.vehicleData?.insuranceGroup ?? ''),
+            co2Emissions: (response.data.vehicleData?.runningCosts?.co2Emissions ?? response.data.vehicleData?.co2Emissions ?? '') === null ? '' : String(response.data.vehicleData?.runningCosts?.co2Emissions ?? response.data.vehicleData?.co2Emissions ?? '')
           },
-          videoUrl: response.data.advertData?.videoUrl || ''
+          videoUrl: response.data.advertData?.videoUrl || '',
+          // CRITICAL FIX: Include business info from sellerContact
+          businessName: response.data.vehicleData?.sellerContact?.businessName || response.data.advertData?.businessName || '',
+          businessLogo: response.data.vehicleData?.sellerContact?.businessLogo || response.data.advertData?.businessLogo || '',
+          businessWebsite: response.data.vehicleData?.sellerContact?.businessWebsite || response.data.advertData?.businessWebsite || ''
+        });
+        
+        console.log('🏢 Business info loaded:', {
+          businessName: response.data.vehicleData?.sellerContact?.businessName || response.data.advertData?.businessName,
+          businessLogo: response.data.vehicleData?.sellerContact?.businessLogo || response.data.advertData?.businessLogo,
+          businessWebsite: response.data.vehicleData?.sellerContact?.businessWebsite || response.data.advertData?.businessWebsite
         });
         
         console.log('✅ Advert data loaded successfully');
