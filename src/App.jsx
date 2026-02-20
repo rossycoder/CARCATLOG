@@ -176,7 +176,7 @@ function App() {
               <Route 
                 path="/trade/dashboard" 
                 element={
-                  <ProtectedTradeRoute>
+                  <ProtectedTradeRoute requireSubscription={true}>
                     <TradeDashboard />
                   </ProtectedTradeRoute>
                 } 
@@ -184,7 +184,7 @@ function App() {
               <Route 
                 path="/trade/inventory" 
                 element={
-                  <ProtectedTradeRoute>
+                  <ProtectedTradeRoute requireSubscription={true}>
                     <TradeInventoryPage />
                   </ProtectedTradeRoute>
                 } 
@@ -192,7 +192,7 @@ function App() {
               <Route 
                 path="/trade/analytics" 
                 element={
-                  <ProtectedTradeRoute>
+                  <ProtectedTradeRoute requireSubscription={true}>
                     <TradeAnalyticsPage />
                   </ProtectedTradeRoute>
                 } 
