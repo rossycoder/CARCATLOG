@@ -27,10 +27,14 @@ const CarDetailPage = () => {
   const isElectricOrPluginHybrid = (fuelType) => {
     if (!fuelType) return false;
     return fuelType === 'Electric' || 
+           fuelType === 'Hybrid' ||
+           fuelType === 'Petrol Hybrid' ||
+           fuelType === 'Diesel Hybrid' ||
            fuelType === 'Plug-in Hybrid' ||
            fuelType === 'Petrol Plug-in Hybrid' ||
            fuelType === 'Diesel Plug-in Hybrid' ||
-           fuelType.toLowerCase().includes('plug-in');
+           fuelType.toLowerCase().includes('hybrid') ||
+           fuelType.toLowerCase().includes('electric');
   };
 
   // Function to handle back navigation intelligently
@@ -357,18 +361,28 @@ const CarDetailPage = () => {
 
             {/* Title and Price - AutoTrader Format */}
             <div className="car-header">
-              {/* Write-off Warning Badge - Show for CAT A, B, C, S, N, D */}
+              {/* Write-off Warning Badge - Show for CAT A, B, C, S, N, D, and UNKNOWN */}
               {car.historyCheckId && 
                car.historyCheckId.writeOffCategory && 
-               ['A', 'B', 'C', 'S', 'N', 'D'].includes(car.historyCheckId.writeOffCategory.toUpperCase()) && (
-                <div className="write-off-warning-badge">
-                  <span className="warning-icon">⚠️</span>
-                  <span className="warning-text">
-                    CAT {car.historyCheckId.writeOffCategory.toUpperCase()}
-                  </span>
+               (() => {
+                 const category = car.historyCheckId.writeOffCategory.toUpperCase();
+                 const isKnownCategory = ['A', 'B', 'C', 'S', 'N', 'D'].includes(category);
+                 const isUnknownCategory = category === 'UNKNOWN' || category === 'NOT KNOWN';
                  
-                </div>
-              )}
+                 // Show badge for known categories OR unknown category
+                 if (isKnownCategory || isUnknownCategory) {
+                   return (
+                     <div className="write-off-warning-badge">
+                       <span className="warning-icon">⚠️</span>
+                       <span className="warning-text">
+                         {isUnknownCategory ? 'CAT UNKNOWN' : `CAT ${category}`}
+                       </span>
+                     </div>
+                   );
+                 }
+                 return null;
+               })()
+              }
               
               <h1 className="car-make-model">
                 {car.make} {car.model}

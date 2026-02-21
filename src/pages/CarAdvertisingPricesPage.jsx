@@ -22,15 +22,24 @@ const CarAdvertisingPricesPage = () => {
     mileage: ''
   });
 
-  // Check if this is view-only mode (from /sell-your-car page)
-  const searchParams = new URLSearchParams(locationState.search);
-  const isViewOnly = searchParams.get('viewOnly') === 'true';
-
   const advertId = locationState.state?.advertId;
   const [advertData, setAdvertData] = useState(locationState.state?.advertData);
   const [vehicleData, setVehicleData] = useState(locationState.state?.vehicleData);
   const contactDetails = locationState.state?.contactDetails;
   const vehicleValuation = locationState.state?.vehicleValuation; // Get valuation from state
+
+  // COMPLETE FIX: Remove viewOnly logic entirely - all users should be able to select packages
+  // The viewOnly parameter was causing confusion and locking trade dealers out
+  // This page is for selecting advertising packages, so buttons should always be visible
+  const isViewOnly = false; // Always show package selection buttons
+  
+  // Debug logging
+  console.log('🔍 Package Selection Page - Always Enabled:', {
+    hasAdvertData: !!advertData,
+    hasVehicleData: !!vehicleData,
+    sellerType,
+    isViewOnly
+  });
 
   // Debug logging for received data
   console.log('🔍 PRICING PAGE: Received data from navigation:', {
@@ -355,7 +364,7 @@ const CarAdvertisingPricesPage = () => {
     }
   }, [vehicleValuation, advertData, vehicleData, sellerType]); // Removed priceRange from dependencies to prevent loops
 
-  // Auto-detect seller type based on business info
+  // Auto-detect seller type based on business info (but don't lock the toggle)
   useEffect(() => {
     console.log('🔍 Auto-detection check:', {
       hasAdvertData: !!advertData,
@@ -366,26 +375,21 @@ const CarAdvertisingPricesPage = () => {
       vehicleBusinessWebsite: vehicleData?.sellerContact?.businessWebsite
     });
     
-    // Check both advertData and vehicleData for business info
-    const hasLogo = (advertData?.businessLogo && advertData.businessLogo.trim() !== '') ||
-                    (vehicleData?.sellerContact?.businessLogo && vehicleData.sellerContact.businessLogo.trim() !== '');
-    const hasWebsite = (advertData?.businessWebsite && advertData.businessWebsite.trim() !== '') ||
-                       (vehicleData?.sellerContact?.businessWebsite && vehicleData.sellerContact.businessWebsite.trim() !== '');
-    
-    if (hasLogo || hasWebsite) {
+    // Auto-detect but allow user to change later
+    if (hasBusinessInfo()) {
       setSellerType('trade');
-      console.log('✅ Auto-detected as TRADE seller (has logo or website)');
-      console.log('   Logo:', hasLogo ? '✓' : '✗');
-      console.log('   Website:', hasWebsite ? '✓' : '✗');
+      console.log('✅ Auto-detected as TRADE seller (has business info) - but user can change');
     } else if (advertData || vehicleData) {
       // Only set to private if we have data but no business info
       setSellerType('private');
-      console.log('✅ Auto-detected as PRIVATE seller (no business info)');
+      console.log('✅ Auto-detected as PRIVATE seller (no business info) - but user can change');
     }
   }, [advertData, vehicleData]);
 
-  // Check if user has NO business info (should default to Private and disable Trade)
-  const hasNoBusinessInfo = () => {
+  // UPDATED FIX: Allow users to freely choose between Private and Trade
+  // Only auto-detect seller type, but don't lock the toggle buttons
+  // This allows flexibility when coming from /sell-your-car or homepage
+  const hasBusinessInfo = () => {
     const hasLogo = (advertData?.businessLogo && advertData.businessLogo.trim() !== '') ||
                     (vehicleData?.sellerContact?.businessLogo && vehicleData.sellerContact.businessLogo.trim() !== '');
     const hasWebsite = (advertData?.businessWebsite && advertData.businessWebsite.trim() !== '') ||
@@ -393,29 +397,11 @@ const CarAdvertisingPricesPage = () => {
     const hasBusinessName = (advertData?.businessName && advertData.businessName.trim() !== '') ||
                            (vehicleData?.sellerContact?.businessName && vehicleData.sellerContact.businessName.trim() !== '');
     
-    // If NO business info at all, return true (should be Private only)
-    return !hasLogo && !hasWebsite && !hasBusinessName;
+    return hasLogo || hasWebsite || hasBusinessName;
   };
 
-  // Check if user HAS business info (should lock to Trade)
-  const isTradeSellerLocked = () => {
-    return !hasNoBusinessInfo(); // If has business info, lock to Trade
-  };
-
-  // Auto-set seller type based on business info
-  useEffect(() => {
-    if (isTradeSellerLocked() && sellerType !== 'trade') {
-      // Has business info, force to Trade
-      console.log('🔒 Auto-setting seller type to Trade (has business info)');
-      setSellerType('trade');
-    } else if (hasNoBusinessInfo() && sellerType !== 'private') {
-      // No business info, force to Private
-      console.log('🔒 Auto-setting seller type to Private (no business info)');
-      setSellerType('private');
-    }
-  }, [advertData?.businessLogo, advertData?.businessWebsite, advertData?.businessName, 
-      vehicleData?.sellerContact?.businessLogo, vehicleData?.sellerContact?.businessWebsite, 
-      vehicleData?.sellerContact?.businessName]);
+  // REMOVED: No longer locking seller type - users can freely toggle
+  // This allows both Private and Trade options to be available at all times
 
   // Separate effect to handle initial price range setting when vehicleData becomes available
   useEffect(() => {
@@ -702,7 +688,6 @@ const CarAdvertisingPricesPage = () => {
               <button 
                 type="button"
                 onClick={() => handleSellerTypeChange('trade')}
-                disabled={hasNoBusinessInfo()}
                 style={{ 
                   padding: '14px 40px', 
                   borderTop: sellerType === 'trade' ? '2px solid #1a1a2e' : '1px solid #ddd',
@@ -710,20 +695,19 @@ const CarAdvertisingPricesPage = () => {
                   borderLeft: sellerType === 'trade' ? '2px solid #1a1a2e' : '1px solid #ddd',
                   borderRight: 'none',
                   borderRadius: '8px 0 0 8px',
-                  background: sellerType === 'trade' ? 'white' : (hasNoBusinessInfo() ? '#f5f5f5' : 'white'),
+                  background: sellerType === 'trade' ? 'white' : 'white',
                   color: '#1a1a2e',
-                  cursor: hasNoBusinessInfo() ? 'not-allowed' : 'pointer',
+                  cursor: 'pointer',
                   fontSize: '1rem',
                   fontWeight: sellerType === 'trade' ? '500' : '400',
-                  opacity: hasNoBusinessInfo() ? 0.5 : 1
+                  opacity: 1
                 }}
               >
-                Trade {hasNoBusinessInfo() && '🔒'}
+                Trade
               </button>
               <button 
                 type="button"
                 onClick={() => handleSellerTypeChange('private')}
-                disabled={isTradeSellerLocked()}
                 style={{ 
                   padding: '14px 40px', 
                   borderTop: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
@@ -731,22 +715,17 @@ const CarAdvertisingPricesPage = () => {
                   borderLeft: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
                   borderRight: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
                   borderRadius: '0 8px 8px 0',
-                  background: sellerType === 'private' ? 'white' : (isTradeSellerLocked() ? '#f5f5f5' : 'white'),
+                  background: sellerType === 'private' ? 'white' : 'white',
                   color: '#1a1a2e',
-                  cursor: isTradeSellerLocked() ? 'not-allowed' : 'pointer',
+                  cursor: 'pointer',
                   fontSize: '1rem',
                   fontWeight: sellerType === 'private' ? '500' : '400',
-                  opacity: isTradeSellerLocked() ? 0.5 : 1
+                  opacity: 1
                 }}
               >
-                Private {isTradeSellerLocked() && '🔒'}
+                Private
               </button>
             </div>
-            {isTradeSellerLocked() && (
-              <p style={{ fontSize: '0.875rem', color: '#666', marginTop: '8px', marginBottom: 0, display: 'none' }}>
-                {/* Message hidden as per user request */}
-              </p>
-            )}
           </div>
 
           <div className="filter-group">
@@ -809,6 +788,7 @@ const CarAdvertisingPricesPage = () => {
                   </ul>
                 </div>
                 
+                {/* Package selection buttons - Always visible for all users including trade dealers */}
                 {!isViewOnly && (
                   <>
                     {user ? (

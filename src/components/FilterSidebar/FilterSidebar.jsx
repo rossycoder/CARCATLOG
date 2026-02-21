@@ -17,13 +17,23 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     transmissions: [],
     bodyTypes: [],
     colours: [],
+    doors: [],
+    seats: [],
     yearRange: { min: 2000, max: new Date().getFullYear() },
     counts: {
       total: 0,
       privateSellers: 0,
       tradeSellers: 0,
       writtenOff: 0,
-      clean: 0
+      clean: 0,
+      makes: {},
+      models: {},
+      fuelTypes: {},
+      transmissions: {},
+      bodyTypes: {},
+      colours: {},
+      doors: {},
+      seats: {}
     }
   });
   const [filters, setFilters] = useState({
@@ -51,6 +61,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
   });
 
   // Load filters from URL params when modal opens
+  // Only load basic search filters to show proper counts
+  // Clear specific filters (bodyType, colour, doors, seats) to avoid zero counts
   useEffect(() => {
     if (isOpen) {
       setFilters({
@@ -67,10 +79,10 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         mileageFrom: searchParams.get('mileageFrom') || '',
         mileageTo: searchParams.get('mileageTo') || '',
         gearbox: searchParams.get('gearbox') || '',
-        bodyType: searchParams.get('bodyType') || '',
-        colour: searchParams.get('colour') || '',
-        doors: searchParams.get('doors') || '',
-        seats: searchParams.get('seats') || '',
+        bodyType: '', // Clear bodyType to show all options
+        colour: '', // Clear colour to show all options
+        doors: '', // Clear doors to show all options
+        seats: '', // Clear seats to show all options
         fuelType: searchParams.get('fuelType') || '',
         engineSize: searchParams.get('engineSize') || '',
         sellerType: searchParams.get('sellerType') || '',
@@ -83,17 +95,29 @@ const FilterSidebar = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        console.log('[FilterSidebar] 🎯 Fetching filter options with params:', {
-          make: filters.make,
-          model: filters.model,
-          submodel: filters.submodel
-        });
+        console.log('[FilterSidebar] 🎯 Fetching filter options with ALL filters:', filters);
         
-        // Build query params for filtered options
+        // Build query params with ALL current filters for dynamic counting
+        // BUT: Don't include variant/submodel in the API call for filter options
+        // This ensures we get proper counts for all options
         const params = new URLSearchParams();
         if (filters.make) params.append('make', filters.make);
         if (filters.model) params.append('model', filters.model);
-        if (filters.submodel) params.append('submodel', filters.submodel);
+        // Don't include submodel/variant for filter options
+        // if (filters.submodel) params.append('submodel', filters.submodel);
+        if (filters.fuelType) params.append('fuelType', filters.fuelType);
+        if (filters.gearbox) params.append('transmission', filters.gearbox);
+        if (filters.bodyType) params.append('bodyType', filters.bodyType);
+        if (filters.colour) params.append('colour', filters.colour);
+        if (filters.doors) params.append('doors', filters.doors);
+        if (filters.seats) params.append('seats', filters.seats);
+        if (filters.yearFrom) params.append('yearFrom', filters.yearFrom);
+        if (filters.yearTo) params.append('yearTo', filters.yearTo);
+        if (filters.priceFrom) params.append('priceFrom', filters.priceFrom);
+        if (filters.priceTo) params.append('priceTo', filters.priceTo);
+        if (filters.mileageFrom) params.append('mileageFrom', filters.mileageFrom);
+        if (filters.mileageTo) params.append('mileageTo', filters.mileageTo);
+        if (filters.sellerType) params.append('sellerType', filters.sellerType);
         
         const queryString = params.toString();
         const url = queryString ? `/vehicles/filter-options?${queryString}` : '/vehicles/filter-options';
@@ -107,21 +131,34 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         console.log('[FilterSidebar] Full response:', options);
         console.log('[FilterSidebar] Colours:', options?.colours);
         console.log('[FilterSidebar] Counts:', options?.counts);
+        console.log('[FilterSidebar] Fuel Type Counts:', options?.counts?.fuelTypes);
         
         if (options) {
-          // Ensure counts object exists with defaults
+          // Ensure counts object exists with defaults, but preserve individual filter counts
           const optionsWithDefaults = {
             ...options,
-            counts: options.counts || {
-              total: 0,
-              privateSellers: 0,
-              tradeSellers: 0,
-              writtenOff: 0,
-              clean: 0
+            counts: {
+              total: options.counts?.total || 0,
+              privateSellers: options.counts?.privateSellers || 0,
+              tradeSellers: options.counts?.tradeSellers || 0,
+              writtenOff: options.counts?.writtenOff || 0,
+              clean: options.counts?.clean || 0,
+              // Preserve individual filter counts
+              makes: options.counts?.makes || {},
+              models: options.counts?.models || {},
+              fuelTypes: options.counts?.fuelTypes || {},
+              transmissions: options.counts?.transmissions || {},
+              bodyTypes: options.counts?.bodyTypes || {},
+              colours: options.counts?.colours || {},
+              doors: options.counts?.doors || {},
+              seats: options.counts?.seats || {}
             }
           };
           setFilterOptions(optionsWithDefaults);
           console.log('[FilterSidebar] ✅ Filter options set successfully with counts:', optionsWithDefaults.counts);
+          console.log('[FilterSidebar] ✅ Fuel Type Counts after setting:', optionsWithDefaults.counts.fuelTypes);
+          console.log('[FilterSidebar] ✅ Make Counts after setting:', optionsWithDefaults.counts.makes);
+          console.log('[FilterSidebar] ✅ Model Counts after setting:', optionsWithDefaults.counts.models);
         } else {
           console.error('[FilterSidebar] ❌ Invalid options structure:', options);
         }
@@ -133,7 +170,15 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     };
     
     fetchFilterOptions();
-  }, [filters.make, filters.model, filters.submodel]); // Re-fetch when these change
+  }, [
+    filters.make, filters.model, filters.submodel,
+    filters.fuelType, filters.gearbox, filters.bodyType, filters.colour,
+    filters.doors, filters.seats,
+    filters.yearFrom, filters.yearTo,
+    filters.priceFrom, filters.priceTo,
+    filters.mileageFrom, filters.mileageTo,
+    filters.sellerType
+  ]); // Re-fetch when ANY filter changes for dynamic counts
 
   const handleChange = (field, value) => {
     setFilters(prev => {
@@ -386,10 +431,15 @@ const FilterSidebar = ({ isOpen, onClose }) => {
                 value={filters.make}
                 onChange={(e) => handleChange('make', e.target.value)}
               >
-                <option value="">Select Make</option>
-                {filterOptions.makes.map(make => (
-                  <option key={make} value={make}>{make}</option>
-                ))}
+                <option value="">All Makes</option>
+                {filterOptions.makes.map(make => {
+                  const count = filterOptions.counts?.makes?.[make] || 0;
+                  return (
+                    <option key={make} value={make}>
+                      {make} ({count})
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -401,10 +451,15 @@ const FilterSidebar = ({ isOpen, onClose }) => {
                 onChange={(e) => handleChange('model', e.target.value)}
                 disabled={!filters.make}
               >
-                <option value="">Select Model</option>
-                {availableModels.map(model => (
-                  <option key={model} value={model}>{model}</option>
-                ))}
+                <option value="">All Models</option>
+                {availableModels.map(model => {
+                  const count = filterOptions.counts?.models?.[model] || 0;
+                  return (
+                    <option key={model} value={model}>
+                      {model} ({count})
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -542,10 +597,15 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.gearbox}
               onChange={(e) => handleChange('gearbox', e.target.value)}
             >
-              <option value="">Select Gearbox</option>
-              {filterOptions.transmissions.map(transmission => (
-                <option key={transmission} value={transmission}>{transmission}</option>
-              ))}
+              <option value="">All Gearboxes</option>
+              {filterOptions.transmissions.map(transmission => {
+                const count = filterOptions.counts?.transmissions?.[transmission] || 0;
+                return (
+                  <option key={transmission} value={transmission}>
+                    {transmission} ({count})
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -562,10 +622,15 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.bodyType}
               onChange={(e) => handleChange('bodyType', e.target.value)}
             >
-              <option value="">Select Body Type</option>
-              {filterOptions.bodyTypes.map(bodyType => (
-                <option key={bodyType} value={bodyType}>{bodyType}</option>
-              ))}
+              <option value="">All Body Types</option>
+              {filterOptions.bodyTypes.map(bodyType => {
+                const count = filterOptions.counts?.bodyTypes?.[bodyType] || 0;
+                return (
+                  <option key={bodyType} value={bodyType}>
+                    {bodyType} ({count})
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -582,10 +647,15 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.colour}
               onChange={(e) => handleChange('colour', e.target.value)}
             >
-              <option value="">Select Colour</option>
-              {filterOptions.colours.map(colour => (
-                <option key={colour} value={colour}>{colour}</option>
-              ))}
+              <option value="">All Colours</option>
+              {filterOptions.colours.map(colour => {
+                const count = filterOptions.counts?.colours?.[colour] || 0;
+                return (
+                  <option key={colour} value={colour}>
+                    {colour} ({count})
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -602,11 +672,15 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.doors}
               onChange={(e) => handleChange('doors', e.target.value)}
             >
-              <option value="">Select Doors</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
+              <option value="">All Doors</option>
+              {(filterOptions.doors || [2, 3, 4, 5]).map(door => {
+                const count = filterOptions.counts?.doors?.[door] || 0;
+                return (
+                  <option key={door} value={door}>
+                    {door} doors ({count})
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -623,11 +697,15 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.seats}
               onChange={(e) => handleChange('seats', e.target.value)}
             >
-              <option value="">Select Seats</option>
-              <option value="2">2</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="7">7</option>
+              <option value="">All Seats</option>
+              {(filterOptions.seats || [2, 4, 5, 7]).map(seat => {
+                const count = filterOptions.counts?.seats?.[seat] || 0;
+                return (
+                  <option key={seat} value={seat}>
+                    {seat} seats ({count})
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -644,10 +722,15 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               value={filters.fuelType}
               onChange={(e) => handleChange('fuelType', e.target.value)}
             >
-              <option value="">Select Fuel Type</option>
-              {filterOptions.fuelTypes.map(fuelType => (
-                <option key={fuelType} value={fuelType}>{fuelType}</option>
-              ))}
+              <option value="">All Fuel Types</option>
+              {filterOptions.fuelTypes.map(fuelType => {
+                const count = filterOptions.counts?.fuelTypes?.[fuelType] || 0;
+                return (
+                  <option key={fuelType} value={fuelType}>
+                    {fuelType} ({count})
+                  </option>
+                );
+              })}
             </select>
           </div>
 

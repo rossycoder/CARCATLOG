@@ -2039,6 +2039,29 @@ const CarAdvertEditPage = () => {
           {!isTradeDealer && (
             <section className="business-info-section">
               <h3>Business Information (Optional)</h3>
+              
+              {/* Red Alert for Trade Users */}
+              <div className="trade-user-alert" style={{
+                backgroundColor: '#fff3cd',
+                border: '2px solid #ffc107',
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '20px',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px'
+              }}>
+                <span style={{ fontSize: '24px', flexShrink: 0 }}>⚠️</span>
+                <div>
+                  <strong style={{ color: '#856404', display: 'block', marginBottom: '4px' }}>
+                    Important for Trade Users
+                  </strong>
+                  <p style={{ color: '#856404', margin: 0, fontSize: '14px' }}>
+                    If you are a trade user, please add your business logo and website below. This helps buyers identify professional dealers and builds trust in your listing.
+                  </p>
+                </div>
+              </div>
+              
               <p className="section-note">
                 Add business details to list as a trade seller. If you add a logo or website, your listing will automatically be marked as "Trade".
               </p>

@@ -1270,6 +1270,44 @@ select.edit-input {
   font-weight: 600;
 }
 
+/* Trade User Alert Box */
+.trade-user-alert {
+  background-color: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.trade-user-alert strong {
+  color: #856404;
+  display: block;
+  margin-bottom: 4px;
+  font-size: 15px;
+}
+
+.trade-user-alert p {
+  color: #856404;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .business-info-section .section-note {
   color: #666;
   font-size: 14px;
