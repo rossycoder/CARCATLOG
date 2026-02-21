@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTradeDealerContext } from '../context/TradeDealerContext';
 import api from '../services/api';
 import advertService from '../services/advertService';
 import uploadService from '../services/uploadService';
@@ -12,6 +13,8 @@ const CarAdvertEditPage = () => {
   const { advertId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { dealer, isAuthenticated: isTradeAuthenticated } = useTradeDealerContext();
+  const isTradeDealer = isTradeAuthenticated && dealer;
   
   // Enhanced vehicle lookup hook
   const {
@@ -2032,82 +2035,84 @@ const CarAdvertEditPage = () => {
             <a href="#" className="add-description-link">Add description</a>
           </section>
 
-          {/* Business Information Section */}
-          <section className="business-info-section">
-            <h3>Business Information (Optional)</h3>
-            <p className="section-note">
-              Add business details to list as a trade seller. If you add a logo or website, your listing will automatically be marked as "Trade".
-            </p>
-            
-            <div className="form-group">
-              <label htmlFor="businessName">
-                Business Name <span className="optional">(Optional)</span>
-              </label>
-              <input
-                type="text"
-                id="businessName"
-                value={advertData.businessName}
-                onChange={(e) => setAdvertData({
-                  ...advertData,
-                  businessName: e.target.value
-                })}
-                placeholder="e.g., ABC Motors Ltd"
-                className="form-input"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="businessWebsite">
-                Business Website <span className="optional">(Optional)</span>
-              </label>
-              <input
-                type="url"
-                id="businessWebsite"
-                value={advertData.businessWebsite}
-                onChange={(e) => setAdvertData({
-                  ...advertData,
-                  businessWebsite: e.target.value
-                })}
-                placeholder="https://www.yourbusiness.com"
-                className="form-input"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="businessLogo">
-                Business Logo <span className="optional">(Optional)</span>
-              </label>
-              <input
-                type="file"
-                id="businessLogo"
-                accept="image/*"
-                onChange={handleLogoUpload}
-                className="form-input"
-              />
-              {advertData.businessLogo && (
-                <div className="logo-preview">
-                  <img src={advertData.businessLogo} alt="Business logo" />
-                  <button
-                    type="button"
-                    onClick={() => setAdvertData({...advertData, businessLogo: ''})}
-                    className="remove-logo-btn"
-                  >
-                    Remove
-                  </button>
+          {/* Business Information Section - Hidden for Trade Dealers */}
+          {!isTradeDealer && (
+            <section className="business-info-section">
+              <h3>Business Information (Optional)</h3>
+              <p className="section-note">
+                Add business details to list as a trade seller. If you add a logo or website, your listing will automatically be marked as "Trade".
+              </p>
+              
+              <div className="form-group">
+                <label htmlFor="businessName">
+                  Business Name <span className="optional">(Optional)</span>
+                </label>
+                <input
+                  type="text"
+                  id="businessName"
+                  value={advertData.businessName}
+                  onChange={(e) => setAdvertData({
+                    ...advertData,
+                    businessName: e.target.value
+                  })}
+                  placeholder="e.g., ABC Motors Ltd"
+                  className="form-input"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="businessWebsite">
+                  Business Website <span className="optional">(Optional)</span>
+                </label>
+                <input
+                  type="url"
+                  id="businessWebsite"
+                  value={advertData.businessWebsite}
+                  onChange={(e) => setAdvertData({
+                    ...advertData,
+                    businessWebsite: e.target.value
+                  })}
+                  placeholder="https://www.yourbusiness.com"
+                  className="form-input"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="businessLogo">
+                  Business Logo <span className="optional">(Optional)</span>
+                </label>
+                <input
+                  type="file"
+                  id="businessLogo"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="form-input"
+                />
+                {advertData.businessLogo && (
+                  <div className="logo-preview">
+                    <img src={advertData.businessLogo} alt="Business logo" />
+                    <button
+                      type="button"
+                      onClick={() => setAdvertData({...advertData, businessLogo: ''})}
+                      className="remove-logo-btn"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              {/* Auto-detection indicator */}
+              {(advertData.businessLogo || advertData.businessWebsite) && (
+                <div className="trade-indicator">
+                  <span className="indicator-icon">✓</span>
+                  <span className="indicator-text">
+                    Your listing will appear as a trade seller
+                  </span>
                 </div>
               )}
-            </div>
-            
-            {/* Auto-detection indicator */}
-            {(advertData.businessLogo || advertData.businessWebsite) && (
-              <div className="trade-indicator">
-                <span className="indicator-icon">✓</span>
-                <span className="indicator-text">
-                  Your listing will appear as a trade seller
-                </span>
-              </div>
-            )}
-          </section>
+            </section>
+          )}
 
           {/* Additional Sections */}
           <section className="additional-sections">

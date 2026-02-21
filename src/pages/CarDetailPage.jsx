@@ -704,14 +704,6 @@ const CarDetailPage = () => {
             {/* Electric Vehicle Running Costs - Only for Electric Cars */}
             <ElectricVehicleRunningCosts vehicle={car} />
 
-            {/* Finance Calculator - For ALL cars */}
-            <FinanceCalculator 
-              price={car.price || car.estimatedValue || 10000}
-              apr={car.year ? (new Date().getFullYear() - car.year <= 3 ? 8.9 : new Date().getFullYear() - car.year <= 6 ? 9.9 : 11.9) : 9.9}
-              minDepositPercent={0}
-              maxDepositPercent={50}
-            />
-
             {/* Vehicle Features Section */}
             {showAllFeatures && car.features && car.features.length > 0 && (
               <div className="features-section">
@@ -858,6 +850,14 @@ const CarDetailPage = () => {
                 </button>
               )}
             </div>
+
+            {/* Finance Calculator - Moved to right column below Contact Seller */}
+            <FinanceCalculator 
+              price={car.price || car.estimatedValue || 10000}
+              apr={car.year ? (new Date().getFullYear() - car.year <= 3 ? 8.9 : new Date().getFullYear() - car.year <= 6 ? 9.9 : 11.9) : 9.9}
+              minDepositPercent={0}
+              maxDepositPercent={50}
+            />
           </div>
         </div>
       </div>
