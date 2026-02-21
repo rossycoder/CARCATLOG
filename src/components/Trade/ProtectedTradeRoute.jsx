@@ -13,7 +13,8 @@ const ProtectedTradeRoute = ({ children, requireSubscription = false }) => {
       // This ensures we have the latest subscription status
       refreshDealer();
     }
-  }, [location.pathname, isAuthenticated, requireSubscription, refreshDealer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, isAuthenticated, requireSubscription]); // Removed refreshDealer from deps to prevent infinite loop
 
   if (loading) {
     return (

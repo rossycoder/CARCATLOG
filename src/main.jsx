@@ -8,9 +8,10 @@ import './index.css'
 import './utils/clearAuthStorage.js'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+  // StrictMode temporarily disabled to prevent double-mounting issues in development
+  // <React.StrictMode>
     <HelmetProvider>
       <App />
     </HelmetProvider>
-  </React.StrictMode>,
+  // </React.StrictMode>,
 )

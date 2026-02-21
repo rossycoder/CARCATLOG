@@ -1,20 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTradeDealerContext } from '../../context/TradeDealerContext';
 import TradeSidebar from '../../components/Trade/TradeSidebar';
 import * as tradeInventoryService from '../../services/tradeInventoryService';
 import './TradeDashboard.css';
 
+// FIXED: Prevent infinite API calls - Version 2.1 - FORCE RELOAD
 const TradeDashboard = () => {
   const { dealer, subscription } = useTradeDealerContext();
   const location = useLocation();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
+  const hasFetchedRef = useRef(false); // Prevent duplicate fetches
+
+  // Fetch stats only once on mount
+  useEffect(() => {
+    console.log('🔵 TradeDashboard mounted, hasFetched:', hasFetchedRef.current);
+    if (!hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      console.log('✅ Fetching stats for the first time');
+      fetchStats();
+    } else {
+      console.log('⏭️ Skipping fetch - already fetched');
+    }
+  }, []); // Empty dependency array - run once
 
   useEffect(() => {
-    fetchStats();
-    
     // Check for success message from navigation state
     if (location.state?.message) {
       setSuccessMessage(location.state.message);
@@ -23,7 +35,7 @@ const TradeDashboard = () => {
       // Clear the navigation state
       window.history.replaceState({}, document.title);
     }
-  }, [location]);
+  }, [location.state?.message]); // Only run when message changes
 
   const fetchStats = async () => {
     try {

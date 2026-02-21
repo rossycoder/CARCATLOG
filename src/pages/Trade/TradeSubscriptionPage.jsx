@@ -4,6 +4,7 @@ import { useTradeDealerContext } from '../../context/TradeDealerContext';
 import tradeSubscriptionService from '../../services/tradeSubscriptionService';
 import './TradeSubscriptionPage.css';
 
+// FIXED: Infinite loop and loading issues - Version 2.1
 const TradeSubscriptionPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,7 +17,9 @@ const TradeSubscriptionPage = () => {
 
   useEffect(() => {
     fetchPlansAndSubscription();
-    
+  }, []); // Only fetch once on mount
+
+  useEffect(() => {
     // Check for welcome message from navigation state
     if (location.state?.message) {
       setWelcomeMessage(location.state.message);
@@ -25,42 +28,52 @@ const TradeSubscriptionPage = () => {
       // Clear the navigation state
       window.history.replaceState({}, document.title);
     }
-  }, [location]);
+  }, [location.state?.message]); // Only when message changes
 
   const fetchPlansAndSubscription = async () => {
     try {
+      console.log('🔵 Fetching plans and subscription...');
       setLoading(true);
       const [plansData, subscriptionData] = await Promise.all([
         tradeSubscriptionService.getPlans(),
         tradeSubscriptionService.getCurrentSubscription()
       ]);
       
+      console.log('✅ Plans received:', plansData);
+      console.log('✅ Subscription received:', subscriptionData);
+      
       setPlans(plansData);
       setCurrentSubscription(subscriptionData);
     } catch (err) {
-      console.error('Error fetching subscription data:', err);
+      console.error('❌ Error fetching subscription data:', err);
       setError('Failed to load subscription information');
     } finally {
       setLoading(false);
+      console.log('✅ Loading complete');
     }
   };
 
   const handleSelectPlan = async (planSlug) => {
     try {
+      console.log('🔵 Starting plan selection:', planSlug);
       setLoading(true);
       setError(null);
 
       // Create checkout session
+      console.log('🔵 Calling createCheckoutSession...');
       const response = await tradeSubscriptionService.createCheckoutSession(planSlug);
+      console.log('🔵 Response received:', response);
       
       if (response.success) {
         // Check if we got a Stripe URL (production) or direct activation (development)
         if (response.url) {
           // Production: Redirect to Stripe checkout
-          console.log('Redirecting to Stripe checkout:', response.url);
+          console.log('✅ Redirecting to Stripe checkout:', response.url);
           window.location.href = response.url;
-        } else {
+          // Don't set loading to false - we're redirecting
+        } else if (response.subscription) {
           // Development: Direct activation
+          console.log('✅ Subscription activated directly:', response.subscription);
           alert(`${response.message}\n\nYou can now access your dashboard and start listing vehicles!`);
           
           // Refresh subscription data
@@ -68,14 +81,24 @@ const TradeSubscriptionPage = () => {
           
           // Navigate to dashboard
           navigate('/trade/dashboard');
+        } else {
+          console.error('❌ Unexpected response format:', response);
+          setError('Unexpected response from server. Please try again.');
+          setLoading(false);
         }
       } else {
+        console.error('❌ Request failed:', response.message);
         setError(response.message || 'Failed to activate subscription');
         setLoading(false);
       }
     } catch (err) {
-      console.error('Error selecting plan:', err);
-      setError(err.response?.data?.message || 'Failed to activate subscription. Please try again.');
+      console.error('❌ Error selecting plan:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      setError(err.response?.data?.message || err.message || 'Failed to activate subscription. Please try again.');
       setLoading(false);
     }
   };
@@ -122,6 +145,21 @@ const TradeSubscriptionPage = () => {
           margin: '0 auto 20px'
         }}>
           {welcomeMessage}
+        </div>
+      )}
+
+      {error && (
+        <div style={{
+          padding: '15px 20px',
+          marginBottom: '20px',
+          background: '#ef4444',
+          color: 'white',
+          borderRadius: '8px',
+          textAlign: 'center',
+          maxWidth: '1200px',
+          margin: '0 auto 20px'
+        }}>
+          {error}
         </div>
       )}
       
@@ -171,9 +209,9 @@ const TradeSubscriptionPage = () => {
             <button 
               className="select-plan-button bronze-button"
               onClick={() => handleSelectPlan('bronze')}
-              disabled={currentSubscription?.plan?.slug === 'bronze'}
+              disabled={loading || currentSubscription?.plan?.slug === 'bronze'}
             >
-              {currentSubscription?.plan?.slug === 'bronze' ? 'Current Plan' : 'Select BRONZE Package'}
+              {loading ? 'Processing...' : currentSubscription?.plan?.slug === 'bronze' ? 'Current Plan' : 'Select BRONZE Package'}
             </button>
           </div>
         </div>
@@ -209,9 +247,9 @@ const TradeSubscriptionPage = () => {
             <button 
               className="select-plan-button silver-button"
               onClick={() => handleSelectPlan('silver')}
-              disabled={currentSubscription?.plan?.slug === 'silver'}
+              disabled={loading || currentSubscription?.plan?.slug === 'silver'}
             >
-              {currentSubscription?.plan?.slug === 'silver' ? 'Current Plan' : 'Select SILVER Package'}
+              {loading ? 'Processing...' : currentSubscription?.plan?.slug === 'silver' ? 'Current Plan' : 'Select SILVER Package'}
             </button>
           </div>
         </div>
@@ -247,9 +285,9 @@ const TradeSubscriptionPage = () => {
             <button 
               className="select-plan-button gold-button"
               onClick={() => handleSelectPlan('gold')}
-              disabled={currentSubscription?.plan?.slug === 'gold'}
+              disabled={loading || currentSubscription?.plan?.slug === 'gold'}
             >
-              {currentSubscription?.plan?.slug === 'gold' ? 'Current Plan' : 'Select GOLD Package'}
+              {loading ? 'Processing...' : currentSubscription?.plan?.slug === 'gold' ? 'Current Plan' : 'Select GOLD Package'}
             </button>
           </div>
         </div>
