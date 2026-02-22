@@ -118,6 +118,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         if (filters.mileageFrom) params.append('mileageFrom', filters.mileageFrom);
         if (filters.mileageTo) params.append('mileageTo', filters.mileageTo);
         if (filters.sellerType) params.append('sellerType', filters.sellerType);
+        if (filters.engineSize) params.append('engineSize', filters.engineSize);
+        if (filters.writeOffStatus) params.append('writeOffStatus', filters.writeOffStatus);
         
         const queryString = params.toString();
         const url = queryString ? `/vehicles/filter-options?${queryString}` : '/vehicles/filter-options';
@@ -177,7 +179,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     filters.yearFrom, filters.yearTo,
     filters.priceFrom, filters.priceTo,
     filters.mileageFrom, filters.mileageTo,
-    filters.sellerType
+    filters.sellerType, filters.engineSize, filters.writeOffStatus
   ]); // Re-fetch when ANY filter changes for dynamic counts
 
   const handleChange = (field, value) => {
@@ -303,8 +305,14 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         params.append(key, value);
         console.log(`[FilterSidebar] Adding param: ${key} = ${value}`);
       }
+      // Convert 'distance' to 'radius' for backend compatibility
+      // Only add radius if postcode is also provided
+      else if (key === 'distance' && value && value !== 'national' && filters.postcode) {
+        params.append('radius', value);
+        console.log(`[FilterSidebar] Adding param: radius = ${value}`);
+      }
       // For other fields, skip empty values and defaults
-      else if (value && value !== 'national') {
+      else if (value && value !== 'national' && key !== 'distance') {
         params.append(key, value);
         console.log(`[FilterSidebar] Adding param: ${key} = ${value}`);
       }

@@ -71,13 +71,15 @@ const CarAdvertEditPage = () => {
   const [runningCostsTimeout, setRunningCostsTimeout] = useState(null);
   const [featureSaveTimeout, setFeatureSaveTimeout] = useState(null);
   
-  // Vehicle details editing state (service history, MOT, seats)
+  // Vehicle details editing state (service history, MOT, seats, model, variant)
   const [isVehicleDetailsEditing, setIsVehicleDetailsEditing] = useState(false);
   const [editableVehicleData, setEditableVehicleData] = useState({
     serviceHistory: '',
     motDue: '',
     seats: '',
-    fuelType: ''
+    fuelType: '',
+    model: '',
+    variant: ''
   });
   
   // Enhanced data processing state
@@ -1054,7 +1056,7 @@ const CarAdvertEditPage = () => {
     handleInputChange('price', vehicleData.estimatedValue || '');
   };
   
-  // Handle vehicle details edit (service history, MOT, seats)
+  // Handle vehicle details edit (service history, MOT, seats, model, variant)
   const handleVehicleDetailsEdit = () => {
     console.log('🖱️ Edit vehicle details button clicked!');
     
@@ -1063,7 +1065,9 @@ const CarAdvertEditPage = () => {
       serviceHistory: advertData.serviceHistory || 'Contact seller',
       motDue: vehicleData.motDue || vehicleData.motExpiry || '',
       seats: vehicleData.seats || '',
-      fuelType: vehicleData.fuelType || 'Petrol'
+      fuelType: vehicleData.fuelType || 'Petrol',
+      model: vehicleData.model || '',
+      variant: vehicleData.variant || ''
     });
     
     setIsVehicleDetailsEditing(true);
@@ -1080,12 +1084,20 @@ const CarAdvertEditPage = () => {
         return;
       }
       
+      // Validate model and variant (required fields)
+      if (!editableVehicleData.model || !editableVehicleData.model.trim()) {
+        setErrors(prev => ({ ...prev, model: 'Model is required' }));
+        return;
+      }
+      
       // Clear any errors
-      setErrors(prev => ({ ...prev, seats: null, serviceHistory: null, motDue: null, fuelType: null }));
+      setErrors(prev => ({ ...prev, seats: null, serviceHistory: null, motDue: null, fuelType: null, model: null, variant: null }));
       
       // CRITICAL DEBUG: Log what we're about to save
       console.log('🔍 Saving vehicle details:');
       console.log('   editableVehicleData.fuelType:', editableVehicleData.fuelType);
+      console.log('   editableVehicleData.model:', editableVehicleData.model);
+      console.log('   editableVehicleData.variant:', editableVehicleData.variant);
       console.log('   vehicleData.fuelType:', vehicleData.fuelType);
       console.log('   Full editableVehicleData:', editableVehicleData);
       
@@ -1093,7 +1105,9 @@ const CarAdvertEditPage = () => {
       const updateData = {
         serviceHistory: editableVehicleData.serviceHistory,
         seats: editableVehicleData.seats ? parseInt(editableVehicleData.seats) : vehicleData.seats,
-        fuelType: editableVehicleData.fuelType || vehicleData.fuelType // Fallback to current if empty
+        fuelType: editableVehicleData.fuelType || vehicleData.fuelType, // Fallback to current if empty
+        model: editableVehicleData.model.trim(),
+        variant: editableVehicleData.variant ? editableVehicleData.variant.trim() : ''
       };
       
       console.log('💾 Update data being sent:', updateData);
@@ -1123,7 +1137,7 @@ const CarAdvertEditPage = () => {
         serviceHistory: editableVehicleData.serviceHistory
       }));
       
-      console.log('✅ Local state updated with new fuel type:', updateData.fuelType);
+      console.log('✅ Local state updated with new data:', updateData);
       
       // Exit editing mode
       setIsVehicleDetailsEditing(false);
@@ -1141,7 +1155,9 @@ const CarAdvertEditPage = () => {
       serviceHistory: advertData.serviceHistory || 'Contact seller',
       motDue: vehicleData.motDue || vehicleData.motExpiry || '',
       seats: vehicleData.seats || '',
-      fuelType: vehicleData.fuelType || 'Petrol'
+      fuelType: vehicleData.fuelType || 'Petrol',
+      model: vehicleData.model || '',
+      variant: vehicleData.variant || ''
     };
     console.log('🔄 Resetting editable data:', resetData);
     setEditableVehicleData(resetData);
@@ -1818,7 +1834,7 @@ const CarAdvertEditPage = () => {
             <div className="spec-actions">
               {!isVehicleDetailsEditing ? (
                 <a href="#" className="edit-link" onClick={(e) => { e.preventDefault(); handleVehicleDetailsEdit(); }}>
-                  Edit service history, MOT, seats and fuel type
+                  Edit vehicle details (model, variant, service history, MOT, seats, fuel type)
                 </a>
               ) : (
                 <div className="edit-actions">
@@ -1833,6 +1849,34 @@ const CarAdvertEditPage = () => {
             </div>
             
             <div className="spec-grid">
+              <div className="spec-item">
+                <label>Model</label>
+                {!isVehicleDetailsEditing ? (
+                  <span>{vehicleData.model || 'Not set'}</span>
+                ) : (
+                  <input
+                    type="text"
+                    value={editableVehicleData.model}
+                    onChange={(e) => setEditableVehicleData(prev => ({ ...prev, model: e.target.value }))}
+                    className="edit-input"
+                    placeholder="e.g., 3 Series, Golf, Corsa"
+                  />
+                )}
+              </div>
+              <div className="spec-item">
+                <label>Variant</label>
+                {!isVehicleDetailsEditing ? (
+                  <span>{vehicleData.variant || 'Not set'}</span>
+                ) : (
+                  <input
+                    type="text"
+                    value={editableVehicleData.variant}
+                    onChange={(e) => setEditableVehicleData(prev => ({ ...prev, variant: e.target.value }))}
+                    className="edit-input"
+                    placeholder="e.g., 320d M Sport, GTI, SE"
+                  />
+                )}
+              </div>
               <div className="spec-item">
                 <label>MOT Due</label>
                 {!isVehicleDetailsEditing ? (
@@ -2014,6 +2058,28 @@ const CarAdvertEditPage = () => {
                 </div>
               )}
             </div>
+            
+            {/* Error messages for vehicle details */}
+            {errors.model && (
+              <p className="error-message" style={{ marginTop: '10px', color: '#d32f2f' }}>
+                {errors.model}
+              </p>
+            )}
+            {errors.variant && (
+              <p className="error-message" style={{ marginTop: '10px', color: '#d32f2f' }}>
+                {errors.variant}
+              </p>
+            )}
+            {errors.seats && (
+              <p className="error-message" style={{ marginTop: '10px', color: '#d32f2f' }}>
+                {errors.seats}
+              </p>
+            )}
+            {errors.vehicleDetails && (
+              <p className="error-message" style={{ marginTop: '10px', color: '#d32f2f' }}>
+                {errors.vehicleDetails}
+              </p>
+            )}
           </section>
 
           {/* Description Section */}

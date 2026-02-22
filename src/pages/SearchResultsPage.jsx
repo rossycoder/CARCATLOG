@@ -246,6 +246,35 @@ function SearchResultsPage() {
           console.log('Results after mileageTo filter:', results.length);
         }
         
+        // Engine size filter - client-side
+        if (filterParams.engineSize) {
+          const engineSizeValue = filterParams.engineSize;
+          
+          results = results.filter(car => {
+            if (!car.engineSize) return false;
+            
+            const carEngineSize = parseFloat(car.engineSize);
+            
+            if (engineSizeValue === '1.0') {
+              return carEngineSize <= 1.0;
+            } else if (engineSizeValue === '1.5') {
+              return carEngineSize > 1.0 && carEngineSize <= 1.5;
+            } else if (engineSizeValue === '2.0') {
+              return carEngineSize > 1.5 && carEngineSize <= 2.0;
+            } else if (engineSizeValue === '2.5') {
+              return carEngineSize > 2.0 && carEngineSize <= 2.5;
+            } else if (engineSizeValue === '3.0') {
+              return carEngineSize > 2.5 && carEngineSize <= 3.0;
+            } else if (engineSizeValue === '3.0+') {
+              return carEngineSize > 3.0;
+            }
+            
+            return true;
+          });
+          
+          console.log('Results after engine size filter:', results.length);
+        }
+        
         // Seller type filter - client-side
         if (filterParams.sellerType) {
           if (filterParams.sellerType === 'private') {
