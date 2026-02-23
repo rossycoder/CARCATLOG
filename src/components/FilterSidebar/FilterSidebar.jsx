@@ -397,10 +397,18 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               onChange={(e) => handleChange('distance', e.target.value)}
             >
               <option value="national">National</option>
+              <option value="1">Within 1 mile</option>
+              <option value="5">Within 5 miles</option>
               <option value="10">Within 10 miles</option>
+              <option value="15">Within 15 miles</option>
+              <option value="20">Within 20 miles</option>
               <option value="25">Within 25 miles</option>
+              <option value="30">Within 30 miles</option>
+              <option value="40">Within 40 miles</option>
               <option value="50">Within 50 miles</option>
+              <option value="75">Within 75 miles</option>
               <option value="100">Within 100 miles</option>
+              <option value="150">Within 150 miles</option>
               <option value="200">Within 200 miles</option>
             </select>
           </div>
