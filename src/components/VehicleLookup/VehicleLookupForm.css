@@ -203,6 +203,29 @@
   margin-bottom: 30px;
 }
 
+/* AutoTrader Style Title Section */
+.vehicle-title-section {
+  margin-bottom: 30px;
+  padding-bottom: 30px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.vehicle-make-model {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.vehicle-details-line {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
 .details-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));

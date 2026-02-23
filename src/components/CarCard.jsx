@@ -147,71 +147,32 @@ const CarCard = ({ car }) => {
       </div>
       
       <div className="car-content">
-        <h3 className="car-title">{car.make} {car.model}</h3>
+        <h3 className="car-title">
+          {/* AutoTrader Style Line 1: Make + Model only */}
+          {car.make} {car.model}
+        </h3>
         <p className="car-subtitle">
-          {/* Always generate comprehensive title (ignore backend displayTitle for now) */}
+          {/* AutoTrader Style Line 2: Variant + Battery + BodyType + Transmission + Doors */}
           {(() => {
             const parts = [];
             
-            // 1. Engine size (for non-electric vehicles)
-            if (car.fuelType !== 'Electric' && car.engineSize) {
-              const size = parseFloat(car.engineSize);
-              if (!isNaN(size) && size > 0) {
-                const variantHasEngineInfo = car.variant && /^\d+/.test(car.variant);
-                if (!variantHasEngineInfo) {
-                  const sizeInLitres = size > 100 ? size / 1000 : size;
-                  parts.push(sizeInLitres.toFixed(1));
-                }
-              }
-            }
-            
-            // 2. Fuel type (show for all vehicles)
-            if (car.fuelType && car.fuelType !== 'null' && car.fuelType !== 'undefined') {
-              if (car.fuelType === 'Hybrid') {
-                const variantLower = (car.variant || '').toLowerCase();
-                if (variantLower.includes('diesel') || variantLower.includes('tdi') || variantLower.includes('hdi')) {
-                  parts.push('Diesel Hybrid');
-                } else {
-                  parts.push('Petrol Hybrid');
-                }
-              } else {
-                parts.push(car.fuelType);
-              }
-            }
-            
-            // 3. Variant
-            if (car.variant && 
-                car.variant !== 'null' && 
-                car.variant !== 'undefined' && 
-                car.variant.trim() !== '') {
+            // 1. Variant (main specs like "225XE M SPORT PREMIUM ACTIVE TOURER")
+            if (car.variant && car.variant !== 'null' && car.variant !== 'undefined' && car.variant.trim() !== '') {
               parts.push(car.variant.trim());
-            } else if (car.submodel && 
-                       car.submodel !== 'null' && 
-                       car.submodel !== 'undefined' && 
-                       car.submodel.trim() !== '') {
-              parts.push(car.submodel);
             }
             
-            // 4. Battery capacity for electric vehicles
-            if (car.fuelType === 'Electric') {
-              const batteryCapacity = car.batteryCapacity || car.runningCosts?.batteryCapacity;
-              if (batteryCapacity) {
-                parts.push(`${batteryCapacity}kWh`);
-              }
+            // 2. Battery capacity for PHEV/Electric vehicles
+            if (car.batteryCapacity) {
+              parts.push(`${car.batteryCapacity}kWh`);
             }
             
-            // 5. Body type (if not already in variant)
+            // 3. Body type
             if (car.bodyType && car.bodyType !== 'null' && car.bodyType !== 'undefined') {
-              const bodyTypeInVariant = car.variant && 
-                car.variant.toUpperCase().includes(car.bodyType.toUpperCase());
-              
-              if (!bodyTypeInVariant) {
-                parts.push(car.bodyType);
-              }
+              parts.push(car.bodyType);
             }
             
-            // 6. Transmission
-            if (car.transmission && car.transmission !== 'null' && car.transmission !== 'undefined') {
+            // 4. Transmission
+            if (car.transmission) {
               const trans = car.transmission.toLowerCase();
               if (trans === 'automatic' || trans === 'auto') {
                 parts.push('Auto');
@@ -219,15 +180,38 @@ const CarCard = ({ car }) => {
                 parts.push('Manual');
               } else if (trans.includes('semi')) {
                 parts.push('Semi-Auto');
+              } else {
+                parts.push(car.transmission);
               }
             }
             
-            // 7. Doors
+            // 5. Doors
             if (car.doors) {
               parts.push(`${car.doors}dr`);
             }
             
-            return parts.filter(Boolean).join(' ');
+            return parts.join(' ');
+          })()}
+        </p>
+        <p className="car-specs">
+          {/* Line 3: Year • Mileage • Fuel • Transmission */}
+          {(() => {
+            const specs = [];
+            
+            if (car.year) specs.push(car.year);
+            
+            if (car.mileage) {
+              const mileage = parseInt(car.mileage);
+              if (!isNaN(mileage)) {
+                specs.push(`${mileage.toLocaleString()} miles`);
+              }
+            }
+            
+            if (car.fuelType && car.fuelType !== 'null' && car.fuelType !== 'undefined') {
+              specs.push(car.fuelType);
+            }
+            
+            return specs.join(' • ');
           })()}
         </p>
         
@@ -239,10 +223,6 @@ const CarCard = ({ car }) => {
           {/* Electric Vehicle Badge */}
           <ElectricVehicleBadge vehicle={car} size="small" />
           
-          {/* Show "Great price" badge if price is below estimated value */}
-          {car.price && car.estimatedValue && car.price < car.estimatedValue * 0.9 && (
-            <span className="badge price-badge">Great price</span>
-          )}
           {/* Show insurance write-off category if exists */}
           {car.historyCheckId?.writeOffCategory && car.historyCheckId.writeOffCategory !== 'none' && car.historyCheckId.writeOffCategory !== 'unknown' && (
             <span className="badge cat-badge">Cat {car.historyCheckId.writeOffCategory}</span>

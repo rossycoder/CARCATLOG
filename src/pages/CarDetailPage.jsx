@@ -385,10 +385,42 @@ const CarDetailPage = () => {
               }
               
               <h1 className="car-make-model">
+                {/* AutoTrader Style Line 1: Make + Model only */}
                 {car.make} {car.model}
               </h1>
               <h2 className="car-variant-line">
-                {generateComprehensiveVehicleTitle(car) || car.displayTitle || generateVariantDisplay(car)}
+                {/* AutoTrader Style Line 2: Variant + Battery + BodyType + Transmission + Doors */}
+                {(() => {
+                  const parts = [];
+                  
+                  // 1. Variant
+                  if (car.variant && car.variant !== 'null' && car.variant !== 'undefined' && car.variant.trim() !== '') {
+                    parts.push(car.variant.trim());
+                  }
+                  
+                  // 2. Battery capacity for PHEV/Electric
+                  if (car.batteryCapacity) {
+                    parts.push(`${car.batteryCapacity}kWh`);
+                  }
+                  
+                  // 3. Body type
+                  if (car.bodyType && car.bodyType !== 'null' && car.bodyType !== 'undefined') {
+                    parts.push(car.bodyType);
+                  }
+                  
+                  // 4. Transmission
+                  if (car.transmission) {
+                    const trans = car.transmission.toLowerCase();
+                    parts.push(trans === 'automatic' || trans === 'auto' ? 'Auto' : trans === 'manual' ? 'Manual' : car.transmission);
+                  }
+                  
+                  // 5. Doors
+                  if (car.doors) {
+                    parts.push(`${car.doors}dr`);
+                  }
+                  
+                  return parts.join(' ');
+                })()}
               </h2>
               <div className="price-tag">
                 {formatPrice(car.price)}
@@ -865,7 +897,129 @@ const CarDetailPage = () => {
               )}
             </div>
 
-            {/* Finance Calculator - Moved to right column below Contact Seller */}
+            {/* Price Indicator - Above Finance Calculator */}
+            {car.price && (() => {
+              // Get market value from different sources
+              // Priority: retail price > dealer price > estimated value
+              const marketValue = car.allValuations?.retail || 
+                                 car.allValuations?.Retail ||
+                                 car.valuation?.estimatedValue?.retail ||
+                                 car.valuation?.dealerPrice ||
+                                 car.estimatedValue;
+              
+              // Only show if we have both price and market value, and they're different
+              if (!marketValue || marketValue === car.price) {
+                console.log('⚠️ No market value available or same as price:', { price: car.price, marketValue });
+                return null;
+              }
+              
+              const priceRatio = car.price / marketValue;
+              let priceLevel = null;
+              let needleAngle = 0;
+              let labelColor = '';
+              
+              // Debug logging
+              console.log('💰 Price Indicator Debug:', {
+                carPrice: car.price,
+                marketValue: marketValue,
+                priceRatio: priceRatio,
+                percentage: (priceRatio * 100).toFixed(1) + '%',
+                allValuations: car.allValuations,
+                valuation: car.valuation
+              });
+              
+              // CORRECT LOGIC: Match gauge arc positions exactly
+              // Gauge zones: Gray (0-36°) → Light Green (36-72°) → Dark Green (72-108°) → Yellow (108-144°) → Coral (144-180°)
+              // IMPORTANT: Lower price ratio = Better deal = Needle points to GREEN zones (72-108°)
+              if (priceRatio <= 0.75) {
+                // 25% or more below market value - GREAT PRICE (Light Green zone: 36-72°)
+                priceLevel = 'Great price';
+                needleAngle = 54; // Middle of Light Green zone (36+72)/2
+                labelColor = '#A5D6A7'; // Light Green
+              } else if (priceRatio <= 0.85) {
+                // 15-25% below market value - GOOD PRICE (Dark Green zone: 72-108°)
+                priceLevel = 'Good price';
+                needleAngle = 80; // Left side of Dark Green zone
+                labelColor = '#388E3C'; // Dark Green
+              } else if (priceRatio <= 0.95) {
+                // 5-15% below market value - Still GOOD (Dark Green zone: 72-108°)
+                priceLevel = 'Good price';
+                needleAngle = 100; // Right side of Dark Green zone
+                labelColor = '#388E3C'; // Dark Green
+              } else if (priceRatio <= 1.05) {
+                // Within 5% of market value - FAIR PRICE (Yellow zone: 108-144°)
+                priceLevel = 'Fair price';
+                needleAngle = 126; // Middle of Yellow zone (108+144)/2
+                labelColor = '#FFC107'; // Yellow/Gold
+              } else if (priceRatio <= 1.15) {
+                // 5-15% above market value - HIGHER PRICE (Coral zone: 144-180°)
+                priceLevel = 'Higher price';
+                needleAngle = 162; // Middle of Coral zone (144+180)/2
+                labelColor = '#FF7043'; // Coral/Orange
+              } else {
+                // More than 15% above market value - LOWER PRICE (Gray zone: 0-36°)
+                priceLevel = 'Lower price';
+                needleAngle = 18; // Middle of Gray zone (0+36)/2
+                labelColor = '#BDBDBD'; // Gray
+              }
+              
+              // Calculate needle position - CORRECTED FORMULA
+              // SVG coordinate system: 0° is at 3 o'clock, angles go clockwise
+              // Our gauge: 0° should be at 9 o'clock (left), 180° at 3 o'clock (right)
+              // So we need to add 180° to flip the direction
+              const svgAngle = 180 - needleAngle; // Flip the angle
+              const needleX = 100 + 70 * Math.cos((svgAngle) * Math.PI / 180);
+              const needleY = 100 - 70 * Math.sin((svgAngle) * Math.PI / 180); // Negative because SVG Y goes down
+              
+              // CRITICAL DEBUG: Log needle calculation
+              console.log('🎯 Needle Calculation:', {
+                priceLevel,
+                needleAngle,
+                svgAngle,
+                needleX,
+                needleY,
+                labelColor
+              });
+              
+              return (
+                <div className="good-price-indicator">
+                  <div className="price-gauge">
+                    <svg viewBox="0 0 200 120" className="gauge-svg">
+                      {/* Gauge background arcs - 5 zones matching needle angles exactly */}
+                      {/* Arc angles: Each arc is 36° (180° total / 5 zones) */}
+                      
+                      {/* Zone 1: Gray - FAR LEFT (0-36°) - Lower price */}
+                      <path d="M 20 100 A 80 80 0 0 1 38 48" fill="none" stroke="#BDBDBD" strokeWidth="16" strokeLinecap="round"/>
+                      
+                      {/* Zone 2: Light Green - LEFT-CENTER (36-72°) - Great price */}
+                      <path d="M 38 48 A 80 80 0 0 1 70 26" fill="none" stroke="#A5D6A7" strokeWidth="16" strokeLinecap="round"/>
+                      
+                      {/* Zone 3: Dark Green - CENTER (72-108°) - Good price */}
+                      <path d="M 70 26 A 80 80 0 0 1 130 26" fill="none" stroke="#388E3C" strokeWidth="16" strokeLinecap="round"/>
+                      
+                      {/* Zone 4: Yellow/Gold - RIGHT-CENTER (108-144°) - Fair price */}
+                      <path d="M 130 26 A 80 80 0 0 1 162 48" fill="none" stroke="#FFC107" strokeWidth="16" strokeLinecap="round"/>
+                      
+                      {/* Zone 5: Coral/Orange - FAR RIGHT (144-180°) - Higher price */}
+                      <path d="M 162 48 A 80 80 0 0 1 180 100" fill="none" stroke="#FF7043" strokeWidth="16" strokeLinecap="round"/>
+                      
+                      {/* Needle pointing to appropriate zone */}
+                      <line x1="100" y1="100" x2={needleX} y2={needleY} stroke="#1a1a1a" strokeWidth="5" strokeLinecap="round"/>
+                      <circle cx="100" cy="100" r="8" fill="#1a1a1a"/>
+                      <circle cx="100" cy="100" r="4" fill="#fff"/>
+                    </svg>
+                  </div>
+                  <div className="price-label" style={{ backgroundColor: labelColor }}>
+                    {priceLevel}
+                  </div>
+                  <div className="price-amount">
+                    {formatPrice(car.price)}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Finance Calculator - Below Price Indicator */}
             <FinanceCalculator 
               price={car.price || car.estimatedValue || 10000}
               apr={car.year ? (new Date().getFullYear() - car.year <= 3 ? 8.9 : new Date().getFullYear() - car.year <= 6 ? 9.9 : 11.9) : 9.9}

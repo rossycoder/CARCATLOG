@@ -1172,3 +1172,47 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+
+/* Good Price Indicator - Below Finance Calculator */
+.good-price-indicator {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.price-gauge {
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto 10px;
+}
+
+.gauge-svg {
+  width: 100%;
+  height: auto;
+}
+
+.price-label {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.price-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Price level specific colors are set inline via style attribute */

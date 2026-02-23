@@ -44,6 +44,8 @@ const VehicleLookupForm = () => {
       console.error('Vehicle lookup error:', err);
       if (err.code === 'ERR_NETWORK' || !err.response) {
         setError('Unable to connect to vehicle lookup service. Please ensure the backend server is running.');
+      } else if (err.response?.status === 404 || err.response?.data?.error?.code === 'VEHICLE_NOT_FOUND') {
+        setError('Unable to find vehicle details. Please check the registration number and try again. The vehicle may have been scrapped, exported, or the registration may have changed.');
       } else {
         setError(err.response?.data?.error?.message || 'Failed to lookup vehicle. Please try again.');
       }
@@ -134,6 +136,16 @@ const VehicleLookupForm = () => {
           </div>
 
           <div className="vehicle-details-card">
+            {/* AutoTrader Style Title */}
+            <div className="vehicle-title-section">
+              <h1 className="vehicle-make-model">
+                {vehicleData.make} {vehicleData.model}
+              </h1>
+              <h2 className="vehicle-details-line">
+                {vehicleData.year} • {vehicleData.mileage?.toLocaleString()} miles • {vehicleData.fuelType}
+              </h2>
+            </div>
+
             <div className="details-grid">
               <div className="detail-item">
                 <span className="detail-label">REGISTRATION NUMBER</span>
@@ -143,16 +155,6 @@ const VehicleLookupForm = () => {
               <div className="detail-item">
                 <span className="detail-label">MILEAGE</span>
                 <span className="detail-value">{vehicleData.mileage?.toLocaleString()} miles</span>
-              </div>
-
-              <div className="detail-item">
-                <span className="detail-label">MAKE</span>
-                <span className="detail-value">{vehicleData.make}</span>
-              </div>
-
-              <div className="detail-item">
-                <span className="detail-label">MODEL</span>
-                <span className="detail-value">{vehicleData.model}</span>
               </div>
 
               <div className="detail-item">
@@ -169,6 +171,20 @@ const VehicleLookupForm = () => {
                 <span className="detail-label">FUEL TYPE</span>
                 <span className="detail-value">{vehicleData.fuelType}</span>
               </div>
+
+              {vehicleData.bodyType && (
+                <div className="detail-item">
+                  <span className="detail-label">BODY TYPE</span>
+                  <span className="detail-value">{vehicleData.bodyType}</span>
+                </div>
+              )}
+
+              {vehicleData.transmission && (
+                <div className="detail-item">
+                  <span className="detail-label">TRANSMISSION</span>
+                  <span className="detail-value">{vehicleData.transmission}</span>
+                </div>
+              )}
 
               {vehicleData.engineSize && (
                 <div className="detail-item">
