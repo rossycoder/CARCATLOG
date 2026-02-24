@@ -963,14 +963,15 @@ const CarDetailPage = () => {
                 labelColor = '#BDBDBD'; // Gray
               }
               
-              // Calculate needle position - FIXED FORMULA
+              // Calculate needle position - CORRECTED FORMULA
               // SVG coordinate system: 0° is at 3 o'clock (right), angles go counter-clockwise
               // Our gauge: 0° should be at 9 o'clock (left), 180° at 3 o'clock (right)
-              // We need to convert our logical angle (0-180° left to right) to SVG angle
-              // SVG angle = 180° - our angle (to flip left-right)
-              const svgAngle = 180 + needleAngle; // Add 180° to start from left (9 o'clock position)
-              const needleX = 100 + 70 * Math.cos((svgAngle) * Math.PI / 180);
-              const needleY = 100 - 70 * Math.sin((svgAngle) * Math.PI / 180); // Negative because SVG Y goes down
+              // Gauge spans from 180° (left) to 0° (right) in SVG coordinates
+              // Our logical angle: 0° = left (Gray), 180° = right (Coral)
+              // SVG angle = 180° - needleAngle (to convert left-to-right to SVG coordinates)
+              const svgAngle = 180 - needleAngle;
+              const needleX = 100 + 70 * Math.cos(svgAngle * Math.PI / 180);
+              const needleY = 100 - 70 * Math.sin(svgAngle * Math.PI / 180);
               
               // CRITICAL DEBUG: Log needle calculation
               console.log('🎯 Needle Calculation:', {
