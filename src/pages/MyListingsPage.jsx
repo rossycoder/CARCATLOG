@@ -256,6 +256,43 @@ function MyListingsPage() {
                         </button>
                       </>
                     )}
+                    {listing.advertStatus === 'pending_payment' && (
+                      <>
+                        <button 
+                          onClick={() => {
+                            // Redirect to appropriate advertising prices page based on vehicle type
+                            const vehicleType = listing.vehicleType || 'car';
+                            const advertId = listing.advertId || listing._id;
+                            
+                            if (vehicleType === 'bike') {
+                              navigate(`/bikes/advertising-prices?advertId=${advertId}&resumePayment=true`);
+                            } else if (vehicleType === 'van') {
+                              navigate(`/vans/advertising-prices?advertId=${advertId}&resumePayment=true`);
+                            } else {
+                              navigate(`/sell-my-car/advertising-prices?advertId=${advertId}&resumePayment=true`);
+                            }
+                          }}
+                          className="btn-payment"
+                          title="Complete payment to activate listing"
+                        >
+                          💳 Complete Payment
+                        </button>
+                        <button 
+                          onClick={() => handleEditListing(listing._id, listing.vehicleType)}
+                          className="btn-edit"
+                          title="Edit listing before payment"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button 
+                          onClick={() => handleViewListing(listing._id, listing.vehicleType)}
+                          className="btn-view"
+                          title="Preview listing"
+                        >
+                          👁️ Preview
+                        </button>
+                      </>
+                    )}
                     {(listing.advertStatus === 'sold' || listing.advertStatus === 'expired') && (
                       <button 
                         onClick={() => handleViewListing(listing._id, listing.vehicleType)}

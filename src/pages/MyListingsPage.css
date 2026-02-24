@@ -268,6 +268,15 @@
   background: #c82333;
 }
 
+.btn-payment {
+  background: #ffc107;
+  color: #1a1a1a;
+}
+
+.btn-payment:hover {
+  background: #e0a800;
+}
+
 .btn-primary {
   background: #007bff;
   color: white;

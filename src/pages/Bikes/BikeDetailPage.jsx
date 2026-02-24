@@ -5,6 +5,9 @@ import { vehicleSchema, breadcrumbSchema } from '../../utils/seoSchemas';
 import VehicleHistorySection from '../../components/VehicleHistory/VehicleHistorySection';
 import MOTHistorySection from '../../components/VehicleHistory/MOTHistorySection';
 import LocationDisplay from '../../components/Location/LocationDisplay';
+import ElectricVehicleCharging from '../../components/ElectricVehicleCharging';
+import ElectricVehicleRunningCosts from '../../components/ElectricVehicleRunningCosts';
+import FinanceCalculator from '../../components/FinanceCalculator';
 import { generateVariantDisplay, extractTownName, formatColor } from '../../utils/vehicleFormatter';
 import '../CarDetailPage.css'; // Reuse car detail page styles
 
@@ -19,6 +22,16 @@ const BikeDetailPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
   const [imageError, setImageError] = useState(false);
+
+  // Helper function to check if bike is electric or hybrid
+  const isElectricOrHybrid = (fuelType) => {
+    if (!fuelType) return false;
+    return fuelType === 'Electric' || 
+           fuelType === 'Hybrid' ||
+           fuelType === 'Plug-in Hybrid' ||
+           fuelType.toLowerCase().includes('hybrid') ||
+           fuelType.toLowerCase().includes('electric');
+  };
 
   // Function to handle back navigation intelligently
   const handleBackClick = () => {
@@ -49,7 +62,13 @@ const BikeDetailPage = () => {
       
       console.log('Fetching bike details from:', url);
       
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
       
       if (!response.ok) {
         throw new Error('Bike not found');
@@ -58,6 +77,8 @@ const BikeDetailPage = () => {
       const data = await response.json();
       console.log('✅ Bike data loaded successfully');
       console.log('🖼️ Images:', data.data.images?.length || 0, 'found');
+      console.log('⛽ Fuel Type:', data.data.fuelType);
+      console.log('👤 Seller Contact:', JSON.stringify(data.data.sellerContact, null, 2));
       setBike(data.data);
     } catch (err) {
       console.error('Error fetching bike details:', err);
@@ -84,8 +105,13 @@ const BikeDetailPage = () => {
   const generateComprehensiveBikeTitle = (bike) => {
     const parts = [];
     
-    // Add engine CC
-    if (bike.engineCC) {
+    // For electric bikes: Add battery capacity
+    if (isElectricOrHybrid(bike.fuelType) && bike.batteryCapacity) {
+      parts.push(`${bike.batteryCapacity}kWh`);
+    }
+    
+    // For petrol bikes: Add engine CC
+    if (!isElectricOrHybrid(bike.fuelType) && bike.engineCC) {
       parts.push(`${bike.engineCC}cc`);
     }
     
@@ -269,6 +295,28 @@ const BikeDetailPage = () => {
 
             {/* Title and Price - AutoTrader Format */}
             <div className="car-header">
+              {/* Write-off Warning Badge */}
+              {bike.historyCheckId && 
+               bike.historyCheckId.writeOffCategory && 
+               (() => {
+                 const category = bike.historyCheckId.writeOffCategory.toUpperCase();
+                 const isKnownCategory = ['A', 'B', 'C', 'S', 'N', 'D'].includes(category);
+                 const isUnknownCategory = category === 'UNKNOWN' || category === 'NOT KNOWN';
+                 
+                 if (isKnownCategory || isUnknownCategory) {
+                   return (
+                     <div className="write-off-warning-badge">
+                       <span className="warning-icon">⚠️</span>
+                       <span className="warning-text">
+                         {isUnknownCategory ? 'CAT UNKNOWN' : `CAT ${category}`}
+                       </span>
+                     </div>
+                   );
+                 }
+                 return null;
+               })()
+              }
+              
               <h1 className="car-make-model">
                 {bike.make} {bike.model}
               </h1>
@@ -317,11 +365,21 @@ const BikeDetailPage = () => {
                   </div>
                 </div>
 
+                {/* Engine CC for petrol bikes, Range for electric bikes */}
                 <div className="spec-item">
-                  <span className="spec-icon">🔧</span>
+                  <span className="spec-icon">{isElectricOrHybrid(bike.fuelType) ? '🔋' : '🔧'}</span>
                   <div className="spec-details">
-                    <span className="spec-label">Engine</span>
-                    <span className="spec-value">{bike.engineCC}cc</span>
+                    <span className="spec-label">
+                      {isElectricOrHybrid(bike.fuelType) ? 'Electric Range' : 'Engine'}
+                    </span>
+                    <span className="spec-value">
+                      {isElectricOrHybrid(bike.fuelType) 
+                        ? (bike.electricRange || bike.runningCosts?.electricRange 
+                            ? `${bike.electricRange || bike.runningCosts?.electricRange} miles` 
+                            : 'N/A')
+                        : (bike.engineCC ? `${bike.engineCC}cc` : 'N/A')
+                      }
+                    </span>
                   </div>
                 </div>
 
@@ -429,7 +487,136 @@ const BikeDetailPage = () => {
               </div>
             )}
 
-            {/* Vehicle Features Section */}
+            {/* Running Costs Section - For ALL bikes */}
+            {bike.runningCosts && (
+              <div className="running-costs-section-new">
+                <h2>Running costs</h2>
+                <div className="running-costs-horizontal">
+                  <div className="running-cost-item">
+                    <div className="cost-icon-wrapper">
+                      <svg className="cost-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                      </svg>
+                    </div>
+                    <div className="cost-content">
+                      <div className="cost-label">CO₂ emissions</div>
+                      <div className="cost-value">
+                        {isElectricOrHybrid(bike.fuelType) && bike.fuelType === 'Electric' ? '0g/km' : (bike.runningCosts?.co2Emissions ? `${bike.runningCosts.co2Emissions}g/km` : 'N/A')}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="running-cost-item">
+                    <div className="cost-icon-wrapper">
+                      <svg className="cost-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      </svg>
+                    </div>
+                    <div className="cost-content">
+                      <div className="cost-label">Insurance group</div>
+                      <div className="cost-value">{(bike.runningCosts?.insuranceGroup || bike.insuranceGroup) || 'N/A'}</div>
+                    </div>
+                  </div>
+
+                  <div className="running-cost-item">
+                    <div className="cost-icon-wrapper">
+                      <svg className="cost-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M16 8l-4 4-4-4"/>
+                      </svg>
+                    </div>
+                    <div className="cost-content">
+                      <div className="cost-label">Tax per year</div>
+                      <div className="cost-value">
+                        {(bike.runningCosts?.annualTax || bike.annualTax) ? formatPrice(bike.runningCosts?.annualTax || bike.annualTax) : 'N/A'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {!isElectricOrHybrid(bike.fuelType) && bike.runningCosts?.fuelEconomy && (bike.runningCosts.fuelEconomy.combined || bike.runningCosts.fuelEconomy.urban || bike.runningCosts.fuelEconomy.extraUrban) && (
+                  <div className="additional-running-costs">
+                    <div className="fuel-economy-grid">
+                      {bike.runningCosts.fuelEconomy.combined && (
+                        <div className="fuel-economy-item">
+                          <span className="fuel-icon">⛽</span>
+                          <div className="fuel-details">
+                            <span className="fuel-label">Combined MPG</span>
+                            <span className="fuel-value">{bike.runningCosts.fuelEconomy.combined} mpg</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {bike.runningCosts.fuelEconomy.urban && (
+                        <div className="fuel-economy-item">
+                          <span className="fuel-icon">🏙️</span>
+                          <div className="fuel-details">
+                            <span className="fuel-label">Urban MPG</span>
+                            <span className="fuel-value">{bike.runningCosts.fuelEconomy.urban} mpg</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {bike.runningCosts.fuelEconomy.extraUrban && (
+                        <div className="fuel-economy-item">
+                          <span className="fuel-icon">🛣️</span>
+                          <div className="fuel-details">
+                            <span className="fuel-label">Extra Urban MPG</span>
+                            <span className="fuel-value">{bike.runningCosts.fuelEconomy.extraUrban} mpg</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {isElectricOrHybrid(bike.fuelType) && (bike.runningCosts?.electricRange || bike.runningCosts?.batteryCapacity || bike.runningCosts?.chargingTime || bike.electricRange || bike.batteryCapacity || bike.chargingTime) && (
+                  <div className="additional-running-costs">
+                    <div className="fuel-economy-grid">
+                      {(bike.runningCosts?.electricRange || bike.electricRange) && (
+                        <div className="fuel-economy-item">
+                          <span className="fuel-icon">🔋</span>
+                          <div className="fuel-details">
+                            <span className="fuel-label">Electric Range</span>
+                            <span className="fuel-value">{bike.runningCosts?.electricRange || bike.electricRange} miles</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {(bike.runningCosts?.batteryCapacity || bike.batteryCapacity) && (
+                        <div className="fuel-economy-item">
+                          <span className="fuel-icon">🔋</span>
+                          <div className="fuel-details">
+                            <span className="fuel-label">Battery Capacity</span>
+                            <span className="fuel-value">{bike.runningCosts?.batteryCapacity || bike.batteryCapacity} kWh</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {(bike.runningCosts?.chargingTime || bike.chargingTime) && (
+                        <div className="fuel-economy-item">
+                          <span className="fuel-icon">⚡</span>
+                          <div className="fuel-details">
+                            <span className="fuel-label">Charging Time</span>
+                            <span className="fuel-value">{bike.runningCosts?.chargingTime || bike.chargingTime} hours</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Electric Bike Charging Information */}
+            <ElectricVehicleCharging vehicle={bike} />
+
+            {/* Electric Bike Running Costs */}
+            <ElectricVehicleRunningCosts vehicle={bike} />
+
+            {/* Bike Features Section */}
             {showAllFeatures && bike.features && bike.features.length > 0 && (
               <div className="features-section">
                 <h2>Bike Features</h2>
@@ -474,13 +661,25 @@ const BikeDetailPage = () => {
                 
                 {(bike.sellerType === 'trade' || bike.sellerContact?.type === 'trade') && (
                   <div className="trade-seller-details">
-                    {bike.dealerLogo && (
+                    {bike.sellerContact?.businessLogo && (
                       <div className="dealer-logo-display">
-                        <img src={bike.dealerLogo} alt={bike.sellerContact?.businessName || 'Dealer'} />
+                        <img src={bike.sellerContact.businessLogo} alt={bike.sellerContact?.businessName || 'Dealer'} />
                       </div>
                     )}
                     {bike.sellerContact?.businessName && (
                       <div className="dealer-business-name">{bike.sellerContact.businessName}</div>
+                    )}
+                    {bike.sellerContact?.businessWebsite && (
+                      <div className="dealer-website">
+                        <a 
+                          href={bike.sellerContact.businessWebsite} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="dealer-website-link"
+                        >
+                          🌐 Visit Website →
+                        </a>
+                      </div>
                     )}
                     {bike.sellerContact?.businessAddress && (
                       <div className="dealer-business-address">
@@ -511,6 +710,7 @@ const BikeDetailPage = () => {
                 
                 {(bike.sellerType === 'private' || bike.sellerContact?.type === 'private') && (
                   <div className="private-seller-details">
+                    <div className="private-seller-icon">👤</div>
                     <div className="private-seller-label">Private Seller</div>
                     <div className="private-seller-location">
                       📍 {extractTownName(bike.locationName) || 'Location available'}
@@ -532,7 +732,7 @@ const BikeDetailPage = () => {
             </div>
           </div>
 
-          {/* Right Column - Contact Seller */}
+          {/* Right Column - Contact Seller + Price Indicator + Finance Calculator */}
           <div className="right-column">
             <div className="contact-card">
               <h3>Contact seller</h3>
@@ -558,6 +758,112 @@ const BikeDetailPage = () => {
                 </button>
               )}
             </div>
+
+            {/* Price Indicator - Above Finance Calculator */}
+            {bike.price && (() => {
+              const marketValue = bike.allValuations?.retail || 
+                                 bike.allValuations?.Retail ||
+                                 bike.valuation?.estimatedValue?.retail ||
+                                 bike.valuation?.dealerPrice ||
+                                 bike.estimatedValue;
+              
+              if (!marketValue || marketValue === bike.price) {
+                console.log('⚠️ No market value available or same as price:', { price: bike.price, marketValue });
+                return null;
+              }
+              
+              const priceRatio = bike.price / marketValue;
+              let priceLevel = null;
+              let needleAngle = 0;
+              let labelColor = '';
+              
+              console.log('💰 Price Indicator Debug:', {
+                bikePrice: bike.price,
+                marketValue: marketValue,
+                priceRatio: priceRatio,
+                percentage: (priceRatio * 100).toFixed(1) + '%'
+              });
+              
+              // Price level logic (same as cars)
+              if (priceRatio <= 0.75) {
+                priceLevel = 'Great price';
+                needleAngle = 54;
+                labelColor = '#A5D6A7';
+              } else if (priceRatio <= 0.85) {
+                priceLevel = 'Good price';
+                needleAngle = 80;
+                labelColor = '#388E3C';
+              } else if (priceRatio <= 0.95) {
+                priceLevel = 'Good price';
+                needleAngle = 100;
+                labelColor = '#388E3C';
+              } else if (priceRatio <= 1.05) {
+                priceLevel = 'Fair price';
+                needleAngle = 126;
+                labelColor = '#FFC107';
+              } else if (priceRatio <= 1.15) {
+                priceLevel = 'Higher price';
+                needleAngle = 162;
+                labelColor = '#FF7043';
+              } else {
+                priceLevel = 'Lower price';
+                needleAngle = 18;
+                labelColor = '#BDBDBD';
+              }
+              
+              const svgAngle = 180 + needleAngle;
+              const needleX = 100 + 70 * Math.cos((svgAngle) * Math.PI / 180);
+              const needleY = 100 - 70 * Math.sin((svgAngle) * Math.PI / 180);
+              
+              console.log('🎯 Needle Calculation:', {
+                priceLevel,
+                needleAngle,
+                svgAngle,
+                needleX,
+                needleY,
+                labelColor
+              });
+              
+              return (
+                <div className="good-price-indicator">
+                  <div className="price-gauge">
+                    <svg viewBox="0 0 200 120" className="gauge-svg">
+                      {/* Gauge background arcs */}
+                      <path d="M 20 100 A 80 80 0 0 1 38 48" fill="none" stroke="#BDBDBD" strokeWidth="16" strokeLinecap="round"/>
+                      <path d="M 38 48 A 80 80 0 0 1 70 26" fill="none" stroke="#A5D6A7" strokeWidth="16" strokeLinecap="round"/>
+                      <path d="M 70 26 A 80 80 0 0 1 130 26" fill="none" stroke="#388E3C" strokeWidth="16" strokeLinecap="round"/>
+                      <path d="M 130 26 A 80 80 0 0 1 162 48" fill="none" stroke="#FFC107" strokeWidth="16" strokeLinecap="round"/>
+                      <path d="M 162 48 A 80 80 0 0 1 180 100" fill="none" stroke="#FF7043" strokeWidth="16" strokeLinecap="round"/>
+                      
+                      {/* Needle */}
+                      <line x1="100" y1="100" x2={needleX} y2={needleY} stroke="#1a1a1a" strokeWidth="5" strokeLinecap="round"/>
+                      <circle cx="100" cy="100" r="8" fill="#1a1a1a"/>
+                      <circle cx="100" cy="100" r="4" fill="#fff"/>
+                    </svg>
+                  </div>
+                  <div className="price-label" style={{ backgroundColor: labelColor }}>
+                    {priceLevel}
+                  </div>
+                  <div className="price-amount">
+                    {formatPrice(bike.price)}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Finance Calculator - Below Price Indicator */}
+            <FinanceCalculator 
+              price={bike.price || bike.estimatedValue || 5000}
+              apr={bike.year ? (() => {
+                const age = new Date().getFullYear() - bike.year;
+                if (age <= 2) return 6.9;
+                if (age <= 5) return 9.9;
+                if (age <= 9) return 12.9;
+                return 16.9;
+              })() : 9.9}
+              minDepositPercent={0}
+              maxDepositPercent={50}
+            />
           </div>
         </div>
       </div>

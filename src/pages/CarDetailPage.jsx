@@ -1023,7 +1023,13 @@ const CarDetailPage = () => {
             {/* Finance Calculator - Below Price Indicator */}
             <FinanceCalculator 
               price={car.price || car.estimatedValue || 10000}
-              apr={car.year ? (new Date().getFullYear() - car.year <= 3 ? 8.9 : new Date().getFullYear() - car.year <= 6 ? 9.9 : 11.9) : 9.9}
+              apr={car.year ? (() => {
+                const age = new Date().getFullYear() - car.year;
+                if (age <= 2) return 6.9;
+                if (age <= 5) return 9.9;
+                if (age <= 9) return 12.9;
+                return 16.9;
+              })() : 9.9}
               minDepositPercent={0}
               maxDepositPercent={50}
             />

@@ -76,20 +76,38 @@ function BikeSearchResultsPage() {
       }
       
       console.log('[BikeSearchResultsPage] Performing filtered search with:', filterParams);
-      const response = await bikeService.searchBikes(filterParams);
+      
+      // Check if postcode is provided - use postcode search for distance calculation
+      const hasPostcode = filterParams.postcode && filterParams.postcode.trim() !== '';
+      const radius = filterParams.distance || 25;
+      
+      let response;
+      if (hasPostcode) {
+        console.log('[BikeSearchResultsPage] Using postcode search for distance calculation');
+        // Use postcode search endpoint to get distance
+        response = await bikeService.searchBikesByPostcode(
+          filterParams.postcode,
+          radius,
+          filterParams // Pass other filters
+        );
+      } else {
+        console.log('[BikeSearchResultsPage] Using normal search (no distance)');
+        // Use normal search endpoint (no distance calculation)
+        response = await bikeService.searchBikes(filterParams);
+      }
       
       console.log('[BikeSearchResultsPage] Search response:', response);
       
       if (response.success) {
-        const bikes = response.bikes || [];
-        const total = response.total || 0;
+        const bikes = response.data?.results || response.bikes || [];
+        const total = response.data?.count || response.total || bikes.length;
         
         console.log('[BikeSearchResultsPage] Found bikes:', total);
         
         // Transform to match expected format
         const transformedData = {
           postcode: filterParams.postcode || 'All UK',
-          radius: filterParams.distance || 0,
+          radius: radius,
           count: total,
           results: bikes,
           showingAllBikes: false

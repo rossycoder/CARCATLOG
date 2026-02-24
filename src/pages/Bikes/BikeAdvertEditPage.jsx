@@ -57,6 +57,27 @@ const BikeAdvertEditPage = () => {
   const [runningCostsTimeout, setRunningCostsTimeout] = useState(null);
   const [featureSaveTimeout, setFeatureSaveTimeout] = useState(null);
   
+  // Vehicle details editing state (make, model, variant only)
+  const [isEditingVehicleDetails, setIsEditingVehicleDetails] = useState(false);
+  const [editableVehicleData, setEditableVehicleData] = useState({
+    make: '',
+    model: '',
+    variant: ''
+  });
+  
+  // Overview editing state (fuel type, bike type, color, etc.)
+  const [isEditingOverview, setIsEditingOverview] = useState(false);
+  const [editableOverviewData, setEditableOverviewData] = useState({
+    fuelType: '',
+    bikeType: '',
+    color: '',
+    engineSize: '',
+    engineCC: ''
+  });
+  
+  // Price suggestion from valuation
+  const [suggestedPrice, setSuggestedPrice] = useState(null);
+  
   // Enhanced data processing state
   const [enhancedDataProcessed, setEnhancedDataProcessed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -74,6 +95,14 @@ const BikeAdvertEditPage = () => {
     }
   }, [vehicleData, isLoading]);
 
+  // Set suggested price from valuation
+  useEffect(() => {
+    if (vehicleData && vehicleData.estimatedValue) {
+      // For bikes, use the estimated value as suggested price
+      setSuggestedPrice(vehicleData.estimatedValue);
+    }
+  }, [vehicleData]);
+  
   // Auto-fill data when enhanced data is received from API OR generate frontend values
   useEffect(() => {
     if (enhancedData && !apiLoading && !enhancedDataProcessed) {
@@ -397,6 +426,239 @@ const BikeAdvertEditPage = () => {
     setIsPriceEditing(false);
     // Revert to original price
     handleInputChange('price', vehicleData.estimatedValue || '');
+  };
+  
+  // Handle vehicle details edit (make, model, variant only)
+  const handleVehicleDetailsEdit = (e) => {
+    e.preventDefault();
+    console.log('🖱️ Edit vehicle details button clicked!');
+    
+    // Initialize editable data with current values
+    setEditableVehicleData({
+      make: vehicleData.make || '',
+      model: vehicleData.model || '',
+      variant: vehicleData.variant || ''
+    });
+    
+    setIsEditingVehicleDetails(true);
+  };
+  
+  // Handle vehicle details save
+  const handleVehicleDetailsSave = async () => {
+    try {
+      console.log('💾 Saving vehicle details:', editableVehicleData);
+      
+      // Validate make and model (required fields)
+      if (!editableVehicleData.make || !editableVehicleData.make.trim()) {
+        setErrors(prev => ({ ...prev, make: 'Make is required' }));
+        return;
+      }
+      
+      if (!editableVehicleData.model || !editableVehicleData.model.trim()) {
+        setErrors(prev => ({ ...prev, model: 'Model is required' }));
+        return;
+      }
+      
+      // Clear any errors
+      setErrors(prev => ({ ...prev, make: null, model: null, variant: null }));
+      
+      // Update only make, model, and variant
+      const updateData = {
+        make: editableVehicleData.make.trim(),
+        model: editableVehicleData.model.trim(),
+        variant: editableVehicleData.variant ? editableVehicleData.variant.trim() : '',
+        userEditedFields: {
+          make: true,
+          model: true,
+          variant: !!editableVehicleData.variant
+        }
+      };
+      
+      console.log('💾 Update data being sent:', updateData);
+      
+      // Save to backend via API
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_BASE_URL}/bikes/${advertId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(updateData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update vehicle details');
+      }
+      
+      const data = await response.json();
+      console.log('✅ Vehicle details saved successfully:', data);
+      
+      // Update local state
+      setVehicleData(prev => ({
+        ...prev,
+        make: updateData.make,
+        model: updateData.model,
+        variant: updateData.variant
+      }));
+      
+      // Also update localStorage
+      const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
+      const updatedData = {
+        ...currentData,
+        vehicleData: {
+          ...currentData.vehicleData,
+          make: updateData.make,
+          model: updateData.model,
+          variant: updateData.variant
+        },
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
+      
+      console.log('✅ Local state and localStorage updated');
+      
+      // Exit editing mode
+      setIsEditingVehicleDetails(false);
+      alert('Vehicle details updated successfully!');
+    } catch (error) {
+      console.error('❌ Error saving vehicle details:', error);
+      setErrors(prev => ({ ...prev, vehicleDetails: 'Failed to save. Please try again.' }));
+      alert('Failed to update vehicle details. Please try again.');
+    }
+  };
+  
+  // Handle vehicle details cancel
+  const handleVehicleDetailsCancel = () => {
+    setIsEditingVehicleDetails(false);
+    // Reset editable data
+    setEditableVehicleData({
+      make: vehicleData.make || '',
+      model: vehicleData.model || '',
+      variant: vehicleData.variant || ''
+    });
+    // Clear any errors
+    setErrors(prev => ({ ...prev, make: null, model: null, variant: null }));
+  };
+  
+  // Handle overview edit (fuel type, bike type, color, etc.)
+  const handleOverviewEdit = (e) => {
+    e.preventDefault();
+    console.log('🖱️ Edit overview button clicked!');
+    
+    // Initialize editable data with current values
+    setEditableOverviewData({
+      fuelType: vehicleData.fuelType || '',
+      bikeType: vehicleData.bikeType || '',
+      color: vehicleData.color || '',
+      engineSize: vehicleData.engineSize || '',
+      engineCC: vehicleData.engineCC || ''
+    });
+    
+    setIsEditingOverview(true);
+  };
+  
+  // Handle overview save
+  const handleOverviewSave = async () => {
+    try {
+      console.log('💾 Saving overview data:', editableOverviewData);
+      
+      // Validate required fields
+      if (!editableOverviewData.fuelType || !editableOverviewData.fuelType.trim()) {
+        setErrors(prev => ({ ...prev, fuelType: 'Fuel type is required' }));
+        return;
+      }
+      
+      // Clear any errors
+      setErrors(prev => ({ ...prev, fuelType: null, bikeType: null, color: null }));
+      
+      // Update data
+      const updateData = {
+        fuelType: editableOverviewData.fuelType.trim(),
+        bikeType: editableOverviewData.bikeType ? editableOverviewData.bikeType.trim() : '',
+        color: editableOverviewData.color ? editableOverviewData.color.trim() : '',
+        engineSize: editableOverviewData.engineSize ? editableOverviewData.engineSize.trim() : '',
+        engineCC: editableOverviewData.engineCC ? parseInt(editableOverviewData.engineCC) : null,
+        userEditedFields: {
+          fuelType: true,
+          bikeType: !!editableOverviewData.bikeType,
+          color: !!editableOverviewData.color,
+          engineSize: !!editableOverviewData.engineSize,
+          engineCC: !!editableOverviewData.engineCC
+        }
+      };
+      
+      console.log('💾 Update data being sent:', updateData);
+      
+      // Save to backend via API
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_BASE_URL}/bikes/${advertId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(updateData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update overview data');
+      }
+      
+      const data = await response.json();
+      console.log('✅ Overview data saved successfully:', data);
+      
+      // Update local state
+      setVehicleData(prev => ({
+        ...prev,
+        fuelType: updateData.fuelType,
+        bikeType: updateData.bikeType,
+        color: updateData.color,
+        engineSize: updateData.engineSize,
+        engineCC: updateData.engineCC
+      }));
+      
+      // Also update localStorage
+      const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
+      const updatedData = {
+        ...currentData,
+        vehicleData: {
+          ...currentData.vehicleData,
+          fuelType: updateData.fuelType,
+          bikeType: updateData.bikeType,
+          color: updateData.color,
+          engineSize: updateData.engineSize,
+          engineCC: updateData.engineCC
+        },
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
+      
+      console.log('✅ Local state and localStorage updated');
+      
+      // Exit editing mode
+      setIsEditingOverview(false);
+      alert('Overview data updated successfully!');
+    } catch (error) {
+      console.error('❌ Error saving overview data:', error);
+      setErrors(prev => ({ ...prev, overview: 'Failed to save. Please try again.' }));
+      alert('Failed to update overview data. Please try again.');
+    }
+  };
+  
+  // Handle overview cancel
+  const handleOverviewCancel = () => {
+    setIsEditingOverview(false);
+    // Reset editable data
+    setEditableOverviewData({
+      fuelType: vehicleData.fuelType || '',
+      bikeType: vehicleData.bikeType || '',
+      color: vehicleData.color || '',
+      engineSize: vehicleData.engineSize || '',
+      engineCC: vehicleData.engineCC || ''
+    });
+    // Clear any errors
+    setErrors(prev => ({ ...prev, fuelType: null, bikeType: null, color: null, overview: null }));
   };
 
   // Auto-save running costs with debounce
@@ -801,20 +1063,79 @@ const BikeAdvertEditPage = () => {
 
           {/* Vehicle Details Section */}
           <section className="vehicle-details-section">
-            <h2>
-              {`${vehicleData.make} ${vehicleData.model}`}
-              {vehicleData.year && ` (${vehicleData.year})`}
-            </h2>
-            <p className="vehicle-subtitle">
-              {vehicleData.engineSize && `${vehicleData.engineSize} `}
-              {vehicleData.bikeType && `${vehicleData.bikeType} | `}
-              {vehicleData.mileage && `${vehicleData.mileage.toLocaleString()} miles`}
-            </p>
-            
-            <div className="vehicle-actions">
-              <a href="#" className="edit-link">Edit bike details</a>
-              <a href="#" className="attention-link">Add attention grabber</a>
-            </div>
+            {!isEditingVehicleDetails ? (
+              <>
+                <h2>
+                  {`${vehicleData.make} ${vehicleData.model}`}
+                  {vehicleData.year && ` (${vehicleData.year})`}
+                </h2>
+                <p className="vehicle-subtitle">
+                  {vehicleData.engineSize && `${vehicleData.engineSize} `}
+                  {vehicleData.bikeType && `${vehicleData.bikeType} | `}
+                  {vehicleData.mileage && `${vehicleData.mileage.toLocaleString()} miles`}
+                </p>
+                
+                <div className="vehicle-actions">
+                  <a href="#" onClick={handleVehicleDetailsEdit} className="edit-link">Edit vehicle details</a>
+                  <a href="#" className="attention-link">Add attention grabber</a>
+                </div>
+              </>
+            ) : (
+              <div className="vehicle-details-edit-form">
+                <h3>Edit Vehicle Details</h3>
+                
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Make *</label>
+                    <input
+                      type="text"
+                      value={editableVehicleData.make}
+                      onChange={(e) => setEditableVehicleData({...editableVehicleData, make: e.target.value})}
+                      placeholder="e.g. Honda"
+                      className={errors.make ? 'error' : ''}
+                      required
+                    />
+                    {errors.make && <p className="error-message">{errors.make}</p>}
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Model *</label>
+                    <input
+                      type="text"
+                      value={editableVehicleData.model}
+                      onChange={(e) => setEditableVehicleData({...editableVehicleData, model: e.target.value})}
+                      placeholder="e.g. CBR600RR"
+                      className={errors.model ? 'error' : ''}
+                      required
+                    />
+                    {errors.model && <p className="error-message">{errors.model}</p>}
+                  </div>
+                </div>
+                
+                <div className="form-group">
+                  <label>Variant (optional)</label>
+                  <input
+                    type="text"
+                    value={editableVehicleData.variant}
+                    onChange={(e) => setEditableVehicleData({...editableVehicleData, variant: e.target.value})}
+                    placeholder="e.g. ABS, Sport, Limited Edition"
+                  />
+                </div>
+                
+                <div className="form-actions">
+                  <button type="button" onClick={handleVehicleDetailsSave} className="save-button">
+                    Save Changes
+                  </button>
+                  <button type="button" onClick={handleVehicleDetailsCancel} className="cancel-button">
+                    Cancel
+                  </button>
+                </div>
+                
+                {errors.vehicleDetails && (
+                  <p className="error-message">{errors.vehicleDetails}</p>
+                )}
+              </div>
+            )}
             
             <div className="price-section">
               <div className="price-display-wrapper">
@@ -866,6 +1187,17 @@ const BikeAdvertEditPage = () => {
               {errors.price && (
                 <p className="error-message">{errors.price}</p>
               )}
+              
+              {/* Price suggestion from valuation - NO "Use this price" button */}
+              {suggestedPrice && suggestedPrice > 0 && (
+                <div className="price-suggestion">
+                  <span className="suggestion-icon">💡</span>
+                  <span className="suggestion-text">
+                    Suggested price based on valuation: £{suggestedPrice.toLocaleString()}
+                  </span>
+                </div>
+              )}
+              
               {vehicleData.estimatedValue && (
                 <p className="price-note">
                   Our current valuation for your bike is £{vehicleData.estimatedValue.toLocaleString()}
@@ -878,12 +1210,15 @@ const BikeAdvertEditPage = () => {
             </div>
           </section>
 
-          {/* Vehicle Specifications */}
+          {/* Vehicle Specifications - EDITABLE */}
           <section className="specifications-section">
             <h3>Overview</h3>
-            <div className="spec-actions">
-              <a href="#" className="edit-link">Edit service history and MOT</a>
-            </div>
+            
+            {!isEditingOverview && (
+              <div className="spec-actions">
+                <a href="#" onClick={handleOverviewEdit} className="edit-link">Edit vehicle</a>
+              </div>
+            )}
             
             <p className="mileage-note">
               We've set an initial mileage for your advert based on your bike's MOT history
@@ -892,43 +1227,124 @@ const BikeAdvertEditPage = () => {
             <div className="mileage-display">
               <span className="mileage-icon">🛣️</span>
               <span className="mileage-text">{vehicleData.mileage?.toLocaleString() || 'Not available'} miles</span>
-              <a href="#" className="edit-mileage">Edit mileage</a>
             </div>
             
-            <div className="spec-grid">
-              <div className="spec-item">
-                <label>MOT Due</label>
-                <span>
-                  {vehicleData.motDue || 
-                   vehicleData.motExpiry || 
-                   vehicleData.motExpiryDate || 
-                   'Contact seller for MOT details'}
-                </span>
+            {!isEditingOverview ? (
+              <div className="spec-grid">
+                <div className="spec-item">
+                  <label>MOT Due</label>
+                  <span>
+                    {vehicleData.motDue || 
+                     vehicleData.motExpiry || 
+                     vehicleData.motExpiryDate || 
+                     'Contact seller for MOT details'}
+                  </span>
+                </div>
+                <div className="spec-item">
+                  <label>Fuel type</label>
+                  <span>{vehicleData.fuelType || 'Not specified'}</span>
+                </div>
+                <div className="spec-item">
+                  <label>Bike type</label>
+                  <span>{vehicleData.bikeType || 'Not specified'}</span>
+                </div>
+                <div className="spec-item">
+                  <label>Engine</label>
+                  <span>
+                    {vehicleData.engineSize || 
+                     (vehicleData.engineCC ? `${vehicleData.engineCC}cc` : 'Not specified')}
+                  </span>
+                </div>
+                <div className="spec-item">
+                  <label>Color</label>
+                  <span>{vehicleData.color || 'Not specified'}</span>
+                </div>
+                <div className="spec-item">
+                  <label>Previous Owners</label>
+                  <span>{vehicleData.previousOwners || 'Not available'}</span>
+                </div>
               </div>
-              <div className="spec-item">
-                <label>Fuel type</label>
-                <span>{vehicleData.fuelType || 'Not specified'}</span>
+            ) : (
+              <div className="overview-edit-form">
+                <h4>Edit Overview Details</h4>
+                
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Fuel Type *</label>
+                    <select
+                      value={editableOverviewData.fuelType}
+                      onChange={(e) => setEditableOverviewData({...editableOverviewData, fuelType: e.target.value})}
+                      className={errors.fuelType ? 'error' : ''}
+                      required
+                    >
+                      <option value="">Select fuel type</option>
+                      <option value="Petrol">Petrol</option>
+                      <option value="Electric">Electric</option>
+                      <option value="Hybrid">Hybrid</option>
+                      <option value="Petrol Hybrid">Petrol Hybrid</option>
+                      <option value="Diesel Hybrid">Diesel Hybrid</option>
+                      <option value="Plug-in Hybrid">Plug-in Hybrid</option>
+                    </select>
+                    {errors.fuelType && <p className="error-message">{errors.fuelType}</p>}
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Bike Type</label>
+                    <input
+                      type="text"
+                      value={editableOverviewData.bikeType}
+                      onChange={(e) => setEditableOverviewData({...editableOverviewData, bikeType: e.target.value})}
+                      placeholder="e.g. Sport, Cruiser, Adventure"
+                    />
+                  </div>
+                </div>
+                
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Color</label>
+                    <input
+                      type="text"
+                      value={editableOverviewData.color}
+                      onChange={(e) => setEditableOverviewData({...editableOverviewData, color: e.target.value})}
+                      placeholder="e.g. Black, Red, Blue"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Engine Size</label>
+                    <input
+                      type="text"
+                      value={editableOverviewData.engineSize}
+                      onChange={(e) => setEditableOverviewData({...editableOverviewData, engineSize: e.target.value})}
+                      placeholder="e.g. 1.0L"
+                    />
+                  </div>
+                </div>
+                
+                <div className="form-group">
+                  <label>Engine CC</label>
+                  <input
+                    type="number"
+                    value={editableOverviewData.engineCC}
+                    onChange={(e) => setEditableOverviewData({...editableOverviewData, engineCC: e.target.value})}
+                    placeholder="e.g. 600"
+                  />
+                </div>
+                
+                <div className="form-actions">
+                  <button type="button" onClick={handleOverviewSave} className="save-button">
+                    Save Changes
+                  </button>
+                  <button type="button" onClick={handleOverviewCancel} className="cancel-button">
+                    Cancel
+                  </button>
+                </div>
+                
+                {errors.overview && (
+                  <p className="error-message">{errors.overview}</p>
+                )}
               </div>
-              <div className="spec-item">
-                <label>Bike type</label>
-                <span>{vehicleData.bikeType || 'Not specified'}</span>
-              </div>
-              <div className="spec-item">
-                <label>Engine</label>
-                <span>
-                  {vehicleData.engineSize || 
-                   (vehicleData.engineCC ? `${vehicleData.engineCC}cc` : 'Not specified')}
-                </span>
-              </div>
-              <div className="spec-item">
-                <label>Color</label>
-                <span>{vehicleData.color || 'Not specified'}</span>
-              </div>
-              <div className="spec-item">
-                <label>Previous Owners</label>
-                <span>{vehicleData.previousOwners || 'Not available'}</span>
-              </div>
-            </div>
+            )}
           </section>
 
           {/* Description Section */}
