@@ -58,7 +58,7 @@ const BikesPage = () => {
     // Build query string for URL
     const params = new URLSearchParams();
     params.append('postcode', trimmedPostcode);
-    params.append('radius', '25');
+    // Removed radius - nationwide search by default
     if (make) params.append('make', make);
     if (model) params.append('model', model);
     

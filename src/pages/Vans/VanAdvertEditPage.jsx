@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTradeDealerContext } from '../../context/TradeDealerContext';
 import uploadService from '../../services/uploadService';
+import { formatDateUK } from '../../utils/dateFormatter';
 import './VanAdvertEditPage.css';
 
 // VAT Status Options
@@ -24,6 +26,8 @@ const VanAdvertEditPage = () => {
   const { advertId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { dealer, isAuthenticated: isTradeAuthenticated } = useTradeDealerContext();
+  const isTradeDealer = isTradeAuthenticated && dealer;
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,11 +41,33 @@ const VanAdvertEditPage = () => {
     photos: [],
     contactPhone: '',
     contactEmail: '',
-    location: ''
+    location: '',
+    features: [],
+    runningCosts: {
+      fuelEconomy: {
+        urban: '',
+        extraUrban: '',
+        combined: ''
+      },
+      annualTax: '',
+      insuranceGroup: '',
+      co2Emissions: ''
+    },
+    videoUrl: '',
+    businessName: '',
+    businessWebsite: '',
+    businessLogo: ''
   });
   const [errors, setErrors] = useState({});
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  
+  // Expandable sections state - All expanded by default
+  const [expandedSections, setExpandedSections] = useState({
+    features: true,      // Always expanded
+    runningCosts: true,  // Always expanded
+    video: true          // Always expanded
+  });
 
   // Load vehicle data and advert details on mount
   useEffect(() => {
@@ -66,6 +92,42 @@ const VanAdvertEditPage = () => {
       if (storedData) {
         const parsed = JSON.parse(storedData);
         setVehicleData(parsed.vehicleData);
+        
+        // CRITICAL: Auto-populate trade dealer info if logged in as trade dealer
+        const businessName = parsed.advertData?.businessName || 
+                            (isTradeDealer ? dealer?.businessName : '') || '';
+        const businessLogo = parsed.advertData?.businessLogo || 
+                            (isTradeDealer ? dealer?.logo : '') || '';
+        const businessWebsite = parsed.advertData?.businessWebsite || 
+                               (isTradeDealer ? dealer?.website : '') || '';
+        
+        console.log('🏢 Trade Dealer Auto-Population:', {
+          isTradeDealer,
+          dealerBusinessName: dealer?.businessName,
+          dealerLogo: dealer?.logo,
+          dealerWebsite: dealer?.website,
+          finalBusinessName: businessName,
+          finalBusinessLogo: businessLogo,
+          finalBusinessWebsite: businessWebsite
+        });
+        
+        // AUTO-POPULATE RUNNING COSTS FROM API DATA
+        const runningCostsFromAPI = {
+          fuelEconomy: {
+            urban: parsed.vehicleData?.urbanMpg || '',
+            extraUrban: parsed.vehicleData?.extraUrbanMpg || '',
+            combined: parsed.vehicleData?.combinedMpg || ''
+          },
+          annualTax: parsed.vehicleData?.annualTax || '',
+          insuranceGroup: parsed.vehicleData?.insuranceGroup || '',
+          co2Emissions: parsed.vehicleData?.co2Emissions || ''
+        };
+        
+        console.log('💰 Running Costs Auto-Population:', {
+          fromAPI: runningCostsFromAPI,
+          fromStored: parsed.advertData?.runningCosts
+        });
+        
         setAdvertData({
           price: parsed.advertData?.price || '',
           vatStatus: parsed.advertData?.vatStatus || 'no_vat',
@@ -73,7 +135,14 @@ const VanAdvertEditPage = () => {
           photos: parsed.advertData?.photos || [],
           contactPhone: parsed.advertData?.contactPhone || '',
           contactEmail: parsed.advertData?.contactEmail || user?.email || '',
-          location: parsed.advertData?.location || ''
+          location: parsed.advertData?.location || '',
+          features: parsed.advertData?.features || [],
+          // Use stored running costs if available, otherwise use API data
+          runningCosts: parsed.advertData?.runningCosts || runningCostsFromAPI,
+          videoUrl: parsed.advertData?.videoUrl || '',
+          businessName: businessName,
+          businessWebsite: businessWebsite,
+          businessLogo: businessLogo
         });
       } else {
         throw new Error('Advert not found');
@@ -194,6 +263,92 @@ const VanAdvertEditPage = () => {
       ...prev,
       photos: prev.photos.filter(photo => photo.id !== photoId)
     }));
+  };
+
+  // Toggle section expansion
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  // Toggle feature selection
+  const toggleFeature = (feature) => {
+    setAdvertData(prev => ({
+      ...prev,
+      features: prev.features.includes(feature)
+        ? prev.features.filter(f => f !== feature)
+        : [...prev.features, feature]
+    }));
+  };
+
+  // Handle running costs change
+  const handleRunningCostsChange = (field, value) => {
+    if (field.includes('.')) {
+      // Nested field like 'fuelEconomy.urban'
+      const [parent, child] = field.split('.');
+      setAdvertData(prev => ({
+        ...prev,
+        runningCosts: {
+          ...prev.runningCosts,
+          [parent]: {
+            ...prev.runningCosts[parent],
+            [child]: value
+          }
+        }
+      }));
+    } else {
+      // Top-level field like 'annualTax'
+      setAdvertData(prev => ({
+        ...prev,
+        runningCosts: {
+          ...prev.runningCosts,
+          [field]: value
+        }
+      }));
+    }
+  };
+
+  // Handle video URL change
+  const handleVideoUrl = (url) => {
+    setAdvertData(prev => ({
+      ...prev,
+      videoUrl: url
+    }));
+  };
+
+  // Handle logo upload
+  const handleLogoUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Logo file size must be less than 2MB');
+      return;
+    }
+
+    try {
+      const base64 = await uploadService.fileToBase64(file);
+      const result = await uploadService.uploadImage(base64, `${advertId}_logo`);
+      
+      if (result.success) {
+        setAdvertData(prev => ({
+          ...prev,
+          businessLogo: result.data.url
+        }));
+      }
+    } catch (error) {
+      console.error('Logo upload error:', error);
+      alert('Failed to upload logo. Please try again.');
+    }
   };
 
 
@@ -465,12 +620,22 @@ const VanAdvertEditPage = () => {
               <a href="#" className="attention-link">Add attention grabber</a>
             </div>
             
-            <div className="price-section">
-              <div className="price-input-wrapper">
+            <div className="price-section" style={{ position: 'relative', zIndex: 10 }}>
+              <div className="price-input-wrapper" style={{ position: 'relative', zIndex: 20 }}>
                 <button 
+                  type="button"
                   className="price-adjust-btn decrement"
-                  onClick={decrementPrice}
+                  onClick={() => {
+                    console.log('➖ Decrement button clicked');
+                    decrementPrice();
+                  }}
                   disabled={!advertData.price || parseInt(advertData.price) < 100}
+                  style={{ 
+                    cursor: 'pointer', 
+                    pointerEvents: 'auto',
+                    position: 'relative',
+                    zIndex: 30
+                  }}
                 >
                   −
                 </button>
@@ -483,8 +648,18 @@ const VanAdvertEditPage = () => {
                   className={`price-input ${errors.price ? 'error' : ''}`}
                 />
                 <button 
+                  type="button"
                   className="price-adjust-btn increment"
-                  onClick={incrementPrice}
+                  onClick={() => {
+                    console.log('➕ Increment button clicked');
+                    incrementPrice();
+                  }}
+                  style={{ 
+                    cursor: 'pointer', 
+                    pointerEvents: 'auto',
+                    position: 'relative',
+                    zIndex: 30
+                  }}
                 >
                   +
                 </button>
@@ -494,39 +669,58 @@ const VanAdvertEditPage = () => {
               )}
               
               {/* VAT Status Section */}
-              <div className="vat-status-section">
+              <div className="vat-status-section" style={{ position: 'relative', zIndex: 100 }}>
                 <h4>VAT status</h4>
                 <p className="vat-description">
                   {VAT_STATUS_OPTIONS[advertData.vatStatus].description}
                 </p>
-                <div className="vat-options">
+                <div className="vat-options" style={{ position: 'relative', zIndex: 101 }}>
                   {Object.entries(VAT_STATUS_OPTIONS).map(([key, option]) => (
-                    <label key={key} className={`vat-option ${advertData.vatStatus === key ? 'selected' : ''}`}>
-                      <input
-                        type="radio"
-                        name="vatStatus"
-                        value={key}
-                        checked={advertData.vatStatus === key}
-                        onChange={(e) => handleInputChange('vatStatus', e.target.value)}
-                      />
-                      <span className="vat-option-label">{option.label}</span>
-                    </label>
+                    <button
+                      key={key}
+                      type="button"
+                      className={`vat-option-button ${advertData.vatStatus === key ? 'selected' : ''}`}
+                      onClick={() => {
+                        console.log('🔘 VAT Status button clicked:', key);
+                        console.log('Current vatStatus:', advertData.vatStatus);
+                        handleInputChange('vatStatus', key);
+                      }}
+                      style={{ 
+                        cursor: 'pointer', 
+                        pointerEvents: 'auto',
+                        position: 'relative',
+                        zIndex: 102
+                      }}
+                    >
+                      <span className={`radio-circle ${advertData.vatStatus === key ? 'checked' : ''}`} style={{ pointerEvents: 'none' }}>
+                        {advertData.vatStatus === key && <span className="radio-dot" style={{ pointerEvents: 'none' }}></span>}
+                      </span>
+                      <span className="vat-option-label" style={{ pointerEvents: 'none' }}>{option.label}</span>
+                    </button>
                   ))}
                 </div>
                 <button 
+                  type="button"
                   className="learn-more-link"
-                  onClick={() => setShowVatInfo(true)}
+                  onClick={() => {
+                    console.log('Learn more clicked');
+                    setShowVatInfo(true);
+                  }}
                 >
                   Learn more about VAT status
                 </button>
               </div>
               
-              {vehicleData.estimatedValue && (
+              {((vehicleData.allValuations?.private || vehicleData.estimatedValue) && !advertData.price) && (
                 <>
                   <p className="price-note">
-                    Our current valuation for your van is £{vehicleData.estimatedValue.toLocaleString()}
+                    Our current valuation for your van is £{(vehicleData.allValuations?.private || vehicleData.estimatedValue).toLocaleString()}
                   </p>
-                  <button className="sell-price-button">
+                  <button 
+                    type="button"
+                    className="sell-price-button"
+                    onClick={() => handleInputChange('price', String(vehicleData.allValuations?.private || vehicleData.estimatedValue))}
+                  >
                     Sell for this much
                   </button>
                 </>
@@ -554,7 +748,7 @@ const VanAdvertEditPage = () => {
             <div className="spec-grid">
               <div className="spec-item">
                 <label>MOT Due</label>
-                <span>{vehicleData.motDue || 'Not available'}</span>
+                <span>{formatDateUK(vehicleData.motDue)}</span>
               </div>
               <div className="spec-item">
                 <label>Fuel type</label>
@@ -604,22 +798,279 @@ const VanAdvertEditPage = () => {
             </div>
           </section>
 
+          {/* Business Information Section - For Trade Users */}
+          <section className="business-info-section">
+            <h3>Business Information (Optional)</h3>
+            
+            {/* Alert for Trade Users */}
+            <div className="trade-user-alert">
+              <span className="alert-icon">⚠️</span>
+              <div className="alert-content">
+                <strong className="alert-title">Important for Trade Users</strong>
+                <p className="alert-text">
+                  If you are a trade user, please add your business logo and website below. This helps buyers identify professional dealers and builds trust in your listing.
+                </p>
+              </div>
+            </div>
+            
+            <p className="section-note">
+              Add business details to list as a trade seller. If you add a logo or website, your listing will automatically be marked as "Trade".
+            </p>
+            
+            <div className="business-form">
+              <div className="form-group">
+                <label htmlFor="businessName">
+                  Business Name <span className="optional">(Optional)</span>
+                </label>
+                <input
+                  type="text"
+                  id="businessName"
+                  value={advertData.businessName}
+                  onChange={(e) => setAdvertData({
+                    ...advertData,
+                    businessName: e.target.value
+                  })}
+                  placeholder="e.g., ABC Van Sales Ltd"
+                  className="form-input"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="businessWebsite">
+                  Business Website <span className="optional">(Optional)</span>
+                </label>
+                <input
+                  type="url"
+                  id="businessWebsite"
+                  value={advertData.businessWebsite}
+                  onChange={(e) => setAdvertData({
+                    ...advertData,
+                    businessWebsite: e.target.value
+                  })}
+                  placeholder="https://www.yourbusiness.com"
+                  className="form-input"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="businessLogo">
+                  Business Logo <span className="optional">(Optional)</span>
+                </label>
+                <input
+                  type="file"
+                  id="businessLogo"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="form-input"
+                />
+                {advertData.businessLogo && (
+                  <div className="logo-preview">
+                    <img src={advertData.businessLogo} alt="Business logo" />
+                    <button
+                      type="button"
+                      onClick={() => setAdvertData({...advertData, businessLogo: ''})}
+                      className="remove-logo-btn"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              {/* Auto-detection indicator */}
+              {(advertData.businessLogo || advertData.businessWebsite || advertData.businessName) && (
+                <div className="trade-indicator">
+                  <span className="indicator-icon">✓</span>
+                  <span className="indicator-text">
+                    Your listing will appear as a trade seller
+                  </span>
+                </div>
+              )}
+            </div>
+          </section>
+
           {/* Additional Sections */}
           <section className="additional-sections">
-            <div className="section-item">
-              <span className="section-icon">⭐</span>
-              <span className="section-text">Van features</span>
-              <span className="section-arrow">›</span>
+            {/* Van Features Section */}
+            <div className="section-item expandable">
+              <div 
+                className="section-header"
+                onClick={() => toggleSection('features')}
+              >
+                <span className="section-icon">⭐</span>
+                <span className="section-text">Van features</span>
+                <span className={`section-arrow ${expandedSections.features ? 'expanded' : ''}`}>›</span>
+              </div>
+              
+              {expandedSections.features && (
+                <div className="section-content">
+                  <p className="section-description">Select the features your van has:</p>
+                  <div className="features-grid">
+                    {[
+                      'Air Conditioning', 'Climate Control', 'Cruise Control', 'Sat Nav',
+                      'Bluetooth', 'USB Port', 'Parking Sensors', 'Reversing Camera',
+                      'Electric Windows', 'Electric Mirrors', 'Central Locking', 'Remote Locking',
+                      'Alloy Wheels', 'Roof Rack', 'Tow Bar', 'Bulkhead',
+                      'Ply Lining', 'Racking System', 'Side Loading Door', 'Rear Barn Doors',
+                      'Full service history', 'Partial service history'
+                    ].map(feature => (
+                      <label key={feature} className="feature-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={advertData.features.includes(feature)}
+                          onChange={() => toggleFeature(feature)}
+                        />
+                        <span>{feature}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="section-item">
-              <span className="section-icon">💰</span>
-              <span className="section-text">Running costs</span>
-              <span className="section-arrow">›</span>
+
+            {/* Running Costs Section */}
+            <div className="section-item expandable">
+              <div 
+                className="section-header"
+                onClick={() => toggleSection('runningCosts')}
+              >
+                <span className="section-icon">💰</span>
+                <span className="section-text">Running costs</span>
+                <span className={`section-arrow ${expandedSections.runningCosts ? 'expanded' : ''}`}>›</span>
+              </div>
+              
+              {expandedSections.runningCosts && (
+                <div className="section-content">
+                  <p className="section-description">
+                    Add running cost information to help buyers.
+                  </p>
+                  
+                  <div className="running-costs-form">
+                    <div className="form-group">
+                      <label>Fuel Economy (MPG)</label>
+                      <div className="fuel-economy-inputs">
+                        <div className="fuel-input-group">
+                          <label className="fuel-label">Urban</label>
+                          <input
+                            type="number"
+                            value={advertData.runningCosts.fuelEconomy.urban}
+                            onChange={(e) => handleRunningCostsChange('fuelEconomy.urban', e.target.value)}
+                            placeholder="e.g. 30.5"
+                            className="fuel-input"
+                          />
+                          <span className="fuel-unit">mpg</span>
+                        </div>
+                        <div className="fuel-input-group">
+                          <label className="fuel-label">Extra Urban</label>
+                          <input
+                            type="number"
+                            value={advertData.runningCosts.fuelEconomy.extraUrban}
+                            onChange={(e) => handleRunningCostsChange('fuelEconomy.extraUrban', e.target.value)}
+                            placeholder="e.g. 45.2"
+                            className="fuel-input"
+                          />
+                          <span className="fuel-unit">mpg</span>
+                        </div>
+                        <div className="fuel-input-group">
+                          <label className="fuel-label">Combined</label>
+                          <input
+                            type="number"
+                            value={advertData.runningCosts.fuelEconomy.combined}
+                            onChange={(e) => handleRunningCostsChange('fuelEconomy.combined', e.target.value)}
+                            placeholder="e.g. 40.8"
+                            className="fuel-input"
+                          />
+                          <span className="fuel-unit">mpg</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>Annual Tax (£)</label>
+                      <input
+                        type="number"
+                        value={advertData.runningCosts.annualTax}
+                        onChange={(e) => handleRunningCostsChange('annualTax', e.target.value)}
+                        placeholder="e.g. 290"
+                        className="form-input"
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>Insurance Group</label>
+                      <input
+                        type="number"
+                        value={advertData.runningCosts.insuranceGroup}
+                        onChange={(e) => handleRunningCostsChange('insuranceGroup', e.target.value)}
+                        placeholder="e.g. 8"
+                        min="1"
+                        max="50"
+                        className="form-input"
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>CO2 Emissions (g/km)</label>
+                      <input
+                        type="number"
+                        value={advertData.runningCosts.co2Emissions}
+                        onChange={(e) => handleRunningCostsChange('co2Emissions', e.target.value)}
+                        placeholder="e.g. 150"
+                        className="form-input"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="section-item">
-              <span className="section-icon">🎥</span>
-              <span className="section-text">Advert video - add a video</span>
-              <span className="section-arrow">›</span>
+
+            {/* Video Section */}
+            <div className="section-item expandable">
+              <div 
+                className="section-header"
+                onClick={() => toggleSection('video')}
+              >
+                <span className="section-icon">🎥</span>
+                <span className="section-text">Advert video - add a video</span>
+                <span className={`section-arrow ${expandedSections.video ? 'expanded' : ''}`}>›</span>
+              </div>
+              
+              {expandedSections.video && (
+                <div className="section-content">
+                  <p className="section-description">
+                    Add a YouTube video link to showcase your van. First upload your video to YouTube, then paste the link here.
+                  </p>
+                  <div className="video-form">
+                    <div className="form-group">
+                      <label>YouTube Video URL</label>
+                      <input
+                        type="url"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        value={advertData.videoUrl}
+                        onChange={(e) => handleVideoUrl(e.target.value)}
+                        className="video-url-input"
+                      />
+                      {advertData.videoUrl && /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(advertData.videoUrl) && (
+                        <div className="video-preview">
+                          <p className="success-message">✓ Valid YouTube URL</p>
+                        </div>
+                      )}
+                      {advertData.videoUrl && !/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(advertData.videoUrl) && (
+                        <p className="error-message">Please enter a valid YouTube URL</p>
+                      )}
+                    </div>
+                    <div className="video-info">
+                      <p>💡 Tips for a great video:</p>
+                      <ul>
+                        <li>Show the exterior from all angles</li>
+                        <li>Showcase the interior and load space</li>
+                        <li>Demonstrate any special features</li>
+                        <li>Keep it under 3 minutes</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </section>
 

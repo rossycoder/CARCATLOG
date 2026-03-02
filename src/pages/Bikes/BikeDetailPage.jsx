@@ -75,10 +75,6 @@ const BikeDetailPage = () => {
       }
       
       const data = await response.json();
-      console.log('✅ Bike data loaded successfully');
-      console.log('🖼️ Images:', data.data.images?.length || 0, 'found');
-      console.log('⛽ Fuel Type:', data.data.fuelType);
-      console.log('👤 Seller Contact:', JSON.stringify(data.data.sellerContact, null, 2));
       setBike(data.data);
     } catch (err) {
       console.error('Error fetching bike details:', err);
@@ -616,18 +612,29 @@ const BikeDetailPage = () => {
             {/* Electric Bike Running Costs */}
             <ElectricVehicleRunningCosts vehicle={bike} />
 
-            {/* Bike Features Section */}
-            {showAllFeatures && bike.features && bike.features.length > 0 && (
+            {/* Bike Features Section - Match Car Detail Page Exactly */}
+            {showAllFeatures && (
               <div className="features-section">
-                <h2>Bike Features</h2>
-                <div className="features-grid">
-                  {bike.features.map((feature, index) => (
-                    <div key={index} className="feature-item">
-                      <span className="feature-icon">✓</span>
-                      <span className="feature-text">{feature}</span>
+                {bike.features && bike.features.length > 0 ? (
+                  <>
+                    <h2>Vehicle Features</h2>
+                    <div className="features-grid">
+                      {bike.features.map((feature, index) => (
+                        <div key={index} className="feature-item">
+                          <span className="feature-icon">✓</span>
+                          <span className="feature-text">{feature}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </>
+                ) : (
+                  <>
+                    <h2>Vehicle Features</h2>
+                    <div className="no-features-message">
+                      <p>No additional features listed for this bike.</p>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
@@ -761,15 +768,21 @@ const BikeDetailPage = () => {
 
             {/* Price Indicator - Above Finance Calculator */}
             {bike.price && (() => {
-              const marketValue = bike.allValuations?.retail || 
-                                 bike.allValuations?.Retail ||
-                                 bike.valuation?.estimatedValue?.retail ||
-                                 bike.valuation?.dealerPrice ||
-                                 bike.estimatedValue;
+              // Get market value from different sources
+              // Priority: private price > retail price > dealer price > estimated value
+              let marketValue = bike.allValuations?.private || 
+                               bike.allValuations?.Private ||
+                               bike.valuation?.estimatedValue?.private ||
+                               bike.allValuations?.retail || 
+                               bike.allValuations?.Retail ||
+                               bike.valuation?.estimatedValue?.retail ||
+                               bike.valuation?.dealerPrice ||
+                               bike.estimatedValue;
               
+              // FALLBACK: If no market value, use price + 20% as estimated market value
+              // This ensures gauge always shows
               if (!marketValue || marketValue === bike.price) {
-                console.log('⚠️ No market value available or same as price:', { price: bike.price, marketValue });
-                return null;
+                marketValue = bike.price * 1.2; // Assume market value is 20% higher than asking price
               }
               
               const priceRatio = bike.price / marketValue;
@@ -777,65 +790,68 @@ const BikeDetailPage = () => {
               let needleAngle = 0;
               let labelColor = '';
               
-              console.log('💰 Price Indicator Debug:', {
-                bikePrice: bike.price,
-                marketValue: marketValue,
-                priceRatio: priceRatio,
-                percentage: (priceRatio * 100).toFixed(1) + '%'
-              });
-              
-              // Price level logic (same as cars)
+              // CORRECT LOGIC: Match gauge arc positions exactly
+              // Gauge zones: Gray (0-36°) → Light Green (36-72°) → Dark Green (72-108°) → Yellow (108-144°) → Coral (144-180°)
+              // IMPORTANT: Lower price ratio = Better deal = Needle points to GREEN zones (72-108°)
               if (priceRatio <= 0.75) {
+                // 25% or more below market value - GREAT PRICE (Light Green zone: 36-72°)
                 priceLevel = 'Great price';
-                needleAngle = 54;
-                labelColor = '#A5D6A7';
+                needleAngle = 54; // Middle of Light Green zone (36+72)/2
+                labelColor = '#A5D6A7'; // Light Green
               } else if (priceRatio <= 0.85) {
+                // 15-25% below market value - GOOD PRICE (Dark Green zone: 72-108°)
                 priceLevel = 'Good price';
-                needleAngle = 80;
-                labelColor = '#388E3C';
+                needleAngle = 80; // Left side of Dark Green zone
+                labelColor = '#388E3C'; // Dark Green
               } else if (priceRatio <= 0.95) {
+                // 5-15% below market value - Still GOOD (Dark Green zone: 72-108°)
                 priceLevel = 'Good price';
-                needleAngle = 100;
-                labelColor = '#388E3C';
+                needleAngle = 100; // Right side of Dark Green zone
+                labelColor = '#388E3C'; // Dark Green
               } else if (priceRatio <= 1.05) {
+                // Within 5% of market value - FAIR PRICE (Yellow zone: 108-144°)
                 priceLevel = 'Fair price';
-                needleAngle = 126;
-                labelColor = '#FFC107';
+                needleAngle = 126; // Middle of Yellow zone (108+144)/2
+                labelColor = '#FFC107'; // Yellow/Gold
               } else if (priceRatio <= 1.15) {
+                // 5-15% above market value - HIGHER PRICE (Coral zone: 144-180°)
                 priceLevel = 'Higher price';
-                needleAngle = 162;
-                labelColor = '#FF7043';
+                needleAngle = 162; // Middle of Coral zone (144+180)/2
+                labelColor = '#FF7043'; // Coral/Orange
               } else {
+                // More than 15% above market value - LOWER PRICE (Gray zone: 0-36°)
                 priceLevel = 'Lower price';
-                needleAngle = 18;
-                labelColor = '#BDBDBD';
+                needleAngle = 18; // Middle of Gray zone (0+36)/2
+                labelColor = '#BDBDBD'; // Gray
               }
               
-              const svgAngle = 180 + needleAngle;
-              const needleX = 100 + 70 * Math.cos((svgAngle) * Math.PI / 180);
-              const needleY = 100 - 70 * Math.sin((svgAngle) * Math.PI / 180);
-              
-              console.log('🎯 Needle Calculation:', {
-                priceLevel,
-                needleAngle,
-                svgAngle,
-                needleX,
-                needleY,
-                labelColor
-              });
+              // Calculate needle position
+              const svgAngle = 180 - needleAngle;
+              const needleX = 100 + 70 * Math.cos(svgAngle * Math.PI / 180);
+              const needleY = 100 - 70 * Math.sin(svgAngle * Math.PI / 180);
               
               return (
                 <div className="good-price-indicator">
                   <div className="price-gauge">
                     <svg viewBox="0 0 200 120" className="gauge-svg">
-                      {/* Gauge background arcs */}
+                      {/* Gauge background arcs - 5 zones */}
+                      
+                      {/* Zone 1: Gray - FAR LEFT (0-36°) */}
                       <path d="M 20 100 A 80 80 0 0 1 38 48" fill="none" stroke="#BDBDBD" strokeWidth="16" strokeLinecap="round"/>
+                      
+                      {/* Zone 2: Light Green - LEFT-CENTER (36-72°) */}
                       <path d="M 38 48 A 80 80 0 0 1 70 26" fill="none" stroke="#A5D6A7" strokeWidth="16" strokeLinecap="round"/>
+                      
+                      {/* Zone 3: Dark Green - CENTER (72-108°) */}
                       <path d="M 70 26 A 80 80 0 0 1 130 26" fill="none" stroke="#388E3C" strokeWidth="16" strokeLinecap="round"/>
+                      
+                      {/* Zone 4: Yellow/Gold - RIGHT-CENTER (108-144°) */}
                       <path d="M 130 26 A 80 80 0 0 1 162 48" fill="none" stroke="#FFC107" strokeWidth="16" strokeLinecap="round"/>
+                      
+                      {/* Zone 5: Coral/Orange - FAR RIGHT (144-180°) */}
                       <path d="M 162 48 A 80 80 0 0 1 180 100" fill="none" stroke="#FF7043" strokeWidth="16" strokeLinecap="round"/>
                       
-                      {/* Needle */}
+                      {/* Needle pointing to appropriate zone */}
                       <line x1="100" y1="100" x2={needleX} y2={needleY} stroke="#1a1a1a" strokeWidth="5" strokeLinecap="round"/>
                       <circle cx="100" cy="100" r="8" fill="#1a1a1a"/>
                       <circle cx="100" cy="100" r="4" fill="#fff"/>

@@ -19,7 +19,40 @@ const BikeAdvertPaymentSuccessPage = () => {
     } else {
       setIsLoading(false);
     }
-  }, [sessionId]);
+    
+    // Auto-activate bike if advertId is present (fallback for webhook)
+    if (advertId && sessionId) {
+      activateBikeFromPayment();
+    }
+  }, [sessionId, advertId]);
+
+  const activateBikeFromPayment = async () => {
+    try {
+      console.log('🔄 Attempting to activate bike from payment success page...');
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_BASE_URL}/bikes/activate-from-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          advertId,
+          sessionId
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('✅ Bike activated successfully:', data.data);
+      } else {
+        console.warn('⚠️  Bike activation failed:', data.error);
+      }
+    } catch (err) {
+      console.error('❌ Error activating bike:', err);
+      // Don't show error to user - webhook might have already activated it
+    }
+  };
 
   const fetchPurchaseDetails = async () => {
     try {

@@ -180,6 +180,69 @@ export const bikeService = {
     }
   },
 
+  // Complete bike lookup - fetches ALL data (MOT + History + Valuation)
+  // Used in edit page to get complete information
+  completeBikeLookup: async (registrationNumber, mileage) => {
+    try {
+      console.log('🔍 Complete bike lookup:', registrationNumber, 'with mileage:', mileage);
+      
+      const response = await api.get(`/bikes/complete-lookup/${registrationNumber}?mileage=${mileage}`);
+      
+      if (response.data.success && response.data.data) {
+        const bikeData = response.data.data;
+        return {
+          success: true,
+          data: {
+            registration: bikeData.registration || registrationNumber.toUpperCase(),
+            mileage: bikeData.mileage || mileage,
+            make: bikeData.make || 'Unknown',
+            model: bikeData.model || 'Unknown',
+            year: bikeData.year || new Date().getFullYear(),
+            color: bikeData.color || 'Not specified',
+            fuelType: bikeData.fuelType || 'Petrol',
+            engineSize: bikeData.engineSize || (bikeData.engineCC ? `${bikeData.engineCC}cc` : 'Unknown'),
+            engineCC: bikeData.engineCC || null,
+            bikeType: bikeData.bikeType || 'Other',
+            transmission: 'Manual',
+            
+            // Valuation data
+            estimatedValue: bikeData.estimatedValue || null,
+            valuation: bikeData.valuation || null,
+            
+            // MOT data
+            motDue: bikeData.motDue || null,
+            motStatus: bikeData.motStatus || null,
+            motHistory: bikeData.motHistory || [],
+            
+            // History data
+            previousOwners: bikeData.previousOwners || null,
+            writeOffCategory: bikeData.writeOffCategory || 'none',
+            
+            // Additional data
+            variant: bikeData.variant || null,
+            bodyType: bikeData.bodyType || null,
+            emissionClass: bikeData.emissionClass || null,
+            co2Emissions: bikeData.co2Emissions || null,
+            combinedMpg: bikeData.combinedMpg || null,
+            urbanMpg: bikeData.urbanMpg || null,
+            extraUrbanMpg: bikeData.extraUrbanMpg || null,
+            annualTax: bikeData.annualTax || null,
+            insuranceGroup: bikeData.insuranceGroup || null
+          },
+          metadata: response.data.metadata
+        };
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Complete bike lookup API error:', error);
+      return {
+        success: false,
+        error: 'Unable to fetch complete bike details. Please try again.',
+        data: null
+      };
+    }
+  },
+
   // DVLA vehicle lookup (DEPRECATED - use lookupBikeByRegistration instead)
   dvlaLookup: async (registrationNumber, mileage) => {
     console.warn('⚠️ dvlaLookup is deprecated. Use lookupBikeByRegistration for optimized DVLA-first lookup.');

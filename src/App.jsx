@@ -61,6 +61,7 @@ import UsedVansPage from './pages/Vans/UsedVansPage'
 import NewVansPage from './pages/Vans/NewVansPage'
 import SellYourVanPage from './pages/Vans/SellYourVanPage'
 import VanFinderFormPage from './pages/Vans/VanFinderFormPage'
+import VanCheckPage from './pages/Vans/VanCheckPage'
 import VanAdvertEditPage from './pages/Vans/VanAdvertEditPage'
 import VanSellerContactPage from './pages/Vans/VanSellerContactPage'
 import VanAdvertisingPricesPage from './pages/Vans/VanAdvertisingPricesPage'
@@ -162,6 +163,7 @@ function App() {
               <Route path="/vans/new-vans" element={<NewVansPage />} />
               <Route path="/vans/sell-your-van" element={<SellYourVanPage />} />
               <Route path="/vans/find-your-van" element={<VanFinderFormPage />} />
+              <Route path="/vans/check" element={<VanCheckPage />} />
               <Route path="/vans/selling/advert/edit/:advertId" element={<VanAdvertEditPage />} />
               <Route path="/vans/selling/advert/contact/:advertId" element={<VanSellerContactPage />} />
               <Route path="/vans/advertising-prices" element={<VanAdvertisingPricesPage />} />

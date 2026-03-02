@@ -79,7 +79,7 @@ function BikeSearchResultsPage() {
       
       // Check if postcode is provided - use postcode search for distance calculation
       const hasPostcode = filterParams.postcode && filterParams.postcode.trim() !== '';
-      const radius = filterParams.distance || 25;
+      const radius = filterParams.radius || filterParams.distance || 25;
       
       let response;
       if (hasPostcode) {
@@ -169,25 +169,36 @@ function BikeSearchResultsPage() {
     setError('');
 
     try {
-      const response = await bikeService.getBikes({});
+      // Get user's postcode from localStorage if available
+      const userPostcode = localStorage.getItem('userPostcode');
       
-      const bikes = response.data?.bikes || response.data || [];
-      const total = response.data?.pagination?.total || bikes.length;
+      let response;
+      if (userPostcode) {
+        console.log('[BikeSearchResultsPage] Loading all bikes with distance from:', userPostcode);
+        // Use postcode search with large radius to get all bikes with distance
+        response = await bikeService.searchBikesByPostcode(userPostcode, 500); // 500 miles = all UK
+      } else {
+        console.log('[BikeSearchResultsPage] Loading all bikes without distance');
+        response = await bikeService.getBikes({});
+      }
+      
+      const bikes = response.data?.results || response.data?.bikes || response.data || [];
+      const total = response.data?.count || response.data?.pagination?.total || bikes.length;
       
       const transformedData = {
-        postcode: 'All UK',
-        radius: 0,
+        postcode: userPostcode || 'All UK',
+        radius: userPostcode ? 500 : 0,
         count: total,
-        results: bikes.map(bike => ({ ...bike, distance: 0 })),
-        showingAllBikes: false
+        results: bikes,
+        showingAllBikes: true
       };
       
-      console.log('Loaded bikes:', total);
+      console.log('[BikeSearchResultsPage] Loaded bikes:', total, 'with distance:', !!userPostcode);
       setSearchResults(transformedData);
       setFilteredResults(transformedData);
     } catch (err) {
       setError('Failed to load bikes');
-      console.error('Error loading bikes:', err);
+      console.error('[BikeSearchResultsPage] Error loading bikes:', err);
     } finally {
       setLoading(false);
     }
@@ -491,7 +502,9 @@ function BikeSearchResultsPage() {
                     <span className="location-icon">📍</span>
                     <span>
                       {extractTownName(bike.locationName) || 'Location not available'}
-                      {bike.distance > 0 && ` • ${(bike.distance || 0).toFixed(0)} miles away`}
+                      {bike.distance !== undefined && bike.distance !== null && (
+                        <> • <span className="distance-text">{(bike.distance || 0).toFixed(0)} miles away</span></>
+                      )}
                     </span>
                   </div>
                 </div>

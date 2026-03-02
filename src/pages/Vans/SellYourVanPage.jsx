@@ -38,6 +38,8 @@ const SellYourVanPage = () => {
   const [mileage, setMileage] = useState(passedMileage);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showVanDetails, setShowVanDetails] = useState(false);
+  const [fetchedVanData, setFetchedVanData] = useState(null);
 
   // Update form when passed state changes
   useEffect(() => {
@@ -124,35 +126,66 @@ const SellYourVanPage = () => {
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('🔍 Looking up van:', registration, 'with mileage:', mileage);
       
-      const vehicleData = generateMockVanData(registration, mileage);
-      const advertId = uuidv4();
+      // Import van service
+      const { lookupVanByRegistration } = await import('../../services/vanService');
       
-      const vanAdvertData = {
-        id: advertId,
-        vehicleData: vehicleData,
-        advertData: {
-          price: '',
-          description: '',
-          photos: [],
-          contactPhone: '',
-          contactEmail: '',
-          location: ''
-        },
-        status: 'draft',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      // Call API to lookup van details
+      const response = await lookupVanByRegistration(registration, mileage);
       
-      localStorage.setItem(`vanAdvert_${advertId}`, JSON.stringify(vanAdvertData));
-      navigate(`/vans/selling/advert/edit/${advertId}`);
+      console.log('✅ Van lookup response:', response);
+      
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to lookup van details');
+      }
+      
+      // Show van details below the form
+      setFetchedVanData(response.data);
+      setShowVanDetails(true);
+      
+      // Scroll to van details
+      setTimeout(() => {
+        document.getElementById('van-details-section')?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 100);
+      
     } catch (error) {
-      console.error('Error creating van advert:', error);
-      alert('An error occurred. Please try again.');
+      console.error('❌ Error looking up van:', error);
+      alert(`Error: ${error.message || 'An error occurred. Please try again.'}`);
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const handleContinueToAdvert = () => {
+    if (!fetchedVanData) return;
+    
+    const advertId = uuidv4();
+    
+    const vanAdvertData = {
+      id: advertId,
+      vehicleData: fetchedVanData,
+      advertData: {
+        price: fetchedVanData.estimatedValue || '',
+        description: '',
+        photos: [],
+        contactPhone: '',
+        contactEmail: '',
+        location: ''
+      },
+      status: 'draft',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    console.log('💾 Saving van advert data to localStorage:', vanAdvertData);
+    localStorage.setItem(`vanAdvert_${advertId}`, JSON.stringify(vanAdvertData));
+    
+    console.log('🚀 Navigating to van advert edit page');
+    navigate(`/vans/selling/advert/edit/${advertId}`);
   };
 
   const sellSteps = [
@@ -280,6 +313,123 @@ const SellYourVanPage = () => {
         </div>
         </div>
       </section>
+
+      {/* Van Details Section - Show after successful lookup */}
+      {showVanDetails && fetchedVanData && (
+        <section className="van-details-section" id="van-details-section">
+          <div className="van-details-container">
+            <div className="van-details-card">
+              <div className="details-header">
+                <h2>✓ Van Found</h2>
+                <p className="vrm-display">{registration.toUpperCase()}</p>
+              </div>
+
+              <div className="van-info-grid">
+                {/* Basic Information */}
+                <div className="info-section">
+                  <h3>Basic Information</h3>
+                  <div className="info-items">
+                    <div className="info-item">
+                      <span className="info-label">Make</span>
+                      <span className="info-value">{fetchedVanData.make || 'Unknown'}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Model</span>
+                      <span className="info-value">{fetchedVanData.model || 'Unknown'}</span>
+                    </div>
+                    {fetchedVanData.variant && (
+                      <div className="info-item">
+                        <span className="info-label">Variant</span>
+                        <span className="info-value">{fetchedVanData.variant}</span>
+                      </div>
+                    )}
+                    <div className="info-item">
+                      <span className="info-label">Year</span>
+                      <span className="info-value">{fetchedVanData.year}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Colour</span>
+                      <span className="info-value">{fetchedVanData.color || 'Not specified'}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Mileage</span>
+                      <span className="info-value">{parseInt(mileage).toLocaleString()} miles</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Technical Specs */}
+                <div className="info-section">
+                  <h3>Technical Specifications</h3>
+                  <div className="info-items">
+                    <div className="info-item">
+                      <span className="info-label">Fuel Type</span>
+                      <span className="info-value">{fetchedVanData.fuelType || 'Diesel'}</span>
+                    </div>
+                    {fetchedVanData.engineSize && (
+                      <div className="info-item">
+                        <span className="info-label">Engine</span>
+                        <span className="info-value">{fetchedVanData.engineSize}</span>
+                      </div>
+                    )}
+                    <div className="info-item">
+                      <span className="info-label">Transmission</span>
+                      <span className="info-value">{fetchedVanData.transmission || 'Manual'}</span>
+                    </div>
+                    {fetchedVanData.vanType && (
+                      <div className="info-item">
+                        <span className="info-label">Van Type</span>
+                        <span className="info-value">{fetchedVanData.vanType}</span>
+                      </div>
+                    )}
+                    {fetchedVanData.payloadCapacity && (
+                      <div className="info-item">
+                        <span className="info-label">Payload</span>
+                        <span className="info-value">{fetchedVanData.payloadCapacity} kg</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Valuation */}
+                {fetchedVanData.estimatedValue && (
+                  <div className="info-section">
+                    <h3>Estimated Value</h3>
+                    <div className="info-items">
+                      <div className="info-item highlight">
+                        <span className="info-label">Estimated Price</span>
+                        <span className="info-value price">
+                          £{parseInt(fetchedVanData.estimatedValue).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="details-actions">
+                <button 
+                  className="continue-btn primary"
+                  onClick={handleContinueToAdvert}
+                >
+                  Continue to Create Advert →
+                </button>
+                <button 
+                  className="continue-btn secondary"
+                  onClick={() => {
+                    setShowVanDetails(false);
+                    setFetchedVanData(null);
+                    setRegistration('');
+                    setMileage('');
+                  }}
+                >
+                  Check Another Van
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Section 2: Place an advert on CarCatALog */}
       <section className="advert-section">

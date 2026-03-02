@@ -158,7 +158,7 @@ const SellYourBikePage = () => {
     }
   };
 
-  const handleContinueToAdvert = () => {
+  const handleContinueToAdvert = async () => {
     if (!fetchedBikeData) return;
     
     const advertId = uuidv4();
@@ -182,11 +182,11 @@ const SellYourBikePage = () => {
         model: getValue(fetchedBikeData.model) || 'Unknown',
         year: getValue(fetchedBikeData.year) || new Date().getFullYear(),
         color: getValue(fetchedBikeData.color) || 'Not specified',
-        fuelType: getValue(fetchedBikeData.fuelType) || 'Petrol',
+        fuelType: getValue(fetchedBikeData.fuelType) || 'Petrol', // Use capitalized format
         engineCC: getValue(fetchedBikeData.engineCC) || getValue(fetchedBikeData.engineSize),
         engineSize: getValue(fetchedBikeData.engineSize) || (getValue(fetchedBikeData.engineCC) ? `${getValue(fetchedBikeData.engineCC)}cc` : null),
         bikeType: getValue(fetchedBikeData.bikeType) || 'Sport',
-        transmission: getValue(fetchedBikeData.transmission) || 'Manual',
+        transmission: getValue(fetchedBikeData.transmission) || 'manual', // Use lowercase format
         variant: getValue(fetchedBikeData.variant),
         previousOwners: getValue(fetchedBikeData.previousOwners),
         motDue: getValue(fetchedBikeData.motDue) || getValue(fetchedBikeData.motExpiry) || getValue(fetchedBikeData.motExpiryDate),
@@ -220,8 +220,12 @@ const SellYourBikePage = () => {
       updatedAt: new Date().toISOString()
     };
     
-    console.log('💾 Saving bike advert data:', bikeAdvertData);
+    console.log('💾 Saving bike advert data to localStorage:', bikeAdvertData);
     localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(bikeAdvertData));
+    
+    // NOTE: Bike will be created in database on BikeAdvertEditPage
+    // when user clicks "Continue to Payment" - that's when MOT History and Valuation APIs will be called
+    
     navigate(`/bikes/selling/advert/edit/${advertId}`);
   };
 

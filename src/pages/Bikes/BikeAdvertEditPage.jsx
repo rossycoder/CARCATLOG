@@ -40,7 +40,10 @@ const BikeAdvertEditPage = () => {
       insuranceGroup: '',
       co2Emissions: ''
     },
-    videoUrl: ''
+    videoUrl: '',
+    businessName: '',
+    businessLogo: '',
+    businessWebsite: ''
   });
   const [errors, setErrors] = useState({});
   
@@ -88,6 +91,35 @@ const BikeAdvertEditPage = () => {
     loadAdvertData();
   }, [advertId]);
 
+  // Auto-save business info when it changes
+  useEffect(() => {
+    // Only auto-save if advertId exists and business info has changed
+    if (!advertId || (!advertData.businessName && !advertData.businessWebsite && !advertData.businessLogo)) return;
+    
+    const timeout = setTimeout(async () => {
+      try {
+        // Save to localStorage
+        const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
+        const updatedData = {
+          ...currentData,
+          advertData: {
+            ...currentData.advertData,
+            businessName: advertData.businessName,
+            businessWebsite: advertData.businessWebsite,
+            businessLogo: advertData.businessLogo
+          },
+          updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
+        console.log('✅ Business info auto-saved');
+      } catch (error) {
+        console.error('❌ Failed to auto-save business info:', error);
+      }
+    }, 1000); // Debounce 1 second
+    
+    return () => clearTimeout(timeout);
+  }, [advertData.businessName, advertData.businessWebsite, advertData.businessLogo]);
+
   // Show popup when page loads
   useEffect(() => {
     if (vehicleData && !isLoading) {
@@ -103,17 +135,19 @@ const BikeAdvertEditPage = () => {
     }
   }, [vehicleData]);
   
-  // Auto-fill data when enhanced data is received from API OR generate frontend values
+  // Auto-fill data when enhanced data is received from API
   useEffect(() => {
     if (enhancedData && !apiLoading && !enhancedDataProcessed) {
       setEnhancedDataProcessed(true); // Prevent duplicate processing
       
       console.log('🏍️ Auto-filling bike data from API:', enhancedData);
       
-      // Auto-fill running costs
+      // Auto-fill running costs ONLY if API has data
       if (enhancedData.combinedMpg || enhancedData.annualTax || enhancedData.insuranceGroup || enhancedData.co2Emissions) {
-        console.log('💰 Auto-filling running costs:', {
+        console.log('💰 Auto-filling running costs from API:', {
           combinedMpg: enhancedData.combinedMpg,
+          urbanMpg: enhancedData.urbanMpg,
+          extraUrbanMpg: enhancedData.extraUrbanMpg,
           annualTax: enhancedData.annualTax,
           insuranceGroup: enhancedData.insuranceGroup,
           co2Emissions: enhancedData.co2Emissions
@@ -122,13 +156,13 @@ const BikeAdvertEditPage = () => {
         setAdvertData(prev => {
           const newRunningCosts = {
             fuelEconomy: {
-              urban: String(enhancedData.urbanMpg || prev.runningCosts.fuelEconomy.urban || ''),
-              extraUrban: String(enhancedData.extraUrbanMpg || prev.runningCosts.fuelEconomy.extraUrban || ''),
-              combined: String(enhancedData.combinedMpg || prev.runningCosts.fuelEconomy.combined || '')
+              urban: String(enhancedData.urbanMpg || ''),
+              extraUrban: String(enhancedData.extraUrbanMpg || ''),
+              combined: String(enhancedData.combinedMpg || '')
             },
-            annualTax: String(enhancedData.annualTax || prev.runningCosts.annualTax || ''),
-            insuranceGroup: String(enhancedData.insuranceGroup || prev.runningCosts.insuranceGroup || ''),
-            co2Emissions: String(enhancedData.co2Emissions || prev.runningCosts.co2Emissions || '')
+            annualTax: String(enhancedData.annualTax || ''),
+            insuranceGroup: String(enhancedData.insuranceGroup || ''),
+            co2Emissions: String(enhancedData.co2Emissions || '')
           };
           
           return {
@@ -160,107 +194,94 @@ const BikeAdvertEditPage = () => {
           localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
           console.log('✅ Running costs auto-saved from API data');
         }, 500);
+      } else {
+        console.log('ℹ️ API has no running costs data - fields will remain empty (no frontend generation)');
       }
     }
   }, [enhancedData, apiLoading, enhancedDataProcessed, advertId]);
-
-  // Frontend-only MPG calculation when no API data is available
-  useEffect(() => {
-    if (vehicleData && !enhancedDataProcessed && !apiLoading) {
-      // Check if running costs are empty and we need to generate frontend values
-      const needsMpgValues = !advertData.runningCosts.fuelEconomy.urban && 
-                            !advertData.runningCosts.fuelEconomy.extraUrban && 
-                            !advertData.runningCosts.fuelEconomy.combined;
-      
-      if (needsMpgValues) {
-        console.log('🏍️ Generating frontend-only MPG values for bike');
-        
-        // Generate realistic MPG values based on bike type and engine size
-        const engineCC = vehicleData.engineCC || 600; // Default to 600cc if not available
-        
-        // Calculate combined MPG based on engine size (realistic values)
-        let combinedMpg;
-        if (engineCC <= 125) {
-          combinedMpg = 80 + Math.floor(Math.random() * 20); // 80-100 MPG for small bikes
-        } else if (engineCC <= 500) {
-          combinedMpg = 60 + Math.floor(Math.random() * 15); // 60-75 MPG for medium bikes
-        } else if (engineCC <= 750) {
-          combinedMpg = 45 + Math.floor(Math.random() * 15); // 45-60 MPG for larger bikes
-        } else {
-          combinedMpg = 35 + Math.floor(Math.random() * 15); // 35-50 MPG for big bikes
-        }
-        
-        // Calculate urban (typically 15% lower) and extra urban (typically 15% higher)
-        const urbanMpg = Math.floor(combinedMpg * 0.85) + Math.floor(Math.random() * 3);
-        const extraUrbanMpg = Math.floor(combinedMpg * 1.15) + Math.floor(Math.random() * 3);
-        
-        // Generate other running costs
-        const annualTax = engineCC <= 150 ? 20 : engineCC <= 400 ? 47 : engineCC <= 600 ? 68 : 91;
-        const insuranceGroup = Math.min(20, Math.floor(engineCC / 50) + Math.floor(Math.random() * 5));
-        const co2Emissions = Math.floor(engineCC / 10) + 50 + Math.floor(Math.random() * 20);
-        
-        console.log('💰 Generated frontend MPG values:', {
-          urban: urbanMpg,
-          extraUrban: extraUrbanMpg,
-          combined: combinedMpg,
-          annualTax,
-          insuranceGroup,
-          co2Emissions
-        });
-        
-        setAdvertData(prev => ({
-          ...prev,
-          runningCosts: {
-            fuelEconomy: {
-              urban: String(urbanMpg),
-              extraUrban: String(extraUrbanMpg),
-              combined: String(combinedMpg)
-            },
-            annualTax: String(annualTax),
-            insuranceGroup: String(insuranceGroup),
-            co2Emissions: String(co2Emissions)
-          }
-        }));
-        
-        // Auto-save the generated values
-        setTimeout(() => {
-          const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
-          const updatedData = {
-            ...currentData,
-            advertData: {
-              ...currentData.advertData,
-              runningCosts: {
-                fuelEconomy: {
-                  urban: String(urbanMpg),
-                  extraUrban: String(extraUrbanMpg),
-                  combined: String(combinedMpg)
-                },
-                annualTax: String(annualTax),
-                insuranceGroup: String(insuranceGroup),
-                co2Emissions: String(co2Emissions)
-              }
-            },
-            updatedAt: new Date().toISOString()
-          };
-          localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
-          console.log('✅ Frontend-generated running costs auto-saved');
-        }, 500);
-      }
-    }
-  }, [vehicleData, advertData.runningCosts, enhancedDataProcessed, apiLoading, advertId]);
 
   const loadAdvertData = async () => {
     try {
       setIsLoading(true);
       
-      // Fetch advert data from localStorage
+      // STEP 1: Try to fetch bike from database first (if it exists after payment)
+      let databaseBike = null;
+      try {
+        console.log('🔍 Fetching bike from database with advertId:', advertId);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/advert/${advertId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data) {
+            databaseBike = result.data;
+            console.log('✅ Bike found in database:', databaseBike._id);
+            console.log('📊 MOT History:', databaseBike.motHistory?.length || 0, 'records');
+            console.log('📊 MOT Due Date:', databaseBike.motDue || databaseBike.motExpiry || 'Not available');
+            console.log('📊 Previous Owners:', databaseBike.historyCheckData?.previousKeepers || 'Not available');
+          }
+        }
+      } catch (dbError) {
+        console.log('⚠️ Bike not yet in database (will be created after payment)');
+      }
+      
+      // STEP 2: Fetch advert data from localStorage
       const storedData = localStorage.getItem(`bikeAdvert_${advertId}`);
       
       if (storedData) {
         const parsed = JSON.parse(storedData);
-        setVehicleData(parsed.vehicleData);
+        
+        // STEP 3: Merge database data with localStorage data (database takes priority for MOT/history)
+        const mergedVehicleData = {
+          ...parsed.vehicleData,
+          // Override with database data if available (after payment, complete data is fetched)
+          ...(databaseBike && {
+            motDue: databaseBike.motDue || databaseBike.motExpiry || databaseBike.motExpiryDate,
+            motHistory: databaseBike.motHistory || [],
+            previousOwners: databaseBike.historyCheckData?.previousKeepers || parsed.vehicleData.previousOwners,
+            isWrittenOff: databaseBike.historyCheckData?.isWrittenOff || false,
+            // Update running costs from database if available
+            ...(databaseBike.runningCosts && {
+              combinedMpg: databaseBike.runningCosts.fuelEconomy?.combined,
+              urbanMpg: databaseBike.runningCosts.fuelEconomy?.urban,
+              extraUrbanMpg: databaseBike.runningCosts.fuelEconomy?.extraUrban,
+              annualTax: databaseBike.runningCosts.annualTax,
+              insuranceGroup: databaseBike.runningCosts.insuranceGroup,
+              co2Emissions: databaseBike.runningCosts.co2Emissions
+            })
+          })
+        };
+        
+        console.log('🔄 Merged vehicle data:', {
+          fromDatabase: !!databaseBike,
+          motDue: mergedVehicleData.motDue,
+          motHistoryCount: mergedVehicleData.motHistory?.length || 0,
+          previousOwners: mergedVehicleData.previousOwners
+        });
+        
+        setVehicleData(mergedVehicleData);
+        
+        // Extract private price from valuation structure (priority order)
+        const privatePrice = 
+          parsed.advertData?.price || // Saved price (highest priority)
+          mergedVehicleData.valuation?.private || // Valuation private price
+          mergedVehicleData.allValuations?.private || // Alternative valuation structure
+          mergedVehicleData.estimatedValue || // Fallback to estimated value
+          '';
+        
+        console.log('💰 Price extraction:', {
+          savedPrice: parsed.advertData?.price,
+          valuationPrivate: mergedVehicleData.valuation?.private,
+          allValuationsPrivate: mergedVehicleData.allValuations?.private,
+          estimatedValue: mergedVehicleData.estimatedValue,
+          finalPrice: privatePrice
+        });
+        
         setAdvertData({
-          price: parsed.advertData?.price || '',
+          price: privatePrice,
           description: parsed.advertData?.description || '',
           photos: parsed.advertData?.photos || [],
           contactPhone: parsed.advertData?.contactPhone || '',
@@ -273,21 +294,116 @@ const BikeAdvertEditPage = () => {
             insuranceGroup: '',
             co2Emissions: ''
           },
-          videoUrl: parsed.advertData?.videoUrl || ''
+          videoUrl: parsed.advertData?.videoUrl || '',
+          // CRITICAL FIX: Include business info from sellerContact
+          businessName: parsed.vehicleData?.sellerContact?.businessName || parsed.advertData?.businessName || '',
+          businessLogo: parsed.vehicleData?.sellerContact?.businessLogo || parsed.advertData?.businessLogo || '',
+          businessWebsite: parsed.vehicleData?.sellerContact?.businessWebsite || parsed.advertData?.businessWebsite || ''
         });
         
-        // Check if we need to fetch running costs from API
-        const needsRunningCosts = !parsed.advertData?.runningCosts?.annualTax && 
-                                 !parsed.advertData?.runningCosts?.fuelEconomy?.combined;
+        console.log('🏢 Business info loaded:', {
+          businessName: parsed.vehicleData?.sellerContact?.businessName || parsed.advertData?.businessName,
+          businessLogo: parsed.vehicleData?.sellerContact?.businessLogo || parsed.advertData?.businessLogo,
+          businessWebsite: parsed.vehicleData?.sellerContact?.businessWebsite || parsed.advertData?.businessWebsite
+        });
         
-        if (needsRunningCosts && parsed.vehicleData?.registration && parsed.vehicleData?.mileage) {
-          console.log('🔍 Fetching running costs from API for:', parsed.vehicleData.registration);
+        // CRITICAL: Fetch MOT + Valuation data immediately if not already available
+        const needsMOTData = !mergedVehicleData.motDue || mergedVehicleData.motDue === 'Unknown';
+        const needsValuationData = !mergedVehicleData.valuation?.private && !mergedVehicleData.estimatedValue;
+        
+        if ((needsMOTData || needsValuationData) && mergedVehicleData.registration) {
+          console.log('🔍 Fetching MOT + Valuation data for:', mergedVehicleData.registration);
+          console.log('   Needs MOT:', needsMOTData, '| Needs Valuation:', needsValuationData);
+          
           try {
-            await lookupBike(parsed.vehicleData.registration, parsed.vehicleData.mileage);
+            const response = await fetch(
+              `${import.meta.env.VITE_API_URL}/bikes/complete-lookup/${mergedVehicleData.registration}?mileage=${mergedVehicleData.mileage || 50000}`,
+              {
+                headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+              }
+            );
+            
+            if (response.ok) {
+              const result = await response.json();
+              console.log('✅ Complete bike data fetched:', {
+                motDue: result.data?.motDue,
+                motExpiry: result.data?.motExpiry,
+                motHistoryCount: result.data?.motHistory?.length || 0,
+                estimatedValue: result.data?.estimatedValue,
+                valuation: result.data?.valuation,
+                runningCosts: {
+                  combinedMpg: result.data?.combinedMpg,
+                  annualTax: result.data?.annualTax,
+                  co2Emissions: result.data?.co2Emissions
+                }
+              });
+              
+              // Update merged vehicle data with API response
+              if (result.data) {
+                mergedVehicleData.motDue = result.data.motDue || result.data.motExpiry || mergedVehicleData.motDue;
+                mergedVehicleData.motExpiry = result.data.motExpiry || result.data.motDue || mergedVehicleData.motExpiry;
+                mergedVehicleData.motHistory = result.data.motHistory || mergedVehicleData.motHistory || [];
+                mergedVehicleData.estimatedValue = result.data.estimatedValue || mergedVehicleData.estimatedValue;
+                mergedVehicleData.valuation = result.data.valuation || mergedVehicleData.valuation;
+                
+                // CRITICAL: Update running costs from API (ONLY if API has data)
+                if (result.data.combinedMpg || result.data.annualTax || result.data.co2Emissions) {
+                  mergedVehicleData.combinedMpg = result.data.combinedMpg || mergedVehicleData.combinedMpg;
+                  mergedVehicleData.urbanMpg = result.data.urbanMpg || mergedVehicleData.urbanMpg;
+                  mergedVehicleData.extraUrbanMpg = result.data.extraUrbanMpg || mergedVehicleData.extraUrbanMpg;
+                  mergedVehicleData.annualTax = result.data.annualTax || mergedVehicleData.annualTax;
+                  mergedVehicleData.insuranceGroup = result.data.insuranceGroup || mergedVehicleData.insuranceGroup;
+                  mergedVehicleData.co2Emissions = result.data.co2Emissions || mergedVehicleData.co2Emissions;
+                  
+                  console.log('✅ Running costs updated from API:', {
+                    combinedMpg: mergedVehicleData.combinedMpg,
+                    annualTax: mergedVehicleData.annualTax,
+                    co2Emissions: mergedVehicleData.co2Emissions
+                  });
+                } else {
+                  console.log('ℹ️ API has no running costs data - fields will remain empty');
+                }
+                
+                // Update vehicleData state
+                setVehicleData(mergedVehicleData);
+                
+                // Update localStorage with fetched data
+                const updatedData = {
+                  ...parsed,
+                  vehicleData: {
+                    ...parsed.vehicleData,
+                    motDue: mergedVehicleData.motDue,
+                    motExpiry: mergedVehicleData.motExpiry,
+                    motHistory: mergedVehicleData.motHistory || [],
+                    estimatedValue: mergedVehicleData.estimatedValue,
+                    valuation: mergedVehicleData.valuation,
+                    // Update running costs if API has data
+                    ...(result.data.combinedMpg || result.data.annualTax || result.data.co2Emissions ? {
+                      combinedMpg: mergedVehicleData.combinedMpg,
+                      urbanMpg: mergedVehicleData.urbanMpg,
+                      extraUrbanMpg: mergedVehicleData.extraUrbanMpg,
+                      annualTax: mergedVehicleData.annualTax,
+                      insuranceGroup: mergedVehicleData.insuranceGroup,
+                      co2Emissions: mergedVehicleData.co2Emissions
+                    } : {})
+                  },
+                  updatedAt: new Date().toISOString()
+                };
+                localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
+                console.log('✅ MOT + Valuation + Running Costs data saved to localStorage');
+              }
+            } else {
+              console.warn('⚠️ Failed to fetch complete bike data:', response.status);
+            }
           } catch (error) {
-            console.warn('⚠️ Could not fetch running costs from API:', error.message);
+            console.error('❌ Error fetching complete bike data:', error);
           }
+        } else {
+          console.log('ℹ️ MOT and Valuation data already available');
         }
+        
       } else {
         throw new Error('Advert not found');
       }
@@ -833,6 +949,76 @@ const BikeAdvertEditPage = () => {
     }));
   };
 
+  // Logo upload handler
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+    
+    try {
+      setIsUploading(true);
+      console.log('📤 Uploading business logo...');
+      
+      // Convert file to base64
+      const base64Image = await uploadService.fileToBase64(file);
+      console.log('✅ File converted to base64, length:', base64Image.length);
+      
+      // Upload to Cloudinary
+      const response = await uploadService.uploadImage(base64Image, advertId);
+      console.log('📡 Upload response:', response);
+      
+      const logoUrl = response.data?.url || response.url;
+      console.log('🔗 Logo URL extracted:', logoUrl);
+      
+      if (logoUrl) {
+        // Update state with new logo URL
+        setAdvertData(prev => ({
+          ...prev,
+          businessLogo: logoUrl
+        }));
+        
+        console.log('✅ Business logo uploaded successfully:', logoUrl);
+        
+        // CRITICAL: Auto-save business logo to localStorage
+        try {
+          console.log('💾 Auto-saving business logo to localStorage...');
+          const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
+          const updatedData = {
+            ...currentData,
+            advertData: {
+              ...currentData.advertData,
+              businessLogo: logoUrl
+            },
+            updatedAt: new Date().toISOString()
+          };
+          localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
+          console.log('✅ Business logo saved to localStorage');
+        } catch (saveError) {
+          console.error('❌ Failed to save business logo:', saveError);
+        }
+      } else {
+        console.error('❌ Upload response missing URL:', response);
+        throw new Error(response.message || 'Upload failed - no URL returned');
+      }
+    } catch (error) {
+      console.error('❌ Logo upload failed:', error);
+      alert('Failed to upload logo. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -878,7 +1064,7 @@ const BikeAdvertEditPage = () => {
     }
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!validateForm()) {
       return;
     }
@@ -892,6 +1078,101 @@ const BikeAdvertEditPage = () => {
       updatedAt: new Date().toISOString()
     };
     localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(bikeAdvertData));
+    
+    // CRITICAL: Create bike in database with MOT History and Valuation
+    // This will call Vehicle Specs, MOT History, and Valuation APIs
+    try {
+      console.log('📡 Creating bike in database with complete data (MOT + Valuation)...');
+      setIsSaving(true);
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          advertId: advertId,
+          userId: user?._id,
+          registrationNumber: vehicleData.registration,
+          mileage: vehicleData.mileage,
+          make: vehicleData.make || 'Unknown',
+          model: vehicleData.model || 'Unknown',
+          year: vehicleData.year || new Date().getFullYear(),
+          color: vehicleData.color || 'Not specified',
+          fuelType: vehicleData.fuelType || 'Petrol',
+          engineCC: parseInt(vehicleData.engineCC || vehicleData.engineSize || '0') || 0,
+          bikeType: vehicleData.bikeType || 'Other',
+          transmission: 'manual',
+          condition: 'used',
+          status: 'incomplete', // CRITICAL: Will be changed to 'pending_payment' then 'active' after payment
+          price: advertData.price || 0,
+          description: advertData.description || '',
+          images: advertData.photos ? advertData.photos.map(p => p.url || p) : [],
+          postcode: advertData.location || '',
+          sellerContact: {
+            type: 'private',
+            phoneNumber: advertData.contactPhone || '',
+            email: advertData.contactEmail || user?.email || '',
+            allowEmailContact: false,
+            businessName: advertData.businessName || '',
+            businessLogo: advertData.businessLogo || '',
+            businessWebsite: advertData.businessWebsite || ''
+          },
+          runningCosts: advertData.runningCosts || undefined,
+          features: advertData.features || []
+        })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Bike created in database with ID:', result.data?._id);
+        console.log('📊 Complete data saved:', {
+          motDue: result.data?.motDue,
+          motHistory: result.data?.motHistory?.length || 0,
+          previousOwners: result.data?.historyCheckData?.previousKeepers,
+          valuation: result.data?.valuation,
+          estimatedValue: result.data?.estimatedValue
+        });
+        
+        // CRITICAL: Update vehicleData with fetched MOT and Valuation data
+        if (result.data) {
+          setVehicleData(prev => ({
+            ...prev,
+            motDue: result.data.motDue || prev.motDue,
+            motExpiry: result.data.motExpiry || prev.motExpiry,
+            motHistory: result.data.motHistory || prev.motHistory || [],
+            estimatedValue: result.data.estimatedValue || prev.estimatedValue,
+            valuation: result.data.valuation || prev.valuation
+          }));
+          
+          // Also update localStorage with fetched data
+          const updatedAdvertData = {
+            ...bikeAdvertData,
+            vehicleData: {
+              ...bikeAdvertData.vehicleData,
+              motDue: result.data.motDue,
+              motExpiry: result.data.motExpiry,
+              motHistory: result.data.motHistory || [],
+              estimatedValue: result.data.estimatedValue,
+              valuation: result.data.valuation
+            }
+          };
+          localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedAdvertData));
+          
+          console.log('✅ Vehicle data updated with MOT and Valuation from API');
+        }
+      } else {
+        const error = await response.json();
+        console.warn('⚠️ Failed to create bike in database:', error.message);
+        // Continue anyway - bike will be created during payment
+      }
+    } catch (error) {
+      console.error('❌ Error creating bike in database:', error);
+      // Continue anyway - bike will be created during payment
+    } finally {
+      setIsSaving(false);
+    }
     
     // Navigate to seller contact details page
     navigate(`/bikes/selling/advert/contact/${advertId}`);
@@ -1234,10 +1515,27 @@ const BikeAdvertEditPage = () => {
                 <div className="spec-item">
                   <label>MOT Due</label>
                   <span>
-                    {vehicleData.motDue || 
-                     vehicleData.motExpiry || 
-                     vehicleData.motExpiryDate || 
-                     'Contact seller for MOT details'}
+                    {vehicleData.motDue || vehicleData.motExpiry || vehicleData.motExpiryDate ? (
+                      new Date(vehicleData.motDue || vehicleData.motExpiry || vehicleData.motExpiryDate).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                      })
+                    ) : vehicleData.motHistory && vehicleData.motHistory.length > 0 && vehicleData.motHistory[0].expiryDate ? (
+                      new Date(vehicleData.motHistory[0].expiryDate).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                      })
+                    ) : (() => {
+                      const currentYear = new Date().getFullYear();
+                      const vehicleAge = currentYear - (vehicleData.year || 2020);
+                      
+                      if (vehicleAge < 3) {
+                        return 'Not required (new vehicle)';
+                      }
+                      return 'Contact seller for MOT details';
+                    })()}
                   </span>
                 </div>
                 <div className="spec-item">
@@ -1261,7 +1559,11 @@ const BikeAdvertEditPage = () => {
                 </div>
                 <div className="spec-item">
                   <label>Previous Owners</label>
-                  <span>{vehicleData.previousOwners || 'Not available'}</span>
+                  <span>
+                    {vehicleData.previousOwners !== undefined && vehicleData.previousOwners !== null
+                      ? vehicleData.previousOwners
+                      : 'Available after payment'}
+                  </span>
                 </div>
               </div>
             ) : (
@@ -1560,6 +1862,159 @@ const BikeAdvertEditPage = () => {
                 </div>
               )}
             </div>
+          </section>
+
+          {/* Business Information Section */}
+          <section className="business-info-section">
+            <h3>Business Information (Optional)</h3>
+            
+            {/* Info Alert */}
+            <div style={{ 
+              backgroundColor: '#fff3cd', 
+              border: '1px solid #ffc107', 
+              borderRadius: '8px', 
+              padding: '12px 16px', 
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px'
+            }}>
+              <span style={{ fontSize: '20px', flexShrink: 0 }}>ℹ️</span>
+              <div>
+                <strong style={{ color: '#856404', display: 'block', marginBottom: '4px' }}>
+                  For Trade Dealers
+                </strong>
+                <p style={{ color: '#856404', margin: 0, fontSize: '14px' }}>
+                  If you are a trade user, please add your business logo and website below. This helps buyers identify professional dealers and builds trust in your listing.
+                </p>
+              </div>
+            </div>
+            
+            <p className="section-note">
+              Add your business details to help buyers identify you as a professional dealer.
+            </p>
+            
+            <div className="form-group">
+              <label htmlFor="businessName">
+                Business Name <span className="optional">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                id="businessName"
+                value={advertData.businessName}
+                onChange={(e) => setAdvertData({
+                  ...advertData,
+                  businessName: e.target.value
+                })}
+                placeholder="e.g., ABC Motors Ltd"
+                className="form-input"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="businessWebsite">
+                Business Website <span className="optional">(Optional)</span>
+              </label>
+              <input
+                type="url"
+                id="businessWebsite"
+                value={advertData.businessWebsite}
+                onChange={(e) => setAdvertData({
+                  ...advertData,
+                  businessWebsite: e.target.value
+                })}
+                placeholder="https://www.yourbusiness.com"
+                className="form-input"
+              />
+              <small className="field-hint">
+                Enter your business website URL (must start with http:// or https://)
+              </small>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="businessLogo">
+                Business Logo <span className="optional">(Optional)</span>
+              </label>
+              <input
+                type="file"
+                id="businessLogo"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="form-input"
+                disabled={isUploading}
+              />
+              <small className="field-hint">
+                Upload your business logo (max 5MB, JPG/PNG)
+              </small>
+              
+              {/* Logo Preview */}
+              {advertData.businessLogo && (
+                <div className="logo-preview" style={{ marginTop: '12px' }}>
+                  <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>Logo Preview:</p>
+                  <div style={{ position: 'relative', display: 'inline-block' }}>
+                    <img 
+                      src={advertData.businessLogo} 
+                      alt="Business Logo Preview" 
+                      style={{ 
+                        maxWidth: '200px', 
+                        maxHeight: '100px', 
+                        objectFit: 'contain',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        padding: '8px',
+                        backgroundColor: '#f9f9f9'
+                      }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setAdvertData({...advertData, businessLogo: ''})}
+                      className="remove-logo-btn"
+                      style={{
+                        position: 'absolute',
+                        top: '-8px',
+                        right: '-8px',
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '24px',
+                        height: '24px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        lineHeight: '1',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Trade indicator */}
+            {(advertData.businessLogo || advertData.businessWebsite) && (
+              <div className="trade-indicator" style={{
+                backgroundColor: '#d4edda',
+                border: '1px solid #c3e6cb',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                marginTop: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span className="indicator-icon" style={{ fontSize: '18px' }}>✓</span>
+                <span className="indicator-text" style={{ color: '#155724', fontSize: '14px' }}>
+                  Your listing will appear as a trade seller
+                </span>
+              </div>
+            )}
           </section>
 
           {/* Action Button */}

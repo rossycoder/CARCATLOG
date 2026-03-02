@@ -13,7 +13,7 @@ function VanSearchResultsPage() {
   const [searchResults, setSearchResults] = useState(null);
   const [filteredResults, setFilteredResults] = useState(null);
   const [postcode, setPostcode] = useState('');
-  const [radius, setRadius] = useState(25);
+  const [radius, setRadius] = useState(10000); // Nationwide search by default
   const [savedVans, setSavedVans] = useState(new Set());
   const [searchSaved, setSearchSaved] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -90,7 +90,7 @@ function VanSearchResultsPage() {
         // Transform to match expected format
         const transformedData = {
           postcode: filterParams.postcode || 'All UK',
-          radius: filterParams.distance || 0,
+          radius: filterParams.radius || filterParams.distance || 0,
           count: total,
           results: vans,
           showingAllVans: false
@@ -484,7 +484,9 @@ function VanSearchResultsPage() {
                     <span className="location-icon">📍</span>
                     <span>
                       {extractTownName(van.locationName) || 'Location not available'}
-                      {van.distance > 0 && ` • ${(van.distance || 0).toFixed(0)} miles away`}
+                      {van.distance > 0 && (
+                        <> • <span className="distance-text">{(van.distance || 0).toFixed(0)} miles away</span></>
+                      )}
                     </span>
                   </div>
                 </div>

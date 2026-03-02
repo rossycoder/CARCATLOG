@@ -423,6 +423,8 @@
 .price-section {
   border-top: 1px solid #eee;
   padding-top: 24px;
+  position: relative;
+  z-index: 10;
 }
 
 .price-input-wrapper {
@@ -430,6 +432,8 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
+  position: relative;
+  z-index: 20;
 }
 
 .price-adjust-btn {
@@ -441,21 +445,24 @@
   color: #1a4ba0;
   font-size: 20px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: pointer !important;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 30;
 }
 
 .price-adjust-btn:hover:not(:disabled) {
-  background: #1a4ba0;
-  color: white;
+  background: #1a4ba0 !important;
+  color: white !important;
 }
 
 .price-adjust-btn:disabled {
   opacity: 0.4;
-  cursor: not-allowed;
+  cursor: not-allowed !important;
 }
 
 .currency {
@@ -489,6 +496,8 @@
   background: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
+  position: relative;
+  z-index: 1;
 }
 
 .vat-status-section h4 {
@@ -510,33 +519,81 @@
   gap: 12px;
   margin-bottom: 16px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 10;
 }
 
-.vat-option {
-  display: flex;
+/* Button-based VAT options */
+.vat-option-button {
+  display: flex !important;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
+  gap: 10px;
+  padding: 14px 20px;
   border: 2px solid #ddd;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: pointer !important;
   transition: all 0.2s;
+  background: white;
+  user-select: none;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10;
+}
+
+.vat-option-button:hover {
+  border-color: #1a4ba0 !important;
+  background: #f8f9fa !important;
+}
+
+.vat-option-button.selected {
+  border-color: #1a4ba0 !important;
+  background: #e8f4fd !important;
+}
+
+/* Custom radio circle */
+.radio-circle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #999;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  pointer-events: none;
+}
+
+.vat-option-button:hover .radio-circle {
+  border-color: #1a4ba0;
+}
+
+.vat-option-button.selected .radio-circle {
+  border-color: #1a4ba0;
   background: white;
 }
 
-.vat-option:hover {
-  border-color: #1a4ba0;
+.radio-dot {
+  width: 10px;
+  height: 10px;
+  background: #1a4ba0;
+  border-radius: 50%;
+  animation: radioFadeIn 0.2s ease;
+  pointer-events: none;
 }
 
-.vat-option.selected {
-  border-color: #1a4ba0;
-  background: #e8f4fd;
-}
-
-.vat-option input[type="radio"] {
-  accent-color: #1a4ba0;
-  width: 18px;
-  height: 18px;
+@keyframes radioFadeIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .vat-option-label {
@@ -889,12 +946,449 @@
     flex-direction: column;
   }
   
-  .vat-option {
+  .vat-option-button {
     width: 100%;
   }
   
   .price-input-wrapper {
     flex-wrap: wrap;
     justify-content: center;
+  }
+}
+
+/* Expandable Sections - AutoTrader Style */
+.additional-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.section-item.expandable {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  background-color: #fafafa;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.section-header:hover {
+  background-color: #f5f5f5;
+}
+
+.section-icon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.section-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #191919;
+  flex: 1;
+}
+
+.section-arrow {
+  margin-left: auto;
+  transition: transform 0.3s;
+  font-size: 1.5rem;
+  color: #666;
+}
+
+.section-arrow.expanded {
+  transform: rotate(90deg);
+}
+
+.section-content {
+  padding: 2rem 1.5rem;
+  background-color: white;
+}
+
+.section-description {
+  margin-bottom: 1.5rem;
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Features Grid - AutoTrader Style */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.5rem;
+}
+
+.feature-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 6px;
+  border: 1px solid #e5e5e5;
+  background-color: white;
+}
+
+.feature-checkbox:hover {
+  background-color: #f9f9f9;
+  border-color: #0066ff;
+}
+
+.feature-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #0066ff;
+}
+
+.feature-checkbox input[type="checkbox"]:checked + span {
+  color: #0066ff;
+  font-weight: 500;
+}
+
+.feature-checkbox span {
+  font-size: 0.95rem;
+  color: #333;
+  user-select: none;
+}
+
+/* Running Costs Form - AutoTrader Style */
+.running-costs-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #191919;
+  font-size: 1rem;
+}
+
+.form-input {
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s;
+  background-color: white;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+.fuel-economy-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+.fuel-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fuel-label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.fuel-input {
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.fuel-input:focus {
+  outline: none;
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+.fuel-unit {
+  font-size: 0.85rem;
+  color: #999;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* Video Form - AutoTrader Style */
+.video-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.video-url-input {
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.video-url-input:focus {
+  outline: none;
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+.video-preview {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background-color: #f0fdf4;
+  border-radius: 6px;
+  border: 1px solid #86efac;
+}
+
+.success-message {
+  color: #16a34a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: #fef2f2;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+}
+
+.video-info {
+  background-color: #eff6ff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #0066ff;
+}
+
+.video-info p {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #191919;
+  font-size: 1rem;
+}
+
+.video-info ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.video-info li {
+  padding: 0.5rem 0;
+  color: #666;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+.video-info li:before {
+  content: "✓";
+  color: #0066ff;
+  font-weight: bold;
+  margin-right: 0.75rem;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .fuel-economy-inputs {
+    grid-template-columns: 1fr;
+  }
+  
+  .section-header {
+    padding: 1rem;
+  }
+  
+  .section-content {
+    padding: 1.5rem 1rem;
+  }
+  
+  .section-icon {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+  }
+  
+  .section-text {
+    font-size: 1rem;
+  }
+}
+
+/* Business Information Section */
+.business-info-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+}
+
+.business-info-section h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #191919;
+}
+
+.trade-user-alert {
+  background-color: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.alert-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-title {
+  color: #856404;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.alert-text {
+  color: #856404;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.business-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.optional {
+  color: #999;
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
+.logo-preview {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+}
+
+.logo-preview img {
+  max-width: 150px;
+  max-height: 80px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.remove-logo-btn {
+  padding: 0.5rem 1rem;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.remove-logo-btn:hover {
+  background-color: #b91c1c;
+}
+
+.trade-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: #d1fae5;
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.indicator-icon {
+  font-size: 1.25rem;
+  color: #10b981;
+  font-weight: bold;
+}
+
+.indicator-text {
+  color: #065f46;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .business-info-section {
+    padding: 1.5rem 1rem;
+  }
+  
+  .trade-user-alert {
+    padding: 1rem;
+  }
+  
+  .alert-icon {
+    font-size: 1.25rem;
+  }
+  
+  .logo-preview {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .logo-preview img {
+    max-width: 100%;
   }
 }

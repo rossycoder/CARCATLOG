@@ -146,6 +146,12 @@ export const vanService = {
             engineSize: vanData.engineSize || 'Unknown',
             estimatedValue: vanData.estimatedValue || null,
             
+            // MOT and Tax information
+            motDue: vanData.motDue || 'Not available',
+            motStatus: vanData.motStatus || 'Unknown',
+            taxDue: vanData.taxDue || 'Not available',
+            taxStatus: vanData.taxStatus || 'Unknown',
+            
             // Van-specific fields
             payloadCapacity: vanData.payloadCapacity || 'Unknown',
             loadLength: vanData.loadLength || null,
@@ -168,11 +174,7 @@ export const vanService = {
             insuranceGroup: vanData.insuranceGroup || null,
             
             // Legacy fields for compatibility
-            previousOwners: 'Unknown',
-            motDue: 'Unknown',
-            taxDue: 'Unknown',
-            taxStatus: 'Unknown',
-            motStatus: 'Unknown'
+            previousOwners: 'Unknown'
           },
           metadata: response.data.metadata
         };

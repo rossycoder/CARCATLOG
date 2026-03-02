@@ -17,9 +17,11 @@ const VehicleHistorySection = ({ vrm, carData }) => {
         setError(null);
         
         // Only use vehicle history data from car document (no API calls)
-        if (carData && carData.historyCheckId) {
-          console.log('[VehicleHistory] Using vehicle history from car data:', carData.historyCheckId);
-          setHistoryData(carData.historyCheckId);
+        // Check both historyCheckId (for cars) and historyCheckData (for vans/bikes)
+        if (carData && (carData.historyCheckId || carData.historyCheckData)) {
+          const historySource = carData.historyCheckId || carData.historyCheckData;
+          console.log('[VehicleHistory] Using vehicle history from car data:', historySource);
+          setHistoryData(historySource);
           setIsLoading(false);
           return;
         }
@@ -334,11 +336,17 @@ const VehicleHistorySection = ({ vrm, carData }) => {
             <span className="stat-label">Owners</span>
             <span className="stat-value">
               {(() => {
-                // Try multiple field names for owners
+                // PRIORITY 1: Check carData.historyCheckData (for bikes and cars)
+                if (carData?.historyCheckData?.previousKeepers !== undefined && carData.historyCheckData.previousKeepers !== null) {
+                  return carData.historyCheckData.previousKeepers;
+                }
+                
+                // PRIORITY 2: Try multiple field names in historyData
                 const owners = historyData.numberOfPreviousKeepers !== undefined ? historyData.numberOfPreviousKeepers :
                               historyData.previousOwners !== undefined ? historyData.previousOwners :
                               historyData.numberOfOwners !== undefined ? historyData.numberOfOwners :
                               historyData.keeperChanges !== undefined ? historyData.keeperChanges :
+                              historyData.previousKeepers !== undefined ? historyData.previousKeepers :
                               null;
                 
                 // Show number if it's defined (including 0 for first owner)

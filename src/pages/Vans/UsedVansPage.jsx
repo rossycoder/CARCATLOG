@@ -25,7 +25,7 @@ const UsedVansPage = () => {
   const [featuredVans, setFeaturedVans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [postcode, setPostcode] = useState('');
-  const [radius, setRadius] = useState(25);
+  const [radius, setRadius] = useState(10000); // Nationwide search by default
   const [selectedMake, setSelectedMake] = useState('');
   const [postcodeError, setPostcodeError] = useState('');
 

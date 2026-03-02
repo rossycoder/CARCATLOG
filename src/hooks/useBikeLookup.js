@@ -17,7 +17,21 @@ const useBikeLookup = () => {
       const result = await bikeService.lookupBikeByRegistration(registration, mileage);
       
       if (result.success && result.data) {
-        setBikeData(result.data);
+        // CRITICAL: Handle both old format (flat) and new format (nested runningCosts)
+        // New format from database has runningCosts.fuelEconomy.combined
+        // Old format from API has combinedMpg at top level
+        const normalizedData = {
+          ...result.data,
+          // Extract running costs from nested structure if present
+          urbanMpg: result.data.urbanMpg || result.data.runningCosts?.fuelEconomy?.urban,
+          extraUrbanMpg: result.data.extraUrbanMpg || result.data.runningCosts?.fuelEconomy?.extraUrban,
+          combinedMpg: result.data.combinedMpg || result.data.runningCosts?.fuelEconomy?.combined,
+          annualTax: result.data.annualTax || result.data.runningCosts?.annualTax,
+          insuranceGroup: result.data.insuranceGroup || result.data.runningCosts?.insuranceGroup,
+          co2Emissions: result.data.co2Emissions || result.data.runningCosts?.co2Emissions
+        };
+        
+        setBikeData(normalizedData);
         
         // Set field sources for auto-fill indicators
         const fieldSources = {};
@@ -26,50 +40,57 @@ const useBikeLookup = () => {
         const isMockData = result.metadata?.apiProvider?.includes('mock') || 
                           result.metadata?.apiProvider?.includes('fallback');
         
+        // Check if data came from database (has dataSources flag)
+        const fromDatabase = result.data.dataSources?.checkCarDetails;
+        const sourceLabel = fromDatabase ? 'Database' : (isMockData ? 'Generated' : (result.metadata?.apiProvider || 'API'));
+        
         // Running costs sources
-        if (result.data.combinedMpg || result.data.urbanMpg || result.data.extraUrbanMpg) {
+        if (normalizedData.combinedMpg || normalizedData.urbanMpg || normalizedData.extraUrbanMpg) {
           fieldSources.runningCosts = {
             fuelEconomy: {
-              urban: result.data.urbanMpg ? (isMockData ? 'Generated' : (result.metadata?.apiProvider || 'API')) : null,
-              extraUrban: result.data.extraUrbanMpg ? (isMockData ? 'Generated' : (result.metadata?.apiProvider || 'API')) : null,
-              combined: result.data.combinedMpg ? (isMockData ? 'Generated' : (result.metadata?.apiProvider || 'API')) : null
+              urban: normalizedData.urbanMpg ? sourceLabel : null,
+              extraUrban: normalizedData.extraUrbanMpg ? sourceLabel : null,
+              combined: normalizedData.combinedMpg ? sourceLabel : null
             }
           };
         }
         
-        if (result.data.annualTax) {
+        if (normalizedData.annualTax) {
           if (!fieldSources.runningCosts) fieldSources.runningCosts = {};
-          fieldSources.runningCosts.annualTax = isMockData ? 'Generated' : (result.metadata?.apiProvider || 'API');
+          fieldSources.runningCosts.annualTax = sourceLabel;
         }
         
-        if (result.data.insuranceGroup) {
+        if (normalizedData.insuranceGroup) {
           if (!fieldSources.runningCosts) fieldSources.runningCosts = {};
-          fieldSources.runningCosts.insuranceGroup = isMockData ? 'Generated' : (result.metadata?.apiProvider || 'API');
+          fieldSources.runningCosts.insuranceGroup = sourceLabel;
         }
         
-        if (result.data.co2Emissions) {
+        if (normalizedData.co2Emissions) {
           if (!fieldSources.runningCosts) fieldSources.runningCosts = {};
-          fieldSources.runningCosts.co2Emissions = isMockData ? 'Generated' : (result.metadata?.apiProvider || 'API');
+          fieldSources.runningCosts.co2Emissions = sourceLabel;
         }
         
         setSources(fieldSources);
         
-        console.log('✅ Bike lookup successful:', result.data);
+        console.log('✅ Bike lookup successful:', normalizedData);
         console.log('💰 Running costs found:', {
-          urbanMpg: result.data.urbanMpg,
-          extraUrbanMpg: result.data.extraUrbanMpg,
-          combinedMpg: result.data.combinedMpg,
-          annualTax: result.data.annualTax,
-          insuranceGroup: result.data.insuranceGroup,
-          co2Emissions: result.data.co2Emissions
+          urbanMpg: normalizedData.urbanMpg,
+          extraUrbanMpg: normalizedData.extraUrbanMpg,
+          combinedMpg: normalizedData.combinedMpg,
+          annualTax: normalizedData.annualTax,
+          insuranceGroup: normalizedData.insuranceGroup,
+          co2Emissions: normalizedData.co2Emissions,
+          source: sourceLabel
         });
         
         // Show note if using fallback data
         if (isMockData) {
           console.log('⚠️ Using generated/fallback data - please verify details');
+        } else if (fromDatabase) {
+          console.log('✅ Using cached database data - saved API cost!');
         }
         
-        return result.data;
+        return normalizedData;
       } else {
         throw new Error(result.error || 'Failed to lookup bike');
       }

@@ -961,3 +961,265 @@
     font-size: 1.1rem;
   }
 }
+
+/* Van Details Section */
+.van-details-section {
+  padding: 3rem 1.5rem;
+  background: #f9fafb;
+}
+
+.van-details-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.van-details-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.details-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.details-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0066ff;
+  margin-bottom: 0.75rem;
+}
+
+.vrm-display {
+  display: inline-block;
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #92400e;
+}
+
+.van-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.info-section {
+  background: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.info-section h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.info-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.info-item.highlight {
+  background: #e6f2ff;
+  border-color: #0066ff;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.info-value.price {
+  color: #0066ff;
+  font-size: 1.25rem;
+}
+
+.details-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.continue-btn {
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  min-width: 200px;
+}
+
+.continue-btn.primary {
+  background: #0066ff;
+  color: white;
+}
+
+.continue-btn.primary:hover {
+  background: #0052cc;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 102, 255, 0.3);
+}
+
+.continue-btn.secondary {
+  background: white;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+}
+
+.continue-btn.secondary:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.error-banner .error-icon {
+  font-size: 1.25rem;
+}
+
+.error-banner p {
+  color: #991b1b;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Advertising Card Section */
+.advertising-card-section {
+  padding: 4rem 1rem;
+  background-color: #f8f9fa;
+}
+
+.advertising-card-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.advertising-section-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 2.5rem;
+  text-align: center;
+  color: #1f2937;
+}
+
+.advertising-card-with-image {
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.advertising-card-image {
+  width: 100%;
+  min-height: 500px;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  padding: 2rem;
+}
+
+.advertising-card-image img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  max-width: 100%;
+}
+
+/* Responsive for Van Details */
+@media (max-width: 768px) {
+  .van-details-card {
+    padding: 1.5rem;
+  }
+
+  .van-info-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .details-actions {
+    flex-direction: column;
+  }
+
+  .continue-btn {
+    width: 100%;
+  }
+
+  .vrm-display {
+    font-size: 1.25rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  .advertising-card-section {
+    padding: 2.5rem 1rem;
+  }
+  
+  .advertising-section-title {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+  }
+  
+  .advertising-card-image {
+    min-height: 400px;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .advertising-section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .advertising-card-image {
+    min-height: 300px;
+    padding: 1rem;
+  }
+}

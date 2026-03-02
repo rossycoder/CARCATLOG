@@ -178,7 +178,11 @@ const BikeSellerContactPage = () => {
         contactPhone: formData.phoneNumber,
         contactEmail: formData.email,
         location: formData.postcode,
-        allowEmailContact: formData.allowEmailContact
+        allowEmailContact: formData.allowEmailContact,
+        // Include business info from advert data
+        businessName: advertData?.businessName || '',
+        businessLogo: advertData?.businessLogo || '',
+        businessWebsite: advertData?.businessWebsite || ''
       };
 
       const response = await fetch(`${API_BASE_URL}/bikes/publish`, {

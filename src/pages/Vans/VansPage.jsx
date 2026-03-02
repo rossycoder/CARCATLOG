@@ -58,7 +58,7 @@ const VansPage = () => {
     // Build query string for URL
     const params = new URLSearchParams();
     params.append('postcode', trimmedPostcode);
-    params.append('radius', '25');
+    params.append('radius', '10000'); // Nationwide search
     if (make) params.append('make', make);
     if (model) params.append('model', model);
     

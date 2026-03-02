@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { useTradeDealerContext } from '../../context/TradeDealerContext';
+import { formatDateUK } from '../../utils/dateFormatter';
 import './VanFinderFormPage.css';
 
 const VanFinderFormPage = () => {
@@ -476,7 +477,7 @@ const VanFinderFormPage = () => {
 
               <div className="detail-item">
                 <label className="detail-label">MOT Due</label>
-                <p className="detail-value">{vehicleDetails.motDue}</p>
+                <p className="detail-value">{formatDateUK(vehicleDetails.motDue)}</p>
               </div>
             </div>
 
