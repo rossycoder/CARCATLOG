@@ -6,7 +6,9 @@ const MeetTheSellerSection = ({ seller, distance, postcode }) => {
     return null;
   }
 
-  const isTradeSeller = seller.type === 'trade';
+  // CRITICAL: Check if seller has business info (either registered trade dealer OR user with business details)
+  const hasBusinessInfo = seller.businessName || seller.logo || seller.website;
+  const isTradeSeller = seller.type === 'trade' || hasBusinessInfo;
 
   const handlePhoneClick = () => {
     if (seller.phoneNumber) {
@@ -43,6 +45,15 @@ const MeetTheSellerSection = ({ seller, distance, postcode }) => {
               <span>{seller.city || extractTownName(seller.locationName) || 'Croydon'} • {distance || '10'} miles</span>
             </div>
           </div>
+
+          {seller.website && (
+            <div className="seller-website">
+              <a href={seller.website} target="_blank" rel="noopener noreferrer" className="website-link">
+                <span className="website-icon">🌐</span>
+                Visit website
+              </a>
+            </div>
+          )}
 
           {seller.rating && (
             <div className="seller-rating">

@@ -432,9 +432,15 @@ const VanDetailPage = () => {
             {/* Meet the Seller Section */}
             <MeetTheSellerSection
               seller={{
-                type: van.sellerContact?.type || van.sellerType || 'private',
+                // CRITICAL: Detect trade seller by checking if business info exists
+                type: (van.sellerContact?.type === 'trade' || 
+                       van.isDealerListing || 
+                       van.sellerContact?.businessName || 
+                       van.sellerContact?.businessLogo || 
+                       van.sellerContact?.businessWebsite) ? 'trade' : 'private',
                 businessName: van.sellerContact?.businessName || van.dealerName || null,
-                logo: van.sellerContact?.businessLogo || van.dealerLogo || null,
+                tradingName: van.sellerContact?.tradingName || null,
+                logo: van.sellerContact?.businessLogo || van.sellerContact?.logo || van.dealerLogo || null,
                 website: van.sellerContact?.businessWebsite || null,
                 phoneNumber: van.sellerContact?.phoneNumber || van.phoneNumber || null,
                 locationName: van.locationName,
@@ -458,7 +464,11 @@ const VanDetailPage = () => {
               
               <div className="seller-info">
                 <span className="seller-type">
-                  {van.sellerContact?.type === 'trade' || van.sellerType === 'trade' ? 'Trade seller' : 'Private seller'}
+                  {(van.sellerContact?.type === 'trade' || 
+                    van.isDealerListing || 
+                    van.sellerContact?.businessName || 
+                    van.sellerContact?.businessLogo || 
+                    van.sellerContact?.businessWebsite) ? 'Trade seller' : 'Private seller'}
                 </span>
                 {van.sellerContact?.businessName && (
                   <div className="business-name">{van.sellerContact.businessName}</div>
