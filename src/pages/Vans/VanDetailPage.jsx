@@ -22,6 +22,18 @@ const VanDetailPage = () => {
   const [imageError, setImageError] = useState(false);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
 
+  // Function to scroll to features section
+  const scrollToFeatures = () => {
+    setShowAllFeatures(true);
+    // Scroll to features section with a small delay
+    setTimeout(() => {
+      const featuresSection = document.querySelector('.features-section');
+      if (featuresSection) {
+        featuresSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
   // Function to handle back navigation intelligently
   const handleBackClick = () => {
     if (location.state?.from) {
@@ -70,6 +82,8 @@ const VanDetailPage = () => {
       console.log('✅ Van data loaded successfully');
       console.log('🖼️ Images:', data.data.images?.length || 0, 'found');
       console.log('👤 Seller Contact:', JSON.stringify(data.data.sellerContact, null, 2));
+      console.log('✨ Features:', data.data.features?.length || 0, 'found:', data.data.features);
+      console.log('💰 Running Costs:', data.data.runningCosts);
       setVan(data.data);
     } catch (err) {
       console.error('Error fetching van details:', err);
@@ -346,7 +360,7 @@ const VanDetailPage = () => {
                 )}
               </div>
 
-              <button className="view-all-specs">
+              <button className="view-all-specs" onClick={scrollToFeatures}>
                 ≡ View all spec and features →
               </button>
             </div>
@@ -409,6 +423,62 @@ const VanDetailPage = () => {
               </div>
             )}
 
+            {/* Running Costs Section */}
+            {van.runningCosts && (
+              <div className="running-costs-section-new">
+                <h2>Running costs</h2>
+                <div className="running-costs-horizontal">
+                  {/* Fuel Economy */}
+                  {(van.runningCosts?.fuelEconomy?.combined || van.combinedMpg) && (
+                    <div className="running-cost-item">
+                      <div className="cost-icon">⛽</div>
+                      <div className="cost-content">
+                        <div className="cost-label">Fuel economy</div>
+                        <div className="cost-value">
+                          {van.runningCosts?.fuelEconomy?.combined || van.combinedMpg} mpg
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Insurance Group */}
+                  <div className="running-cost-item">
+                    <div className="cost-icon">🛡️</div>
+                    <div className="cost-content">
+                      <div className="cost-label">Insurance group</div>
+                      <div className="cost-value">
+                        {(van.runningCosts?.insuranceGroup || van.insuranceGroup) || 'N/A'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Annual Tax */}
+                  <div className="running-cost-item">
+                    <div className="cost-icon">💷</div>
+                    <div className="cost-content">
+                      <div className="cost-label">Tax per year</div>
+                      <div className="cost-value">
+                        {(van.runningCosts?.annualTax || van.annualTax) ? formatPrice(van.runningCosts?.annualTax || van.annualTax) : 'N/A'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* CO2 Emissions */}
+                  {(van.runningCosts?.co2Emissions || van.co2Emissions) && (
+                    <div className="running-cost-item">
+                      <div className="cost-icon">🌱</div>
+                      <div className="cost-content">
+                        <div className="cost-label">CO₂ emissions</div>
+                        <div className="cost-value">
+                          {van.runningCosts?.co2Emissions || van.co2Emissions} g/km
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Location Display */}
             <LocationDisplay 
               sellerPostcode={van.postcode || van.sellerContact?.postcode}
@@ -432,8 +502,9 @@ const VanDetailPage = () => {
             {/* Meet the Seller Section */}
             <MeetTheSellerSection
               seller={{
-                // CRITICAL: Detect trade seller by checking if business info exists
-                type: (van.sellerContact?.type === 'trade' || 
+                // CRITICAL: Detect trade seller by checking dealerId OR business info
+                type: (van.dealerId || 
+                       van.sellerContact?.type === 'trade' || 
                        van.isDealerListing || 
                        van.sellerContact?.businessName || 
                        van.sellerContact?.businessLogo || 
@@ -464,7 +535,8 @@ const VanDetailPage = () => {
               
               <div className="seller-info">
                 <span className="seller-type">
-                  {(van.sellerContact?.type === 'trade' || 
+                  {(van.dealerId || 
+                    van.sellerContact?.type === 'trade' || 
                     van.isDealerListing || 
                     van.sellerContact?.businessName || 
                     van.sellerContact?.businessLogo || 

@@ -21,7 +21,25 @@ const VehicleHistorySection = ({ vrm, carData }) => {
         if (carData && (carData.historyCheckId || carData.historyCheckData)) {
           const historySource = carData.historyCheckId || carData.historyCheckData;
           console.log('[VehicleHistory] Using vehicle history from car data:', historySource);
-          setHistoryData(historySource);
+          
+          // If historyCheckData exists (vans/bikes), transform it to match expected format
+          if (carData.historyCheckData && !carData.historyCheckId) {
+            console.log('[VehicleHistory] Transforming historyCheckData for van/bike');
+            const transformedData = {
+              isStolen: carData.historyCheckData.stolen || false,
+              isScrapped: carData.historyCheckData.scrapped || false,
+              isImported: false, // Not available in historyCheckData
+              isExported: carData.historyCheckData.exported || false,
+              writeOffCategory: carData.historyCheckData.writeOffCategory || 'none',
+              previousOwners: carData.historyCheckData.previousKeepers || 0,
+              colourChanges: carData.historyCheckData.colourChanges || 0,
+              plateChanges: carData.historyCheckData.plateChanges || 0,
+              outstandingFinance: carData.historyCheckData.outstandingFinance || false
+            };
+            setHistoryData(transformedData);
+          } else {
+            setHistoryData(historySource);
+          }
           setIsLoading(false);
           return;
         }

@@ -112,7 +112,9 @@ const VanAdvertEditPage = () => {
         });
         
         // AUTO-POPULATE RUNNING COSTS FROM API DATA
-        const runningCostsFromAPI = {
+        // Check if runningCosts object exists in vehicleData (new structure)
+        // Otherwise fall back to top-level fields (old structure)
+        const runningCostsFromAPI = parsed.vehicleData?.runningCosts || {
           fuelEconomy: {
             urban: parsed.vehicleData?.urbanMpg || '',
             extraUrban: parsed.vehicleData?.extraUrbanMpg || '',
@@ -125,7 +127,8 @@ const VanAdvertEditPage = () => {
         
         console.log('💰 Running Costs Auto-Population:', {
           fromAPI: runningCostsFromAPI,
-          fromStored: parsed.advertData?.runningCosts
+          fromStored: parsed.advertData?.runningCosts,
+          vehicleDataHasRunningCosts: !!parsed.vehicleData?.runningCosts
         });
         
         setAdvertData({

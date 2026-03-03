@@ -598,3 +598,89 @@
 }
 
 /* Price level specific colors are set inline via style attribute */
+
+/* Features Section */
+.features-section {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.features-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 12px;
+}
+
+.feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  text-align: center;
+  min-height: 80px;
+}
+
+.feature-icon {
+  color: #4caf50;
+  font-size: 1.5rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.feature-text {
+  font-size: 0.875rem;
+  color: #333;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.show-more-features {
+  width: 100%;
+  background: none;
+  border: 1px solid #e0e0e0;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 16px;
+  cursor: pointer;
+  color: #2196F3;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.show-more-features:hover {
+  background: #f5f5f5;
+}
+
+/* Responsive adjustments for features section */
+@media (max-width: 1024px) {
+  .features-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .features-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

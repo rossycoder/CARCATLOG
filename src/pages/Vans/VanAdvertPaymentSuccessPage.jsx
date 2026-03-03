@@ -16,10 +16,40 @@ const VanAdvertPaymentSuccessPage = () => {
   useEffect(() => {
     if (sessionId) {
       fetchPurchaseDetails();
+      // AUTO-COMPLETE: Automatically activate van after payment success
+      // This bypasses webhook requirement for localhost development
+      autoCompletePurchase();
     } else {
       setIsLoading(false);
     }
   }, [sessionId]);
+
+  const autoCompletePurchase = async () => {
+    try {
+      console.log('🔄 Auto-completing van purchase for session:', sessionId);
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_BASE_URL}/payments/auto-complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionId }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('✅ Van purchase auto-completed successfully!');
+        console.log('   Vehicle ID:', data.vehicleId);
+        // Refresh purchase data to show updated status
+        setTimeout(() => fetchPurchaseDetails(), 1000);
+      } else {
+        console.warn('⚠️ Auto-complete failed:', data.error);
+      }
+    } catch (err) {
+      console.error('❌ Error auto-completing purchase:', err);
+    }
+  };
 
   const fetchPurchaseDetails = async () => {
     try {
