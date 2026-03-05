@@ -1,3 +1,10 @@
+/* Wrapper for card + save button */
+.car-card-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .car-card {
   background: #ffffff;
   border-radius: 12px;
@@ -154,30 +161,58 @@
 }
 
 .save-button {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(255, 255, 255, 0.9) !important;
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
   border: none !important;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  z-index: 3;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  z-index: 10 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
 .save-button:hover {
-  transform: scale(1.1);
+  transform: scale(1.1) !important;
   background: rgba(255, 255, 255, 1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.save-button:active {
+  transform: scale(0.95) !important;
 }
 
 .save-button.saved {
   animation: heartbeat 0.4s ease;
+}
+
+.save-button svg {
+  width: 24px !important;
+  height: 24px !important;
+  display: block !important;
+  pointer-events: none !important;
+}
+
+.save-button.saved svg {
+  fill: #e31e24 !important;
+  stroke: #e31e24 !important;
+}
+
+.save-button:not(.saved) svg {
+  fill: none !important;
+  stroke: #1a1a1a !important;
+  stroke-width: 2 !important;
 }
 
 @keyframes heartbeat {

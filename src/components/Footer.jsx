@@ -24,9 +24,13 @@ const Footer = () => {
               <Link to="/security">Security advice</Link>
               <Link to="/contact">Contact us</Link>
               <Link to="/about">About</Link>
-              <Link to="/terms-and-conditions/advertising">Terms & conditions</Link>
+              <Link to="/terms-of-use">Terms of use</Link>
+              <Link to="/terms-and-conditions/advertising">Advertising terms</Link>
+              <Link to="/privacy-notice">Privacy notice</Link>
+              <Link to="/accessibility-statement">Accessibility statement</Link>
+              <Link to="/cookies-policy">Cookies policy</Link>
             </nav>
-            <Link to="/cookies" className="manage-cookies">Manage cookies</Link>
+            <Link to="/cookies-policy" className="manage-cookies">Manage cookies</Link>
           </div>
 
           {/* Column 3 - Engagement & Legal */}

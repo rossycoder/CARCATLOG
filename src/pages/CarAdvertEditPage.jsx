@@ -79,6 +79,19 @@ const CarAdvertEditPage = () => {
     variant: ''
   });
   
+  // Overview section editing state (model, variant, motDue, engineSize, doors, gearbox, seats, fuelType)
+  const [isOverviewEditing, setIsOverviewEditing] = useState(false);
+  const [editableOverviewData, setEditableOverviewData] = useState({
+    model: '',
+    variant: '',
+    motDue: '',
+    engineSize: '',
+    doors: '',
+    transmission: '',
+    seats: '',
+    fuelType: ''
+  });
+  
   // Enhanced data processing state
   const [enhancedDataProcessed, setEnhancedDataProcessed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -1102,7 +1115,8 @@ const CarAdvertEditPage = () => {
       console.log('💾 Update data being sent:', updateData);
       
       // Save to backend (will update both Car and VehicleHistory)
-      const response = await advertService.updateAdvert(advertId, updateData, {
+      // CRITICAL: Pass empty object as advertData, and updateData as vehicleData
+      const response = await advertService.updateAdvert(advertId, {}, {
         ...vehicleData,
         ...updateData
       });
@@ -1117,8 +1131,16 @@ const CarAdvertEditPage = () => {
       
       console.log('✅ Local state updated with new data:', updateData);
       
+      // Show success message
+      alert('Vehicle details saved successfully! Page will reload to show changes.');
+      
       // Exit editing mode
       setIsVehicleDetailsEditing(false);
+      
+      // Reload page to fetch fresh data from database
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error('❌ Error saving vehicle details:', error);
       setErrors(prev => ({ ...prev, vehicleDetails: 'Failed to save. Please try again.' }));
@@ -1136,6 +1158,95 @@ const CarAdvertEditPage = () => {
     };
     console.log('🔄 Resetting editable data:', resetData);
     setEditableVehicleData(resetData);
+  };
+  
+  // Handle Overview section edit (model, variant, motDue, engineSize, doors, transmission, seats, fuelType)
+  const handleOverviewEdit = () => {
+    console.log('🖱️ Overview edit button clicked!');
+    setEditableOverviewData({
+      model: vehicleData.model || '',
+      variant: vehicleData.variant || '',
+      motDue: vehicleData.motDue || vehicleData.motExpiry || '',
+      engineSize: vehicleData.engineSize || '',
+      doors: vehicleData.doors || '',
+      transmission: vehicleData.transmission || '',
+      seats: vehicleData.seats || '',
+      fuelType: vehicleData.fuelType || ''
+    });
+    setIsOverviewEditing(true);
+  };
+  
+  // Handle Overview save
+  const handleOverviewSave = async () => {
+    try {
+      console.log('💾 Saving Overview data:', editableOverviewData);
+      
+      // Validate model (required)
+      if (!editableOverviewData.model || !editableOverviewData.model.trim()) {
+        setErrors(prev => ({ ...prev, model: 'Model is required' }));
+        return;
+      }
+      
+      // Clear errors
+      setErrors(prev => ({ ...prev, model: null, variant: null }));
+      
+      const updateData = {
+        model: editableOverviewData.model.trim(),
+        variant: editableOverviewData.variant ? editableOverviewData.variant.trim() : '',
+        motDue: editableOverviewData.motDue || null,
+        motExpiry: editableOverviewData.motDue || null, // Save to both fields
+        engineSize: editableOverviewData.engineSize ? parseFloat(editableOverviewData.engineSize) : null,
+        doors: editableOverviewData.doors ? parseInt(editableOverviewData.doors) : null,
+        transmission: editableOverviewData.transmission || null,
+        seats: editableOverviewData.seats ? parseInt(editableOverviewData.seats) : null,
+        fuelType: editableOverviewData.fuelType || null
+      };
+      
+      console.log('💾 Saving to database:', updateData);
+      
+      // Save to backend
+      const response = await advertService.updateAdvert(advertId, {}, {
+        ...vehicleData,
+        ...updateData
+      });
+      
+      console.log('✅ Overview saved successfully:', response);
+      
+      // Update local state
+      setVehicleData(prev => ({
+        ...prev,
+        ...updateData
+      }));
+      
+      // Show success message
+      alert('Changes saved successfully!');
+      
+      // Exit editing mode
+      setIsOverviewEditing(false);
+      
+      // Reload to show fresh data
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (error) {
+      console.error('❌ Error saving Overview:', error);
+      setErrors(prev => ({ ...prev, overview: 'Failed to save. Please try again.' }));
+    }
+  };
+  
+  // Handle Overview cancel
+  const handleOverviewCancel = () => {
+    setIsOverviewEditing(false);
+    setEditableOverviewData({
+      model: vehicleData.model || '',
+      variant: vehicleData.variant || '',
+      motDue: vehicleData.motDue || vehicleData.motExpiry || '',
+      engineSize: vehicleData.engineSize || '',
+      doors: vehicleData.doors || '',
+      transmission: vehicleData.transmission || '',
+      seats: vehicleData.seats || '',
+      fuelType: vehicleData.fuelType || ''
+    });
   };
   
   // Handle feature toggle with debounced save
@@ -1556,18 +1667,35 @@ const CarAdvertEditPage = () => {
                 </div>
               ) : (
                 <div className="photo-grid">
-                  {advertData.photos.map((photo) => (
-                    <div key={photo.id} className="photo-item">
-                      <img src={photo.url} alt="Car" />
-                      <button
-                        className="remove-photo"
-                        onClick={() => removePhoto(photo.id)}
-                        disabled={isUploading}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                  {advertData.photos.map((photo, index) => {
+                    // Handle both string URLs and object format
+                    const photoUrl = typeof photo === 'string' ? photo : photo.url;
+                    const photoId = typeof photo === 'string' ? `photo-${index}` : photo.id;
+                    
+                    console.log(`📸 Photo ${index}:`, photo, '→ URL:', photoUrl);
+                    
+                    return (
+                      <div key={photoId} className="photo-item">
+                        <img 
+                          src={photoUrl} 
+                          alt={`Car photo ${index + 1}`}
+                          onError={(e) => {
+                            console.error('❌ Image failed to load:', photoUrl);
+                            e.target.style.border = '2px solid red';
+                            e.target.alt = 'Failed to load';
+                          }} 
+                        />
+                        <button
+                          className="remove-photo"
+                          onClick={() => removePhoto(photoId)}
+                          disabled={isUploading}
+                          title="Remove photo"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    );
+                  })}
                   {advertData.photos.length < 100 && (
                     <label className="add-more-photos">
                       <div className="add-icon">+</div>
@@ -1652,8 +1780,8 @@ const CarAdvertEditPage = () => {
                 </p>
                 
                 <div className="vehicle-actions">
-                  <a href="#" onClick={handleVehicleDetailsEdit} className="edit-link">Edit vehicle details</a>
-                  <a href="#" className="attention-link">Add attention grabber</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); handleVehicleDetailsEdit(); }} className="edit-link">Edit vehicle details</a>
+                  <a href="#" onClick={(e) => e.preventDefault()} className="attention-link">Add attention grabber</a>
                 </div>
               </>
             ) : (
@@ -1697,12 +1825,39 @@ const CarAdvertEditPage = () => {
                   />
                 </div>
                 
-                <div className="form-actions">
-                  <button type="button" onClick={handleVehicleDetailsSave} className="save-button">
-                    Save Changes
-                  </button>
-                  <button type="button" onClick={handleVehicleDetailsCancel} className="cancel-button">
+                <div style={{ marginTop: '20px' }}>
+                  <button 
+                    type="button" 
+                    onClick={handleVehicleDetailsCancel}
+                    style={{
+                      padding: '10px 24px',
+                      marginRight: '12px',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      border: 'none',
+                      backgroundColor: '#f0f0f0',
+                      color: '#333'
+                    }}
+                  >
                     Cancel
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={handleVehicleDetailsSave}
+                    style={{
+                      padding: '10px 24px',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      border: 'none',
+                      backgroundColor: '#f59e0b',
+                      color: 'white'
+                    }}
+                  >
+                    Save Changes
                   </button>
                 </div>
               </div>
@@ -1826,58 +1981,128 @@ const CarAdvertEditPage = () => {
 
           {/* Vehicle Specifications */}
           <section className="specifications-section">
-            <h3>Overview</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0 }}>Overview</h3>
+              {!isOverviewEditing && (
+                <button 
+                  type="button" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleOverviewEdit();
+                  }} 
+                  className="edit-link"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#007bff',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    textDecoration: 'underline',
+                    padding: '4px 8px'
+                  }}
+                >
+                  Edit
+                </button>
+              )}
+            </div>
             
             <div className="spec-grid">
               <div className="spec-item">
                 <label>Model</label>
-                <span>{vehicleData.model || 'Not set'}</span>
+                {isOverviewEditing ? (
+                  <input
+                    type="text"
+                    value={editableOverviewData.model || ''}
+                    onChange={(e) => setEditableOverviewData(prev => ({ ...prev, model: e.target.value }))}
+                    placeholder="e.g. 3 Series, C-Class"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}
+                  />
+                ) : (
+                  <span>{vehicleData.model || 'Not set'}</span>
+                )}
               </div>
               <div className="spec-item">
                 <label>Variant</label>
-                <span>{vehicleData.variant || 'Not set'}</span>
+                {isOverviewEditing ? (
+                  <input
+                    type="text"
+                    value={editableOverviewData.variant || ''}
+                    onChange={(e) => setEditableOverviewData(prev => ({ ...prev, variant: e.target.value }))}
+                    placeholder="e.g. 320d M Sport"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}
+                  />
+                ) : (
+                  <span>{vehicleData.variant || 'Not set'}</span>
+                )}
               </div>
               <div className="spec-item">
                 <label>MOT Due</label>
-                <span>
-                  {(() => {
-                    // Priority 1: Check vehicleData.motDue (from database)
-                    if (vehicleData?.motDue) {
-                      const dateStr = vehicleData.motDue;
-                      if (typeof dateStr === 'string' || dateStr instanceof Date) {
-                        const date = new Date(dateStr);
-                        if (!isNaN(date.getTime())) {
-                          return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                {isOverviewEditing ? (
+                  <input
+                    type="date"
+                    value={editableOverviewData.motDue ? new Date(editableOverviewData.motDue).toISOString().split('T')[0] : ''}
+                    onChange={(e) => setEditableOverviewData(prev => ({ ...prev, motDue: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}
+                  />
+                ) : (
+                  <span>
+                    {(() => {
+                      // Priority 1: Check vehicleData.motDue (from database)
+                      if (vehicleData?.motDue) {
+                        const dateStr = vehicleData.motDue;
+                        if (typeof dateStr === 'string' || dateStr instanceof Date) {
+                          const date = new Date(dateStr);
+                          if (!isNaN(date.getTime())) {
+                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                          }
                         }
                       }
-                    }
-                    
-                    // Priority 2: Check vehicleData.motExpiry (from database)
-                    if (vehicleData?.motExpiry) {
-                      const dateValue = vehicleData.motExpiry;
-                      if (typeof dateValue === 'string' || dateValue instanceof Date) {
-                        const date = new Date(dateValue);
-                        if (!isNaN(date.getTime())) {
-                          return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                      
+                      // Priority 2: Check vehicleData.motExpiry (from database)
+                      if (vehicleData?.motExpiry) {
+                        const dateValue = vehicleData.motExpiry;
+                        if (typeof dateValue === 'string' || dateValue instanceof Date) {
+                          const date = new Date(dateValue);
+                          if (!isNaN(date.getTime())) {
+                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                          }
                         }
                       }
-                    }
-                    
-                    // Priority 3: Check motHistory array (from database)
-                    if (vehicleData?.motHistory && vehicleData.motHistory.length > 0) {
-                      const latestTest = vehicleData.motHistory[0];
-                      if (latestTest && latestTest.expiryDate) {
-                        const date = new Date(latestTest.expiryDate);
-                        if (!isNaN(date.getTime())) {
-                          return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                      
+                      // Priority 3: Check motHistory array (from database)
+                      if (vehicleData?.motHistory && vehicleData.motHistory.length > 0) {
+                        const latestTest = vehicleData.motHistory[0];
+                        if (latestTest && latestTest.expiryDate) {
+                          const date = new Date(latestTest.expiryDate);
+                          if (!isNaN(date.getTime())) {
+                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                          }
                         }
                       }
-                    }
-                    
-                    // Fallback
-                    return 'Contact seller for MOT details';
-                  })()}
-                </span>
+                      
+                      // Fallback
+                      return 'Contact seller for MOT details';
+                    })()}
+                  </span>
+                )}
               </div>
               <div className="spec-item">
                 <label>Service History</label>
@@ -1885,7 +2110,31 @@ const CarAdvertEditPage = () => {
               </div>
               <div className="spec-item">
                 <label>Fuel type</label>
-                <span>{vehicleData.fuelType || 'Petrol'}</span>
+                {isOverviewEditing ? (
+                  <select
+                    value={editableOverviewData.fuelType || ''}
+                    onChange={(e) => setEditableOverviewData(prev => ({ ...prev, fuelType: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}
+                  >
+                    <option value="">Select...</option>
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Electric">Electric</option>
+                    <option value="Hybrid">Hybrid</option>
+                    <option value="Petrol Plug-in Hybrid">Petrol Plug-in Hybrid</option>
+                    <option value="Diesel Plug-in Hybrid">Diesel Plug-in Hybrid</option>
+                    <option value="Petrol Hybrid">Petrol Hybrid</option>
+                    <option value="Diesel Hybrid">Diesel Hybrid</option>
+                  </select>
+                ) : (
+                  <span>{vehicleData.fuelType || 'Petrol'}</span>
+                )}
               </div>
               <div className="spec-item">
                 <label>Body type</label>
@@ -1893,37 +2142,109 @@ const CarAdvertEditPage = () => {
               </div>
               <div className="spec-item">
                 <label>{vehicleData.fuelType === 'Electric' ? 'Electric Range' : 'Engine'}</label>
-                <span>
-                  {vehicleData.fuelType === 'Electric' 
-                    ? (vehicleData.electricRange || vehicleData.runningCosts?.electricRange 
-                        ? `${vehicleData.electricRange || vehicleData.runningCosts?.electricRange} miles` 
-                        : 'N/A')
-                    : (vehicleData.engineSize 
-                        ? (() => {
-                            const size = parseFloat(vehicleData.engineSize);
-                            // If size > 100, it's in CC, convert to litres
-                            const sizeInLitres = size > 100 ? size / 1000 : size;
-                            // Use 1 decimal precision (2.184 -> 2.2L)
-                            return `${sizeInLitres.toFixed(1)}L`;
-                          })()
-                        : '4.4L')
-                  }
-                </span>
+                {isOverviewEditing && vehicleData.fuelType !== 'Electric' ? (
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={editableOverviewData.engineSize || ''}
+                    onChange={(e) => setEditableOverviewData(prev => ({ ...prev, engineSize: e.target.value }))}
+                    placeholder="e.g. 2.0"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}
+                  />
+                ) : (
+                  <span>
+                    {vehicleData.fuelType === 'Electric' 
+                      ? (vehicleData.electricRange || vehicleData.runningCosts?.electricRange 
+                          ? `${vehicleData.electricRange || vehicleData.runningCosts?.electricRange} miles` 
+                          : 'N/A')
+                      : (vehicleData.engineSize 
+                          ? (() => {
+                              const size = parseFloat(vehicleData.engineSize);
+                              // If size > 100, it's in CC, convert to litres
+                              const sizeInLitres = size > 100 ? size / 1000 : size;
+                              // Use 1 decimal precision (2.184 -> 2.2L)
+                              return `${sizeInLitres.toFixed(1)}L`;
+                            })()
+                          : '4.4L')
+                    }
+                  </span>
+                )}
               </div>
               <div className="spec-item">
                 <label>Gearbox</label>
-                <span>
-                  {vehicleData.transmission || 'Automatic'}
-                  {vehicleData.gearbox && ` (${vehicleData.gearbox} speed)`}
-                </span>
+                {isOverviewEditing ? (
+                  <select
+                    value={editableOverviewData.transmission || ''}
+                    onChange={(e) => setEditableOverviewData(prev => ({ ...prev, transmission: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}
+                  >
+                    <option value="">Select...</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Automatic">Automatic</option>
+                    <option value="Semi-Automatic">Semi-Automatic</option>
+                  </select>
+                ) : (
+                  <span>
+                    {vehicleData.transmission || 'Automatic'}
+                    {vehicleData.gearbox && ` (${vehicleData.gearbox} speed)`}
+                  </span>
+                )}
               </div>
               <div className="spec-item">
                 <label>Doors</label>
-                <span>{vehicleData.doors || '4'}</span>
+                {isOverviewEditing ? (
+                  <input
+                    type="number"
+                    min="2"
+                    max="5"
+                    value={editableOverviewData.doors || ''}
+                    onChange={(e) => setEditableOverviewData(prev => ({ ...prev, doors: e.target.value }))}
+                    placeholder="e.g. 4"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}
+                  />
+                ) : (
+                  <span>{vehicleData.doors || '4'}</span>
+                )}
               </div>
               <div className="spec-item">
                 <label>Seats</label>
-                <span>{vehicleData.seats || '5'}</span>
+                {isOverviewEditing ? (
+                  <input
+                    type="number"
+                    min="2"
+                    max="9"
+                    value={editableOverviewData.seats || ''}
+                    onChange={(e) => setEditableOverviewData(prev => ({ ...prev, seats: e.target.value }))}
+                    placeholder="e.g. 5"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}
+                  />
+                ) : (
+                  <span>{vehicleData.seats || '5'}</span>
+                )}
               </div>
               {/* Only show Emission Class if data is available */}
               {(enhancedData?.emissionClass || vehicleData.emissionClass) && (
@@ -1935,14 +2256,58 @@ const CarAdvertEditPage = () => {
                 </div>
               )}
             </div>
+            
+            {/* Save/Cancel buttons for Overview editing */}
+            {isOverviewEditing && (
+              <div style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
+                <button
+                  key="overview-save"
+                  type="button"
+                  onClick={handleOverviewSave}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#f59e0b',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  Save Changes
+                </button>
+                <button
+                  key="overview-cancel"
+                  type="button"
+                  onClick={handleOverviewCancel}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#6c757d',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </section>
 
           {/* Description Section */}
           <section className="description-section">
             <h3>Description</h3>
-            <p className="section-note">
-              You have not added a description yet. Cars with a detailed description sell quicker
-            </p>
+            {!advertData.description || advertData.description.trim() === '' ? (
+              <p className="section-note">
+                You have not added a description yet. Cars with a detailed description sell quicker
+              </p>
+            ) : (
+              <p className="section-note" style={{ color: '#28a745' }}>
+                ✓ Description added. You can edit it below.
+              </p>
+            )}
             <textarea
               value={advertData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
@@ -1953,11 +2318,10 @@ const CarAdvertEditPage = () => {
             {errors.description && (
               <p className="error-message">{errors.description}</p>
             )}
-            <a href="#" className="add-description-link">Add description</a>
           </section>
 
-          {/* Business Information Section - Hidden for Trade Dealers */}
-          {!isTradeDealer && (
+          {/* Business Information Section - COMPLETELY HIDDEN */}
+          {false && !isTradeDealer && !isOverviewEditing && !isVehicleDetailsEditing && (
             <section className="business-info-section">
               <h3>Business Information (Optional)</h3>
               
@@ -2058,7 +2422,8 @@ const CarAdvertEditPage = () => {
             </section>
           )}
 
-          {/* Additional Sections */}
+          {/* Additional Sections - Show but hide Video and Features when editing */}
+          {!isOverviewEditing && !isVehicleDetailsEditing && (
           <section className="additional-sections">
             {/* Vehicle Features Section */}
             <div className="section-item expandable">
@@ -2190,7 +2555,8 @@ const CarAdvertEditPage = () => {
               )}
             </div>
 
-            {/* Video Section */}
+            {/* Video Section - COMPLETELY HIDDEN */}
+            {false && (
             <div className="section-item expandable">
               <div 
                 className="section-header"
@@ -2238,7 +2604,9 @@ const CarAdvertEditPage = () => {
                 </div>
               )}
             </div>
+            )}
           </section>
+          )}
 
           {/* Action Button */}
           <section className="actions-section">
@@ -2266,7 +2634,7 @@ const CarAdvertEditPage = () => {
                 onClick={handleSave}
                 disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}
                 className="publish-button"
-                style={{ backgroundColor: '#4CAF50' }}
+                style={{ backgroundColor: '#f59e0b' }}
               >
                 {isSaving ? 'Saving...' : '✓ Save Changes'}
               </button>

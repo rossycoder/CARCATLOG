@@ -40,6 +40,10 @@ import ElectricVehicleDemo from './pages/ElectricVehicleDemo'
 
 // Terms and Conditions Pages
 import AdvertisingTermsPage from './pages/TermsAndConditions/AdvertisingTermsPage'
+import PrivacyNoticePage from './pages/TermsAndConditions/PrivacyNoticePage'
+import AccessibilityStatementPage from './pages/TermsAndConditions/AccessibilityStatementPage'
+import CookiesPolicyPage from './pages/TermsAndConditions/CookiesPolicyPage'
+import TermsOfUsePage from './pages/TermsAndConditions/TermsOfUsePage'
 
 // Bike Pages
 import BikesPage from './pages/Bikes/BikesPage'
@@ -142,6 +146,10 @@ function App() {
               
               {/* Terms and Conditions Routes */}
               <Route path="/terms-and-conditions/advertising" element={<AdvertisingTermsPage />} />
+              <Route path="/terms-of-use" element={<TermsOfUsePage />} />
+              <Route path="/privacy-notice" element={<PrivacyNoticePage />} />
+              <Route path="/accessibility-statement" element={<AccessibilityStatementPage />} />
+              <Route path="/cookies-policy" element={<CookiesPolicyPage />} />
               
               {/* Bike Routes */}
               <Route path="/bikes" element={<BikesPage />} />

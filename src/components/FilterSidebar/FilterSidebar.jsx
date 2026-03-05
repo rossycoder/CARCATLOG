@@ -33,7 +33,11 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       bodyTypes: {},
       colours: {},
       doors: {},
-      seats: {}
+      seats: {},
+      engineSizes: {},
+      mileageRanges: {},
+      priceRanges: {},
+      years: {}
     }
   });
   const [filters, setFilters] = useState({
@@ -55,7 +59,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     doors: '',
     seats: '',
     fuelType: '',
-    engineSize: '',
+    engineSizeFrom: '',
+    engineSizeTo: '',
     sellerType: '',
     writeOffStatus: ''
   });
@@ -84,7 +89,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         doors: '', // Clear doors to show all options
         seats: '', // Clear seats to show all options
         fuelType: searchParams.get('fuelType') || '',
-        engineSize: searchParams.get('engineSize') || '',
+        engineSizeFrom: searchParams.get('engineSizeFrom') || '',
+        engineSizeTo: searchParams.get('engineSizeTo') || '',
         sellerType: searchParams.get('sellerType') || '',
         writeOffStatus: searchParams.get('writeOffStatus') || ''
       });
@@ -118,7 +124,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         if (filters.mileageFrom) params.append('mileageFrom', filters.mileageFrom);
         if (filters.mileageTo) params.append('mileageTo', filters.mileageTo);
         if (filters.sellerType) params.append('sellerType', filters.sellerType);
-        if (filters.engineSize) params.append('engineSize', filters.engineSize);
+        if (filters.engineSizeFrom) params.append('engineSizeFrom', filters.engineSizeFrom);
+        if (filters.engineSizeTo) params.append('engineSizeTo', filters.engineSizeTo);
         if (filters.writeOffStatus) params.append('writeOffStatus', filters.writeOffStatus);
         
         const queryString = params.toString();
@@ -134,6 +141,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         console.log('[FilterSidebar] Colours:', options?.colours);
         console.log('[FilterSidebar] Counts:', options?.counts);
         console.log('[FilterSidebar] Fuel Type Counts:', options?.counts?.fuelTypes);
+        console.log('[FilterSidebar] 🚗 Mileage Ranges from API:', options?.counts?.mileageRanges);
         
         if (options) {
           // Ensure counts object exists with defaults, but preserve individual filter counts
@@ -153,7 +161,11 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               bodyTypes: options.counts?.bodyTypes || {},
               colours: options.counts?.colours || {},
               doors: options.counts?.doors || {},
-              seats: options.counts?.seats || {}
+              seats: options.counts?.seats || {},
+              engineSizes: options.counts?.engineSizes || {},
+              mileageRanges: options.counts?.mileageRanges || {},
+              priceRanges: options.counts?.priceRanges || {},
+              years: options.counts?.years || {}
             }
           };
           setFilterOptions(optionsWithDefaults);
@@ -161,6 +173,9 @@ const FilterSidebar = ({ isOpen, onClose }) => {
           console.log('[FilterSidebar] ✅ Fuel Type Counts after setting:', optionsWithDefaults.counts.fuelTypes);
           console.log('[FilterSidebar] ✅ Make Counts after setting:', optionsWithDefaults.counts.makes);
           console.log('[FilterSidebar] ✅ Model Counts after setting:', optionsWithDefaults.counts.models);
+          console.log('[FilterSidebar] ✅ Engine Size Counts after setting:', optionsWithDefaults.counts.engineSizes);
+          console.log('[FilterSidebar] ✅ Mileage Range Counts after setting:', optionsWithDefaults.counts.mileageRanges);
+          console.log('[FilterSidebar] 🔍 Mileage Ranges keys:', Object.keys(optionsWithDefaults.counts.mileageRanges || {}));
         } else {
           console.error('[FilterSidebar] ❌ Invalid options structure:', options);
         }
@@ -179,7 +194,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     filters.yearFrom, filters.yearTo,
     filters.priceFrom, filters.priceTo,
     filters.mileageFrom, filters.mileageTo,
-    filters.sellerType, filters.engineSize, filters.writeOffStatus
+    filters.sellerType, filters.engineSizeFrom, filters.engineSizeTo, filters.writeOffStatus
   ]); // Re-fetch when ANY filter changes for dynamic counts
 
   const handleChange = (field, value) => {
@@ -282,7 +297,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       doors: '',
       seats: '',
       fuelType: '',
-      engineSize: '',
+      engineSizeFrom: '',
+      engineSizeTo: '',
       sellerType: '',
       writeOffStatus: ''
     });
@@ -498,37 +514,78 @@ const FilterSidebar = ({ isOpen, onClose }) => {
           {/* Price */}
           <div className="filter-section">
             <label className="filter-label">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-              </svg>
+              <span style={{ fontSize: '16px', fontWeight: 'bold' }}>£</span>
               Price
             </label>
             <div className="range-inputs">
-              <div className="input-with-error">
-                <input
-                  type="text"
-                  className={`filter-input ${validationErrors.priceFrom ? 'error' : ''}`}
-                  placeholder="From"
-                  value={filters.priceFrom}
-                  onChange={(e) => handleChange('priceFrom', e.target.value)}
-                />
-                {validationErrors.priceFrom && (
-                  <span className="validation-error">{validationErrors.priceFrom}</span>
+              <select
+                className="filter-select"
+                value={filters.priceFrom}
+                onChange={(e) => handleChange('priceFrom', e.target.value)}
+              >
+                <option value="">From</option>
+                {filterOptions.counts?.priceRanges && Object.keys(filterOptions.counts.priceRanges).length > 0 ? (
+                  Object.keys(filterOptions.counts.priceRanges)
+                    .sort((a, b) => parseInt(a) - parseInt(b))
+                    .map(price => (
+                      <option key={price} value={price}>
+                        £{parseInt(price).toLocaleString()} ({(filterOptions.counts.priceRanges[price] || 0).toLocaleString()})
+                      </option>
+                    ))
+                ) : (
+                  // Fallback static options
+                  <>
+                    <option value="0">£0</option>
+                    <option value="1000">£1,000</option>
+                    <option value="2000">£2,000</option>
+                    <option value="3000">£3,000</option>
+                    <option value="5000">£5,000</option>
+                    <option value="7500">£7,500</option>
+                    <option value="10000">£10,000</option>
+                    <option value="15000">£15,000</option>
+                    <option value="20000">£20,000</option>
+                    <option value="25000">£25,000</option>
+                    <option value="30000">£30,000</option>
+                    <option value="40000">£40,000</option>
+                    <option value="50000">£50,000</option>
+                  </>
                 )}
-              </div>
+              </select>
               <span className="range-separator">to</span>
-              <div className="input-with-error">
-                <input
-                  type="text"
-                  className={`filter-input ${validationErrors.priceTo ? 'error' : ''}`}
-                  placeholder="To"
-                  value={filters.priceTo}
-                  onChange={(e) => handleChange('priceTo', e.target.value)}
-                />
-                {validationErrors.priceTo && (
-                  <span className="validation-error">{validationErrors.priceTo}</span>
+              <select
+                className="filter-select"
+                value={filters.priceTo}
+                onChange={(e) => handleChange('priceTo', e.target.value)}
+              >
+                <option value="">To</option>
+                {filterOptions.counts?.priceRanges && Object.keys(filterOptions.counts.priceRanges).length > 0 ? (
+                  Object.keys(filterOptions.counts.priceRanges)
+                    .sort((a, b) => parseInt(a) - parseInt(b))
+                    .map(price => (
+                      <option key={price} value={price}>
+                        £{parseInt(price).toLocaleString()} ({(filterOptions.counts.priceRanges[price] || 0).toLocaleString()})
+                      </option>
+                    ))
+                ) : (
+                  // Fallback static options
+                  <>
+                    <option value="1000">£1,000</option>
+                    <option value="2000">£2,000</option>
+                    <option value="3000">£3,000</option>
+                    <option value="5000">£5,000</option>
+                    <option value="7500">£7,500</option>
+                    <option value="10000">£10,000</option>
+                    <option value="15000">£15,000</option>
+                    <option value="20000">£20,000</option>
+                    <option value="25000">£25,000</option>
+                    <option value="30000">£30,000</option>
+                    <option value="40000">£40,000</option>
+                    <option value="50000">£50,000</option>
+                    <option value="75000">£75,000</option>
+                    <option value="100000">£100,000+</option>
+                  </>
                 )}
-              </div>
+              </select>
             </div>
           </div>
 
@@ -551,9 +608,14 @@ const FilterSidebar = ({ isOpen, onClose }) => {
                 {Array.from(
                   { length: filterOptions.yearRange.max - filterOptions.yearRange.min + 1 }, 
                   (_, i) => filterOptions.yearRange.max - i
-                ).map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
+                ).map(year => {
+                  const count = filterOptions.counts?.years?.[year] || 0;
+                  return (
+                    <option key={year} value={year}>
+                      {year} ({count.toLocaleString()})
+                    </option>
+                  );
+                })}
               </select>
               <span className="range-separator">to</span>
               <select 
@@ -565,9 +627,14 @@ const FilterSidebar = ({ isOpen, onClose }) => {
                 {Array.from(
                   { length: filterOptions.yearRange.max - filterOptions.yearRange.min + 1 }, 
                   (_, i) => filterOptions.yearRange.max - i
-                ).map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
+                ).map(year => {
+                  const count = filterOptions.counts?.years?.[year] || 0;
+                  return (
+                    <option key={year} value={year}>
+                      {year} ({count.toLocaleString()})
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>
@@ -582,21 +649,70 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               Mileage
             </label>
             <div className="range-inputs">
-              <input
-                type="text"
-                className="filter-input"
-                placeholder="From"
+              <select
+                className="filter-select"
                 value={filters.mileageFrom}
                 onChange={(e) => handleChange('mileageFrom', e.target.value)}
-              />
+              >
+                <option value="">From</option>
+                {filterOptions.counts?.mileageRanges && Object.keys(filterOptions.counts.mileageRanges).length > 0 ? (
+                  Object.keys(filterOptions.counts.mileageRanges)
+                    .sort((a, b) => parseInt(a) - parseInt(b))
+                    .map(mileage => (
+                      <option key={mileage} value={mileage}>
+                        {parseInt(mileage).toLocaleString()} miles ({(filterOptions.counts.mileageRanges[mileage] || 0).toLocaleString()})
+                      </option>
+                    ))
+                ) : (
+                  // Fallback static options
+                  <>
+                    <option value="0">0 miles</option>
+                    <option value="10000">10,000 miles</option>
+                    <option value="20000">20,000 miles</option>
+                    <option value="30000">30,000 miles</option>
+                    <option value="40000">40,000 miles</option>
+                    <option value="50000">50,000 miles</option>
+                    <option value="60000">60,000 miles</option>
+                    <option value="70000">70,000 miles</option>
+                    <option value="80000">80,000 miles</option>
+                    <option value="90000">90,000 miles</option>
+                    <option value="100000">100,000 miles</option>
+                  </>
+                )}
+              </select>
               <span className="range-separator">to</span>
-              <input
-                type="text"
-                className="filter-input"
-                placeholder="To"
+              <select
+                className="filter-select"
                 value={filters.mileageTo}
                 onChange={(e) => handleChange('mileageTo', e.target.value)}
-              />
+              >
+                <option value="">To</option>
+                {filterOptions.counts?.mileageRanges && Object.keys(filterOptions.counts.mileageRanges).length > 0 ? (
+                  Object.keys(filterOptions.counts.mileageRanges)
+                    .sort((a, b) => parseInt(a) - parseInt(b))
+                    .map(mileage => (
+                      <option key={mileage} value={mileage}>
+                        {parseInt(mileage).toLocaleString()} miles ({(filterOptions.counts.mileageRanges[mileage] || 0).toLocaleString()})
+                      </option>
+                    ))
+                ) : (
+                  // Fallback static options
+                  <>
+                    <option value="10000">10,000 miles</option>
+                    <option value="20000">20,000 miles</option>
+                    <option value="30000">30,000 miles</option>
+                    <option value="40000">40,000 miles</option>
+                    <option value="50000">50,000 miles</option>
+                    <option value="60000">60,000 miles</option>
+                    <option value="70000">70,000 miles</option>
+                    <option value="80000">80,000 miles</option>
+                    <option value="90000">90,000 miles</option>
+                    <option value="100000">100,000 miles</option>
+                    <option value="150000">150,000 miles</option>
+                    <option value="200000">200,000+ miles</option>
+                  </>
+                )}
+              </select>
             </div>
           </div>
 
@@ -759,19 +875,76 @@ const FilterSidebar = ({ isOpen, onClose }) => {
               </svg>
               Engine size
             </label>
-            <select 
-              className="filter-select"
-              value={filters.engineSize}
-              onChange={(e) => handleChange('engineSize', e.target.value)}
-            >
-              <option value="">Select Engine Size</option>
-              <option value="1.0">Up to 1.0L</option>
-              <option value="1.5">1.0L - 1.5L</option>
-              <option value="2.0">1.5L - 2.0L</option>
-              <option value="2.5">2.0L - 2.5L</option>
-              <option value="3.0">2.5L - 3.0L</option>
-              <option value="3.0+">3.0L+</option>
-            </select>
+            <div className="range-selects">
+              <select 
+                className="filter-select-small"
+                value={filters.engineSizeFrom}
+                onChange={(e) => handleChange('engineSizeFrom', e.target.value)}
+              >
+                <option value="">From</option>
+                {filterOptions.counts?.engineSizes && Object.keys(filterOptions.counts.engineSizes).length > 0 ? (
+                  Object.keys(filterOptions.counts.engineSizes)
+                    .sort((a, b) => parseFloat(a) - parseFloat(b))
+                    .map(size => (
+                      <option key={size} value={size}>
+                        {size}L ({(filterOptions.counts.engineSizes[size] || 0).toLocaleString()})
+                      </option>
+                    ))
+                ) : (
+                  // Fallback static options if backend data not available
+                  <>
+                    <option value="1.0">1.0L</option>
+                    <option value="1.2">1.2L</option>
+                    <option value="1.4">1.4L</option>
+                    <option value="1.5">1.5L</option>
+                    <option value="1.6">1.6L</option>
+                    <option value="1.8">1.8L</option>
+                    <option value="2.0">2.0L</option>
+                    <option value="2.5">2.5L</option>
+                    <option value="3.0">3.0L</option>
+                    <option value="4.0">4.0L</option>
+                    <option value="5.0">5.0L</option>
+                    <option value="6.0">6.0L</option>
+                  </>
+                )}
+              </select>
+              <span className="range-separator">to</span>
+              <select 
+                className="filter-select-small"
+                value={filters.engineSizeTo}
+                onChange={(e) => handleChange('engineSizeTo', e.target.value)}
+              >
+                <option value="">To</option>
+                {filterOptions.counts?.engineSizes && Object.keys(filterOptions.counts.engineSizes).length > 0 ? (
+                  Object.keys(filterOptions.counts.engineSizes)
+                    .sort((a, b) => parseFloat(a) - parseFloat(b))
+                    .map(size => (
+                      <option key={size} value={size}>
+                        {size}L ({(filterOptions.counts.engineSizes[size] || 0).toLocaleString()})
+                      </option>
+                    ))
+                ) : (
+                  // Fallback static options if backend data not available
+                  <>
+                    <option value="1.0">1.0L</option>
+                    <option value="1.2">1.2L</option>
+                    <option value="1.4">1.4L</option>
+                    <option value="1.5">1.5L</option>
+                    <option value="1.6">1.6L</option>
+                    <option value="1.8">1.8L</option>
+                    <option value="2.0">2.0L</option>
+                    <option value="2.5">2.5L</option>
+                    <option value="3.0">3.0L</option>
+                    <option value="4.0">4.0L</option>
+                    <option value="5.0">5.0L</option>
+                    <option value="6.0">6.0L</option>
+                  </>
+                )}
+              </select>
+            </div>
+            <p className="filter-hint">
+              Engine size is measured in litres (L). Smaller engines are usually more economical.
+            </p>
           </div>
 
           {/* Seller Type */}
