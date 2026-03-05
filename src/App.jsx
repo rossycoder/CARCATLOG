@@ -92,7 +92,29 @@ function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Immediate scroll reset
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      
+      // Also reset scroll on the document element and body
+      // This handles edge cases in different browsers
+      if (document.documentElement) {
+        document.documentElement.scrollTop = 0;
+        document.documentElement.scrollLeft = 0;
+      }
+      if (document.body) {
+        document.body.scrollTop = 0;
+        document.body.scrollLeft = 0;
+      }
+    };
+
+    // Scroll immediately
+    scrollToTop();
+    
+    // Also scroll after a tiny delay to handle async content
+    const timeoutId = setTimeout(scrollToTop, 0);
+    
+    return () => clearTimeout(timeoutId);
   }, [pathname]);
 
   return null;
