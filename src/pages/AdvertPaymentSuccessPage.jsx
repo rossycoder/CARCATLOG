@@ -199,25 +199,6 @@ const AdvertPaymentSuccessPage = () => {
           </div>
 
           <div className="action-buttons">
-            {purchaseData?.paymentStatus === 'pending' && (
-              <button 
-                className="test-button" 
-                onClick={handleCompleteTestPayment}
-                disabled={isCompletingTest}
-                style={{
-                  backgroundColor: '#FF9800',
-                  color: 'white',
-                  padding: '12px 24px',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: isCompletingTest ? 'not-allowed' : 'pointer',
-                  marginBottom: '10px',
-                  width: '100%'
-                }}
-              >
-                {isCompletingTest ? 'Completing...' : '🧪 Complete Test Payment & Create Car'}
-              </button>
-            )}
             <button className="primary-button" onClick={handleCreateAd}>
               Create Your Ad Now
             </button>

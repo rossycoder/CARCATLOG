@@ -118,16 +118,13 @@
 .next-steps {
   text-align: left;
   margin-bottom: 40px;
-  padding: 25px;
-  background: #f0f7ff;
-  border-radius: 12px;
-  border-left: 4px solid #2196F3;
+  padding: 0;
 }
 
 .next-steps h2 {
   font-size: 1.5rem;
   color: #333;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   font-weight: 600;
 }
 
@@ -138,11 +135,12 @@
 }
 
 .next-steps li {
-  padding: 10px 0;
+  padding: 12px 0;
   color: #555;
-  font-size: 0.95rem;
+  font-size: 1rem;
   position: relative;
   padding-left: 30px;
+  line-height: 1.6;
 }
 
 .next-steps li:before {

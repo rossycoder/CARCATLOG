@@ -49,7 +49,8 @@ const BikeFilterSidebar = ({ isOpen, onClose }) => {
         mileageTo: searchParams.get('mileageTo') || '',
         bikeType: searchParams.get('bikeType') || '',
         colour: searchParams.get('colour') || '',
-        fuelType: searchParams.get('fuelType') || ''
+        fuelType: searchParams.get('fuelType') || '',
+        _refreshTimestamp: Date.now() // Force refresh when modal opens
       });
     }
   }, [isOpen, searchParams]);
@@ -68,7 +69,7 @@ const BikeFilterSidebar = ({ isOpen, onClose }) => {
     };
     
     fetchFilterOptions();
-  }, []);
+  }, [filters._refreshTimestamp]); // Re-fetch when modal opens
 
   const handleChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
@@ -246,43 +247,43 @@ const BikeFilterSidebar = ({ isOpen, onClose }) => {
             />
           </div>
 
-          {/* Make and Model */}
-          <div className="filter-section">
-            <label className="filter-label">
+          {/* Make and Model - Collapsible Section */}
+          <div className="filter-section-collapsible">
+            <div className="filter-section-header">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 17h14v-5H5v5zm0 0v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2M5 17V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10"/>
               </svg>
-              Make
-            </label>
-            <select
-              className="filter-select"
-              value={filters.make}
-              onChange={(e) => handleChange('make', e.target.value)}
-            >
-              <option value="">Select Make</option>
-              {filterOptions.makes.map(make => (
-                <option key={make} value={make}>{make}</option>
-              ))}
-            </select>
-          </div>
+              <span>Make and model</span>
+            </div>
+            
+            <div className="filter-subsection">
+              <label className="filter-sublabel">Make</label>
+              <select
+                className="filter-select"
+                value={filters.make}
+                onChange={(e) => handleChange('make', e.target.value)}
+              >
+                <option value="">All Makes</option>
+                {filterOptions.makes.map(make => (
+                  <option key={make} value={make}>{make}</option>
+                ))}
+              </select>
+            </div>
 
-          <div className="filter-section">
-            <label className="filter-label">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 17h14v-5H5v5zm0 0v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2M5 17V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10"/>
-              </svg>
-              Model
-            </label>
-            <select
-              className="filter-select"
-              value={filters.model}
-              onChange={(e) => handleChange('model', e.target.value)}
-            >
-              <option value="">Select Model</option>
-              {filterOptions.models.map(model => (
-                <option key={model} value={model}>{model}</option>
-              ))}
-            </select>
+            <div className="filter-subsection">
+              <label className="filter-sublabel">Model</label>
+              <select
+                className="filter-select"
+                value={filters.model}
+                onChange={(e) => handleChange('model', e.target.value)}
+                disabled={!filters.make}
+              >
+                <option value="">All Models</option>
+                {filterOptions.models.map(model => (
+                  <option key={model} value={model}>{model}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Price */}

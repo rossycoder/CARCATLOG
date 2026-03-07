@@ -92,7 +92,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         engineSizeFrom: searchParams.get('engineSizeFrom') || '',
         engineSizeTo: searchParams.get('engineSizeTo') || '',
         sellerType: searchParams.get('sellerType') || '',
-        writeOffStatus: searchParams.get('writeOffStatus') || ''
+        writeOffStatus: searchParams.get('writeOffStatus') || '',
+        _refreshTimestamp: Date.now() // Force refresh when modal opens
       });
     }
   }, [isOpen, searchParams]);
@@ -103,6 +104,10 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       try {
         console.log('[FilterSidebar] 🎯 Fetching filter options with ALL filters:', filters);
         
+        // Add cache-busting timestamp to force fresh data
+        // This ensures we get the latest variants after editing
+        const timestamp = Date.now();
+        
         // Build query params with ALL current filters for dynamic counting
         // BUT: Don't include variant/submodel in the API call for filter options
         // This ensures we get proper counts for all options
@@ -111,6 +116,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         if (filters.model) params.append('model', filters.model);
         // Don't include submodel/variant for filter options
         // if (filters.submodel) params.append('submodel', filters.submodel);
+        params.append('_t', timestamp); // Cache buster
         if (filters.fuelType) params.append('fuelType', filters.fuelType);
         if (filters.gearbox) params.append('transmission', filters.gearbox);
         if (filters.bodyType) params.append('bodyType', filters.bodyType);
@@ -194,7 +200,8 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     filters.yearFrom, filters.yearTo,
     filters.priceFrom, filters.priceTo,
     filters.mileageFrom, filters.mileageTo,
-    filters.sellerType, filters.engineSizeFrom, filters.engineSizeTo, filters.writeOffStatus
+    filters.sellerType, filters.engineSizeFrom, filters.engineSizeTo, filters.writeOffStatus,
+    filters._refreshTimestamp // Re-fetch when modal opens (cache buster)
   ]); // Re-fetch when ANY filter changes for dynamic counts
 
   const handleChange = (field, value) => {

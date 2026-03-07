@@ -2320,8 +2320,8 @@ const CarAdvertEditPage = () => {
             )}
           </section>
 
-          {/* Business Information Section - COMPLETELY HIDDEN */}
-          {false && !isTradeDealer && !isOverviewEditing && !isVehicleDetailsEditing && (
+          {/* Business Information Section - VISIBLE FOR ALL USERS */}
+          {!isOverviewEditing && !isVehicleDetailsEditing && (
             <section className="business-info-section">
               <h3>Business Information (Optional)</h3>
               
