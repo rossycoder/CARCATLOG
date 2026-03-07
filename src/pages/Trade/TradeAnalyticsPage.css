@@ -3,6 +3,9 @@
   padding: 32px;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   overflow-y: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 /* Header */
@@ -506,6 +509,9 @@
   padding: 32px;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   overflow-y: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .analytics-container h1 {

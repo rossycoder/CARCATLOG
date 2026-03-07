@@ -1,29 +1,40 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTradeDealerContext } from '../../context/TradeDealerContext';
-import TradeSidebar from '../../components/Trade/TradeSidebar';
 import * as tradeInventoryService from '../../services/tradeInventoryService';
 import './TradeDashboard.css';
 
-// FIXED: Prevent infinite API calls - Version 2.1 - FORCE RELOAD
+// LIVE ANALYTICS - Version 3.0 with Auto-Refresh
 const TradeDashboard = () => {
   const { dealer, subscription } = useTradeDealerContext();
   const location = useLocation();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const hasFetchedRef = useRef(false); // Prevent duplicate fetches
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const refreshIntervalRef = useRef(null);
 
-  // Fetch stats only once on mount
+  // Fetch stats on mount and set up auto-refresh
   useEffect(() => {
-    console.log('🔵 TradeDashboard mounted, hasFetched:', hasFetchedRef.current);
-    if (!hasFetchedRef.current) {
-      hasFetchedRef.current = true;
-      console.log('✅ Fetching stats for the first time');
-      fetchStats();
-    } else {
-      console.log('⏭️ Skipping fetch - already fetched');
-    }
+    console.log('🔵 TradeDashboard mounted - Starting live analytics');
+    
+    // Initial fetch
+    fetchStats();
+    
+    // Set up auto-refresh every 30 seconds
+    refreshIntervalRef.current = setInterval(() => {
+      console.log('🔄 Auto-refreshing stats...');
+      fetchStats(true); // Pass true to indicate it's a background refresh
+    }, 30000); // 30 seconds
+    
+    // Cleanup on unmount
+    return () => {
+      if (refreshIntervalRef.current) {
+        console.log('🛑 Stopping auto-refresh');
+        clearInterval(refreshIntervalRef.current);
+      }
+    };
   }, []); // Empty dependency array - run once
 
   useEffect(() => {
@@ -37,19 +48,32 @@ const TradeDashboard = () => {
     }
   }, [location.state?.message]); // Only run when message changes
 
-  const fetchStats = async () => {
+  const fetchStats = async (isBackgroundRefresh = false) => {
     try {
+      if (!isBackgroundRefresh) {
+        setLoading(true);
+      } else {
+        setRefreshing(true);
+      }
+      
       const data = await tradeInventoryService.getStats();
       if (data.success) {
-        console.log('Stats data received:', data.stats);
-        console.log('Most viewed vehicles:', data.stats.mostViewed);
+        console.log('✅ Stats data received:', data.stats);
         setStats(data.stats);
+        setLastUpdated(new Date());
       }
     } catch (error) {
-      console.error('Failed to fetch stats:', error);
+      console.error('❌ Failed to fetch stats:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  // Manual refresh function
+  const handleManualRefresh = () => {
+    console.log('🔄 Manual refresh triggered');
+    fetchStats();
   };
 
   const usagePercentage = subscription?.usagePercentage || 0;
@@ -80,10 +104,89 @@ const TradeDashboard = () => {
         <div className="dashboard-header">
           <div>
             <h1>Dashboard</h1>
-            <p className="welcome-text">Welcome back, {dealer?.contactPerson}!</p>
+            <p className="welcome-text">
+              Welcome back, {dealer?.contactPerson}!
+              {lastUpdated && (
+                <span style={{ marginLeft: '10px', fontSize: '12px', color: '#6b7280' }}>
+                  • Last updated: {lastUpdated.toLocaleTimeString()}
+                </span>
+              )}
+            </p>
           </div>
-         
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <Link 
+              to="/trade/inventory"
+              style={{
+                padding: '10px 20px',
+                background: '#f3f4f6',
+                color: '#374151',
+                border: 'none',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontSize: '14px',
+                fontWeight: '600',
+                transition: 'all 0.2s'
+              }}
+            >
+              My Inventory
+            </Link>
+            <Link 
+              to="/trade/analytics"
+              style={{
+                padding: '10px 20px',
+                background: '#f3f4f6',
+                color: '#374151',
+                border: 'none',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontSize: '14px',
+                fontWeight: '600',
+                transition: 'all 0.2s'
+              }}
+            >
+              Analytics
+            </Link>
+            <button 
+              onClick={handleManualRefresh}
+              disabled={refreshing}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 20px',
+                background: refreshing ? '#9ca3af' : '#0066cc',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: refreshing ? 'not-allowed' : 'pointer',
+                fontSize: '14px',
+                fontWeight: '600',
+                transition: 'all 0.2s'
+              }}
+            >
+              <svg 
+                width="16" 
+                height="16" 
+                viewBox="0 0 16 16" 
+                fill="none"
+                style={{
+                  animation: refreshing ? 'spin 1s linear infinite' : 'none'
+                }}
+              >
+                <path d="M14 8A6 6 0 1 1 8 2v2a4 4 0 1 0 4 4h2z" fill="currentColor"/>
+                <path d="M8 0v4l3-2-3-2z" fill="currentColor"/>
+              </svg>
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
         </div>
+
+        <style>{`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
 
         {/* Subscription Status Card */}
         <div className={`subscription-card ${subscription ? 'active' : 'inactive'}`}>
@@ -127,7 +230,31 @@ const TradeDashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="stats-grid">
+        {loading ? (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            padding: '60px',
+            background: 'white',
+            borderRadius: '12px',
+            marginBottom: '32px'
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                border: '4px solid #e5e7eb',
+                borderTop: '4px solid #0066cc',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                margin: '0 auto 16px'
+              }}></div>
+              <p style={{ color: '#6b7280', fontSize: '14px' }}>Loading analytics...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="stats-grid" style={{ opacity: refreshing ? 0.6 : 1, transition: 'opacity 0.3s' }}>
           <div className="stat-card active-stat">
             <div className="stat-header">
               <span className="stat-label">Active Listings</span>
@@ -181,7 +308,8 @@ const TradeDashboard = () => {
               <Link to="/trade/inventory?filter=draft">Complete drafts →</Link>
             </div>
           </div>
-        </div>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="quick-actions-section">

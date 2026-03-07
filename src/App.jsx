@@ -208,7 +208,7 @@ function App() {
               <Route 
                 path="/trade/dashboard" 
                 element={
-                  <ProtectedTradeRoute requireSubscription={true}>
+                  <ProtectedTradeRoute>
                     <TradeDashboard />
                   </ProtectedTradeRoute>
                 } 

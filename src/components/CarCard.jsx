@@ -116,7 +116,13 @@ const CarCard = ({ car }) => {
   };
 
   const imageCount = car.images?.length || 0;
-  const currentImage = car.images?.[currentImageIndex] || car.images?.[0] || 'https://via.placeholder.com/400x300?text=No+Image';
+  const currentImage = car.images?.[currentImageIndex] || car.images?.[0] || '/images/dummy/placeholder.svg';
+
+  // Handle image error - show placeholder if image fails to load
+  const handleImageError = (e) => {
+    e.target.src = '/images/dummy/placeholder.svg';
+    e.target.onerror = null; // Prevent infinite loop
+  };
 
   return (
     <div className="car-card-wrapper">
@@ -127,6 +133,7 @@ const CarCard = ({ car }) => {
             src={currentImage} 
             alt={`${car.make} ${car.model}${car.submodel ? ` ${car.submodel}` : ''}`}
             className="car-image"
+            onError={handleImageError}
           />
           
           {imageCount > 1 && (

@@ -950,10 +950,10 @@ const CarDetailPage = () => {
                 needleAngle = 162; // Middle of Coral zone (144+180)/2
                 labelColor = '#FF7043'; // Coral/Orange
               } else {
-                // More than 15% above market value - LOWER PRICE (Gray zone: 0-36°)
-                priceLevel = 'Lower price';
-                needleAngle = 18; // Middle of Gray zone (0+36)/2
-                labelColor = '#BDBDBD'; // Gray
+                // More than 15% above market value - VERY HIGH PRICE (Far right of Coral zone)
+                priceLevel = 'Higher price';
+                needleAngle = 170; // Far right of Coral zone
+                labelColor = '#FF5722'; // Deeper Red/Orange
               }
               
               // Calculate needle position
