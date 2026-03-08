@@ -145,19 +145,15 @@ const VanAdvertPaymentSuccessPage = () => {
           <div className="next-steps">
             <h2>What's Next?</h2>
             <ul>
-              <li>Your van listing is now live on our platform</li>
-              <li>Buyers can now view and contact you about your van</li>
-              <li>You'll receive email notifications for buyer inquiries</li>
-              <li>Track your ad performance in your dashboard</li>
+              <li>Your listing will go live shortly</li>
+              <li>You can edit your listing at any time</li>
+              <li>You'll receive email notifications for buyer enquiries</li>
             </ul>
           </div>
 
           <div className="action-buttons">
-            <button className="primary-button" onClick={handleViewVans}>
-              View Vans
-            </button>
-            <button className="secondary-button" onClick={handleCreateAd}>
-              Sell Another Van
+            <button className="primary-button" onClick={() => navigate('/my-listings')}>
+              View My Ad
             </button>
           </div>
 

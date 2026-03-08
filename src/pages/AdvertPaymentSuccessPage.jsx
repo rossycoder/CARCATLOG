@@ -191,19 +191,15 @@ const AdvertPaymentSuccessPage = () => {
           <div className="next-steps">
             <h2>What's Next?</h2>
             <ul>
-              <li>Create your car advertisement with photos and details</li>
-              <li>Your listing will go live immediately after submission</li>
-              <li>You'll receive email notifications for buyer inquiries</li>
-              <li>Track your ad performance in your dashboard</li>
+              <li>Your listing will go live shortly</li>
+              <li>You can edit your listing at any time</li>
+              <li>You'll receive email notifications for buyer enquiries</li>
             </ul>
           </div>
 
           <div className="action-buttons">
-            <button className="primary-button" onClick={handleCreateAd}>
-              Create Your Ad Now
-            </button>
-            <button className="secondary-button" onClick={handleViewPricing}>
-              View Pricing
+            <button className="primary-button" onClick={() => navigate('/my-listings')}>
+              View My Ad
             </button>
           </div>
 

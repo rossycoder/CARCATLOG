@@ -727,11 +727,6 @@ const CarAdvertisingPricesPage = () => {
                 Private
               </button>
             </div>
-            {isTradeOptionLocked && (
-              <p className="helper-text" style={{ fontSize: '0.875rem', color: '#e74c3c', marginTop: '0.5rem' }}>
-                🔒 Trade pricing requires business information (logo, website, or business name)
-              </p>
-            )}
           </div>
 
           <div className="filter-group">
