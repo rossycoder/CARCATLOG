@@ -11,6 +11,8 @@ function MyListingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAdminView, setIsAdminView] = useState(false);
+  const [editingColor, setEditingColor] = useState(null); // { listingId, color }
+  const [savingColor, setSavingColor] = useState(false);
 
   useEffect(() => {
     // Wait for auth to load
@@ -93,6 +95,37 @@ function MyListingsPage() {
       console.error('Error deleting listing:', err);
       alert('Failed to delete listing');
     }
+  };
+
+  const handleEditColor = (listingId, currentColor) => {
+    setEditingColor({ listingId, color: currentColor || '' });
+  };
+
+  const handleSaveColor = async (listingId) => {
+    if (!editingColor || editingColor.listingId !== listingId) return;
+
+    try {
+      setSavingColor(true);
+      await api.patch(`/vehicles/${listingId}`, { color: editingColor.color.trim() });
+      
+      // Update local state
+      setListings(prev => prev.map(listing => 
+        listing._id === listingId 
+          ? { ...listing, color: editingColor.color.trim() }
+          : listing
+      ));
+      
+      setEditingColor(null);
+    } catch (err) {
+      console.error('Error updating color:', err);
+      alert('Failed to update color');
+    } finally {
+      setSavingColor(false);
+    }
+  };
+
+  const handleCancelColorEdit = () => {
+    setEditingColor(null);
   };
 
   const getStatusBadge = (status) => {
@@ -198,6 +231,63 @@ function MyListingsPage() {
                     <span>{listing.transmission || 'Manual'}</span>
                     <span>•</span>
                     <span>{listing.fuelType || 'Petrol'}</span>
+                    <span>•</span>
+                    {editingColor?.listingId === listing._id ? (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        🎨
+                        <input
+                          type="text"
+                          value={editingColor.color}
+                          onChange={(e) => setEditingColor({ ...editingColor, color: e.target.value })}
+                          placeholder="Color"
+                          style={{
+                            padding: '2px 6px',
+                            fontSize: '13px',
+                            border: '1px solid #ddd',
+                            borderRadius: '3px',
+                            width: '100px'
+                          }}
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => handleSaveColor(listing._id)}
+                          disabled={savingColor}
+                          style={{
+                            padding: '2px 8px',
+                            fontSize: '12px',
+                            background: '#28a745',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '3px',
+                            cursor: savingColor ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          {savingColor ? '...' : '✓'}
+                        </button>
+                        <button
+                          onClick={handleCancelColorEdit}
+                          style={{
+                            padding: '2px 8px',
+                            fontSize: '12px',
+                            background: '#6c757d',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '3px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ) : (
+                      <span 
+                        onClick={() => handleEditColor(listing._id, listing.color)}
+                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                        title="Click to edit color"
+                      >
+                        🎨 {listing.color || 'Add color'}
+                      </span>
+                    )}
                   </div>
 
                   <div className="listing-price">

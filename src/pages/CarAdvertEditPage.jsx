@@ -79,7 +79,7 @@ const CarAdvertEditPage = () => {
     variant: ''
   });
   
-  // Overview section editing state (model, variant, motDue, engineSize, doors, gearbox, seats, fuelType)
+  // Overview section editing state (model, variant, motDue, engineSize, doors, gearbox, seats, fuelType, color)
   const [isOverviewEditing, setIsOverviewEditing] = useState(false);
   const [editableOverviewData, setEditableOverviewData] = useState({
     model: '',
@@ -1160,7 +1160,7 @@ const CarAdvertEditPage = () => {
     setEditableVehicleData(resetData);
   };
   
-  // Handle Overview section edit (model, variant, motDue, engineSize, doors, transmission, seats, fuelType)
+  // Handle Overview section edit (model, variant, motDue, engineSize, doors, transmission, seats, fuelType, color)
   const handleOverviewEdit = () => {
     console.log('🖱️ Overview edit button clicked!');
     setEditableOverviewData({
@@ -1171,7 +1171,8 @@ const CarAdvertEditPage = () => {
       doors: vehicleData.doors || '',
       transmission: vehicleData.transmission || '',
       seats: vehicleData.seats || '',
-      fuelType: vehicleData.fuelType || ''
+      fuelType: vehicleData.fuelType || '',
+      color: vehicleData.color || ''
     });
     setIsOverviewEditing(true);
   };
@@ -1199,7 +1200,8 @@ const CarAdvertEditPage = () => {
         doors: editableOverviewData.doors ? parseInt(editableOverviewData.doors) : null,
         transmission: editableOverviewData.transmission || null,
         seats: editableOverviewData.seats ? parseInt(editableOverviewData.seats) : null,
-        fuelType: editableOverviewData.fuelType || null
+        fuelType: editableOverviewData.fuelType || null,
+        color: editableOverviewData.color ? editableOverviewData.color.trim() : null
       };
       
       console.log('💾 Saving to database:', updateData);
@@ -1245,7 +1247,8 @@ const CarAdvertEditPage = () => {
       doors: vehicleData.doors || '',
       transmission: vehicleData.transmission || '',
       seats: vehicleData.seats || '',
-      fuelType: vehicleData.fuelType || ''
+      fuelType: vehicleData.fuelType || '',
+      color: vehicleData.color || ''
     });
   };
   
@@ -2244,6 +2247,26 @@ const CarAdvertEditPage = () => {
                   />
                 ) : (
                   <span>{vehicleData.seats || '5'}</span>
+                )}
+              </div>
+              <div className="spec-item">
+                <label>Body Colour</label>
+                {isOverviewEditing ? (
+                  <input
+                    type="text"
+                    value={editableOverviewData.color || ''}
+                    onChange={(e) => setEditableOverviewData(prev => ({ ...prev, color: e.target.value }))}
+                    placeholder="e.g. Black, White, Silver"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}
+                  />
+                ) : (
+                  <span>{vehicleData.color || 'Not specified'}</span>
                 )}
               </div>
               {/* Only show Emission Class if data is available */}

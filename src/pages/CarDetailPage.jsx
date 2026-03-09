@@ -113,6 +113,17 @@ const CarDetailPage = () => {
     return new Intl.NumberFormat('en-GB').format(mileage);
   };
 
+  // Helper function to ensure URL has protocol
+  const ensureHttpProtocol = (url) => {
+    if (!url) return '';
+    // If URL already has protocol, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // Add https:// prefix
+    return `https://${url}`;
+  };
+
   // Generate comprehensive title for ALL vehicles (AutoTrader style)
   // Examples:
   // Electric: "M50 83.9kWh Gran Coupe Auto AWD 5dr"
@@ -821,7 +832,7 @@ const CarDetailPage = () => {
                     {car.sellerContact?.businessWebsite && (
                       <div className="dealer-website">
                         <a 
-                          href={car.sellerContact.businessWebsite} 
+                          href={ensureHttpProtocol(car.sellerContact.businessWebsite)} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="dealer-website-link"

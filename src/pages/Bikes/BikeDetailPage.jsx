@@ -33,6 +33,17 @@ const BikeDetailPage = () => {
            fuelType.toLowerCase().includes('electric');
   };
 
+  // Helper function to ensure URL has protocol
+  const ensureHttpProtocol = (url) => {
+    if (!url) return '';
+    // If URL already has protocol, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // Add https:// prefix
+    return `https://${url}`;
+  };
+
   // Function to handle back navigation intelligently
   const handleBackClick = () => {
     if (location.state?.from) {
@@ -679,7 +690,7 @@ const BikeDetailPage = () => {
                     {bike.sellerContact?.businessWebsite && (
                       <div className="dealer-website">
                         <a 
-                          href={bike.sellerContact.businessWebsite} 
+                          href={ensureHttpProtocol(bike.sellerContact.businessWebsite)} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="dealer-website-link"
