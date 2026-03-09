@@ -463,31 +463,42 @@ const CarDetailPage = () => {
                     <span className="spec-value">{car.bodyType ? car.bodyType.charAt(0).toUpperCase() + car.bodyType.slice(1).toLowerCase() : 'Hatchback'}</span>
                   </div>
                 </div>
-                {/* Engine size for NON-ELECTRIC/NON-PHEV cars, Range for ELECTRIC/PHEV cars */}
-                <div className="spec-item">
-                  <span className="spec-icon">{isElectricOrPluginHybrid(car.fuelType) ? '🔋' : '🔧'}</span>
-                  <div className="spec-details">
-                    <span className="spec-label">
-                      {isElectricOrPluginHybrid(car.fuelType) ? 'Electric Range' : 'Engine size'}
-                    </span>
-                    <span className="spec-value">
-                      {isElectricOrPluginHybrid(car.fuelType) 
-                        ? (car.electricRange || car.runningCosts?.electricRange 
-                            ? `${car.electricRange || car.runningCosts?.electricRange} miles` 
-                            : 'N/A')
-                        : (car.engineSize 
-                            ? (() => {
-                                const size = parseFloat(car.engineSize);
-                                // If size > 100, it's in CC, convert to litres
-                                const sizeInLitres = size > 100 ? size / 1000 : size;
-                                // Use 1 decimal precision (1.598 -> 1.6L)
-                                return `${sizeInLitres.toFixed(1)}L`;
-                              })()
-                            : 'N/A')
-                      }
-                    </span>
+                {/* Engine size for NON-ELECTRIC cars, or PLUG-IN HYBRIDS (they have both engine and electric) */}
+                {(!isElectricOrPluginHybrid(car.fuelType) || car.fuelType.toLowerCase().includes('plug-in')) && (
+                  <div className="spec-item">
+                    <span className="spec-icon">🔧</span>
+                    <div className="spec-details">
+                      <span className="spec-label">Engine size</span>
+                      <span className="spec-value">
+                        {car.engineSize 
+                          ? (() => {
+                              const size = parseFloat(car.engineSize);
+                              // If size > 100, it's in CC, convert to litres
+                              const sizeInLitres = size > 100 ? size / 1000 : size;
+                              // Use 1 decimal precision (1.598 -> 1.6L)
+                              return `${sizeInLitres.toFixed(1)}L`;
+                            })()
+                          : 'N/A'
+                        }
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Electric Range for ELECTRIC and PLUG-IN HYBRID cars */}
+                {isElectricOrPluginHybrid(car.fuelType) && (
+                  <div className="spec-item">
+                    <span className="spec-icon">🔋</span>
+                    <div className="spec-details">
+                      <span className="spec-label">Electric Range</span>
+                      <span className="spec-value">
+                        {car.electricRange || car.runningCosts?.electricRange 
+                          ? `${car.electricRange || car.runningCosts?.electricRange} miles` 
+                          : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 <div className="spec-item">
                   <span className="spec-icon">⚙️</span>
