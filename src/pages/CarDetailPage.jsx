@@ -478,7 +478,9 @@ const CarDetailPage = () => {
                               // Use 1 decimal precision (1.598 -> 1.6L)
                               return `${sizeInLitres.toFixed(1)}L`;
                             })()
-                          : 'N/A'
+                          : car.variant && /\d+cc/i.test(car.variant)
+                            ? car.variant.match(/(\d+)cc/i)[1] + 'cc'
+                            : 'Contact seller'
                         }
                       </span>
                     </div>
