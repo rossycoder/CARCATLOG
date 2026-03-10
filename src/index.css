@@ -8,6 +8,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile Viewport Fix - Prevent zoom issues */
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-width: 320px;
+  overflow-x: hidden;
+}
+
+/* Ensure images don't cause horizontal scroll */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 /* Legacy Variables for Backward Compatibility */
 :root {
   --primary-color: var(--color-primary);
