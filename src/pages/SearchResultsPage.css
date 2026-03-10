@@ -607,4 +607,27 @@
   .modal-footer {
     flex-direction: column;
   }
+
+  /* Mobile badge fixes */
+  .car-specs {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .car-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 4px 8px;
+    white-space: nowrap;
+  }
+
+  .badge-cat {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
 }

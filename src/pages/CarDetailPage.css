@@ -645,6 +645,32 @@
   .detail-container {
     padding: 0 12px;
   }
+
+  /* Mobile badge fixes */
+  .spec-item {
+    padding: 10px;
+  }
+
+  .spec-label {
+    font-size: 0.85rem;
+  }
+
+  .spec-value {
+    font-size: 0.9rem;
+  }
+
+  .car-make-model {
+    font-size: 1.5rem;
+  }
+
+  .car-variant-line {
+    font-size: 1.1rem;
+  }
+
+  .car-real-variant {
+    font-size: 1rem;
+    padding: 6px 10px;
+  }
 }
 
 /* Meet the Seller Section */
