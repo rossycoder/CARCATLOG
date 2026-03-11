@@ -266,6 +266,17 @@ html, body {
   .search-results-page .container-wide {
     max-width: 100vw !important;
     overflow-x: hidden !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Results grid should use full width minus container padding */
+  .results-grid-autotrader {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    width: 100% !important;
   }
 
   .top-filter-bar {
@@ -286,6 +297,14 @@ html, body {
   .car-listing-card {
     max-width: 100% !important;
     width: 100% !important;
+  }
+
+  /* Car cards should fill container */
+  .car-card {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 
   /* Fix pagination */

@@ -28,7 +28,7 @@
 .car-image-container {
   position: relative;
   width: 100%;
-  padding-top: 75%; /* 4:3 aspect ratio like AutoTrader */
+  padding-top: 50%; /* Shorter 2:1 aspect ratio */
   overflow: hidden;
   background: #f5f5f5;
 }
