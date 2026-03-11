@@ -223,8 +223,14 @@ const CarCard = ({ car }) => {
               return parts.join(' ');
             })()}
           </p>
+          
+          {/* Attention Grabber - like "COMFORT ACCESS - PARK SENSORS" */}
+          {car.attentionGrabber && (
+            <p className="car-attention-grabber">{car.attentionGrabber}</p>
+          )}
+          
           <p className="car-specs">
-            {/* Line 3: Year • Mileage • Fuel • Transmission */}
+            {/* Line 3: Year • Mileage • Fuel */}
             {(() => {
               const specs = [];
               
@@ -245,25 +251,30 @@ const CarCard = ({ car }) => {
             })()}
           </p>
           
-          {car.serviceHistory && (
-            <p className="car-service-history">{car.serviceHistory}</p>
-          )}
-          
           <div className="car-badges">
+            {/* Great Price Badge */}
+            {car.priceIndicator === 'great' && (
+              <span className="badge great-price-badge">Great price</span>
+            )}
+            
             {/* Electric Vehicle Badge */}
             <ElectricVehicleBadge vehicle={car} size="small" />
             
-            {/* Show insurance write-off category if exists */}
-            {car.historyCheckId?.writeOffCategory && car.historyCheckId.writeOffCategory !== 'none' && car.historyCheckId.writeOffCategory !== 'unknown' && (
-              <span className="badge cat-badge">Cat {car.historyCheckId.writeOffCategory}</span>
-            )}
+            {/* Mileage Badge */}
             {car.mileage && (
-              <span className="badge">{car.mileage.toLocaleString()} miles</span>
+              <span className="badge mileage-badge">{parseInt(car.mileage).toLocaleString()} miles</span>
             )}
+            
+            {/* Year Badge */}
             {car.year && (
-              <span className="badge">
+              <span className="badge year-badge">
                 {car.year} ({car.registrationNumber?.match(/\d{2}/)?.[0] || car.year.toString().slice(-2)} reg)
               </span>
+            )}
+            
+            {/* Show insurance write-off category if exists */}
+            {car.historyCheckId?.writeOffCategory && car.historyCheckId.writeOffCategory !== 'none' && car.historyCheckId.writeOffCategory !== 'unknown' && (
+              <span className="badge cat-badge">CAT {car.historyCheckId.writeOffCategory}</span>
             )}
           </div>
 
