@@ -889,6 +889,11 @@ const CarDetailPage = () => {
                       📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
                     </button>
                   )}
+                  {car.sellerContact?.allowEmailContact && car.sellerContact?.email && (
+                    <div className="seller-email">
+                      ✉️ {car.sellerContact.email}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -918,6 +923,11 @@ const CarDetailPage = () => {
                 <button className="phone-btn">
                   📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
                 </button>
+              )}
+              {car.sellerContact?.allowEmailContact && car.sellerContact?.email && (
+                <div className="seller-email-contact">
+                  ✉️ {car.sellerContact.email}
+                </div>
               )}
             </div>
 

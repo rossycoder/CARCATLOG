@@ -89,6 +89,12 @@ const MeetTheSellerSection = ({ seller, distance, postcode }) => {
             {seller.phoneNumber}
           </button>
         )}
+        {seller.allowEmailContact && seller.email && (
+          <div className="contact-btn email-display">
+            <span className="btn-icon">✉️</span>
+            {seller.email}
+          </div>
+        )}
       </div>
 
       {postcode && (

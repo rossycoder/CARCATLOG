@@ -538,6 +538,20 @@
   background: #f0f7ff;
 }
 
+.seller-email-contact {
+  width: 100%;
+  padding: 14px;
+  background: #f0f7ff;
+  border: 2px solid #0066cc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+  margin-top: 12px;
+  word-break: break-word;
+}
+
 .seller-notice {
   font-size: 0.85rem;
   color: #666;
@@ -865,6 +879,20 @@
 
 .call-seller-btn:hover {
   background: #f0f7ff;
+}
+
+.seller-email {
+  width: 100%;
+  padding: 14px;
+  background: #f0f7ff;
+  border: 2px solid #0066cc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+  margin-top: 12px;
+  word-break: break-word;
 }
 
 .seller-protection-notice {

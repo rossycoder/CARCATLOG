@@ -489,6 +489,20 @@
   background: #eff6ff;
 }
 
+.bike-detail-page .seller-email {
+  width: 100%;
+  padding: 14px;
+  background: #eff6ff;
+  border: 2px solid #2563eb;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+  margin-top: 12px;
+  word-break: break-word;
+}
+
 .bike-detail-page .seller-protection-notice {
   font-size: 0.85rem;
   color: #6b7280;
@@ -583,6 +597,20 @@
 
 .bike-detail-page .phone-btn:hover {
   background: #eff6ff;
+}
+
+.bike-detail-page .seller-email-contact {
+  width: 100%;
+  padding: 14px;
+  background: #eff6ff;
+  border: 2px solid #2563eb;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+  margin-top: 12px;
+  word-break: break-word;
 }
 
 .bike-detail-page .seller-notice {

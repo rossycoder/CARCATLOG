@@ -745,6 +745,11 @@ const BikeDetailPage = () => {
                       📞 {bike.sellerContact?.phoneNumber || bike.phoneNumber}
                     </button>
                   )}
+                  {bike.sellerContact?.allowEmailContact && bike.sellerContact?.email && (
+                    <div className="seller-email">
+                      ✉️ {bike.sellerContact.email}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -774,6 +779,11 @@ const BikeDetailPage = () => {
                 <button className="phone-btn">
                   📞 {bike.sellerContact?.phoneNumber || bike.phoneNumber}
                 </button>
+              )}
+              {bike.sellerContact?.allowEmailContact && bike.sellerContact?.email && (
+                <div className="seller-email-contact">
+                  ✉️ {bike.sellerContact.email}
+                </div>
               )}
             </div>
 

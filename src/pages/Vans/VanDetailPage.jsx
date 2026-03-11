@@ -559,6 +559,11 @@ const VanDetailPage = () => {
                   📞 {van.sellerContact?.phoneNumber || van.phoneNumber}
                 </button>
               )}
+              {van.sellerContact?.allowEmailContact && van.sellerContact?.email && (
+                <div className="seller-email-contact">
+                  ✉️ {van.sellerContact.email}
+                </div>
+              )}
 
               <div className="seller-notice">
                 Seller's number has been protected. <a href="#">Learn more</a>

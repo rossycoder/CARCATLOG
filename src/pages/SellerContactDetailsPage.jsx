@@ -32,7 +32,7 @@ const SellerContactDetailsPage = () => {
 
   const [formData, setFormData] = useState({
     phoneNumber: '',
-    email: user?.email || 'shahzad872@live.com',
+    email: '',
     allowEmailContact: false,
     postcode: '',
   });
@@ -292,11 +292,13 @@ const SellerContactDetailsPage = () => {
             <label htmlFor="email">
               Email<span className="required">*</span>
             </label>
+            <p className="field-hint">Enter the email address you want buyers to contact you on</p>
             <input
               type="email"
               id="email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
+              placeholder="your.email@example.com"
               className={errors.email ? 'error' : ''}
             />
             {errors.email && (
@@ -325,6 +327,28 @@ const SellerContactDetailsPage = () => {
               >
                 Yes
               </button>
+            </div>
+          </div>
+
+          {/* Contact Details Preview */}
+          <div className="contact-preview-section">
+            <h3 className="preview-title">Contact details that will be shown to buyers:</h3>
+            <div className="contact-preview-box">
+              {formData.phoneNumber && (
+                <div className="preview-item">
+                  <span className="preview-icon">📞</span>
+                  <span className="preview-text">{formData.phoneNumber}</span>
+                </div>
+              )}
+              {formData.allowEmailContact && formData.email && (
+                <div className="preview-item">
+                  <span className="preview-icon">✉️</span>
+                  <span className="preview-text">{formData.email}</span>
+                </div>
+              )}
+              {!formData.phoneNumber && !formData.allowEmailContact && (
+                <p className="preview-empty">No contact details selected yet</p>
+              )}
             </div>
           </div>
 
