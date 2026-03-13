@@ -13,6 +13,36 @@ html, body {
   max-width: 100vw;
 }
 
+/* ===== GLOBAL FIX: Apply box-shadow to images on ALL screen sizes ===== */
+.car-card .car-image-container,
+.car-listing-card .car-image-wrapper,
+.car-image-container,
+.car-image-wrapper {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transition: box-shadow 0.3s ease !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.car-card:hover .car-image-container,
+.car-card:hover .car-image-wrapper,
+.car-listing-card:hover .car-image-wrapper,
+.car-listing-card:hover .car-image-container {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Remove box-shadow from card containers */
+.car-card,
+.car-listing-card {
+  box-shadow: none !important;
+  border: 1px solid #e5e5e5 !important;
+}
+
+.car-card:hover,
+.car-listing-card:hover {
+  box-shadow: none !important;
+  border-color: #d0d0d0 !important;
+}
+
 /* Mobile viewport fixes */
 @media (max-width: 768px) {
   /* Ensure all containers respect viewport */
@@ -46,6 +76,25 @@ html, body {
   .car-listing-card {
     max-width: 100%;
     margin: 0 auto;
+    overflow: visible !important;
+  }
+
+  .car-card-wrapper {
+    overflow: visible !important;
+    position: relative !important;
+  }
+
+  .car-image-container {
+    overflow: visible !important;
+  }
+
+  /* Ensure save button is always visible on mobile */
+  .car-card-wrapper > .save-button {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 9999 !important;
+    pointer-events: auto !important;
   }
 
   .car-specs {
@@ -255,6 +304,12 @@ html, body {
     grid-template-columns: 1fr !important;
     gap: 16px;
     padding: 16px 0;
+    overflow: visible !important;
+  }
+
+  /* Ensure all card wrappers are visible */
+  .results-grid-autotrader > * {
+    overflow: visible !important;
   }
 
   /* Fix search results page specific issues */

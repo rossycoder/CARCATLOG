@@ -3,12 +3,18 @@
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.car-card-wrapper .car-image-container {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .car-card {
   background: #ffffff;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
   text-decoration: none;
@@ -17,6 +23,7 @@
   flex-direction: column;
   height: 100%;
   border: 1px solid #e5e5e5;
+  position: relative;
 }
 
 .car-card:hover {
@@ -25,12 +32,68 @@
   border-color: #d0d0d0;
 }
 
+/* Save button positioned inside image container */
+.car-image-container > .save-button {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  background: white !important;
+  border: 2px solid #000 !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  z-index: 100 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  outline: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  flex-shrink: 0 !important;
+}
+
 .car-image-container {
   position: relative;
   width: 100%;
-  padding-top: 50%; /* Shorter 2:1 aspect ratio */
-  overflow: hidden;
-  background: #f5f5f5;
+  padding-top: 75%; /* 4:3 aspect ratio */
+  overflow: hidden !important;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  transition: box-shadow 0.3s ease !important;
+  isolation: isolate;
+}
+
+.car-card .car-image-container {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  isolation: isolate;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+div.car-image-container {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  isolation: isolate;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+a.car-card > div.car-image-container {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+/* ===== OVERLAY REMOVED - NO GREY BOX ===== */
+.car-image-container::after {
+  display: none !important;
 }
 
 .car-image {
@@ -40,11 +103,24 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
   transition: transform 0.3s ease;
+  background: #ffffff;
+  border-radius: 12px;
+  z-index: 1;
 }
 
 .car-card:hover .car-image {
-  transform: scale(1.05);
+  transform: scale(1.0);
+  box-shadow: none;
+}
+
+.car-card:hover .car-image-container {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+div.car-card:hover div.car-image-container {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
 }
 
 /* Reserve Online Badge */
@@ -58,37 +134,42 @@
   border-radius: 6px;
   font-size: 13px;
   font-weight: 700;
-  z-index: 2;
+  z-index: 100 !important;
   box-shadow: 0 2px 8px rgba(0, 166, 81, 0.3);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-/* Image Count Badge */
-/* Image Slider Controls */
+/* Image Slider Controls - HIDDEN BY DEFAULT */
 .slider-btn {
+  display: none !important;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  
+  background: rgba(255, 255, 255, 0.95) !important;
   color: #1a1a1a !important;
-  border: none !important;
-  width: 40px;
-  height: 40px;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 24px;
-  display: flex;
+  font-size: 20px;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  z-index: 2;
+  z-index: 100 !important;
   opacity: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  pointer-events: none;
 }
 
-.car-image-container:hover .slider-btn {
-  opacity: 1;
+/* Only show on desktop hover */
+@media (min-width: 769px) {
+  .car-image-container:hover .slider-btn {
+    display: flex !important;
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .slider-btn:hover {
@@ -97,11 +178,11 @@
 }
 
 .prev-btn {
-  left: 12px;
+  left: 8px;
 }
 
 .next-btn {
-  right: 12px;
+  right: 8px;
 }
 
 /* Image Dots */
@@ -112,7 +193,7 @@
   transform: translateX(-50%);
   display: flex;
   gap: 6px;
-  z-index: 2;
+  z-index: 100 !important;
 }
 
 .dot {
@@ -136,83 +217,74 @@
   height: 10px;
 }
 
-/* Image Count Badge - AutoTrader Style */
+/* Image Count Badge */
 .image-count {
   position: absolute;
   bottom: 12px;
-  right: 12px;
-  
+  left: 12px;
+  background: rgba(0, 0, 0, 0.75);
   color: white;
-  padding: 6px 10px;
+  padding: 4px 10px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  display: flex;
+  display: inline-flex !important;
   align-items: center;
+  justify-content: center;
   gap: 4px;
- 
-  z-index: 2;
+  z-index: 100 !important;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .image-count svg {
-  width: 14px;
-  height: 14px;
-  display: none; /* Hide icon for cleaner AutoTrader look */
+  width: 10px;
+  height: 10px;
+  display: none;
 }
 
-.save-button {
-  position: absolute !important;
-  top: 12px !important;
-  right: 12px !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  border: none !important;
-  border-radius: 50% !important;
-  width: 40px !important;
-  height: 40px !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: all 0.2s ease !important;
-  z-index: 10 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-}
-
-.save-button:hover {
+.car-image-container > .save-button:hover {
   transform: scale(1.1) !important;
   background: rgba(255, 255, 255, 1) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
-.save-button:active {
+.car-image-container > .save-button:active {
   transform: scale(0.95) !important;
 }
 
-.save-button.saved {
+.car-image-container > .save-button.saved {
   animation: heartbeat 0.4s ease;
 }
 
-.save-button svg {
+.car-image-container > .save-button svg {
   width: 24px !important;
   height: 24px !important;
   display: block !important;
   pointer-events: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
-.save-button.saved svg {
+.car-image-container > .save-button.saved svg {
   fill: #e31e24 !important;
   stroke: #e31e24 !important;
 }
 
-.save-button:not(.saved) svg {
+.car-image-container > .save-button:not(.saved) svg {
   fill: none !important;
   stroke: #1a1a1a !important;
   stroke-width: 2 !important;
+}
+
+.car-image-container > .save-button svg path {
+  fill: inherit !important;
+  stroke: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 @keyframes heartbeat {
@@ -292,10 +364,10 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  display: none; /* Hide for AutoTrader style */
+  display: none;
 }
 
-/* Badges - AutoTrader Style */
+/* Badges */
 .car-card .car-badges {
   display: flex;
   flex-wrap: wrap;
@@ -404,14 +476,41 @@
   white-space: nowrap;
 }
 
-/* Responsive - Tablet */
-@media (max-width: 1024px) {
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* L - Laptop (1024px - 1279px) */
+@media (max-width: 1279px) {
   .car-content {
-    padding: 14px;
+    padding: 18px;
   }
   
-  .car-title {
-    font-size: 17px;
+  .car-card .car-content .car-title {
+    font-size: 19px;
+  }
+  
+  .car-price {
+    font-size: 23px;
+  }
+}
+
+/* M - Tablet (768px - 1023px) */
+@media (max-width: 1023px) {
+  .car-content {
+    padding: 16px;
+  }
+  
+  .car-card .car-content .car-title {
+    font-size: 18px;
+  }
+  
+  .car-card .car-content .car-subtitle {
+    font-size: 14px;
+  }
+  
+  .car-card .car-specs {
+    font-size: 13px;
   }
   
   .car-price {
@@ -422,10 +521,32 @@
     padding: 6px 12px;
     font-size: 12px;
   }
+  
+  .car-image-container > .save-button {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    max-width: 38px !important;
+    max-height: 38px !important;
+  }
+  
+  .car-image-container > .save-button svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  
+  .image-count {
+    bottom: 10px;
+    left: 10px;
+    padding: 5px 9px;
+    font-size: 11px;
+    z-index: 100 !important;
+  }
 }
 
-/* Responsive - Mobile */
-@media (max-width: 768px) {
+/* S - Large Mobile (640px - 767px) */
+@media (max-width: 767px) {
   .car-card {
     border-radius: 8px;
   }
@@ -436,18 +557,18 @@
   }
 
   .car-card .car-content .car-title {
-    font-size: 16px;
-    margin-bottom: 2px;
+    font-size: 17px;
+    margin-bottom: 3px;
   }
   
   .car-card .car-content .car-subtitle {
-    font-size: 13px;
+    font-size: 14px;
     margin-bottom: 6px;
     line-height: 1.3;
   }
   
   .car-attention-grabber {
-    font-size: 12px;
+    font-size: 13px;
     margin-bottom: 8px;
   }
   
@@ -457,7 +578,7 @@
   }
 
   .car-card .car-specs {
-    font-size: 12px;
+    font-size: 13px;
     margin-bottom: 8px;
   }
 
@@ -467,46 +588,48 @@
   }
   
   .car-card .car-badges .badge {
-    padding: 5px 8px;
+    padding: 5px 9px;
     font-size: 11px;
   }
 
   .car-price {
-    font-size: 20px;
-    margin-bottom: 10px;
+    font-size: 21px;
+    margin-bottom: 12px;
   }
   
   .price-label {
-    font-size: 11px;
+    font-size: 12px;
     margin-bottom: 3px;
   }
   
   .car-footer {
-    padding-top: 10px;
+    padding-top: 12px;
   }
   
   .car-location,
   .car-rating {
-    font-size: 12px;
+    font-size: 13px;
   }
 
-  .save-button {
-    width: 34px !important;
-    height: 34px !important;
-    top: 8px !important;
-    right: 8px !important;
+  .car-image-container > .save-button {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    top: 10px !important;
+    right: 10px !important;
+    z-index: 100 !important;
   }
 
-  .save-button svg {
-    width: 18px !important;
-    height: 18px !important;
+  .car-image-container > .save-button svg {
+    width: 20px !important;
+    height: 20px !important;
   }
   
   .slider-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 18px;
-    opacity: 1;
+    display: none !important;
   }
   
   .prev-btn {
@@ -518,33 +641,48 @@
   }
   
   .reserve-badge {
-    top: 8px;
-    left: 8px;
-    padding: 5px 10px;
-    font-size: 10px;
+    top: 10px;
+    left: 10px;
+    padding: 6px 11px;
+    font-size: 11px;
+    z-index: 100 !important;
   }
   
   .image-count {
-    bottom: 8px;
-    right: 8px;
-    padding: 4px 8px;
+    bottom: 10px;
+    left: 10px;
+    padding: 5px 9px;
     font-size: 11px;
+    z-index: 100 !important;
+  }
+  
+  .dot {
+    width: 7px;
+    height: 7px;
+  }
+  
+  .dot.active {
+    width: 9px;
+    height: 9px;
   }
 }
 
-/* Responsive - Small Mobile */
-@media (max-width: 480px) {
+/* XS - Small Mobile (0 - 639px) */
+@media (max-width: 639px) {
   .car-content {
     padding: 12px;
+    gap: 5px;
   }
   
   .car-card .car-content .car-title {
     font-size: 15px;
+    margin-bottom: 2px;
   }
   
   .car-card .car-content .car-subtitle {
     font-size: 12px;
     line-height: 1.3;
+    margin-bottom: 5px;
   }
   
   .car-attention-grabber {
@@ -585,31 +723,111 @@
     font-size: 11px;
   }
   
-  .save-button {
-    width: 30px !important;
-    height: 30px !important;
-    top: 6px !important;
-    right: 6px !important;
+  .car-image-container > .save-button {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    top: 8px !important;
+    right: 8px !important;
+    z-index: 100 !important;
+  }
+  
+  .car-image-container > .save-button svg {
+    width: 18px !important;
+    height: 18px !important;
   }
   
   .slider-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 16px;
+    display: none !important;
+  }
+  
+  .prev-btn {
+    left: 4px;
+  }
+  
+  .next-btn {
+    right: 4px;
   }
   
   .reserve-badge {
-    top: 6px;
-    left: 6px;
-    padding: 4px 8px;
-    font-size: 9px;
+    top: 8px;
+    left: 8px;
+    padding: 5px 9px;
+    font-size: 10px;
+    z-index: 100 !important;
   }
   
   .image-count {
-    bottom: 6px;
-    right: 6px;
-    padding: 3px 6px;
+    bottom: 8px;
+    left: 8px;
+    padding: 4px 7px;
     font-size: 10px;
+    z-index: 100 !important;
+  }
+  
+  .dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .dot.active {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* Extra Small - Tiny Mobile (0 - 374px) */
+@media (max-width: 374px) {
+  .car-content {
+    padding: 10px;
+  }
+  
+  .car-card .car-content .car-title {
+    font-size: 14px;
+  }
+  
+  .car-card .car-content .car-subtitle {
+    font-size: 11px;
+  }
+  
+  .car-price {
+    font-size: 16px;
+  }
+  
+  .car-image-container > .save-button {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    max-width: 28px !important;
+    max-height: 28px !important;
+    top: 6px !important;
+    right: 6px !important;
+    z-index: 100 !important;
+  }
+  
+  .car-image-container > .save-button svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  
+  .slider-btn {
+    display: none !important;
+  }
+  
+  .reserve-badge {
+    padding: 4px 7px;
+    font-size: 9px;
+    z-index: 100 !important;
+  }
+  
+  .image-count {
+    padding: 3px 6px;
+    font-size: 9px;
+    z-index: 100 !important;
   }
   
   .dot {
@@ -621,4 +839,35 @@
     width: 7px;
     height: 7px;
   }
+}
+
+/* ============================================
+   ULTIMATE FIX - FORCE OVERLAY ON ALL DEVICES
+   ============================================ */
+@media (max-width: 768px) {
+  /* Overlay completely removed */
+  .car-image-container::after {
+    display: none !important;
+  }
+
+  .car-image-container > .save-button {
+    z-index: 100 !important;
+  }
+  
+  .image-count,
+  .reserve-badge,
+  .slider-btn,
+  .image-dots {
+    z-index: 100 !important;
+  }
+}
+
+/* Overlay completely disabled */
+.car-image-container::after {
+  display: none !important;
+}
+
+/* Ensure images don't block the button */
+.car-image {
+  pointer-events: none;
 }

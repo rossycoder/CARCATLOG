@@ -125,9 +125,25 @@ const CarCard = ({ car }) => {
   };
 
   return (
-    <div className="car-card-wrapper">
-      <Link to={`/cars/${car._id}`} className="car-card">
-        <div className="car-image-container">
+    <Link to={`/cars/${car._id}`} className="car-card">
+      <div className="car-image-container">
+        {/* Save button INSIDE image container, positioned absolutely */}
+        <button 
+          className={`save-button ${saved ? 'saved' : ''}`}
+          onClick={handleSave}
+          aria-label={saved ? 'Remove from saved' : 'Save car'}
+        >
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill={saved ? '#e31e24' : 'none'}
+            stroke={saved ? '#e31e24' : '#1a1a1a'}
+            strokeWidth="2"
+          >
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </button>
           
           <img 
             src={currentImage} 
@@ -142,6 +158,7 @@ const CarCard = ({ car }) => {
                 className="slider-btn prev-btn"
                 onClick={handlePrevImage}
                 aria-label="Previous image"
+                style={{ display: 'none' }}
               >
                 ‹
               </button>
@@ -149,6 +166,7 @@ const CarCard = ({ car }) => {
                 className="slider-btn next-btn"
                 onClick={handleNextImage}
                 aria-label="Next image"
+                style={{ display: 'none' }}
               >
                 ›
               </button>
@@ -297,25 +315,6 @@ const CarCard = ({ car }) => {
           </div>
         </div>
       </Link>
-      
-      {/* Save button OUTSIDE the Link */}
-      <button 
-        className={`save-button ${saved ? 'saved' : ''}`}
-        onClick={handleSave}
-        aria-label={saved ? 'Remove from saved' : 'Save car'}
-      >
-        <svg 
-          width="24" 
-          height="24" 
-          viewBox="0 0 24 24" 
-          fill={saved ? '#e31e24' : 'none'}
-          stroke={saved ? '#e31e24' : '#1a1a1a'}
-          strokeWidth="2"
-        >
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-        </svg>
-      </button>
-    </div>
   );
   } catch (error) {
     console.error('❌ CarCard caught error:', error, car.registrationNumber);

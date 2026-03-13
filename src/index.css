@@ -9,6 +9,64 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CRITICAL: Force box-shadow on car CARDS and IMAGE CONTAINERS - MUST come after Tailwind */
+@layer components {
+  .car-card,
+  .car-listing-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+  }
+  
+  .car-card:hover,
+  .car-listing-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18) !important;
+  }
+  
+  /* Apply box-shadow to ALL image containers globally */
+  .car-image-container,
+  .car-image-wrapper,
+  .bike-image-container,
+  .van-image-container,
+  .vehicle-image-container {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+    transition: box-shadow 0.3s ease !important;
+  }
+  
+  .car-card:hover .car-image-container,
+  .car-card:hover .car-image-wrapper,
+  .car-listing-card:hover .car-image-wrapper,
+  .bike-card:hover .bike-image-container,
+  .van-card:hover .van-image-container {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  /* FIX: Image count badge - compact square form */
+  .image-count,
+  div.image-count,
+  .car-image-container .image-count {
+    position: absolute !important;
+    bottom: 12px !important;
+    left: 12px !important;
+    top: auto !important;
+    background: rgba(0, 0, 0, 0.75) !important;
+    color: white !important;
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    z-index: 100 !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+  }
+}
+
 /* Mobile Viewport Fix - Prevent zoom issues */
 html {
   -webkit-text-size-adjust: 100%;

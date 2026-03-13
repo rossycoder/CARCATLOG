@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'
 import App from './App.jsx'
 import './index.css'
+import './styles/mobile-fixes.css'
 
 // Import auth utilities for debugging (available in browser console)
 import './utils/clearAuthStorage.js'
