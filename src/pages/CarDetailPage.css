@@ -371,6 +371,7 @@
   background: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
+  min-height: 80px;
 }
 
 .spec-icon {
