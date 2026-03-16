@@ -1246,18 +1246,27 @@
   
   .search-button-group {
     flex-direction: column !important;
-    gap: 6px !important;
+    gap: 12px !important;
     width: 100% !important;
+    align-items: stretch !important;
   }
   
   .search-button {
     width: 100% !important;
     justify-content: center !important;
+    padding: 14px 24px !important;
+    font-size: 1rem !important;
+    display: flex !important;
+    align-items: center !important;
   }
   
   .more-options-link {
     width: 100% !important;
     justify-content: center !important;
+    text-align: center !important;
+    padding: 12px !important;
+    display: flex !important;
+    align-items: center !important;
   }
   
   .search-field label {
@@ -1512,19 +1521,27 @@
   
   .search-button-group {
     flex-direction: column !important;
-    gap: 4px !important;
+    gap: 10px !important;
     width: 100% !important;
+    align-items: stretch !important;
   }
   
   .search-button {
     width: 100% !important;
     justify-content: center !important;
-    padding: 8px 12px !important;
+    padding: 12px 20px !important;
+    font-size: 0.95rem !important;
+    display: flex !important;
+    align-items: center !important;
   }
   
   .more-options-link {
     width: 100% !important;
     justify-content: center !important;
+    text-align: center !important;
+    padding: 10px !important;
+    display: flex !important;
+    align-items: center !important;
   }
   
   .search-field label {

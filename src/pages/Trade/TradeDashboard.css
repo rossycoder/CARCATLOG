@@ -68,6 +68,74 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+/* Trial Banner */
+.trial-banner {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.trial-icon {
+  font-size: 48px;
+  flex-shrink: 0;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.trial-content {
+  flex: 1;
+}
+
+.trial-content h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: white;
+}
+
+.trial-content p {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+.trial-content p:last-child {
+  margin-bottom: 0;
+}
+
+.trial-info {
+  font-size: 14px !important;
+  opacity: 0.9 !important;
+  margin-top: 8px !important;
+}
+
 .subscription-card.active {
   background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
   color: white;

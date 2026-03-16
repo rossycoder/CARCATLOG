@@ -96,10 +96,10 @@ body {
 }
 
 .logo-img {
-  height: 40px;
+  height: 55px;
   width: auto;
   object-fit: contain;
-  max-width: 150px;
+  max-width: 200px;
 }
 
 /* MAIN NAV - Desktop Only */
@@ -474,7 +474,7 @@ body {
 
   .logo-img {
     height: 100px;
-    max-width: 160px;
+    max-width: 200px;
   }
 
   .main-nav {
@@ -574,8 +574,8 @@ body {
   }
 
   .logo-img {
-    height: 40px;
-    max-width: 140px;
+    height: 55px;
+    max-width: 180px;
   }
 
   .main-nav {
@@ -629,11 +629,11 @@ body {
 
   .main-header {
     max-width: 100%;
-    padding: 8px 8px;
-    gap: 4px;
-    display: flex;
+    padding: 10px 12px;
+    gap: 8px;
+    display: grid;
+    grid-template-columns: 50px 1fr 100px;
     align-items: center;
-    justify-content: space-between;
     position: relative;
   }
 
@@ -642,26 +642,25 @@ body {
     gap: 0;
     flex-shrink: 0;
     align-items: center;
-    order: 1;
-    width: 40px;
+    justify-content: flex-start;
+    grid-column: 1;
   }
 
   .menu-btn {
-    padding: 6px;
+    padding: 8px;
   }
 
   .logo {
-    flex: 1;
-    margin: 0;
-    order: 2;
-    min-width: 0;
+    grid-column: 2;
     display: flex;
     justify-content: center;
+    align-items: center;
+    margin: 0;
   }
 
   .logo-img {
-    height: 36px;
-    max-width: 120px;
+    height: 60px;
+    max-width: 180px;
     width: auto;
   }
 
@@ -671,18 +670,15 @@ body {
 
   .header-right {
     display: flex !important;
-    gap: 2px;
+    gap: 4px;
     flex-shrink: 0;
     align-items: center;
-    position: static;
-    transform: none;
-    order: 3;
-    width: 80px;
     justify-content: flex-end;
+    grid-column: 3;
   }
 
   .saved-btn {
-    padding: 6px;
+    padding: 8px;
     color: #333 !important;
   }
 
@@ -691,7 +687,7 @@ body {
   }
 
   .account-btn {
-    padding: 6px;
+    padding: 8px;
     color: #333 !important;
   }
 
@@ -744,40 +740,27 @@ body {
    ============================================ */
 @media (max-width: 480px) {
   .main-header {
-    padding: 6px 6px;
-    gap: 2px;
+    padding: 8px 10px;
+    grid-template-columns: 45px 1fr 90px;
+    gap: 6px;
   }
 
   .logo-img {
-    height: 32px;
-    max-width: 100px;
+    height: 55px;
+    max-width: 150px;
     width: auto;
   }
 
   .menu-btn {
-    padding: 5px;
+    padding: 6px;
   }
 
   .saved-btn {
-    padding: 5px;
+    padding: 6px;
   }
 
   .account-btn {
-    padding: 5px;
-  }
-
-  .logo {
-    margin: 0;
-    min-width: 0;
-  }
-  
-  .header-left {
-    width: 36px;
-  }
-  
-  .header-right {
-    width: 70px;
-    gap: 0;
+    padding: 6px;
   }
 
   .channel-switcher {
@@ -790,7 +773,7 @@ body {
   }
 
   .header-right {
-    gap: 0;
+    gap: 2px;
   }
   
   .mobile-menu {
@@ -801,28 +784,24 @@ body {
 
 /* Extra small devices */
 @media (max-width: 360px) {
-  .logo-img {
-    height: 28px;
-    max-width: 90px;
-  }
-  
   .main-header {
-    padding: 5px 4px;
-    gap: 2px;
+    padding: 6px 8px;
+    grid-template-columns: 40px 1fr 80px;
+    gap: 4px;
+  }
+
+  .logo-img {
+    height: 50px;
+    max-width: 140px;
   }
   
   .menu-btn,
   .saved-btn,
   .account-btn {
-    padding: 4px;
-  }
-  
-  .header-left {
-    width: 32px;
+    padding: 5px;
   }
   
   .header-right {
-    width: 60px;
     gap: 0;
   }
   

@@ -93,7 +93,7 @@ const VehicleCheckPage = () => {
     } catch (err) {
       console.error('Vehicle lookup error:', err);
       const errorMessage = err.response?.data?.error || err.message || 'Failed to fetch vehicle data';
-      setError(errorMessage);
+      setError(String(errorMessage));
     } finally {
       setIsLoading(false);
     }
@@ -356,7 +356,7 @@ const VehicleCheckPage = () => {
                 <h3>Unable to fetch vehicle data</h3>
               </div>
               <div className="error-content">
-                <p>{error}</p>
+                <p>{typeof error === 'string' ? error : 'An error occurred while fetching vehicle data'}</p>
                 <button 
                   onClick={() => {
                     setError(null);

@@ -14,6 +14,7 @@ const NewCarsPage = () => {
   const [loadingMakes, setLoadingMakes] = useState(true);
   const [searchFilters, setSearchFilters] = useState({
     make: '',
+    model: '',
     maxPrice: '',
     postcode: ''
   });
@@ -59,7 +60,9 @@ const NewCarsPage = () => {
     }
   };
 
-  const handleSearch = () => {
+  const handleSearch = (e) => {
+    e.preventDefault();
+    
     // Validate postcode is entered
     if (!searchFilters.postcode.trim()) {
       setPostcodeError('Please enter a postcode to search');
@@ -67,9 +70,10 @@ const NewCarsPage = () => {
     }
 
     const params = new URLSearchParams();
-    if (searchFilters.make) params.append('make', searchFilters.make);
-    if (searchFilters.maxPrice) params.append('maxPrice', searchFilters.maxPrice);
     if (searchFilters.postcode) params.append('postcode', searchFilters.postcode);
+    if (searchFilters.make) params.append('make', searchFilters.make);
+    if (searchFilters.model) params.append('model', searchFilters.model);
+    if (searchFilters.maxPrice) params.append('maxPrice', searchFilters.maxPrice);
     params.append('condition', 'new');
     navigate(`/search-results?${params.toString()}`);
   };
@@ -95,65 +99,97 @@ const NewCarsPage = () => {
         ])}
       />
       <div className="new-cars-page">
-        {/* Hero Section */}
-        <section className="new-hero">
-          <div className="new-hero-background">
-            <div className="new-hero-container">
-              <span className="new-hero-label">New Cars</span>
-              <h1 className="new-hero-title">Nothing like that smell of a new car</h1>
-            
-            <div className="new-search-card">
-              <div className="new-search-fields">
-                <div className="new-search-field">
-                  <label>Max Price</label>
-                  <select 
-                    value={searchFilters.maxPrice}
-                    onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                  >
-                    <option value="">Any Price</option>
-                    <option value="20000">Up to £20,000</option>
-                    <option value="30000">Up to £30,000</option>
-                    <option value="40000">Up to £40,000</option>
-                    <option value="50000">Up to £50,000</option>
-                    <option value="75000">Up to £75,000</option>
-                  </select>
-                </div>
-                <div className="new-search-field">
-                  <label>Make</label>
-                  <select
-                    value={searchFilters.make}
-                    onChange={(e) => handleFilterChange('make', e.target.value)}
-                    disabled={loadingMakes}
-                  >
-                    <option value="">Any Make</option>
-                    {loadingMakes ? (
-                      <option disabled>Loading makes...</option>
-                    ) : (
-                      makes.map(makeName => (
-                        <option key={makeName} value={makeName}>{makeName}</option>
-                      ))
-                    )}
-                  </select>
-                </div>
-                <div className="new-search-field">
-                  <label>Postcode</label>
-                  <input 
-                    type="text" 
-                    placeholder="Enter postcode"
-                    value={searchFilters.postcode}
-                    onChange={(e) => handleFilterChange('postcode', e.target.value.toUpperCase())}
-                    className={postcodeError ? 'input-error' : ''}
-                  />
-                  {postcodeError && (
-                    <div className="field-error-message">{postcodeError}</div>
-                  )}
-                </div>
+        {/* Hero Section - Matching UsedCarsPage Design */}
+        <section className="redesign-hero">
+          <div className="redesign-hero-background">
+            <div className="redesign-hero-container">
+              <div className="redesign-hero-content">
+                <p className="redesign-hero-label">New Cars</p>
+                <h1 className="redesign-hero-headline">
+                  Nothing like that smell of a new car
+                </h1>
+                
+                <form className="redesign-hero-search-card" onSubmit={handleSearch}>
+                  <div className="redesign-search-row">
+                    <div className="redesign-search-field">
+                      <label>Postcode</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. SW1A 1AA"
+                        value={searchFilters.postcode}
+                        onChange={(e) => handleFilterChange('postcode', e.target.value.toUpperCase())}
+                        className={postcodeError ? 'error' : ''}
+                      />
+                      {postcodeError && (
+                        <span className="error-message">{postcodeError}</span>
+                      )}
+                    </div>
+                    
+                    <div className="redesign-search-field">
+                      <label>Make</label>
+                      <select
+                        value={searchFilters.make}
+                        onChange={(e) => handleFilterChange('make', e.target.value)}
+                        disabled={loadingMakes}
+                      >
+                        <option value="">Any</option>
+                        {loadingMakes ? (
+                          <option disabled>Loading makes...</option>
+                        ) : (
+                          makes.map(makeName => (
+                            <option key={makeName} value={makeName}>{makeName}</option>
+                          ))
+                        )}
+                      </select>
+                    </div>
+                    
+                    <div className="redesign-search-field">
+                      <label>Model</label>
+                      <input 
+                        type="text" 
+                        placeholder="Any"
+                        value={searchFilters.model}
+                        onChange={(e) => handleFilterChange('model', e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="redesign-search-actions">
+                      <button 
+                        type="button"
+                        className="more-options-link"
+                        onClick={() => {
+                          if (!searchFilters.postcode.trim()) {
+                            setPostcodeError('Please enter a postcode first');
+                            return;
+                          }
+                          const params = new URLSearchParams();
+                          if (searchFilters.postcode) params.append('postcode', searchFilters.postcode);
+                          if (searchFilters.make) params.append('make', searchFilters.make);
+                          if (searchFilters.model) params.append('model', searchFilters.model);
+                          params.append('condition', 'new');
+                          params.append('openFilter', 'true');
+                          navigate(`/search-results?${params.toString()}`);
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                        More options
+                      </button>
+                      <button 
+                        type="submit" 
+                        className="redesign-search-btn"
+                      >
+                        <span className="search-icon">🔍</span>
+                        Search new
+                      </button>
+                    </div>
+                  </div>
+                </form>
               </div>
-              <button className="new-search-btn" onClick={handleSearch}>🔍 Search new</button>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       {/* New Cars Available */}
       <section className="new-deals">

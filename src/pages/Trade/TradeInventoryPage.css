@@ -6,6 +6,33 @@
   padding: 32px;
 }
 
+/* Trial Banner - Inventory Page */
+.trial-banner-inventory {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.trial-icon-small {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.trial-text {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.trial-text strong {
+  font-weight: 700;
+}
+
 /* Header Section */
 .inventory-header {
   display: flex;
@@ -16,18 +43,28 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
+.header-left {
+  flex: 1;
+  min-width: 0;
+}
+
 .header-left h1 {
   font-size: 28px;
   font-weight: 700;
   color: #111827;
   margin: 0 0 4px 0;
   letter-spacing: -0.5px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .header-left .subtitle {
   color: #6b7280;
   font-size: 14px;
   margin: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.5;
 }
 
 .btn-add-vehicle {
@@ -526,10 +563,36 @@
 }
 
 @media (max-width: 768px) {
+  .trade-dashboard-content {
+    padding: 16px;
+  }
+
   .inventory-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
+  .header-left {
+    width: 100%;
+  }
+
+  .header-left h1 {
+    font-size: 22px;
+    line-height: 1.2;
+  }
+
+  .header-left .subtitle {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
   }
 
   .btn-add-vehicle {
@@ -537,20 +600,55 @@
     justify-content: center;
   }
 
+  .usage-bar-container {
+    width: 100%;
+  }
+
   .inventory-controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 16px;
   }
 
   .inventory-filters {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 4px;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .filter-group {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+    align-items: start;
+  }
+
+  .filter-label {
+    grid-column: 1 / -1;
+    margin-bottom: 4px;
+  }
+
+  .filter-group button {
+    grid-column: 2;
+  }
+
+  .vehicle-type-filter {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .inventory-filters button {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .inventory-tools {
     flex-direction: column;
     width: 100%;
+    gap: 10px;
   }
 
   .search-box {
@@ -565,8 +663,14 @@
     width: 100%;
   }
 
+  .view-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
   .vehicles-container.grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .vehicles-container.list .vehicle-card {
@@ -585,24 +689,67 @@
   .btn-action {
     width: 100%;
   }
+
+  .limit-warning {
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .warning-icon {
+    font-size: 24px;
+  }
+
+  .warning-content h3 {
+    font-size: 16px;
+  }
+
+  .modal-content {
+    margin: 0 16px;
+  }
 }
 
 @media (max-width: 480px) {
+  .trade-dashboard-content {
+    padding: 12px;
+  }
+
   .header-left h1 {
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .header-left .subtitle {
+    font-size: 13px;
   }
 
   .inventory-filters button {
     font-size: 13px;
-    padding: 8px 14px;
+    padding: 8px 12px;
+  }
+
+  .filter-label {
+    font-size: 12px;
   }
 
   .vehicle-title {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .vehicle-price {
-    font-size: 18px;
+    font-size: 17px;
+  }
+
+  .vehicle-specs {
+    font-size: 13px;
+  }
+
+  .meta-item {
+    font-size: 12px;
+  }
+
+  .btn-action {
+    padding: 9px 12px;
+    font-size: 13px;
   }
 }
 

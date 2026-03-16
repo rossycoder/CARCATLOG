@@ -3,126 +3,194 @@
   background: white;
 }
 
-/* Hero Section */
-.new-hero {
+/* Hero Section - Matching UsedCarsPage Design */
+.redesign-hero {
   background: #f5f5f5;
   padding: 20px;
   position: relative;
 }
 
-.new-hero-background {
+.redesign-hero-background {
   background: linear-gradient(135deg, #0a1628 0%, #1a2942 100%);
+  color: white;
   max-width: 1400px;
   margin: 0 auto;
   border-radius: 24px;
-  padding: 60px 20px 140px;
+  padding: 60px 20px 120px 20px;
   position: relative;
+  overflow: hidden;
 }
 
-.new-hero-container {
+.redesign-hero-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="80" cy="20" r="30" fill="rgba(255,255,255,0.03)"/></svg>');
+  background-size: 200px;
+  opacity: 0.5;
+}
+
+.redesign-hero-container {
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.redesign-hero-content {
   text-align: center;
 }
 
-.new-hero-label {
-  color: rgba(255,255,255,0.8);
-  font-size: 12px;
-  font-weight: 700;
+.redesign-hero-label {
+  font-size: 14px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  display: block;
-  margin-bottom: 16px;
+  letter-spacing: 1px;
+  margin: 0 0 16px 0;
+  opacity: 0.8;
 }
 
-.new-hero-title {
-  color: white;
+.redesign-hero-headline {
   font-size: 56px;
-  font-weight: 900;
-  margin: 0 0 60px 0;
+  font-weight: 700;
+  margin: 0 0 48px 0;
+  line-height: 1.1;
   letter-spacing: -1px;
 }
 
-.new-search-card {
+.redesign-hero-search-card {
   background: white;
-  border-radius: 16px;
-  padding: 32px 32px 40px 32px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   max-width: 900px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  align-items: stretch;
 }
 
-.new-search-fields {
+.redesign-search-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr 1fr 1.5fr;
   gap: 20px;
-  width: 100%;
+  align-items: end;
 }
 
-.new-search-field {
+.redesign-search-field {
+  text-align: left;
+  position: relative;
+  min-height: 70px;
+}
+
+.redesign-search-field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.redesign-search-field input,
+.redesign-search-field select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #1a1a1a;
+  background: white;
+  transition: border-color 0.3s;
+}
+
+.redesign-search-field input.error {
+  border-color: #dc3545;
+}
+
+.redesign-search-field .error-message {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  color: #dc3545;
+  font-size: 11px;
+  margin-top: 4px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.redesign-search-field input:focus,
+.redesign-search-field select:focus {
+  outline: none;
+  border-color: #0066ff;
+}
+
+.redesign-search-field select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path fill="%23666" d="M1 1l5 5 5-5"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.redesign-search-actions {
   display: flex;
   flex-direction: column;
-  position: relative;
-  min-width: 0;
+  gap: 12px;
 }
 
-.new-search-field label {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  color: #666;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-
-.new-search-field input,
-.new-search-field select {
-  width: 100%;
-  padding: 14px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 16px;
-}
-
-/* Validation Error Styles */
-.new-search-field .input-error {
-  border-color: #dc2626 !important;
-}
-
-.new-search-field .input-error:focus {
-  border-color: #dc2626 !important;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
-}
-
-.new-search-field .field-error-message {
-  margin-top: 6px;
-  color: #dc2626;
-  font-size: 12px;
-  font-weight: 500;
-  text-align: left;
-  line-height: 1.3;
-}
-
-.new-search-btn {
-  padding: 16px 32px;
-  background: #0066ff;
-  color: white;
+.more-options-link {
+  background: none;
   border: none;
-  border-radius: 8px;
+  color: #0066ff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0;
+  transition: color 0.2s ease;
+}
+
+.more-options-link:hover {
+  color: #0052cc;
+  text-decoration: underline;
+}
+
+.more-options-link svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+
+.redesign-search-btn {
+  padding: 16px 32px;
+  background: #0066ff !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   white-space: nowrap;
-  width: 100%;
-  margin-top: 0;
 }
 
-.new-search-btn:hover {
-  background: #0052cc;
+.redesign-search-btn:hover {
+  background: #0052cc !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+.search-icon {
+  font-size: 18px;
 }
 
 /* Deals Section - Leasing Carousel Style */
@@ -897,27 +965,21 @@
 
 /* Responsive - Tablet */
 @media (max-width: 1024px) {
-  .new-hero-background {
-    padding: 50px 20px 120px;
+  .redesign-search-row {
+    grid-template-columns: 1fr 1fr;
   }
   
-  .new-hero-title {
-    font-size: 42px;
-    margin-bottom: 40px;
+  .redesign-search-actions {
+    grid-column: 1 / -1;
   }
   
-  .new-search-card {
-    flex-direction: column;
-    padding: 24px;
-    gap: 16px;
+  .more-options-link {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
   }
   
-  .new-search-fields {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-  
-  .new-search-btn {
+  .redesign-search-btn {
     width: 100%;
   }
   
@@ -973,85 +1035,61 @@
 
 /* Responsive - Mobile */
 @media (max-width: 768px) {
-  .new-hero {
+  .redesign-hero {
     padding: 0;
-    background: linear-gradient(135deg, #0a1628 0%, #1a2942 100%);
   }
 
-  .new-hero-background {
-    padding: 30px 16px 30px;
+  .redesign-hero-background {
+    padding: 40px 20px 80px 20px;
     border-radius: 0;
-    background: transparent;
-    max-width: 100%;
+  }
+
+  .redesign-hero-headline {
+    font-size: 36px;
+    margin-bottom: 32px;
+  }
+
+  .redesign-hero-search-card {
+    padding: 24px 20px;
+  }
+
+  .redesign-search-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
   
-  .new-hero-container {
-    padding: 0;
+  .redesign-search-field {
+    min-height: 65px;
   }
   
-  .new-hero-title {
-    font-size: 26px;
-    margin-bottom: 20px;
-    line-height: 1.2;
-    padding: 0;
-    text-align: center;
+  .redesign-search-actions {
+    grid-column: 1;
   }
   
-  .new-hero-label {
-    font-size: 10px;
-    margin-bottom: 10px;
-    text-align: center;
+  .more-options-link {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
   }
   
-  .new-search-card {
-    padding: 16px 16px 24px 16px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    margin: 0;
-  }
-  
-  .new-search-fields {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  
-  .new-search-field {
-    text-align: left;
-  }
-  
-  .new-search-field:nth-child(3) {
-    grid-column: 1 / -1;
-  }
-  
-  .new-search-field label {
-    font-size: 11px;
-    margin-bottom: 6px;
-    text-align: left;
-  }
-  
-  .new-search-field input,
-  .new-search-field select {
-    padding: 12px;
-    font-size: 15px;
-    border-radius: 8px;
-    width: 100%;
-  }
-  
-  .new-search-btn {
-    padding: 14px 20px;
-    font-size: 15px;
-    border-radius: 8px;
-    margin-top: 8px;
+  .redesign-search-btn {
     width: 100%;
   }
   
   .new-deals {
-    padding: 50px 16px;
+    padding: 60px 20px;
   }
   
   .new-deals h2 {
-    font-size: 26px;
-    margin-bottom: 30px;
+    font-size: 28px;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  
+  .section-subtitle {
+    font-size: 15px;
+    margin: 0 0 30px 0;
+    color: #666;
   }
   
   .deals-carousel {
@@ -1065,19 +1103,45 @@
   
   .deals-scroll {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 20px;
   }
   
   .lease-card {
     max-width: 100%;
+    border-radius: 12px;
+  }
+  
+  .lease-image {
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .lease-details {
+    padding: 18px;
   }
   
   .lease-prices {
-    gap: 12px;
+    gap: 14px;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
   }
   
   .price-value {
-    font-size: 24px;
+    font-size: 26px;
+  }
+  
+  .lease-title {
+    font-size: 17px;
+    font-weight: 700;
+  }
+  
+  .lease-spec {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .view-all-link {
+    margin-top: 24px;
+    font-size: 15px;
   }
   
   .award-section {
@@ -1096,11 +1160,11 @@
   }
   
   .promo-content {
-    padding: 30px 20px;
+    padding: 40px 24px;
   }
   
   .promo-content h2 {
-    font-size: 26px;
+    font-size: 28px;
   }
   
   .promo-btn {
@@ -1110,25 +1174,25 @@
   }
   
   .promo-image {
-    min-height: 250px;
+    min-height: 280px;
   }
   
   .brand-grid-section {
-    padding: 40px 16px;
+    padding: 50px 20px;
   }
   
   .brand-grid-section h3 {
-    font-size: 20px;
+    font-size: 22px;
     margin-bottom: 30px;
   }
   
   .brand-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 14px;
   }
   
   .brand-item {
-    padding: 20px;
+    padding: 24px;
   }
   
   .savings-section {
@@ -1164,11 +1228,16 @@
   }
   
   .new-cars-page .benefits-section-pro {
-    padding: 60px 16px !important;
+    padding: 60px 20px !important;
+  }
+  
+  .new-cars-page .benefits-header {
+    margin-bottom: 40px !important;
   }
   
   .new-cars-page .benefits-header h2 {
     font-size: 2rem !important;
+    margin-bottom: 12px !important;
   }
   
   .new-cars-page .benefits-header p {
@@ -1253,58 +1322,54 @@
 
 /* Responsive - Small Mobile */
 @media (max-width: 480px) {
-  .new-hero {
-    padding: 0;
-  }
-
-  .new-hero-background {
-    padding: 20px 12px 24px;
+  .redesign-hero-background {
+    padding: 30px 16px 60px;
   }
   
-  .new-hero-title {
-    font-size: 22px;
-    margin-bottom: 16px;
+  .redesign-hero-headline {
+    font-size: 28px;
+    margin-bottom: 24px;
   }
   
-  .new-hero-label {
-    font-size: 9px;
-    letter-spacing: 1.5px;
+  .redesign-hero-label {
+    font-size: 12px;
   }
   
-  .new-search-card {
-    padding: 14px 14px 20px 14px;
+  .redesign-hero-search-card {
+    padding: 20px 16px;
   }
   
-  .new-search-fields {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+  .redesign-search-field input,
+  .redesign-search-field select {
+    padding: 12px 14px;
+    font-size: 15px;
   }
   
-  .new-search-field:nth-child(3) {
-    grid-column: 1 / -1;
-  }
-  
-  .new-search-field input,
-  .new-search-field select {
-    padding: 10px 12px;
-    font-size: 14px;
-  }
-  
-  .new-search-btn {
-    padding: 12px 16px;
-    font-size: 14px;
+  .redesign-search-btn {
+    padding: 14px 24px;
+    font-size: 15px;
   }
   
   .new-deals h2 {
-    font-size: 22px;
+    font-size: 24px;
+    font-weight: 700;
+  }
+  
+  .section-subtitle {
+    font-size: 14px;
+    margin: -10px 0 24px 0;
   }
   
   .price-value {
-    font-size: 22px;
+    font-size: 24px;
   }
   
   .lease-title {
-    font-size: 14px;
+    font-size: 15px;
+  }
+  
+  .lease-spec {
+    font-size: 13px;
   }
   
   .award-text h2 {
@@ -1312,24 +1377,24 @@
   }
   
   .promo-content h2 {
-    font-size: 22px;
+    font-size: 24px;
   }
   
   .promo-image {
-    min-height: 200px;
+    min-height: 220px;
   }
   
   .brand-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 12px;
   }
   
   .brand-item {
-    padding: 16px;
+    padding: 18px;
   }
   
   .brand-item img {
-    height: 30px;
+    height: 32px;
   }
   
   .brand-item span {
@@ -1338,11 +1403,11 @@
   
   .savings-text h2,
   .stock-text h3 {
-    font-size: 22px;
+    font-size: 24px;
   }
   
   .stock-number h2 {
-    font-size: 40px;
+    font-size: 42px;
   }
   
   .new-cars-page .benefits-header h2 {
@@ -1351,6 +1416,10 @@
   
   .new-cars-page .benefits-section-pro .benefit-card h3 {
     font-size: 1.125rem !important;
+  }
+  
+  .new-cars-page .benefits-section-pro .benefit-card p {
+    font-size: 0.95rem !important;
   }
   
   .reviews-section h3,

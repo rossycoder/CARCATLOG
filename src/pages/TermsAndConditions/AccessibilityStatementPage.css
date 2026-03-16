@@ -55,15 +55,15 @@
 
 .sidebar-nav a:hover {
   background-color: #f8f9fa;
-  color: #27ae60;
-  border-left-color: #27ae60;
+  color: var(--blue-theme-primary, #1a73e8) !important;
+  border-left-color: var(--blue-theme-primary, #1a73e8) !important;
 }
 
 .sidebar-nav a.active {
-  background-color: #e8f8f5;
-  color: #27ae60;
+  background-color: var(--blue-theme-primary-lightest, #f8fbff) !important;
+  color: var(--blue-theme-primary, #1a73e8) !important;
   font-weight: 600;
-  border-left-color: #27ae60;
+  border-left-color: var(--blue-theme-primary, #1a73e8) !important;
 }
 
 .accessibility-container {
@@ -90,7 +90,7 @@
   color: #2c3e50;
   margin-bottom: 15px;
   font-weight: 600;
-  border-bottom: 2px solid #27ae60;
+  border-bottom: 2px solid var(--blue-theme-primary, #1a73e8);
   padding-bottom: 8px;
 }
 
@@ -122,26 +122,26 @@
 }
 
 .commitment-section {
-  background-color: #e8f8f5;
+  background-color: var(--blue-theme-primary-lightest, #f8fbff);
   padding: 25px;
   border-radius: 8px;
-  border: 1px solid #a9dfbf;
+  border: 1px solid var(--blue-theme-border-secondary, #4285f4);
 }
 
 .commitment-section h2 {
-  border-bottom: 2px solid #27ae60;
+  border-bottom: 2px solid var(--blue-theme-primary, #1a73e8);
   margin-top: 0;
 }
 
 .accessibility-container a {
-  color: #27ae60;
+  color: var(--blue-theme-primary, #1a73e8);
   text-decoration: none;
   font-weight: 500;
 }
 
 .accessibility-container a:hover {
   text-decoration: underline;
-  color: #1e8449;
+  color: var(--blue-theme-primary-dark, #1557b0);
 }
 
 @media (max-width: 968px) {
@@ -177,8 +177,8 @@
 
   .sidebar-nav a:hover,
   .sidebar-nav a.active {
-    background-color: #27ae60;
-    color: white;
+    background-color: var(--blue-theme-primary, #1a73e8) !important;
+    color: white !important;
     border-left: none;
   }
 }

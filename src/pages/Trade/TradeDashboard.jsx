@@ -189,6 +189,22 @@ const TradeDashboard = () => {
         `}</style>
 
         {/* Subscription Status Card */}
+        {subscription?.isTrialing && (
+          <div className="trial-banner">
+            <div className="trial-icon">🎉</div>
+            <div className="trial-content">
+              <h3>30-Day Free Trial Active!</h3>
+              <p>
+                <strong>{subscription.trialDaysLeft || 0} days remaining</strong> in your trial period
+              </p>
+              <p className="trial-info">
+                During trial: Only £2.50 per car listing • 
+                After trial: £{(subscription.plan?.price / 100).toFixed(2)}/month for unlimited listings
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className={`subscription-card ${subscription ? 'active' : 'inactive'}`}>
           <div className="subscription-header">
             <div className="subscription-icon">

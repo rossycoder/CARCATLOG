@@ -548,28 +548,40 @@ div.car-card:hover div.car-image-container {
 /* S - Large Mobile (640px - 767px) */
 @media (max-width: 767px) {
   .car-card {
-    border-radius: 8px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .car-image-container {
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .car-image {
+    border-radius: 12px 12px 0 0;
   }
   
   .car-content {
-    padding: 14px;
-    gap: 6px;
+    padding: 16px;
+    gap: 8px;
   }
 
   .car-card .car-content .car-title {
-    font-size: 17px;
-    margin-bottom: 3px;
+    font-size: 18px;
+    margin-bottom: 4px;
+    font-weight: 700;
   }
   
   .car-card .car-content .car-subtitle {
     font-size: 14px;
-    margin-bottom: 6px;
-    line-height: 1.3;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    color: #4b5563;
   }
   
   .car-attention-grabber {
     font-size: 13px;
     margin-bottom: 8px;
+    color: #1a1a1a;
   }
   
   .car-dealer {
@@ -578,54 +590,62 @@ div.car-card:hover div.car-image-container {
   }
 
   .car-card .car-specs {
-    font-size: 13px;
-    margin-bottom: 8px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: #6b7280;
   }
 
   .car-card .car-badges {
-    gap: 5px;
-    margin-bottom: 10px;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
   }
   
   .car-card .car-badges .badge {
-    padding: 5px 9px;
+    padding: 6px 10px;
     font-size: 11px;
+    border-radius: 6px;
   }
 
   .car-price {
-    font-size: 21px;
-    margin-bottom: 12px;
+    font-size: 22px;
+    margin-bottom: 14px;
+    font-weight: 700;
   }
   
   .price-label {
     font-size: 12px;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
   }
   
   .car-footer {
-    padding-top: 12px;
+    padding-top: 14px;
+    margin-top: 8px;
   }
   
-  .car-location,
+  .car-location {
+    font-size: 14px;
+  }
+  
   .car-rating {
     font-size: 13px;
   }
 
   .car-image-container > .save-button {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    max-width: 36px !important;
-    max-height: 36px !important;
-    top: 10px !important;
-    right: 10px !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    max-width: 38px !important;
+    max-height: 38px !important;
+    top: 12px !important;
+    right: 12px !important;
     z-index: 100 !important;
   }
 
   .car-image-container > .save-button svg {
-    width: 20px !important;
-    height: 20px !important;
+    width: 22px !important;
+    height: 22px !important;
   }
   
   .slider-btn {
@@ -641,17 +661,17 @@ div.car-card:hover div.car-image-container {
   }
   
   .reserve-badge {
-    top: 10px;
-    left: 10px;
-    padding: 6px 11px;
+    top: 12px;
+    left: 12px;
+    padding: 7px 12px;
     font-size: 11px;
     z-index: 100 !important;
   }
   
   .image-count {
-    bottom: 10px;
-    left: 10px;
-    padding: 5px 9px;
+    bottom: 12px;
+    left: 12px;
+    padding: 6px 10px;
     font-size: 11px;
     z-index: 100 !important;
   }
@@ -669,75 +689,97 @@ div.car-card:hover div.car-image-container {
 
 /* XS - Small Mobile (0 - 639px) */
 @media (max-width: 639px) {
+  .car-card {
+    border-radius: 10px;
+  }
+  
+  .car-image-container {
+    border-radius: 10px 10px 0 0;
+  }
+  
+  .car-image {
+    border-radius: 10px 10px 0 0;
+  }
+  
   .car-content {
-    padding: 12px;
-    gap: 5px;
+    padding: 14px;
+    gap: 6px;
   }
   
   .car-card .car-content .car-title {
-    font-size: 15px;
-    margin-bottom: 2px;
+    font-size: 16px;
+    margin-bottom: 3px;
+    font-weight: 700;
   }
   
   .car-card .car-content .car-subtitle {
-    font-size: 12px;
-    line-height: 1.3;
-    margin-bottom: 5px;
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    color: #4b5563;
   }
   
   .car-attention-grabber {
-    font-size: 11px;
-    margin-bottom: 6px;
+    font-size: 12px;
+    margin-bottom: 7px;
   }
   
   .car-card .car-specs {
-    font-size: 11px;
-    margin-bottom: 6px;
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: #6b7280;
   }
 
   .car-card .car-badges {
-    gap: 4px;
-    margin-bottom: 8px;
+    gap: 5px;
+    margin-bottom: 10px;
   }
   
   .car-card .car-badges .badge {
-    padding: 4px 7px;
+    padding: 5px 8px;
     font-size: 10px;
+    border-radius: 5px;
   }
   
   .car-price {
-    font-size: 18px;
-    margin-bottom: 8px;
+    font-size: 20px;
+    margin-bottom: 10px;
+    font-weight: 700;
   }
   
   .price-label {
-    font-size: 10px;
+    font-size: 11px;
+    margin-bottom: 3px;
   }
   
   .car-footer {
-    padding-top: 8px;
+    padding-top: 10px;
+    margin-top: 6px;
   }
   
-  .car-location,
+  .car-location {
+    font-size: 13px;
+  }
+  
   .car-rating {
-    font-size: 11px;
+    font-size: 12px;
   }
   
   .car-image-container > .save-button {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    max-width: 32px !important;
-    max-height: 32px !important;
-    top: 8px !important;
-    right: 8px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    top: 10px !important;
+    right: 10px !important;
     z-index: 100 !important;
   }
   
   .car-image-container > .save-button svg {
-    width: 18px !important;
-    height: 18px !important;
+    width: 20px !important;
+    height: 20px !important;
   }
   
   .slider-btn {
@@ -753,17 +795,17 @@ div.car-card:hover div.car-image-container {
   }
   
   .reserve-badge {
-    top: 8px;
-    left: 8px;
-    padding: 5px 9px;
+    top: 10px;
+    left: 10px;
+    padding: 6px 10px;
     font-size: 10px;
     z-index: 100 !important;
   }
   
   .image-count {
-    bottom: 8px;
-    left: 8px;
-    padding: 4px 7px;
+    bottom: 10px;
+    left: 10px;
+    padding: 5px 8px;
     font-size: 10px;
     z-index: 100 !important;
   }

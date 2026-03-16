@@ -657,27 +657,27 @@
 
   /* Mobile badge fixes - Keep 2-column layout like AutoTrader */
   .spec-item {
-    padding: 10px 8px;
-    gap: 8px;
+    padding: 12px 10px;
+    gap: 10px;
   }
 
   .spec-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
   }
 
   .spec-icon {
-    font-size: 1.2rem;
-    width: 24px;
-    height: 24px;
+    font-size: 1.3rem;
+    width: 28px;
+    height: 28px;
   }
 
   .spec-label {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
   }
 
   .spec-value {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
 
   .car-make-model {
