@@ -163,21 +163,48 @@ const TradeSubscriptionPage = () => {
         </div>
       )}
       
-      <div className="subscription-header">
-        <h1>Welcome{dealer?.dealershipName ? `, ${dealer.dealershipName}` : ''}!</h1>
-        <p>Choose a subscription package to start listing your vehicles</p>
-        
-        {currentSubscription && currentSubscription.status === 'active' && (
+      {/* If user already has active subscription (including trial), redirect to dashboard */}
+      {currentSubscription && (currentSubscription.status === 'active' || currentSubscription.status === 'trialing') ? (
+        <div className="subscription-header">
+          <h1>You're All Set!</h1>
+          <p>Your subscription is active. Start listing your vehicles now!</p>
+          
+          {currentSubscription.isTrialing && (
+            <div className="trial-offer-banner">
+              <div className="trial-icon">🎉</div>
+              <div className="trial-content">
+                <h3>30-Day FREE Trial Active!</h3>
+                <p>{currentSubscription.trialDaysLeft || 0} days remaining</p>
+                <p className="trial-details">Only £2.50 per car during trial • Full charge starts after trial ends</p>
+              </div>
+            </div>
+          )}
+          
           <button 
             className="continue-dashboard-btn"
             onClick={() => navigate('/trade/dashboard')}
           >
-            Continue to Dashboard →
+            Go to Dashboard →
           </button>
-        )}
-      </div>
+        </div>
+      ) : (
+        <>
+          <div className="subscription-header">
+            <h1>Welcome{dealer?.dealershipName ? `, ${dealer.dealershipName}` : ''}!</h1>
+            <p>Choose a subscription package to start listing your vehicles</p>
+            
+            {/* 30-Day Free Trial Banner */}
+            <div className="trial-offer-banner">
+              <div className="trial-icon">🎉</div>
+              <div className="trial-content">
+                <h3>30-Day FREE Trial on All Packages!</h3>
+                <p>Start listing immediately - Only pay £2.50 per car during trial</p>
+                <p className="trial-details">Full subscription charge starts after 30 days</p>
+              </div>
+            </div>
+          </div>
 
-      <div className="subscription-plans-grid">
+          <div className="subscription-plans-grid">
         {/* BRONZE PLAN */}
         <div className="subscription-plan-card bronze">
           <div className="plan-header bronze-header">
@@ -291,9 +318,13 @@ const TradeSubscriptionPage = () => {
             </button>
           </div>
         </div>
-      </div>
 
-      {currentSubscription && (
+        {/* End of plans grid */}
+      </div>
+        </>
+      )}
+
+      {!currentSubscription && currentSubscription?.status !== 'active' && currentSubscription?.status !== 'trialing' && (
         <div className="current-subscription-info">
           <h3>Your Current Subscription</h3>
           <div className="subscription-details">

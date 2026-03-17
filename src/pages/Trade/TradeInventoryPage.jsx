@@ -145,17 +145,6 @@ const TradeInventoryPage = () => {
   return (
     <div className="trade-dashboard-layout">
       <div className="trade-dashboard-content">
-        {/* Trial Banner */}
-        {subscription?.isTrialing && (
-          <div className="trial-banner-inventory">
-            <div className="trial-icon-small">🎉</div>
-            <div className="trial-text">
-              <strong>Trial Active:</strong> {subscription.trialDaysLeft || 0} days left • 
-              £2.50 per car during trial
-            </div>
-          </div>
-        )}
-
         {/* Header Section */}
         <div className="inventory-header">
           <div className="header-left">

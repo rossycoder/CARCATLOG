@@ -232,6 +232,10 @@
 
 .write-off-warning-badge .warning-icon {
   font-size: 1.3rem;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: #fbbf24;
 }
 
 .write-off-warning-badge .warning-text {
@@ -251,22 +255,46 @@
 /* Mobile responsive */
 @media (max-width: 768px) {
   .write-off-warning-badge {
-    padding: 10px 12px;
-    gap: 8px;
-    margin-bottom: 12px;
+    padding: 6px 10px;
+    gap: 6px;
+    margin-bottom: 10px;
   }
 
   .write-off-warning-badge .warning-icon {
-    font-size: 1.1rem;
+    width: 14px;
+    height: 14px;
   }
 
   .write-off-warning-badge .warning-text {
-    font-size: 0.9rem;
+    font-size: 0.7rem;
   }
   
   .write-off-warning-badge .warning-subtitle {
     margin-left: 0;
-    margin-top: 4px;
+    margin-top: 0;
+    font-size: 0.65rem;
+    display: none;
+  }
+}
+
+@media (max-width: 968px) {
+  .write-off-warning-badge {
+    padding: 5px 8px;
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+
+  .write-off-warning-badge .warning-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .write-off-warning-badge .warning-text {
+    font-size: 0.65rem;
+  }
+  
+  .write-off-warning-badge .warning-subtitle {
+    display: none;
   }
 }
 

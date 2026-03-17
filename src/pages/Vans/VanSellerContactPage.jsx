@@ -178,6 +178,26 @@ const VanSellerContactPage = () => {
         throw new Error(data.message || 'Failed to publish van');
       }
 
+      console.log('✅ Van published successfully:', data);
+
+      // Check if dealer is in trial period and charge £2.50
+      if (dealer?.subscription?.isTrialing && data.data?.vanId) {
+        try {
+          console.log('🎉 Dealer in trial - charging £2.50 for van listing');
+          const tradeInventoryService = await import('../../services/tradeInventoryService');
+          const chargeResult = await tradeInventoryService.chargeTrialListing(data.data.vanId);
+          
+          if (chargeResult.charged) {
+            console.log('✅ Trial charge successful:', chargeResult.amount);
+          } else {
+            console.log('ℹ️ No trial charge needed:', chargeResult.message);
+          }
+        } catch (chargeError) {
+          console.error('⚠️ Trial charge failed (non-blocking):', chargeError);
+          // Don't block - listing is already created
+        }
+      }
+
       localStorage.removeItem(`vanAdvert_${advertId}`);
 
       navigate('/trade/dashboard', {

@@ -208,6 +208,24 @@ const BikeSellerContactPage = () => {
 
       console.log('✅ Bike published successfully:', data);
 
+      // Check if dealer is in trial period and charge £2.50
+      if (dealer?.subscription?.isTrialing && data.data?.bikeId) {
+        try {
+          console.log('🎉 Dealer in trial - charging £2.50 for bike listing');
+          const tradeInventoryService = await import('../../services/tradeInventoryService');
+          const chargeResult = await tradeInventoryService.chargeTrialListing(data.data.bikeId);
+          
+          if (chargeResult.charged) {
+            console.log('✅ Trial charge successful:', chargeResult.amount);
+          } else {
+            console.log('ℹ️ No trial charge needed:', chargeResult.message);
+          }
+        } catch (chargeError) {
+          console.error('⚠️ Trial charge failed (non-blocking):', chargeError);
+          // Don't block - listing is already created
+        }
+      }
+
       // Clear localStorage
       localStorage.removeItem(`bikeAdvert_${advertId}`);
 

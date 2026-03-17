@@ -384,7 +384,9 @@ const CarDetailPage = () => {
                  if (isKnownCategory || isUnknownCategory) {
                    return (
                      <div className="write-off-warning-badge">
-                       <span className="warning-icon">⚠️</span>
+                       <svg className="warning-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                         <path d="M12 2L1 21h22L12 2zm0 3.83L19.53 19H4.47L12 5.83zM11 16v2h2v-2h-2zm0-6v4h2v-4h-2z"/>
+                       </svg>
                        <span className="warning-text">
                          {isUnknownCategory ? 'CAT UNKNOWN' : `CAT ${category}`}
                        </span>

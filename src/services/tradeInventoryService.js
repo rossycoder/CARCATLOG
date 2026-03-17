@@ -105,6 +105,15 @@ export const deleteVan = async (id) => {
   return response.data;
 };
 
+// Charge £2.50 for trial listing
+export const chargeTrialListing = async (vehicleId) => {
+  const response = await api.post(`${API_URL}/charge-trial-listing`, 
+    { vehicleId }, 
+    getAuthHeaders()
+  );
+  return response.data;
+};
+
 // Alias for createVehicle
 export const addVehicle = createVehicle;
 
@@ -118,6 +127,7 @@ export default {
   deleteVehicle,
   markAsSold,
   publishVehicle,
+  chargeTrialListing,
   getBikeInventory,
   publishBike,
   deleteBike,

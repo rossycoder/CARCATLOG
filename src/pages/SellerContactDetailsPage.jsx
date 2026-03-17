@@ -152,6 +152,23 @@ const SellerContactDetailsPage = () => {
       console.log('✅ Publish response:', response);
 
       if (response.success) {
+        // Check if dealer is in trial period and charge £2.50
+        if (dealer.subscription?.isTrialing) {
+          try {
+            console.log('🎉 Dealer in trial - charging £2.50 for listing');
+            const chargeResult = await tradeInventoryService.chargeTrialListing(response.data.vehicleId);
+            
+            if (chargeResult.charged) {
+              console.log('✅ Trial charge successful:', chargeResult.amount);
+            } else {
+              console.log('ℹ️ No trial charge needed:', chargeResult.message);
+            }
+          } catch (chargeError) {
+            console.error('⚠️ Trial charge failed (non-blocking):', chargeError);
+            // Don't block - listing is already created
+          }
+        }
+        
         // Navigate to trade dashboard with success message
         navigate('/trade/dashboard', {
           state: { 

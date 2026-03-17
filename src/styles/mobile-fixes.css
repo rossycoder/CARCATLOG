@@ -119,19 +119,19 @@ html, body {
   .car-title,
   .car-name,
   .car-make-model {
-    font-size: 0.625rem !important;
+    font-size: 0.75rem !important;
     line-height: 1.3;
   }
 
   .car-subtitle,
   .car-variant-line {
-    font-size: 0.475rem !important;
+    font-size: 0.6rem !important;
   }
 
   /* Fix prices */
   .car-price,
   .price-tag {
-    font-size: 0.75rem !important;
+    font-size: 0.875rem !important;
   }
 
   /* Fix search form buttons */
@@ -192,28 +192,66 @@ html, body {
     gap: 8px;
   }
 
+  /* Vehicle Features - Compact Grid */
+  .features-section .features-grid,
+  .vehicle-features-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .feature-item,
+  .feature-card {
+    padding: 6px 8px !important;
+    font-size: 0.6rem !important;
+    min-height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  .feature-item svg,
+  .feature-card svg,
+  .feature-icon {
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .feature-item span,
+  .feature-card span,
+  .feature-name {
+    font-size: 0.6rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .features-section h2,
+  .features-section h3 {
+    font-size: 0.75rem !important;
+    margin-bottom: 6px !important;
+  }
+
   /* Fix spec items */
   .spec-item {
-    padding: 6px 8px !important;
-    min-height: 50px !important;
+    padding: 4px 6px !important;
+    min-height: 32px !important;
     align-items: flex-start !important;
-    gap: 6px !important;
+    gap: 4px !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
   
   .spec-icon {
-    margin-top: 2px;
-    font-size: 0.875rem !important;
-    width: 16px !important;
-    height: 16px !important;
+    margin-top: 1px;
+    font-size: 0.625rem !important;
+    width: 12px !important;
+    height: 12px !important;
     flex-shrink: 0 !important;
   }
   
   .spec-icon svg,
   .spec-icon img {
-    width: 14px !important;
-    height: 14px !important;
+    width: 10px !important;
+    height: 10px !important;
   }
   
   .spec-details {
@@ -223,14 +261,14 @@ html, body {
   }
 
   .spec-label {
-    font-size: 0.625rem !important;
-    line-height: 1.2 !important;
-    margin-bottom: 2px !important;
+    font-size: 0.5rem !important;
+    line-height: 1.1 !important;
+    margin-bottom: 1px !important;
   }
 
   .spec-value {
-    font-size: 0.75rem !important;
-    line-height: 1.3 !important;
+    font-size: 0.6rem !important;
+    line-height: 1.2 !important;
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
   }
@@ -239,26 +277,26 @@ html, body {
   .running-costs-horizontal {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 6px;
   }
 
   .running-cost-item {
-    padding: 10px;
+    padding: 6px;
     background: #f8f9fa;
-    border-radius: 6px;
+    border-radius: 4px;
   }
 
   .cost-icon-wrapper {
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
   }
 
   .cost-label {
-    font-size: 0.75rem;
+    font-size: 0.55rem;
   }
 
   .cost-value {
-    font-size: 0.875rem;
+    font-size: 0.65rem;
   }
 
   /* Fix navigation */
@@ -310,7 +348,7 @@ html, body {
   .location-value,
   .dealer-location,
   .private-seller-location {
-    font-size: 0.75rem !important;
+    font-size: 0.6rem !important;
     flex-wrap: nowrap !important;
     white-space: nowrap !important;
     overflow: hidden !important;
@@ -318,49 +356,78 @@ html, body {
   }
   
   .location-info {
-    padding: 8px 10px !important;
-    gap: 6px !important;
+    padding: 6px 8px !important;
+    gap: 4px !important;
     flex-wrap: nowrap !important;
     overflow: hidden !important;
   }
   
   .location-label {
-    font-size: 0.75rem !important;
+    font-size: 0.6rem !important;
     flex-shrink: 0 !important;
   }
   
   .dealer-name {
-    font-size: 0.75rem !important;
+    font-size: 0.6rem !important;
   }
   
   .distance-info {
-    font-size: 0.75rem !important;
+    font-size: 0.6rem !important;
   }
 
   /* Fix electric vehicle badges */
   .electric-badge,
   .inline-flex {
-    font-size: 10px !important;
-    padding: 3px 6px !important;
+    font-size: 8px !important;
+    padding: 2px 4px !important;
   }
 
   .electric-badge svg,
   .inline-flex svg {
-    width: 12px !important;
-    height: 12px !important;
+    width: 10px !important;
+    height: 10px !important;
   }
 
   /* Fix write-off warnings */
   .write-off-warning-badge {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-    padding: 10px;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    font-size: 0.65rem !important;
+    min-height: auto !important;
+  }
+
+  .write-off-warning-badge .warning-icon,
+  .write-off-warning-badge svg {
+    width: 12px !important;
+    height: 12px !important;
+    flex-shrink: 0;
+  }
+
+  .write-off-warning-badge .warning-title,
+  .write-off-warning-badge strong {
+    font-size: 0.65rem !important;
+    font-weight: 600 !important;
   }
 
   .write-off-warning-badge .warning-subtitle {
     margin-left: 0;
-    margin-top: 4px;
+    margin-top: 0;
+    font-size: 0.55rem !important;
+    display: none; /* Hide subtitle on mobile for compactness */
+  }
+
+  /* CAT S/N/D badges - Compact */
+  .damage-category-badge,
+  .write-off-badge,
+  [class*="cat-"] {
+    padding: 4px 8px !important;
+    font-size: 0.65rem !important;
+    border-radius: 3px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
   }
 
   /* Fix image galleries */
@@ -406,12 +473,12 @@ html, body {
 
   /* Fix Car Detail Page */
   .car-detail-page {
-    padding: 8px 0 !important;
+    padding: 6px 0 !important;
     overflow-x: hidden !important;
   }
 
   .detail-container {
-    padding: 0 8px !important;
+    padding: 0 6px !important;
     max-width: 100% !important;
     width: 100% !important;
     overflow-x: hidden !important;
@@ -419,7 +486,7 @@ html, body {
 
   .content-grid {
     grid-template-columns: 1fr !important;
-    gap: 12px !important;
+    gap: 8px !important;
     width: 100% !important;
   }
 
@@ -440,58 +507,58 @@ html, body {
   .running-costs-section-new,
   .meet-seller-section,
   .contact-card {
-    padding: 12px !important;
+    padding: 8px !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
   
   .overview-section h2 {
-    font-size: 1rem !important;
-    margin-bottom: 10px !important;
+    font-size: 0.75rem !important;
+    margin-bottom: 6px !important;
   }
 
   .car-header {
-    padding: 12px !important;
+    padding: 8px !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
 
   .car-make-model {
-    font-size: 1.125rem !important;
-    word-wrap: break-word !important;
-  }
-
-  .car-variant-line {
     font-size: 0.875rem !important;
     word-wrap: break-word !important;
   }
 
+  .car-variant-line {
+    font-size: 0.625rem !important;
+    word-wrap: break-word !important;
+  }
+
   .price-tag {
-    font-size: 1.25rem !important;
+    font-size: 1rem !important;
   }
 
   .spec-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 6px !important;
+    gap: 4px !important;
     align-items: stretch !important;
     width: 100% !important;
-    margin-bottom: 10px !important;
+    margin-bottom: 6px !important;
   }
 
   .spec-item {
-    padding: 6px 8px !important;
-    min-height: 50px !important;
+    padding: 4px 6px !important;
+    min-height: 32px !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: flex-start !important;
-    gap: 6px !important;
+    gap: 4px !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
 
   .main-image {
-    height: 200px !important;
+    height: 180px !important;
   }
 
   /* Fix Trade Inventory Page */
