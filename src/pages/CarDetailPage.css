@@ -172,12 +172,15 @@
   align-items: center;
   gap: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-wrap: nowrap;
 }
 
 .location-label {
   color: #666;
   font-size: 0.9rem;
   font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .location-value {
@@ -186,21 +189,24 @@
   font-size: 0.9rem;
   display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0;
+  flex-wrap: nowrap;
+  gap: 4px;
   line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .location-value .dealer-name {
   font-weight: 600;
   color: #1a1a1a;
-  margin-right: 4px;
+  white-space: nowrap;
 }
 
 .location-value .distance-info {
   color: #0066cc;
   font-weight: 600;
-  margin-left: 0;
+  white-space: nowrap;
 }
 
 .car-header {

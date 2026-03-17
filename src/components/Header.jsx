@@ -171,7 +171,7 @@ const Header = () => {
                 </div>
               )}
             </div>
-          ) : (
+          ) : !isTradeAuthenticated && (
             <Link 
               to="/signin" 
               className="icon-btn account-btn signin-btn"
@@ -321,7 +321,7 @@ const Header = () => {
                 Saved Cars
               </Link>
             </>
-          ) : (
+          ) : !isTradeAuthenticated && (
             <Link to="/signin" className="mobile-menu-link" onClick={closeMenu}>
               <FaUser style={{ marginRight: '8px' }} size={14} />
               Sign in

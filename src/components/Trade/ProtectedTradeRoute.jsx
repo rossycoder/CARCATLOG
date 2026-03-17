@@ -18,8 +18,16 @@ const ProtectedTradeRoute = ({ children, requireSubscription = false }) => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div>Loading...</div>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        gap: '16px'
+      }}>
+        <div className="loading-spinner"></div>
+        <p style={{ color: '#6b7280', fontSize: '14px' }}>Loading...</p>
       </div>
     );
   }
@@ -31,8 +39,16 @@ const ProtectedTradeRoute = ({ children, requireSubscription = false }) => {
   // Show loading while subscription is being fetched for routes that require it
   if (requireSubscription && isLoadingSubscription) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div>Loading subscription...</div>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        gap: '16px'
+      }}>
+        <div className="loading-spinner"></div>
+        <p style={{ color: '#6b7280', fontSize: '14px' }}>Loading...</p>
       </div>
     );
   }
