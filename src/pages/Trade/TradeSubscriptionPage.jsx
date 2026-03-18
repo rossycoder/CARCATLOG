@@ -191,15 +191,20 @@ const TradeSubscriptionPage = () => {
         <>
           <div className="subscription-header">
             <h1>Welcome{dealer?.dealershipName ? `, ${dealer.dealershipName}` : ''}!</h1>
-            <p>Choose a subscription package to start listing your vehicles</p>
+            <p>Choose your subscription package - Start with 30 days FREE trial</p>
             
             {/* 30-Day Free Trial Banner */}
             <div className="trial-offer-banner">
               <div className="trial-icon">🎉</div>
               <div className="trial-content">
                 <h3>30-Day FREE Trial on All Packages!</h3>
-                <p>Start listing immediately - Only pay £2.50 per car during trial</p>
-                <p className="trial-details">Full subscription charge starts after 30 days</p>
+                <p><strong>How it works:</strong></p>
+                <ul className="trial-steps">
+                  <li>✓ Choose your package below (Bronze, Silver, or Gold)</li>
+                  <li>✓ Enter your card details (you won't be charged the full amount yet)</li>
+                  <li>✓ Start listing immediately - Pay only £2.50 per car during trial</li>
+                  <li>✓ After 30 days, your chosen package activates at full price</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -213,13 +218,14 @@ const TradeSubscriptionPage = () => {
           
           <div className="plan-content">
             <div className="plan-price">
-              <h3>Price:</h3>
+              <h3>Monthly Price:</h3>
               <p className="price-amount">£1000</p>
               <p className="vat-text">+ VAT</p>
+              <p className="trial-pricing">During 30-day trial: Only £2.50 per car</p>
             </div>
 
             <div className="plan-summary">
-              <p><strong>Summary:</strong> Our Bronze Subscription let's you list upto 20 cars.</p>
+              <p><strong>Summary:</strong> Our Bronze Subscription lets you list up to 20 cars.</p>
             </div>
 
             <div className="plan-features">
@@ -251,13 +257,14 @@ const TradeSubscriptionPage = () => {
           
           <div className="plan-content">
             <div className="plan-price">
-              <h3>Price:</h3>
+              <h3>Monthly Price:</h3>
               <p className="price-amount">£1500</p>
               <p className="vat-text">+ VAT</p>
+              <p className="trial-pricing">During 30-day trial: Only £2.50 per car</p>
             </div>
 
             <div className="plan-summary">
-              <p><strong>Summary:</strong> Our Silver Subscription let's you list upto 35 cars.</p>
+              <p><strong>Summary:</strong> Our Silver Subscription lets you list up to 35 cars.</p>
             </div>
 
             <div className="plan-features">
@@ -289,9 +296,10 @@ const TradeSubscriptionPage = () => {
           
           <div className="plan-content">
             <div className="plan-price">
-              <h3>Price:</h3>
+              <h3>Monthly Price:</h3>
               <p className="price-amount">£2000</p>
               <p className="vat-text">+ VAT</p>
+              <p className="trial-pricing">During 30-day trial: Only £2.50 per car</p>
             </div>
 
             <div className="plan-summary">

@@ -372,72 +372,183 @@ const CarDetailPage = () => {
 
             {/* Title and Price - AutoTrader Format */}
             <div className="car-header">
-              {/* Write-off Warning Badge - Show for CAT A, B, C, S, N, D, and UNKNOWN */}
-              {car.historyCheckId && 
-               car.historyCheckId.writeOffCategory && 
-               (() => {
-                 const category = car.historyCheckId.writeOffCategory.toUpperCase();
-                 const isKnownCategory = ['A', 'B', 'C', 'S', 'N', 'D'].includes(category);
-                 const isUnknownCategory = category === 'UNKNOWN' || category === 'NOT KNOWN';
-                 
-                 // Show badge for known categories OR unknown category
-                 if (isKnownCategory || isUnknownCategory) {
-                   return (
-                     <div className="write-off-warning-badge">
-                       <svg className="warning-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                         <path d="M12 2L1 21h22L12 2zm0 3.83L19.53 19H4.47L12 5.83zM11 16v2h2v-2h-2zm0-6v4h2v-4h-2z"/>
-                       </svg>
-                       <span className="warning-text">
-                         {isUnknownCategory ? 'CAT UNKNOWN' : `CAT ${category}`}
-                       </span>
-                     </div>
-                   );
-                 }
-                 return null;
-               })()
-              }
-              
-              <h1 className="car-make-model">
-                {/* AutoTrader Style Line 1: Make + Model only */}
-                {car.make} {car.model}
-              </h1>
-              <h2 className="car-variant-line">
-                {/* AutoTrader Style Line 2: Variant + Battery + BodyType + Transmission + Doors */}
-                {(() => {
-                  const parts = [];
-                  
-                  // 1. Variant
-                  if (car.variant && car.variant !== 'null' && car.variant !== 'undefined' && car.variant.trim() !== '') {
-                    parts.push(car.variant.trim());
-                  }
-                  
-                  // 2. Battery capacity for PHEV/Electric
-                  if (car.batteryCapacity) {
-                    parts.push(`${car.batteryCapacity}kWh`);
-                  }
-                  
-                  // 3. Body type
-                  if (car.bodyType && car.bodyType !== 'null' && car.bodyType !== 'undefined') {
-                    parts.push(car.bodyType);
-                  }
-                  
-                  // 4. Transmission
-                  if (car.transmission) {
-                    const trans = car.transmission.toLowerCase();
-                    parts.push(trans === 'automatic' || trans === 'auto' ? 'Auto' : trans === 'manual' ? 'Manual' : car.transmission);
-                  }
-                  
-                  // 5. Doors
-                  if (car.doors) {
-                    parts.push(`${car.doors}dr`);
-                  }
-                  
-                  return parts.join(' ');
-                })()}
-              </h2>
-              <div className="price-tag">
-                {formatPrice(car.price)}
+              <div className="car-header-left">
+                {/* Write-off Warning Badge - Show for CAT A, B, C, S, N, D, and UNKNOWN */}
+                {car.historyCheckId && 
+                 car.historyCheckId.writeOffCategory && 
+                 (() => {
+                   const category = car.historyCheckId.writeOffCategory.toUpperCase();
+                   const isKnownCategory = ['A', 'B', 'C', 'S', 'N', 'D'].includes(category);
+                   const isUnknownCategory = category === 'UNKNOWN' || category === 'NOT KNOWN';
+                   
+                   // Show badge for known categories OR unknown category
+                   if (isKnownCategory || isUnknownCategory) {
+                     return (
+                       <div className="write-off-warning-badge">
+                         <svg className="warning-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                           <path d="M12 2L1 21h22L12 2zm0 3.83L19.53 19H4.47L12 5.83zM11 16v2h2v-2h-2zm0-6v4h2v-4h-2z"/>
+                         </svg>
+                         <span className="warning-text">
+                           {isUnknownCategory ? 'CAT UNKNOWN' : `CAT ${category}`}
+                         </span>
+                       </div>
+                     );
+                   }
+                   return null;
+                 })()
+                }
+                
+                <h1 className="car-make-model">
+                  {/* AutoTrader Style Line 1: Make + Model only */}
+                  {car.make} {car.model}
+                </h1>
+                <h2 className="car-variant-line">
+                  {/* AutoTrader Style Line 2: Variant + Battery + BodyType + Transmission + Doors */}
+                  {(() => {
+                    const parts = [];
+                    
+                    // 1. Variant
+                    if (car.variant && car.variant !== 'null' && car.variant !== 'undefined' && car.variant.trim() !== '') {
+                      parts.push(car.variant.trim());
+                    }
+                    
+                    // 2. Battery capacity for PHEV/Electric
+                    if (car.batteryCapacity) {
+                      parts.push(`${car.batteryCapacity}kWh`);
+                    }
+                    
+                    // 3. Body type
+                    if (car.bodyType && car.bodyType !== 'null' && car.bodyType !== 'undefined') {
+                      parts.push(car.bodyType);
+                    }
+                    
+                    // 4. Transmission
+                    if (car.transmission) {
+                      const trans = car.transmission.toLowerCase();
+                      parts.push(trans === 'automatic' || trans === 'auto' ? 'Auto' : trans === 'manual' ? 'Manual' : car.transmission);
+                    }
+                    
+                    // 5. Doors
+                    if (car.doors) {
+                      parts.push(`${car.doors}dr`);
+                    }
+                    
+                    return parts.join(' ');
+                  })()}
+                </h2>
+                <div className="price-tag">
+                  {formatPrice(car.price)}
+                </div>
               </div>
+              
+              {/* Price Indicator - Right side on mobile */}
+              <div className="car-header-right">
+                {car.price && (() => {
+                  // Get market value from different sources
+                  let marketValue = car.allValuations?.private || 
+                                   car.allValuations?.Private ||
+                                   car.valuation?.estimatedValue?.private ||
+                                   car.allValuations?.retail || 
+                                   car.allValuations?.Retail ||
+                                   car.valuation?.estimatedValue?.retail ||
+                                   car.valuation?.dealerPrice ||
+                                   car.estimatedValue;
+                  
+                  if (!marketValue || marketValue === car.price) {
+                    marketValue = car.price * 1.2;
+                  }
+                  
+                  const priceRatio = car.price / marketValue;
+                  let priceLevel = null;
+                  let needleAngle = 0;
+                  let labelColor = '';
+                  
+                  if (priceRatio <= 0.75) {
+                    priceLevel = 'Great price';
+                    needleAngle = 54;
+                    labelColor = '#A5D6A7';
+                  } else if (priceRatio <= 0.85) {
+                    priceLevel = 'Good price';
+                    needleAngle = 80;
+                    labelColor = '#388E3C';
+                  } else if (priceRatio <= 0.95) {
+                    priceLevel = 'Good price';
+                    needleAngle = 100;
+                    labelColor = '#388E3C';
+                  } else if (priceRatio <= 1.05) {
+                    priceLevel = 'Fair price';
+                    needleAngle = 126;
+                    labelColor = '#FFC107';
+                  } else if (priceRatio <= 1.15) {
+                    priceLevel = 'Higher price';
+                    needleAngle = 162;
+                    labelColor = '#FF7043';
+                  } else {
+                    priceLevel = 'Higher price';
+                    needleAngle = 170;
+                    labelColor = '#FF5722';
+                  }
+                  
+                  const svgAngle = 180 - needleAngle;
+                  const needleX = 100 + 70 * Math.cos(svgAngle * Math.PI / 180);
+                  const needleY = 100 - 70 * Math.sin(svgAngle * Math.PI / 180);
+                  
+                  return (
+                    <div className="good-price-indicator mobile-header-indicator">
+                      <div className="price-gauge">
+                        <svg viewBox="0 0 200 120" className="gauge-svg">
+                          <path d="M 20 100 A 80 80 0 0 1 38 48" fill="none" stroke="#BDBDBD" strokeWidth="16" strokeLinecap="round"/>
+                          <path d="M 38 48 A 80 80 0 0 1 70 26" fill="none" stroke="#A5D6A7" strokeWidth="16" strokeLinecap="round"/>
+                          <path d="M 70 26 A 80 80 0 0 1 130 26" fill="none" stroke="#388E3C" strokeWidth="16" strokeLinecap="round"/>
+                          <path d="M 130 26 A 80 80 0 0 1 162 48" fill="none" stroke="#FFC107" strokeWidth="16" strokeLinecap="round"/>
+                          <path d="M 162 48 A 80 80 0 0 1 180 100" fill="none" stroke="#FF7043" strokeWidth="16" strokeLinecap="round"/>
+                          <line x1="100" y1="100" x2={needleX} y2={needleY} stroke="#1a1a1a" strokeWidth="5" strokeLinecap="round"/>
+                          <circle cx="100" cy="100" r="8" fill="#1a1a1a"/>
+                          <circle cx="100" cy="100" r="4" fill="#fff"/>
+                        </svg>
+                      </div>
+                      <div className="price-label" style={{ backgroundColor: labelColor }}>
+                        {priceLevel}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* Contact Seller - Mobile Only (appears between header and overview) */}
+            <div className="contact-card mobile-contact-card">
+              <h3>Contact seller</h3>
+              
+              <div className="seller-info">
+                <span className="seller-type">
+                  {car.sellerContact?.type === 'trade' || car.sellerType === 'trade' ? 'Trade seller' : 'Private seller'}
+                </span>
+                {car.sellerContact?.businessName && (
+                  <div className="business-name">{car.sellerContact.businessName}</div>
+                )}
+                <div className="seller-location">
+                  {extractTownName(car.locationName)}
+                  {car.distance && car.distance > 0 && (
+                    <span className="distance-highlight"> • {Math.round(car.distance)} miles away</span>
+                  )}
+                </div>
+              </div>
+
+              {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
+                <button className="phone-btn">
+                  📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
+                </button>
+              )}
+              {car.sellerContact?.allowEmailContact && car.sellerContact?.email && (
+                <a 
+                  href={`mailto:${car.sellerContact.email}`}
+                  className="seller-email-contact"
+                  style={{ textDecoration: 'none', display: 'block' }}
+                >
+                  ✉️ {car.sellerContact.email}
+                </a>
+              )}
             </div>
 
             {/* Overview Section */}
@@ -892,9 +1003,13 @@ const CarDetailPage = () => {
                     </button>
                   )}
                   {car.sellerContact?.allowEmailContact && car.sellerContact?.email && (
-                    <div className="seller-email">
+                    <a 
+                      href={`mailto:${car.sellerContact.email}`}
+                      className="seller-email"
+                      style={{ textDecoration: 'none', display: 'block' }}
+                    >
                       ✉️ {car.sellerContact.email}
-                    </div>
+                    </a>
                   )}
                 </div>
               </div>
@@ -927,9 +1042,13 @@ const CarDetailPage = () => {
                 </button>
               )}
               {car.sellerContact?.allowEmailContact && car.sellerContact?.email && (
-                <div className="seller-email-contact">
+                <a 
+                  href={`mailto:${car.sellerContact.email}`}
+                  className="seller-email-contact"
+                  style={{ textDecoration: 'none', display: 'block' }}
+                >
                   ✉️ {car.sellerContact.email}
-                </div>
+                </a>
               )}
             </div>
 

@@ -5,15 +5,16 @@ const ElectricVehicleCharging = ({ vehicle }) => {
   // Helper function to check if vehicle is electric or plug-in hybrid (has charging capability)
   const isElectricOrPluginHybrid = (fuelType) => {
     if (!fuelType) return false;
-    return fuelType === 'Electric' || 
-           fuelType === 'Plug-in Hybrid' ||
-           fuelType === 'Petrol Plug-in Hybrid' ||
-           fuelType === 'Diesel Plug-in Hybrid' ||
-           fuelType.toLowerCase().includes('plug-in');
+    const fuelTypeLower = fuelType.toLowerCase();
+    return fuelTypeLower === 'electric' || 
+           fuelTypeLower.includes('plug-in') ||
+           fuelTypeLower.includes('hybrid') ||
+           fuelTypeLower.includes('phev');
   };
 
   // Check if this is an electric vehicle or plug-in hybrid
   if (!isElectricOrPluginHybrid(vehicle.fuelType)) {
+    console.log('🔌 ElectricVehicleCharging: Not showing - fuel type is:', vehicle.fuelType);
     return null;
   }
 
@@ -26,12 +27,15 @@ const ElectricVehicleCharging = ({ vehicle }) => {
     rapidChargingSpeed: vehicle.rapidChargingSpeed || vehicle.runningCosts?.rapidChargingSpeed || 100,
     chargingTime: vehicle.chargingTime || vehicle.runningCosts?.chargingTime || 8,
     chargingTime10to80: vehicle.chargingTime10to80 || vehicle.runningCosts?.chargingTime10to80 || 45,
-    chargingPortType: vehicle.chargingPortType || vehicle.runningCosts?.chargingPortType || 'Type 2 / CCS',
+    chargingPortType: vehicle.chargingPortType || vehicle.runningCosts?.chargingPortType || 'Type 2',
     fastChargingCapability: vehicle.fastChargingCapability || vehicle.runningCosts?.fastChargingCapability || 'Fast Charging Compatible'
   };
 
+  console.log('🔌 ElectricVehicleCharging data:', chargingData);
+
   // CRITICAL: Don't show charging info if range is 0 or missing (prevents Infinity errors)
   if (!chargingData.electricRange || chargingData.electricRange === 0 || !chargingData.batteryCapacity || chargingData.batteryCapacity === 0) {
+    console.log('🔌 ElectricVehicleCharging: Not showing - missing range or battery data');
     return null;
   }
 

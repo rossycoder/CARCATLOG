@@ -188,31 +188,33 @@ const TradeDashboard = () => {
           }
         `}</style>
 
-        <div className={`subscription-card ${subscription ? 'active' : 'inactive'}`}>
-          <div className="subscription-header">
-            <div className="subscription-icon">
-              {subscription ? '✓' : '⚠'}
+        {/* Show Trial Offer Card for Non-Subscribed Users */}
+        {!subscription ? (
+          <div className="trial-offer-card">
+            <div className="trial-offer-header">
+              <div className="trial-offer-icon-large">🎉</div>
+              <div className="trial-offer-content">
+                <h3>30-Day FREE Trial Available!</h3>
+                <p className="trial-offer-subtitle">Start listing immediately - Only £2.50 per car during trial</p>
+                <p className="trial-offer-details">Full subscription charge starts after 30 days</p>
+              </div>
             </div>
-            <div className="subscription-details">
-              <h3>{subscription?.plan?.name || 'No Active Subscription'}</h3>
-              <p className="subscription-description">
-                {subscription ? (
-                  <>
-                    {subscription.listingsUsed} of {subscription.listingsLimit || '∞'} listings used
-                    {subscription.daysRemaining > 0 && ` • ${subscription.daysRemaining} days remaining`}
-                  </>
-                ) : (
-                  'Subscribe to a plan to start listing vehicles'
-                )}
-              </p>
-            </div>
-            {!subscription && (
-              <Link to="/trade/subscription" className="btn-subscribe">
-                Subscribe Now
-              </Link>
-            )}
+            <Link to="/trade/subscription" className="btn-start-trial">
+              Start Free Trial →
+            </Link>
           </div>
-          {subscription && (
+        ) : (
+          <div className={`subscription-card active`}>
+            <div className="subscription-header">
+              <div className="subscription-icon">✓</div>
+              <div className="subscription-details">
+                <h3>{subscription.plan?.name}</h3>
+                <p className="subscription-description">
+                  {subscription.listingsUsed} of {subscription.listingsLimit || '∞'} listings used
+                  {subscription.daysRemaining > 0 && ` • ${subscription.daysRemaining} days remaining`}
+                </p>
+              </div>
+            </div>
             <div className="usage-progress">
               <div className="progress-bar">
                 <div 
@@ -225,8 +227,8 @@ const TradeDashboard = () => {
               </div>
               <span className="progress-label">{usagePercentage.toFixed(0)}% used</span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Stats Grid */}
         {loading ? (

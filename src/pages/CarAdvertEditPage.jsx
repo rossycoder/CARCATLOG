@@ -2578,8 +2578,8 @@ const CarAdvertEditPage = () => {
               )}
             </div>
 
-            {/* Video Section - COMPLETELY HIDDEN */}
-            {false && (
+            {/* Video Section */}
+            {true && (
             <div className="section-item expandable">
               <div 
                 className="section-header"

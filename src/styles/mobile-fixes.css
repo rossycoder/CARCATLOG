@@ -1,477 +1,10 @@
 /* ========================================
-   COMPREHENSIVE MOBILE FIXES FOR ALL PAGES
+   MOBILE FIXES FOR CAR DETAIL PAGE
    ======================================== */
 
-/* Prevent horizontal scroll on all pages */
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
-}
-
-/* ===== GLOBAL FIX: Apply box-shadow to images on ALL screen sizes ===== */
-.car-card .car-image-container,
-.car-listing-card .car-image-wrapper,
-.car-image-container,
-.car-image-wrapper {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  transition: box-shadow 0.3s ease !important;
-  border-radius: 8px 8px 0 0 !important;
-}
-
-.car-card:hover .car-image-container,
-.car-card:hover .car-image-wrapper,
-.car-listing-card:hover .car-image-wrapper,
-.car-listing-card:hover .car-image-container {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
-}
-
-/* Remove box-shadow from card containers */
-.car-card,
-.car-listing-card {
-  box-shadow: none !important;
-  border: 1px solid #e5e5e5 !important;
-}
-
-.car-card:hover,
-.car-listing-card:hover {
-  box-shadow: none !important;
-  border-color: #d0d0d0 !important;
-}
-
-/* Mobile viewport fixes - Updated to cover all mobile and tablet devices */
+/* Mobile viewport fixes */
 @media (max-width: 968px) {
-  /* Remove any transform/zoom - use natural sizing */
-  html, body {
-    overflow-x: hidden;
-    width: 100%;
-  }
-
-  /* Ensure all containers respect viewport */
-  .container,
-  .detail-container,
-  .container-wide,
-  .page-container {
-    max-width: 100vw;
-    overflow-x: hidden;
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  /* Fix images */
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-
-  /* Fix badges and pills */
-  .badge,
-  .filter-pill,
-  .car-badges .badge {
-    font-size: 5.5px !important;
-    padding: 2px 4px !important;
-    white-space: nowrap;
-  }
-
-  /* Fix car cards */
-  .car-card,
-  .car-listing-card {
-    max-width: 100%;
-    margin: 0 auto;
-    overflow: visible !important;
-  }
-
-  .car-card-wrapper {
-    overflow: visible !important;
-    position: relative !important;
-  }
-
-  .car-image-container {
-    overflow: visible !important;
-  }
-
-  /* Ensure save button is always visible on mobile */
-  .car-card-wrapper > .save-button {
-    display: flex !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    z-index: 9999 !important;
-    pointer-events: auto !important;
-  }
-
-  .car-specs {
-    font-size: 6px !important;
-    padding: 3px 5px !important;
-    flex-wrap: wrap;
-  }
-
-  .car-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 3px;
-  }
-
-  /* Fix titles */
-  .car-title,
-  .car-name,
-  .car-make-model {
-    font-size: 0.75rem !important;
-    line-height: 1.3;
-  }
-
-  .car-subtitle,
-  .car-variant-line {
-    font-size: 0.6rem !important;
-  }
-
-  /* Fix prices */
-  .car-price,
-  .price-tag {
-    font-size: 0.875rem !important;
-  }
-
-  /* Fix search form buttons */
-  .search-button-group {
-    flex-direction: column !important;
-    gap: 8px !important;
-    width: 100% !important;
-    align-items: stretch !important;
-  }
-
-  .search-button {
-    width: 100% !important;
-    justify-content: center !important;
-    padding: 10px 16px !important;
-    font-size: 0.875rem !important;
-    display: flex !important;
-    align-items: center !important;
-    box-sizing: border-box !important;
-  }
-
-  .more-options-link {
-    width: 100% !important;
-    justify-content: center !important;
-    text-align: center !important;
-    padding: 8px !important;
-    display: flex !important;
-    align-items: center !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Fix buttons */
-  button,
-  .btn,
-  .message-btn,
-  .phone-btn {
-    min-height: 36px;
-    font-size: 13px;
-  }
-
-  /* Fix forms */
-  input,
-  select,
-  textarea {
-    font-size: 14px !important; /* Prevents zoom on iOS */
-    max-width: 100%;
-  }
-
-  /* Fix grids - Keep 2-column layout for spec-grid like AutoTrader */
-  .spec-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 6px !important;
-    width: 100% !important;
-  }
-
-  .features-grid,
-  .fuel-economy-grid {
-    grid-template-columns: 1fr !important;
-    gap: 8px;
-  }
-
-  /* Vehicle Features - Compact Grid */
-  .features-section .features-grid,
-  .vehicle-features-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 6px !important;
-  }
-
-  .feature-item,
-  .feature-card {
-    padding: 6px 8px !important;
-    font-size: 0.6rem !important;
-    min-height: auto !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-  }
-
-  .feature-item svg,
-  .feature-card svg,
-  .feature-icon {
-    width: 14px !important;
-    height: 14px !important;
-    flex-shrink: 0 !important;
-  }
-
-  .feature-item span,
-  .feature-card span,
-  .feature-name {
-    font-size: 0.6rem !important;
-    line-height: 1.2 !important;
-  }
-
-  .features-section h2,
-  .features-section h3 {
-    font-size: 0.75rem !important;
-    margin-bottom: 6px !important;
-  }
-
-  /* Fix spec items */
-  .spec-item {
-    padding: 4px 6px !important;
-    min-height: 32px !important;
-    align-items: flex-start !important;
-    gap: 4px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-  
-  .spec-icon {
-    margin-top: 1px;
-    font-size: 0.625rem !important;
-    width: 12px !important;
-    height: 12px !important;
-    flex-shrink: 0 !important;
-  }
-  
-  .spec-icon svg,
-  .spec-icon img {
-    width: 10px !important;
-    height: 10px !important;
-  }
-  
-  .spec-details {
-    flex: 1 !important;
-    min-width: 0 !important;
-    overflow: hidden !important;
-  }
-
-  .spec-label {
-    font-size: 0.5rem !important;
-    line-height: 1.1 !important;
-    margin-bottom: 1px !important;
-  }
-
-  .spec-value {
-    font-size: 0.6rem !important;
-    line-height: 1.2 !important;
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-  }
-
-  /* Fix running costs - Keep horizontal/compact layout on mobile */
-  .running-costs-horizontal {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-  }
-
-  .running-cost-item {
-    padding: 6px;
-    background: #f8f9fa;
-    border-radius: 4px;
-  }
-
-  .cost-icon-wrapper {
-    width: 18px;
-    height: 18px;
-  }
-
-  .cost-label {
-    font-size: 0.55rem;
-  }
-
-  .cost-value {
-    font-size: 0.65rem;
-  }
-
-  /* Fix navigation */
-  .main-nav {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Fix tables */
-  table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Fix modals */
-  .modal,
-  .filter-modal {
-    max-width: 100vw;
-    max-height: 100vh;
-    border-radius: 0;
-  }
-
-  /* Fix hero sections */
-  .hero-section,
-  .hero-section-with-search {
-    padding: 16px 8px !important;
-  }
-
-  /* Fix search containers */
-  .search-container-hero {
-    max-width: 95% !important;
-    padding: 12px !important;
-  }
-
-  /* Fix filter bars */
-  .top-filter-bar {
-    overflow-x: hidden;
-  }
-
-  .filter-pills {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    flex-wrap: nowrap;
-    padding-bottom: 4px;
-  }
-
-  /* Fix location info */
-  .location-value,
-  .dealer-location,
-  .private-seller-location {
-    font-size: 0.6rem !important;
-    flex-wrap: nowrap !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-  
-  .location-info {
-    padding: 6px 8px !important;
-    gap: 4px !important;
-    flex-wrap: nowrap !important;
-    overflow: hidden !important;
-  }
-  
-  .location-label {
-    font-size: 0.6rem !important;
-    flex-shrink: 0 !important;
-  }
-  
-  .dealer-name {
-    font-size: 0.6rem !important;
-  }
-  
-  .distance-info {
-    font-size: 0.6rem !important;
-  }
-
-  /* Fix electric vehicle badges */
-  .electric-badge,
-  .inline-flex {
-    font-size: 8px !important;
-    padding: 2px 4px !important;
-  }
-
-  .electric-badge svg,
-  .inline-flex svg {
-    width: 10px !important;
-    height: 10px !important;
-  }
-
-  /* Fix write-off warnings */
-  .write-off-warning-badge {
-    flex-direction: row;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
-    font-size: 0.65rem !important;
-    min-height: auto !important;
-  }
-
-  .write-off-warning-badge .warning-icon,
-  .write-off-warning-badge svg {
-    width: 12px !important;
-    height: 12px !important;
-    flex-shrink: 0;
-  }
-
-  .write-off-warning-badge .warning-title,
-  .write-off-warning-badge strong {
-    font-size: 0.65rem !important;
-    font-weight: 600 !important;
-  }
-
-  .write-off-warning-badge .warning-subtitle {
-    margin-left: 0;
-    margin-top: 0;
-    font-size: 0.55rem !important;
-    display: none; /* Hide subtitle on mobile for compactness */
-  }
-
-  /* CAT S/N/D badges - Compact */
-  .damage-category-badge,
-  .write-off-badge,
-  [class*="cat-"] {
-    padding: 4px 8px !important;
-    font-size: 0.65rem !important;
-    border-radius: 3px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-  }
-
-  /* Fix image galleries */
-  .main-image {
-    height: 200px !important;
-  }
-
-  .thumbnail-strip {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Fix contact cards */
-  .contact-card {
-    position: static !important;
-    margin-top: 16px;
-  }
-
-  /* Fix content grids */
-  .content-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Fix video containers */
-  .video-container {
-    padding-bottom: 56.25%;
-  }
-
-  /* Fix footer */
-  .footer {
-    padding: 16px 8px;
-  }
-
-  .footer-content {
-    flex-direction: column;
-  }
-
-  /* Fix trade sections */
-  .trade-seller-details,
-  .private-seller-details {
-    padding: 10px;
-  }
-
-  /* Fix Car Detail Page */
+  /* Car Detail Page Mobile Layout */
   .car-detail-page {
     padding: 6px 0 !important;
     overflow-x: hidden !important;
@@ -486,19 +19,154 @@ html, body {
 
   .content-grid {
     grid-template-columns: 1fr !important;
-    gap: 8px !important;
+    gap: 0 !important;
     width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
-  .left-column,
+  .left-column {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
   .right-column {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-  }
-
-  .right-column {
     position: static !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Mobile Order: Location -> Header -> Contact -> Overview -> Description */
+  .left-column .location-info {
+    order: 1 !important;
+  }
+  
+  .left-column .car-header {
+    order: 2 !important;
+  }
+  
+  .right-column {
+    order: 3 !important;
+  }
+  
+  .left-column .overview-section {
+    order: 4 !important;
+  }
+  
+  .left-column .description-section {
+    order: 5 !important;
+  }
+  
+  .left-column .features-section {
+    order: 6 !important;
+  }
+  
+  .left-column .running-costs-section-new {
+    order: 7 !important;
+  }
+  
+  /* MOT History should appear BEFORE Vehicle History */
+  .left-column > div:has([class*="mot-history"]),
+  .left-column > div:has([class*="MOTHistory"]) {
+    order: 8 !important;
+  }
+  
+  /* Vehicle History appears AFTER MOT History */
+  .left-column > div:has([class*="vehicle-history"]),
+  .left-column > div:has([class*="VehicleHistory"]) {
+    order: 9 !important;
+  }
+  
+  .left-column .meet-seller-section {
+    order: 10 !important;
+  }
+  
+  /* Within right-column */
+  .right-column .contact-card {
+    order: 1 !important;
+    margin-top: 0 !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .right-column .finance-calculator {
+    order: 2 !important;
+    margin-top: 0 !important;
+    margin-bottom: 12px !important;
+    padding: 14px !important;
+  }
+  
+  .right-column .good-price-indicator:not(.mobile-header-indicator) {
+    display: none !important;
+  }
+  
+  /* Car Header - Two Column Layout on Mobile */
+  .car-header {
+    padding: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  
+  .car-header-left {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  
+  .car-header-right {
+    flex-shrink: 0 !important;
+  }
+  
+  /* Show mobile header indicator, hide sidebar indicator on mobile */
+  .mobile-header-indicator {
+    display: block !important;
+  }
+  
+  /* Make price indicator more compact on mobile */
+  .good-price-indicator {
+    padding: 12px !important;
+    width: 140px !important;
+    flex-shrink: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  .good-price-indicator .price-gauge {
+    max-width: 120px !important;
+    margin: 0 auto 6px !important;
+  }
+  
+  .good-price-indicator .price-label {
+    font-size: 0.75rem !important;
+    padding: 4px 8px !important;
+    margin-top: 6px !important;
+  }
+  
+  .good-price-indicator .price-amount {
+    display: none !important;
+  }
+  
+  /* Finance calculator compact on mobile */
+  .finance-calculator h3 {
+    font-size: 1rem !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .finance-calculator .finance-heading {
+    font-size: 1rem !important;
+  }
+  
+  .finance-calculator .estimate {
+    font-size: 0.75rem !important;
   }
 
   .overview-section,
@@ -513,15 +181,14 @@ html, body {
     box-sizing: border-box !important;
   }
   
+  /* Hide LocationDisplay component on mobile (redundant with location-info in header) */
+  .location-display {
+    display: none !important;
+  }
+  
   .overview-section h2 {
     font-size: 0.75rem !important;
     margin-bottom: 6px !important;
-  }
-
-  .car-header {
-    padding: 8px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
   }
 
   .car-make-model {
@@ -560,559 +227,49 @@ html, body {
   .main-image {
     height: 180px !important;
   }
-
-  /* Fix Trade Inventory Page */
-  .trade-dashboard-layout {
-    display: block !important;
-    padding-top: 0 !important;
-    width: 100% !important;
-    overflow-x: hidden !important;
-  }
-
-  .trade-dashboard-content {
-    padding: 12px !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    margin: 0 !important;
-    overflow-x: hidden !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Fix Trade Dashboard Page */
-  .dashboard-header {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 10px !important;
-    margin-bottom: 12px !important;
-    padding: 10px !important;
-    padding-bottom: 10px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .dashboard-header h1 {
-    font-size: 18px !important;
-    line-height: 1.2 !important;
-  }
-
-  .welcome-text {
-    font-size: 12px !important;
-    line-height: 1.3 !important;
-  }
-
-  .btn-add-vehicle-header,
-  .btn-add-vehicle {
-    width: 100% !important;
-    justify-content: center !important;
-    padding: 10px 14px !important;
-    font-size: 13px !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Trial Banner Mobile */
-  .trial-banner {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 10px !important;
-    padding: 12px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .trial-icon {
-    font-size: 24px !important;
-  }
-
-  .trial-content h3 {
-    font-size: 14px !important;
-    line-height: 1.2 !important;
-  }
-
-  .trial-content p {
-    font-size: 12px !important;
-    line-height: 1.3 !important;
-  }
-
-  .trial-banner-inventory {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 8px !important;
-    padding: 10px 12px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .trial-text {
-    font-size: 12px !important;
-    line-height: 1.3 !important;
-  }
   
-  .trial-icon-small {
-    font-size: 18px !important;
-  }
-
-  .subscription-card {
-    padding: 12px !important;
-    margin-bottom: 12px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .subscription-header {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 8px !important;
-  }
-
-  .subscription-icon {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: 16px !important;
-  }
-
-  .subscription-details h3 {
-    font-size: 14px !important;
-    line-height: 1.2 !important;
-  }
-
-  .subscription-description {
-    font-size: 12px !important;
-    line-height: 1.3 !important;
-  }
-
-  .btn-subscribe {
-    width: 100% !important;
-    text-align: center !important;
-    margin-top: 8px !important;
-    padding: 10px !important;
-    font-size: 13px !important;
-    box-sizing: border-box !important;
-  }
-
-  .usage-progress {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 12px !important;
-    width: 100% !important;
-  }
-
-  .progress-bar {
-    width: 100% !important;
-  }
-
-  .progress-label {
-    text-align: center !important;
-    font-size: 14px !important;
-  }
-
-  .stats-grid {
+  /* CarAdvertEditPage Overview Section - Mobile Fix (2 columns) */
+  .car-advert-edit-page .specifications-section .spec-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
-    width: 100% !important;
-  }
-
-  .stat-card {
-    padding: 16px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .stat-value {
-    font-size: 28px !important;
-    line-height: 1.2 !important;
+    gap: 4px !important;
+    column-gap: 4px !important;
+    row-gap: 0 !important;
   }
   
-  .stat-label {
-    font-size: 13px !important;
-  }
-
-  .action-grid {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-    width: 100% !important;
-  }
-
-  .action-card {
-    padding: 16px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .action-icon {
-    width: 48px !important;
-    height: 48px !important;
-    font-size: 24px !important;
-  }
-
-  .action-card h3 {
-    font-size: 16px !important;
-    line-height: 1.2 !important;
-  }
-
-  .action-card p {
-    font-size: 13px !important;
-    line-height: 1.3 !important;
-  }
-
-  .section-title {
-    font-size: 18px !important;
-    line-height: 1.2 !important;
-  }
-
-  .vehicle-grid {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-    width: 100% !important;
-  }
-
-  .vehicle-card-mini {
-    max-width: 100% !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .section-header {
-    flex-direction: column !important;
+  .car-advert-edit-page .specifications-section .spec-item {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
     align-items: flex-start !important;
-    gap: 12px !important;
-    width: 100% !important;
-  }
-
-  .most-viewed-section {
-    padding: 16px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .quick-actions-section {
-    margin-bottom: 16px !important;
-    width: 100% !important;
-  }
-
-  .inventory-header {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 12px !important;
-    margin-bottom: 16px !important;
-    padding: 12px !important;
-    padding-bottom: 12px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .header-left h1 {
-    font-size: 22px !important;
-    line-height: 1.2 !important;
+    padding: 12px 8px !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-bottom: 1px solid #e9ecef !important;
+    gap: 8px !important;
+    min-height: 44px !important;
   }
   
-  .header-left .subtitle {
-    font-size: 14px !important;
-    line-height: 1.3 !important;
+  .car-advert-edit-page .specifications-section .spec-item label {
+    color: #999 !important;
+    font-weight: 400 !important;
+    font-size: 12px !important;
+    text-transform: none !important;
+    line-height: 1.4 !important;
+    flex: 0 0 auto !important;
+    max-width: 45% !important;
+    word-wrap: break-word !important;
   }
   
-  .inventory-controls {
-    flex-direction: column !important;
-    gap: 12px !important;
-    width: 100% !important;
-    align-items: stretch !important;
-  }
-  
-  .search-box,
-  .filter-dropdown,
-  .sort-dropdown {
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .header-actions {
-    width: 100% !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-  }
-
-  .btn-add-vehicle,
-  .btn-add-bike,
-  .btn-add-van {
-    width: 100% !important;
-    justify-content: center !important;
-  }
-
-  .usage-bar-container {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  .inventory-controls {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 16px !important;
-  }
-
-  .inventory-filters {
-    flex-direction: column !important;
-    gap: 12px !important;
-    width: 100% !important;
-  }
-
-  .filter-group {
-    width: 100% !important;
-    flex-wrap: wrap !important;
-  }
-
-  .vehicle-type-filter {
-    margin-left: 0 !important;
-    padding-left: 0 !important;
-    border-left: none !important;
-    padding-top: 12px !important;
-    border-top: 1px solid #e5e7eb !important;
-  }
-
-  .inventory-filters button {
-    flex: 1 !important;
-    min-width: 0 !important;
-  }
-
-  .inventory-tools {
-    flex-direction: column !important;
-    width: 100% !important;
-    gap: 12px !important;
-  }
-
-  .search-box {
-    width: 100% !important;
-  }
-
-  .search-box input {
-    width: 100% !important;
-  }
-
-  .sort-select {
-    width: 100% !important;
-  }
-
-  .view-toggle {
-    width: 100% !important;
-    justify-content: center !important;
-  }
-
-  .vehicles-container.grid {
-    grid-template-columns: 1fr !important;
-    gap: 16px !important;
-  }
-
-  .vehicles-container.list .vehicle-card {
-    flex-direction: column !important;
-  }
-
-  .vehicles-container.list .vehicle-image-container {
-    width: 100% !important;
-    height: 220px !important;
-  }
-
-  .vehicle-actions {
-    flex-direction: column !important;
-    gap: 10px !important;
-  }
-
-  .btn-action {
-    width: 100% !important;
-  }
-
-  .limit-warning {
-    flex-direction: column !important;
-    padding: 16px !important;
-    gap: 12px !important;
-  }
-
-  .warning-icon {
-    font-size: 28px !important;
-  }
-
-  .warning-content h3 {
-    font-size: 18px !important;
-  }
-
-  .modal-content {
-    margin: 0 16px !important;
-  }
-
-  .vehicle-title {
-    font-size: 16px !important;
-  }
-
-  .vehicle-price {
-    font-size: 18px !important;
-  }
-
-  .vehicle-specs {
-    font-size: 14px !important;
-  }
-
-  .meta-item {
-    font-size: 13px !important;
-  }
-
-  .btn-action {
-    padding: 10px 14px !important;
-    font-size: 14px !important;
-  }
-
-  /* Fix listing pages */
-  .listings-grid,
-  .results-grid-autotrader {
-    grid-template-columns: 1fr !important;
-    gap: 16px;
-    padding: 16px 0;
-    overflow: visible !important;
-  }
-
-  /* Ensure all card wrappers are visible */
-  .results-grid-autotrader > * {
-    overflow: visible !important;
-  }
-
-  /* Fix search results page specific issues */
-  .search-results-page {
-    overflow-x: hidden !important;
-    max-width: 100vw !important;
-  }
-
-  .search-results-page .container-wide {
-    max-width: 100vw !important;
-    overflow-x: hidden !important;
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-
-  /* Results grid should use full width minus container padding */
-  .results-grid-autotrader {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    width: 100% !important;
-  }
-
-  .top-filter-bar {
-    overflow-x: hidden !important;
-  }
-
-  .filter-pills {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
-  }
-
-  .filter-pills::-webkit-scrollbar {
-    display: none !important;
-  }
-
-  .car-listing-card {
-    max-width: 100% !important;
-    width: 100% !important;
-  }
-
-  /* Car cards should fill container */
-  .car-card {
-    max-width: 100% !important;
-    width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  /* Fix pagination */
-  .pagination {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  /* Fix breadcrumbs */
-  .breadcrumb {
-    font-size: 0.85rem;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Fix alerts and notices */
-  .alert,
-  .notice,
-  .warning {
-    padding: 12px;
-    font-size: 0.9rem;
-  }
-
-  /* Fix stats and metrics */
-  .stat-item,
-  .metric-card {
-    padding: 12px;
-  }
-
-  /* Fix action buttons */
-  .action-buttons {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .action-buttons button {
-    width: 100%;
-  }
-}
-
-/* Extra small devices (phones in portrait) */
-@media (max-width: 480px) {
-  .container,
-  .detail-container,
-  .container-wide {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-
-  .car-title,
-  .car-name {
-    font-size: 1.1rem !important;
-  }
-
-  .car-price,
-  .price-tag {
-    font-size: 1.3rem !important;
-  }
-
-  .badge {
-    font-size: 10px !important;
-    padding: 3px 6px !important;
-  }
-
-  .main-image {
-    height: 200px !important;
-  }
-}
-
-/* Landscape orientation fixes */
-@media (max-width: 768px) and (orientation: landscape) {
-  .hero-section,
-  .hero-section-with-search {
-    min-height: auto !important;
-    padding: 16px 12px !important;
-  }
-
-  .main-image {
-    height: 300px !important;
-  }
-}
-
-/* Touch-friendly improvements */
-@media (hover: none) and (pointer: coarse) {
-  button,
-  a,
-  .clickable {
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  input,
-  select,
-  textarea {
-    font-size: 16px !important;
+  .car-advert-edit-page .specifications-section .spec-item span {
+    color: #1a1a1a !important;
+    font-weight: 500 !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    text-align: right !important;
+    flex: 1 1 auto !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: none !important;
   }
 }

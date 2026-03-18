@@ -656,7 +656,8 @@
 /* Responsive Design */
 @media (max-width: 968px) {
   .content-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
   }
 
   .right-column {
@@ -670,6 +671,87 @@
 
   .main-image {
     height: 300px;
+  }
+
+  /* Mobile reordering: Location → Header → Contact → Overview → Description → Running Costs */
+  .left-column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Order 1: Location info */
+  .location-info {
+    order: 1;
+  }
+
+  /* Order 2: Car header (title + price + price indicator) */
+  .car-header {
+    order: 2;
+  }
+
+  /* Order 3: Mobile contact seller card (appears between header and overview) */
+  .mobile-contact-card {
+    order: 3 !important;
+  }
+
+  /* Order 4: Overview section */
+  .overview-section {
+    order: 4;
+  }
+
+  /* Order 5: Description */
+  .description-section {
+    order: 5;
+  }
+
+  /* Order 6: Video */
+  .video-section {
+    order: 6;
+  }
+
+  /* Order 7: Running costs */
+  .running-costs-section-new {
+    order: 7;
+  }
+
+  /* Order 8: Vehicle history (moved up - appears right after running costs) */
+  .vehicle-history-section {
+    order: 8 !important;
+  }
+
+  /* Order 9: MOT history (appears after vehicle history) */
+  .mot-history-section {
+    order: 9 !important;
+  }
+
+  /* Order 10: Electric vehicle charging */
+  .left-column > div:nth-of-type(8) {
+    order: 10;
+  }
+
+  /* Order 11: Electric vehicle running costs */
+  .left-column > div:nth-of-type(9) {
+    order: 11;
+  }
+
+  /* Order 12: Features */
+  .features-section {
+    order: 12;
+  }
+
+  /* Order 13: Location display */
+  .left-column > div:nth-of-type(11) {
+    order: 13;
+  }
+
+  /* Order 14: Meet the seller */
+  .meet-seller-section {
+    order: 14;
+  }
+
+  /* Hide right column completely on mobile (we're using mobile-contact-card instead) */
+  .right-column {
+    display: none;
   }
 }
 
@@ -1060,7 +1142,9 @@
 
 /* Additional running costs section */
 .additional-running-costs {
-  padding-top: 20px;
+  padding-top: 24px;
+  margin-top: 24px;
+  border-top: 1px solid #e9ecef;
 }
 
 .fuel-economy-grid {
@@ -1071,40 +1155,53 @@
 
 .fuel-economy-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  padding: 12px;
+  padding: 16px;
   background: #f8f9fa;
-  border-radius: 6px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+}
+
+.fuel-economy-item:hover {
+  background: #ffffff;
+  border-color: #1a4ba0;
+  box-shadow: 0 2px 8px rgba(26, 75, 160, 0.1);
 }
 
 .fuel-icon {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
 }
 
 .fuel-details {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   flex: 1;
 }
 
 .fuel-label {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: #666;
   font-weight: 500;
+  line-height: 1.3;
 }
 
 .fuel-value {
-  font-size: 0.95rem;
+  font-size: 1.125rem;
   font-weight: 600;
   color: #1a1a1a;
+  line-height: 1.3;
 }
 
 /* Responsive design for new running costs */
@@ -1136,31 +1233,52 @@
   
   .fuel-economy-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .fuel-economy-item {
+    padding: 14px;
+  }
+  
+  .fuel-icon {
+    font-size: 1.6rem;
+    width: 36px;
+    height: 36px;
+  }
+  
+  .fuel-label {
+    font-size: 0.8rem;
+  }
+  
+  .fuel-value {
+    font-size: 1rem;
   }
 }
 
 @media (max-width: 480px) {
   .running-costs-horizontal {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 10px;
   }
   
   .running-cost-item {
-    padding: 10px 8px;
-  }
-
-  .cost-icon-wrapper {
-    width: 28px;
-    height: 28px;
+    padding: 12px 10px;
   }
   
-  .cost-label {
-    font-size: 0.75rem;
+  .fuel-economy-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
   
-  .cost-value {
-    font-size: 0.85rem;
+  .fuel-economy-item {
+    padding: 12px;
+  }
+  
+  .fuel-icon {
+    font-size: 1.5rem;
+    width: 32px;
+    height: 32px;
   }
 }
 
@@ -1367,3 +1485,78 @@
 }
 
 /* Price level specific colors are set inline via style attribute */
+
+
+/* Hide mobile header indicator on desktop */
+.mobile-header-indicator {
+  display: none;
+}
+
+.car-header-right {
+  display: none;
+}
+
+/* Hide mobile contact card on desktop */
+.mobile-contact-card {
+  display: none;
+}
+
+/* Show on mobile via mobile-fixes.css */
+@media (max-width: 968px) {
+  .mobile-header-indicator {
+    display: block;
+  }
+  
+  .car-header-right {
+    display: block;
+  }
+
+  /* Show mobile contact card on mobile */
+  .mobile-contact-card {
+    display: block !important;
+    padding: 16px !important;
+    margin-bottom: 16px;
+  }
+
+  /* Make mobile contact card more compact */
+  .mobile-contact-card h3 {
+    font-size: 1.1rem !important;
+    margin-bottom: 12px !important;
+  }
+
+  .mobile-contact-card .seller-info {
+    margin-bottom: 12px !important;
+  }
+
+  .mobile-contact-card .seller-type {
+    font-size: 0.75rem !important;
+    padding: 3px 10px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .mobile-contact-card .business-name {
+    font-size: 0.95rem !important;
+    margin-bottom: 4px !important;
+  }
+
+  .mobile-contact-card .seller-location {
+    font-size: 0.85rem !important;
+  }
+
+  .mobile-contact-card .phone-btn {
+    padding: 10px !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  .mobile-contact-card .seller-email-contact {
+    padding: 10px !important;
+    font-size: 0.85rem !important;
+    margin-top: 8px !important;
+  }
+
+  /* Hide the original right column contact card on mobile */
+  .right-column .contact-card:not(.mobile-contact-card) {
+    display: none;
+  }
+}
