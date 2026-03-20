@@ -146,13 +146,23 @@ const Header = () => {
             <div className="account-dropdown-container">
               <button 
                 className="icon-btn account-btn"
-                onClick={() => setShowAccountDropdown(!showAccountDropdown)}
+                onClick={(e) => {
+                  // Check if mobile view (window width <= 768px)
+                  if (window.innerWidth <= 768) {
+                    // Mobile: Navigate directly to My Listings
+                    navigate('/my-listings');
+                    closeMenu();
+                  } else {
+                    // Desktop: Show dropdown
+                    setShowAccountDropdown(!showAccountDropdown);
+                  }
+                }}
                 title="Account"
               >
                 <FaUser size={18} />
                 <span className="icon-label">{user.name || 'Account'}</span>
               </button>
-              {showAccountDropdown && (
+              {showAccountDropdown && window.innerWidth > 768 && (
                 <div className="account-dropdown">
                   <div className="account-dropdown-header">
                     <span className="account-name">{user.name || user.email}</span>
@@ -187,13 +197,23 @@ const Header = () => {
             <div className="trade-dropdown-container">
               <button 
                 className="icon-btn trade-btn"
-                onClick={() => setShowTradeDropdown(!showTradeDropdown)}
+                onClick={(e) => {
+                  // Check if mobile view (window width <= 768px)
+                  if (window.innerWidth <= 768) {
+                    // Mobile: Navigate directly to dashboard
+                    navigate('/trade/dashboard');
+                    closeMenu();
+                  } else {
+                    // Desktop: Show dropdown
+                    setShowTradeDropdown(!showTradeDropdown);
+                  }
+                }}
                 title="Trade Account"
               >
                 <FaBuilding size={18} />
                 <span className="icon-label">{dealer.businessName || dealer.email}</span>
               </button>
-              {showTradeDropdown && (
+              {showTradeDropdown && window.innerWidth > 768 && (
                 <div className="account-dropdown">
                   <div className="account-dropdown-header">
                     <span className="account-name">{dealer.businessName || dealer.email}</span>

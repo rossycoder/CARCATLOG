@@ -22,6 +22,7 @@ const CarDetailPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isMobile, setIsMobile] = useState(false); // Start with false, will be set in useEffect
 
   // Helper function to check if vehicle is electric or plug-in hybrid (has charging capability)
   const isElectricOrPluginHybrid = (fuelType) => {
@@ -54,6 +55,26 @@ const CarDetailPage = () => {
   useEffect(() => {
     fetchCarDetails();
   }, [id]);
+
+  // Add window resize listener to detect mobile/desktop
+  useEffect(() => {
+    // Set initial value
+    const checkMobile = () => {
+      const newIsMobile = window.innerWidth <= 768;
+      console.log('🔍 Checking mobile - Width:', window.innerWidth, 'isMobile:', newIsMobile);
+      setIsMobile(newIsMobile);
+    };
+    
+    // Check immediately on mount
+    checkMobile();
+    
+    const handleResize = () => {
+      checkMobile();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchCarDetails = async () => {
     try {
@@ -97,6 +118,24 @@ const CarDetailPage = () => {
       setError(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Track inquiry when user clicks phone or email
+  const trackInquiry = async (type) => {
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      await fetch(`${API_BASE_URL}/vehicles/${id}/inquiry`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ type }) // 'phone' or 'email'
+      });
+      console.log(`✅ Inquiry tracked: ${type}`);
+    } catch (error) {
+      console.error('Failed to track inquiry:', error);
+      // Don't show error to user, just log it
     }
   };
 
@@ -536,7 +575,7 @@ const CarDetailPage = () => {
               </div>
 
               {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
-                <button className="phone-btn">
+                <button className="phone-btn" onClick={() => trackInquiry('phone')}>
                   📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
                 </button>
               )}
@@ -545,6 +584,7 @@ const CarDetailPage = () => {
                   href={`mailto:${car.sellerContact.email}`}
                   className="seller-email-contact"
                   style={{ textDecoration: 'none', display: 'block' }}
+                  onClick={() => trackInquiry('email')}
                 >
                   ✉️ {car.sellerContact.email}
                 </a>
@@ -881,11 +921,12 @@ const CarDetailPage = () => {
               </div>
             )}
 
-            {/* Electric Vehicle Charging Information - Only for Electric Cars */}
-            <ElectricVehicleCharging vehicle={car} />
-
-            {/* Electric Vehicle Running Costs - Only for Electric Cars */}
-            <ElectricVehicleRunningCosts vehicle={car} />
+            {/* Electric Vehicle Sections - Show for both Mobile and Desktop (after Running Costs) */}
+            <div className="electric-vehicle-sections">
+              {console.log('🔋 Rendering EV sections - isMobile:', isMobile)}
+              <ElectricVehicleCharging vehicle={car} />
+              <ElectricVehicleRunningCosts vehicle={car} />
+            </div>
 
             {/* Vehicle Features Section */}
             {showAllFeatures && car.features && car.features.length > 0 && (
@@ -908,6 +949,8 @@ const CarDetailPage = () => {
               sellerLocation={extractTownName(car.locationName)}
               distance={car.distance}
             />
+
+
 
             {/* Vehicle History Section - Always show, component handles missing VRM */}
             <VehicleHistorySection 
@@ -998,7 +1041,7 @@ const CarDetailPage = () => {
                 {/* Contact Buttons */}
                 <div className="seller-contact-buttons">
                   {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
-                    <button className="call-seller-btn">
+                    <button className="call-seller-btn" onClick={() => trackInquiry('phone')}>
                       📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
                     </button>
                   )}
@@ -1007,6 +1050,7 @@ const CarDetailPage = () => {
                       href={`mailto:${car.sellerContact.email}`}
                       className="seller-email"
                       style={{ textDecoration: 'none', display: 'block' }}
+                      onClick={() => trackInquiry('email')}
                     >
                       ✉️ {car.sellerContact.email}
                     </a>
@@ -1037,7 +1081,7 @@ const CarDetailPage = () => {
               </div>
 
               {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
-                <button className="phone-btn">
+                <button className="phone-btn" onClick={() => trackInquiry('phone')}>
                   📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
                 </button>
               )}
@@ -1046,6 +1090,7 @@ const CarDetailPage = () => {
                   href={`mailto:${car.sellerContact.email}`}
                   className="seller-email-contact"
                   style={{ textDecoration: 'none', display: 'block' }}
+                  onClick={() => trackInquiry('email')}
                 >
                   ✉️ {car.sellerContact.email}
                 </a>

@@ -96,10 +96,10 @@ body {
 }
 
 .logo-img {
-  height: 55px;
+  height: 75px;
   width: auto;
   object-fit: contain;
-  max-width: 200px;
+  max-width: 240px;
 }
 
 /* MAIN NAV - Desktop Only */
@@ -473,8 +473,8 @@ body {
   }
 
   .logo-img {
-    height: 60px;
-    max-width: 180px;
+    height: 80px;
+    max-width: 220px;
   }
 
   .main-nav {
@@ -541,9 +541,9 @@ body {
 }
 
 /* ============================================
-   TABLET - 769px to 1024px
+   TABLET - 981px to 1024px
    ============================================ */
-@media (max-width: 1024px) and (min-width: 769px) {
+@media (max-width: 1024px) and (min-width: 981px) {
   .top-nav {
     display: block;
   }
@@ -553,7 +553,7 @@ body {
     margin: 0 auto;
     padding: 10px 20px;
     justify-content: flex-start;
-    gap: 20px;
+    gap: 18px;
   }
 
   .header-left {
@@ -567,7 +567,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 24px;
+    gap: 20px;
   }
 
   .logo {
@@ -575,13 +575,13 @@ body {
   }
 
   .logo-img {
-    height: 55px;
-    max-width: 180px;
+    height: 75px;
+    max-width: 200px;
   }
 
   .main-nav {
     display: flex !important;
-    gap: 18px;
+    gap: 16px;
     flex: 1;
     justify-content: flex-start;
   }
@@ -592,7 +592,7 @@ body {
 
   .header-right {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     flex-shrink: 0;
     margin-left: auto;
   }
@@ -616,6 +616,103 @@ body {
   }
 
   .channel-switcher {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   TABLET - 769px to 980px
+   ============================================ */
+@media (max-width: 980px) and (min-width: 769px) {
+  .top-nav {
+    display: none !important;
+  }
+
+  .header-left {
+    display: flex !important;
+    gap: 0;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .main-header {
+    max-width: 100%;
+    padding: 10px 16px;
+    display: grid;
+    grid-template-columns: 60px 1fr 120px;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .menu-btn {
+    padding: 8px;
+  }
+
+  .logo {
+    grid-column: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .logo-img {
+    height: 75px;
+    max-width: 240px;
+  }
+
+  .main-nav {
+    display: none !important;
+  }
+
+  .header-right {
+    display: flex !important;
+    gap: 8px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: flex-end;
+    grid-column: 3;
+  }
+
+  .icon-btn {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .icon-label {
+    display: block;
+    font-size: 0.7rem;
+  }
+
+  .trade-login-btn,
+  .trade-btn {
+    display: flex !important;
+  }
+
+  .channel-switcher {
+    display: flex !important;
+  }
+
+  /* Show mobile menu on tablet */
+  .mobile-menu {
+    display: block !important;
+    width: 300px;
+    max-width: 85vw;
+  }
+  
+  .mobile-menu-overlay {
+    display: none;
+  }
+  
+  .mobile-menu-overlay.active {
+    display: block !important;
+  }
+  
+  /* Hide account dropdown on tablet - use mobile menu instead */
+  .account-dropdown {
     display: none !important;
   }
 }
@@ -660,8 +757,8 @@ body {
   }
 
   .logo-img {
-    height: 60px;
-    max-width: 180px;
+    height: 80px;
+    max-width: 260px;
     width: auto;
   }
 
@@ -747,8 +844,8 @@ body {
   }
 
   .logo-img {
-    height: 55px;
-    max-width: 150px;
+    height: 75px;
+    max-width: 210px;
     width: auto;
   }
 
@@ -792,8 +889,8 @@ body {
   }
 
   .logo-img {
-    height: 50px;
-    max-width: 140px;
+    height: 70px;
+    max-width: 200px;
   }
   
   .menu-btn,

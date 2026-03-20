@@ -261,7 +261,11 @@ const SignInPage = () => {
                   <button
                     type="button"
                     className="password-toggle-btn"
-                    onClick={() => setShowPasswordText(!showPasswordText)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowPasswordText(!showPasswordText);
+                    }}
                     aria-label={showPasswordText ? "Hide password" : "Show password"}
                   >
                     {showPasswordText ? (

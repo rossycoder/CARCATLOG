@@ -89,7 +89,11 @@ const TradeLoginPage = () => {
                 <button
                   type="button"
                   className="password-toggle-btn"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowPassword(!showPassword);
+                  }}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (

@@ -497,17 +497,45 @@
 
 @media (max-width: 480px) {
   .vehicle-details-section {
-    padding: 32px 16px;
+    padding: 24px 12px;
   }
 
   .vehicle-details-title {
-    font-size: 24px;
-    margin-bottom: 32px;
+    font-size: 20px;
+    margin-bottom: 20px;
   }
 
   .vehicle-details-grid {
-    grid-template-columns: 1fr !important;
-    gap: 28px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px 12px !important; /* 16px row gap, 12px column gap */
+  }
+  
+  .detail-item {
+    padding: 12px 10px !important;
+    min-height: auto !important;
+  }
+  
+  .detail-label {
+    font-size: 11px !important;
+    margin-bottom: 4px !important;
+    line-height: 1.2 !important;
+  }
+  
+  .detail-value {
+    font-size: 14px !important;
+    line-height: 1.3 !important;
+  }
+  
+  .vehicle-actions {
+    margin-top: 20px !important;
+    gap: 10px !important;
+  }
+  
+  .edit-button,
+  .create-advert-button {
+    padding: 12px 20px !important;
+    font-size: 14px !important;
   }
 }
 

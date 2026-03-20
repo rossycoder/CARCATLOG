@@ -1,4 +1,3 @@
-/* Wrapper for card + save button */
 .car-card-wrapper {
   position: relative;
   width: 100%;
@@ -33,7 +32,7 @@
 }
 
 /* Save button positioned inside image container */
-.car-image-container > .save-button {
+.car-image-container > .heart-save-button {
   position: absolute !important;
   top: 12px !important;
   right: 12px !important;
@@ -66,7 +65,7 @@
   position: relative;
   width: 100%;
   padding-top: 75%; /* 4:3 aspect ratio */
-  overflow: hidden !important;
+  overflow: visible !important;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
@@ -246,21 +245,21 @@ div.car-card:hover div.car-image-container {
   display: none;
 }
 
-.car-image-container > .save-button:hover {
+.car-image-container > .heart-save-button:hover {
   transform: scale(1.1) !important;
   background: rgba(255, 255, 255, 1) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
-.car-image-container > .save-button:active {
+.car-image-container > .heart-save-button:active {
   transform: scale(0.95) !important;
 }
 
-.car-image-container > .save-button.saved {
+.car-image-container > .heart-save-button.saved {
   animation: heartbeat 0.4s ease;
 }
 
-.car-image-container > .save-button svg {
+.car-image-container > .heart-save-button svg {
   width: 24px !important;
   height: 24px !important;
   display: block !important;
@@ -269,18 +268,18 @@ div.car-card:hover div.car-image-container {
   visibility: visible !important;
 }
 
-.car-image-container > .save-button.saved svg {
+.car-image-container > .heart-save-button.saved svg {
   fill: #e31e24 !important;
   stroke: #e31e24 !important;
 }
 
-.car-image-container > .save-button:not(.saved) svg {
+.car-image-container > .heart-save-button:not(.saved) svg {
   fill: none !important;
   stroke: #1a1a1a !important;
   stroke-width: 2 !important;
 }
 
-.car-image-container > .save-button svg path {
+.car-image-container > .heart-save-button svg path {
   fill: inherit !important;
   stroke: inherit !important;
   opacity: 1 !important;
@@ -324,6 +323,7 @@ div.car-card:hover div.car-image-container {
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   white-space: normal;
 }
@@ -522,7 +522,7 @@ div.car-card:hover div.car-image-container {
     font-size: 12px;
   }
   
-  .car-image-container > .save-button {
+  .car-image-container > .heart-save-button {
     width: 38px !important;
     height: 38px !important;
     min-width: 38px !important;
@@ -531,7 +531,7 @@ div.car-card:hover div.car-image-container {
     max-height: 38px !important;
   }
   
-  .car-image-container > .save-button svg {
+  .car-image-container > .heart-save-button svg {
     width: 22px !important;
     height: 22px !important;
   }
@@ -631,7 +631,9 @@ div.car-card:hover div.car-image-container {
     font-size: 13px;
   }
 
-  .car-image-container > .save-button {
+  /* FORCE SAVE BUTTON TO SHOW ON MOBILE */
+  .car-image-container > .heart-save-button {
+    display: flex !important;
     width: 38px !important;
     height: 38px !important;
     min-width: 38px !important;
@@ -640,12 +642,19 @@ div.car-card:hover div.car-image-container {
     max-height: 38px !important;
     top: 12px !important;
     right: 12px !important;
-    z-index: 100 !important;
+    z-index: 1000 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    position: absolute !important;
   }
 
-  .car-image-container > .save-button svg {
+  .car-image-container > .heart-save-button svg {
     width: 22px !important;
     height: 22px !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
   .slider-btn {
@@ -765,7 +774,9 @@ div.car-card:hover div.car-image-container {
     font-size: 12px;
   }
   
-  .car-image-container > .save-button {
+  /* FORCE SAVE BUTTON TO SHOW ON MOBILE */
+  .car-image-container > .heart-save-button {
+    display: flex !important;
     width: 36px !important;
     height: 36px !important;
     min-width: 36px !important;
@@ -774,12 +785,19 @@ div.car-card:hover div.car-image-container {
     max-height: 36px !important;
     top: 10px !important;
     right: 10px !important;
-    z-index: 100 !important;
+    z-index: 1000 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    position: absolute !important;
   }
   
-  .car-image-container > .save-button svg {
+  .car-image-container > .heart-save-button svg {
     width: 20px !important;
     height: 20px !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
   .slider-btn {
@@ -839,21 +857,30 @@ div.car-card:hover div.car-image-container {
     font-size: 16px;
   }
   
-  .car-image-container > .save-button {
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
-    min-height: 28px !important;
-    max-width: 28px !important;
-    max-height: 28px !important;
-    top: 6px !important;
-    right: 6px !important;
-    z-index: 100 !important;
+  /* FORCE SAVE BUTTON TO SHOW ON MOBILE */
+  .car-image-container > .heart-save-button {
+    display: flex !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    top: 8px !important;
+    right: 8px !important;
+    z-index: 1000 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    position: absolute !important;
   }
   
-  .car-image-container > .save-button svg {
-    width: 16px !important;
-    height: 16px !important;
+  .car-image-container > .heart-save-button svg {
+    width: 18px !important;
+    height: 18px !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
   .slider-btn {
@@ -892,7 +919,7 @@ div.car-card:hover div.car-image-container {
     display: none !important;
   }
 
-  .car-image-container > .save-button {
+  .car-image-container > .heart-save-button {
     z-index: 100 !important;
   }
   
@@ -907,9 +934,4 @@ div.car-card:hover div.car-image-container {
 /* Overlay completely disabled */
 .car-image-container::after {
   display: none !important;
-}
-
-/* Ensure images don't block the button */
-.car-image {
-  pointer-events: none;
 }

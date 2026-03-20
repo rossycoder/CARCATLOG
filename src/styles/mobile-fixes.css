@@ -2,6 +2,91 @@
    MOBILE FIXES FOR CAR DETAIL PAGE
    ======================================== */
 
+/* ========================================
+   CRITICAL: FORCE HEART SAVE BUTTON ON MOBILE
+   ======================================== */
+@media (max-width: 968px) {
+  /* Ensure ALL parent containers don't clip the button */
+  .results-grid,
+  .results-grid > *,
+  .results-grid-autotrader,
+  .results-grid-autotrader > *,
+  .car-card,
+  .car-card-wrapper,
+  a.car-card {
+    overflow: visible !important;
+  }
+  
+  .car-image-container {
+    overflow: visible !important;
+    position: relative !important;
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  /* Target the heart-shaped save button specifically */
+  .heart-save-button,
+  button.heart-save-button,
+  .car-image-container .heart-save-button,
+  .car-image-container > .heart-save-button,
+  .car-card .heart-save-button,
+  .car-card .car-image-container .heart-save-button,
+  a.car-card .car-image-container > button.heart-save-button,
+  .car-card-wrapper .car-image-container > .heart-save-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 99999 !important;
+    position: absolute !important;
+    pointer-events: auto !important;
+    background: white !important;
+    border: 2px solid #000 !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    top: 10px !important;
+    right: 10px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+    transform: none !important;
+  }
+  
+  /* Force SVG to show */
+  .heart-save-button svg,
+  button.heart-save-button svg,
+  .car-image-container .heart-save-button svg,
+  .car-image-container > .heart-save-button svg,
+  a.car-card .car-image-container > button.heart-save-button svg,
+  .car-card-wrapper .car-image-container > .heart-save-button svg {
+    display: block !important;
+    width: 22px !important;
+    height: 22px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+  }
+  
+  .car-image {
+    pointer-events: none !important;
+    z-index: 1 !important;
+  }
+  
+  /* Remove any overlay that might hide the button */
+  .car-image-container::before,
+  .car-image-container::after {
+    display: none !important;
+  }
+}
+
 /* Mobile viewport fixes */
 @media (max-width: 968px) {
   /* Car Detail Page Mobile Layout */
@@ -71,20 +156,33 @@
     order: 7 !important;
   }
   
+  /* Electric Vehicle Sections - After Running Costs, Before Features */
+  .left-column .electric-vehicle-sections {
+    order: 8 !important;
+  }
+  
+  .left-column .features-section {
+    order: 9 !important;
+  }
+  
+  .left-column .location-display {
+    order: 10 !important;
+  }
+  
   /* MOT History should appear BEFORE Vehicle History */
   .left-column > div:has([class*="mot-history"]),
   .left-column > div:has([class*="MOTHistory"]) {
-    order: 8 !important;
+    order: 11 !important;
   }
   
   /* Vehicle History appears AFTER MOT History */
   .left-column > div:has([class*="vehicle-history"]),
   .left-column > div:has([class*="VehicleHistory"]) {
-    order: 9 !important;
+    order: 12 !important;
   }
   
   .left-column .meet-seller-section {
-    order: 10 !important;
+    order: 13 !important;
   }
   
   /* Within right-column */
@@ -228,48 +326,237 @@
     height: 180px !important;
   }
   
-  /* CarAdvertEditPage Overview Section - Mobile Fix (2 columns) */
+  /* CarAdvertEditPage Overview Section - Mobile Fix (2 Columns with proper wrapping) */
   .car-advert-edit-page .specifications-section .spec-grid {
+    display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 4px !important;
-    column-gap: 4px !important;
-    row-gap: 0 !important;
+    gap: 8px !important;
+    column-gap: 8px !important;
+    row-gap: 8px !important;
   }
   
   .car-advert-edit-page .specifications-section .spec-item {
     display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
     align-items: flex-start !important;
-    padding: 12px 8px !important;
-    background: transparent !important;
-    border-radius: 0 !important;
-    border: none !important;
-    border-bottom: 1px solid #e9ecef !important;
-    gap: 8px !important;
-    min-height: 44px !important;
+    padding: 12px 10px !important;
+    background: #f8f9fa !important;
+    border-radius: 6px !important;
+    border: 1px solid #e9ecef !important;
+    gap: 4px !important;
+    min-height: 60px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   
   .car-advert-edit-page .specifications-section .spec-item label {
-    color: #999 !important;
-    font-weight: 400 !important;
-    font-size: 12px !important;
-    text-transform: none !important;
-    line-height: 1.4 !important;
+    color: #666 !important;
+    font-weight: 600 !important;
+    font-size: 11px !important;
+    text-transform: capitalize !important;
+    line-height: 1.2 !important;
     flex: 0 0 auto !important;
-    max-width: 45% !important;
+    width: 100% !important;
     word-wrap: break-word !important;
+    display: block !important;
+    margin-bottom: 2px !important;
   }
   
   .car-advert-edit-page .specifications-section .spec-item span {
     color: #1a1a1a !important;
     font-weight: 500 !important;
-    font-size: 12px !important;
+    font-size: 13px !important;
     line-height: 1.4 !important;
-    text-align: right !important;
+    text-align: left !important;
     flex: 1 1 auto !important;
+    width: 100% !important;
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
-    hyphens: none !important;
+    word-break: break-word !important;
+    hyphens: auto !important;
+    display: block !important;
+  }
+  
+  /* Vehicle Features - 2 Columns on Mobile */
+  .car-advert-edit-page .features-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    column-gap: 8px !important;
+    row-gap: 8px !important;
+  }
+  
+  .car-advert-edit-page .feature-checkbox {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 8px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    background: #fff !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .car-advert-edit-page .feature-checkbox input[type="checkbox"] {
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .car-advert-edit-page .feature-checkbox span {
+    font-size: 12px !important;
+    color: #333 !important;
+    line-height: 1.3 !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+  
+  /* Running Costs - 2 Columns on Mobile */
+  .car-advert-edit-page .running-costs-form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  
+  .car-advert-edit-page .fuel-economy-inputs {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    column-gap: 10px !important;
+    row-gap: 10px !important;
+  }
+  
+  .car-advert-edit-page .running-costs-form .form-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    margin-bottom: 0 !important;
+  }
+  
+  .car-advert-edit-page .running-costs-form .form-group label {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #666 !important;
+    line-height: 1.2 !important;
+  }
+  
+  .car-advert-edit-page .running-costs-form .form-group input {
+    padding: 10px 8px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    transition: border-color 0.2s !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Price Section - Single Line on Mobile */
+  .car-advert-edit-page .price-section {
+    padding: 16px 12px !important;
+  }
+  
+  .car-advert-edit-page .price-display-wrapper {
+    text-align: center !important;
+  }
+  
+  .car-advert-edit-page .price-display {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+  
+  /* Price amount container - keep £ and number together */
+  .car-advert-edit-page .price-display .currency + .price-value {
+    display: inline !important;
+  }
+  
+  .car-advert-edit-page .price-display .currency {
+    display: inline !important;
+    font-size: 32px !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+    line-height: 1 !important;
+    margin-right: 2px !important;
+  }
+  
+  .car-advert-edit-page .price-display .price-value {
+    display: inline !important;
+    font-size: 32px !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+    line-height: 1 !important;
+  }
+  
+  .car-advert-edit-page .edit-price-button {
+    display: block !important;
+    margin-top: 8px !important;
+    padding: 10px 24px !important;
+    font-size: 14px !important;
+    white-space: nowrap !important;
+    background: none !important;
+    border: 2px solid #1a4ba0 !important;
+    color: #1a4ba0 !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+  }
+  
+  .car-advert-edit-page .price-note {
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    margin-top: 12px !important;
+    text-align: center !important;
+  }
+  
+  .car-advert-edit-page .valuation-breakdown {
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+  }
+}
+
+/* ========================================
+   ELECTRIC VEHICLE SECTIONS - MOBILE/DESKTOP VISIBILITY
+   ======================================== */
+
+/* Desktop: Show desktop versions, hide mobile versions */
+.car-detail-page .left-column .desktop-only-charging,
+.car-detail-page .left-column .desktop-only-ev-costs {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.car-detail-page .left-column .mobile-only-charging,
+.car-detail-page .left-column .mobile-only-ev-costs {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Mobile: Hide desktop versions, show mobile versions */
+@media (max-width: 768px) {
+  .car-detail-page .left-column .desktop-only-charging,
+  .car-detail-page .left-column .desktop-only-ev-costs {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+  
+  .car-detail-page .left-column .mobile-only-charging,
+  .car-detail-page .left-column .mobile-only-ev-costs {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 }

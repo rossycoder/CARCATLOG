@@ -16,6 +16,15 @@ const CarAdvertEditPage = () => {
   const { dealer, isAuthenticated: isTradeAuthenticated } = useTradeDealerContext();
   const isTradeDealer = isTradeAuthenticated && dealer;
   
+  // CRITICAL: Check authentication on mount
+  useEffect(() => {
+    if (!user && !isTradeAuthenticated) {
+      console.log('❌ User not authenticated, redirecting to signin');
+      // Redirect to signin with return URL
+      navigate(`/signin?redirect=/selling/advert/edit/${advertId}`);
+    }
+  }, [user, isTradeAuthenticated, navigate, advertId]);
+  
   // Enhanced vehicle lookup hook
   const {
     loading: apiLoading,
@@ -288,6 +297,24 @@ const CarAdvertEditPage = () => {
           setCarStatus(vehicleData.advertStatus); // Store car status
           setIsDealerCar(vehicleData.isDealerListing || false); // Store if it's a dealer car
           
+          // CRITICAL: Authorization check - verify user owns this car
+          if (user && vehicleData.userId && vehicleData.userId !== user._id) {
+            console.error('❌ Authorization failed: User does not own this car');
+            setLoadError('You do not have permission to edit this advert');
+            setIsLoading(false);
+            setTimeout(() => navigate('/'), 3000); // Redirect after 3 seconds
+            return;
+          }
+          
+          // CRITICAL: Authorization check for trade dealers
+          if (isTradeDealer && vehicleData.dealerId && vehicleData.dealerId !== dealer._id) {
+            console.error('❌ Authorization failed: Dealer does not own this car');
+            setLoadError('You do not have permission to edit this advert');
+            setIsLoading(false);
+            setTimeout(() => navigate('/trade/dashboard'), 3000); // Redirect after 3 seconds
+            return;
+          }
+          
           console.log('🚗 Car loaded:', {
             advertStatus: vehicleData.advertStatus,
             isDealerListing: vehicleData.isDealerListing,
@@ -372,15 +399,19 @@ const CarAdvertEditPage = () => {
             console.log('💡 MOT data should be available in car document already or from initial lookup');
           }
           
-          // Check if we need to fetch enhanced data (valuation and running costs)
-          // IMPORTANT: For new users, we should fetch from API since data isn't in database yet
-          // For existing cars with payment completed, data should be in database already
+          // 🔒 PROTECTED: Check if we need to fetch enhanced data
+          // IMPORTANT: Only fetch for NEW cars without payment (draft/pending_payment)
+          // For existing cars with payment completed, data should already be in database
           const needsValuation = !vehicleData.valuation?.privatePrice && !vehicleData.allValuations?.private;
           const needsRunningCosts = !vehicleData.runningCosts?.annualTax;
           const needsEnhancedData = needsValuation || needsRunningCosts;
           
           // Check if this is a new user car (no payment completed yet)
           const isNewUserCar = vehicleData.advertStatus === 'draft' || vehicleData.advertStatus === 'pending_payment';
+          
+          // 🔒 CRITICAL: Check if MOT data is missing
+          const needsMOTData = !vehicleData.motDue && !vehicleData.motExpiry;
+          const hasMOTHistory = vehicleData.motHistory && vehicleData.motHistory.length > 0;
           
           console.log('🔍 Enhanced data check:', {
             needsValuation,
@@ -391,30 +422,22 @@ const CarAdvertEditPage = () => {
             hasValuation: !!vehicleData.valuation?.privatePrice,
             hasRunningCosts: !!vehicleData.runningCosts?.annualTax,
             hasMOTData: !!(vehicleData.motDue || vehicleData.motExpiry),
+            hasMOTHistory,
             registrationNumber: vehicleData.registrationNumber
           });
           
-          // CRITICAL: Check if MOT data is missing
-          const needsMOTData = !vehicleData.motDue && !vehicleData.motExpiry;
+          // 🔒 PROTECTED: Only fetch for NEW cars OR if critical data is missing
+          // NEVER fetch for existing cars with payment completed
+          const shouldFetchEnhancedData = isNewUserCar && needsEnhancedData;
+          const shouldFetchMOT = isNewUserCar && needsMOTData && !hasMOTHistory;
           
-          // CRITICAL: Check if MOT history exists (even if motDue is missing)
-          const hasMOTHistory = vehicleData.motHistory && vehicleData.motHistory.length > 0;
+          if (!shouldFetchEnhancedData && !shouldFetchMOT) {
+            console.log('✅ Skipping API calls - data already in database or payment completed');
+            console.log('💰 Saving API costs by using cached data');
+          }
           
-          console.log('🔧 MOT Check:', {
-            motDue: vehicleData.motDue,
-            motExpiry: vehicleData.motExpiry,
-            motHistoryCount: vehicleData.motHistory?.length || 0,
-            needsMOTData,
-            hasMOTHistory,
-            willFetchMOT: needsMOTData && !hasMOTHistory && vehicleData.registrationNumber
-          });
-          
-          // CRITICAL: Don't fetch if MOT history already exists (prevents duplicate API calls)
-          const shouldFetchMOT = needsMOTData && !hasMOTHistory;
-          
-          // Only fetch enhanced data for new user cars or if data is missing
-          // IMPORTANT: Skip if MOT history already exists to prevent duplicate API calls
-          if (vehicleData.registrationNumber && (isNewUserCar || needsEnhancedData || shouldFetchMOT)) {
+          // Only fetch enhanced data for NEW user cars (draft/pending_payment)
+          if (vehicleData.registrationNumber && (shouldFetchEnhancedData || shouldFetchMOT)) {
             if (isNewUserCar) {
               console.log('🆕 New user car detected - fetching fresh API data for running costs and valuation');
             } else if (needsMOTData) {
@@ -655,9 +678,9 @@ const CarAdvertEditPage = () => {
           console.log('💡 MOT data should be available in car document already or from initial lookup');
         }
         
-        // Check if we need to fetch enhanced data (valuation and running costs)
-        // IMPORTANT: For new users, we should fetch from API since data isn't in database yet
-        // For existing cars with payment completed, data should be in database already
+        // 🔒 PROTECTED: Check if we need to fetch enhanced data
+        // IMPORTANT: Only fetch for NEW cars without payment (draft/pending_payment)
+        // For existing cars with payment completed, data should already be in database
         const needsValuation = !response.data.vehicleData?.valuation?.privatePrice && 
                                !response.data.vehicleData?.allValuations?.private;
         const needsRunningCosts = !response.data.vehicleData?.runningCosts?.annualTax;
@@ -667,6 +690,10 @@ const CarAdvertEditPage = () => {
         const isNewUserCar = response.data.vehicleData?.advertStatus === 'draft' || 
                             response.data.vehicleData?.advertStatus === 'pending_payment';
         
+        // 🔒 CRITICAL: Check for MOT data
+        const needsMOTData = !response.data.vehicleData?.motDue && !response.data.vehicleData?.motExpiry;
+        const hasMOTHistory = response.data.vehicleData?.motHistory && response.data.vehicleData.motHistory.length > 0;
+        
         console.log('🔍 Enhanced data check (fallback):', {
           needsValuation,
           needsRunningCosts,
@@ -674,20 +701,22 @@ const CarAdvertEditPage = () => {
           isNewUserCar,
           advertStatus: response.data.vehicleData?.advertStatus,
           hasValuation: !!response.data.vehicleData?.valuation?.privatePrice,
-          hasRunningCosts: !!response.data.vehicleData?.runningCosts?.annualTax
-        });
-        
-        // CRITICAL: Also check for MOT data in fallback path
-        const needsMOTData = !response.data.vehicleData?.motDue && !response.data.vehicleData?.motExpiry;
-        console.log('🔧 MOT Check (fallback):', {
-          motDue: response.data.vehicleData?.motDue,
-          motExpiry: response.data.vehicleData?.motExpiry,
+          hasRunningCosts: !!response.data.vehicleData?.runningCosts?.annualTax,
           needsMOTData,
-          willFetchMOT: needsMOTData && response.data.vehicleData?.registrationNumber
+          hasMOTHistory
         });
         
-        // Only fetch enhanced data for new user cars or if data is missing
-        if (response.data.vehicleData?.registrationNumber && (isNewUserCar || needsEnhancedData || needsMOTData)) {
+        // 🔒 PROTECTED: Only fetch for NEW cars OR if critical data is missing
+        const shouldFetchEnhancedData = isNewUserCar && needsEnhancedData;
+        const shouldFetchMOT = isNewUserCar && needsMOTData && !hasMOTHistory;
+        
+        if (!shouldFetchEnhancedData && !shouldFetchMOT) {
+          console.log('✅ Skipping API calls (fallback) - data already in database or payment completed');
+          console.log('💰 Saving API costs by using cached data');
+        }
+        
+        // Only fetch enhanced data for NEW user cars (draft/pending_payment)
+        if (response.data.vehicleData?.registrationNumber && (shouldFetchEnhancedData || shouldFetchMOT)) {
           if (isNewUserCar) {
             console.log('🆕 New user car detected (fallback) - fetching fresh API data for running costs and valuation');
           } else {
@@ -1870,56 +1899,58 @@ const CarAdvertEditPage = () => {
               <div className="price-display-wrapper">
                 {!isPriceEditing ? (
                   <div className="price-display">
-                    <span className="currency">£</span>
-                    <span className="price-value">
-                      {(() => {
-                        // Debug logging
-                        console.log('🔍 DEBUG: advertData.price =', advertData.price, 'type:', typeof advertData.price);
-                        console.log('🔍 DEBUG: vehicleData?.estimatedValue =', vehicleData?.estimatedValue);
-                        console.log('🔍 DEBUG: vehicleData?.allValuations =', vehicleData?.allValuations);
-                        console.log('🔍 DEBUG: vehicleData?.valuation =', vehicleData?.valuation);
-                        
-                        // Try multiple sources for the price
-                        let displayPrice = null;
-                        
-                        // 1. Try advertData.price (should be set from backend)
-                        if (advertData.price && (typeof advertData.price === 'number' ? advertData.price > 0 : parseFloat(advertData.price) > 0)) {
-                          displayPrice = typeof advertData.price === 'number' ? advertData.price : parseFloat(advertData.price);
-                        }
-                        // 2. Try vehicleData.valuation.estimatedValue.private
-                        else if (vehicleData?.valuation?.estimatedValue?.private && vehicleData.valuation.estimatedValue.private > 0) {
-                          displayPrice = vehicleData.valuation.estimatedValue.private;
-                        }
-                        // 3. Try vehicleData.valuation.estimatedValue.retail
-                        else if (vehicleData?.valuation?.estimatedValue?.retail && vehicleData.valuation.estimatedValue.retail > 0) {
-                          displayPrice = vehicleData.valuation.estimatedValue.retail;
-                        }
-                        // 4. Try vehicleData.valuation.privatePrice
-                        else if (vehicleData?.valuation?.privatePrice && vehicleData.valuation.privatePrice > 0) {
-                          displayPrice = vehicleData.valuation.privatePrice;
-                        }
-                        // 5. Try vehicleData.allValuations.private
-                        else if (vehicleData?.allValuations?.private && vehicleData.allValuations.private > 0) {
-                          displayPrice = vehicleData.allValuations.private;
-                        }
-                        // 6. Try vehicleData.estimatedValue
-                        else if (vehicleData?.estimatedValue && vehicleData.estimatedValue > 0) {
-                          displayPrice = vehicleData.estimatedValue;
-                        }
-                        // 7. Try vehicleData.price (database price)
-                        else if (vehicleData?.price && vehicleData.price > 0) {
-                          displayPrice = vehicleData.price;
-                        }
-                        
-                        console.log('🔍 DEBUG: Final displayPrice =', displayPrice);
-                        
-                        if (displayPrice && displayPrice > 0) {
-                          return displayPrice.toLocaleString();
-                        } else {
-                          return 'Not set';
-                        }
-                      })()}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                      <span className="currency">£</span>
+                      <span className="price-value">
+                        {(() => {
+                          // Debug logging
+                          console.log('🔍 DEBUG: advertData.price =', advertData.price, 'type:', typeof advertData.price);
+                          console.log('🔍 DEBUG: vehicleData?.estimatedValue =', vehicleData?.estimatedValue);
+                          console.log('🔍 DEBUG: vehicleData?.allValuations =', vehicleData?.allValuations);
+                          console.log('🔍 DEBUG: vehicleData?.valuation =', vehicleData?.valuation);
+                          
+                          // Try multiple sources for the price
+                          let displayPrice = null;
+                          
+                          // 1. Try advertData.price (should be set from backend)
+                          if (advertData.price && (typeof advertData.price === 'number' ? advertData.price > 0 : parseFloat(advertData.price) > 0)) {
+                            displayPrice = typeof advertData.price === 'number' ? advertData.price : parseFloat(advertData.price);
+                          }
+                          // 2. Try vehicleData.valuation.estimatedValue.private
+                          else if (vehicleData?.valuation?.estimatedValue?.private && vehicleData.valuation.estimatedValue.private > 0) {
+                            displayPrice = vehicleData.valuation.estimatedValue.private;
+                          }
+                          // 3. Try vehicleData.valuation.estimatedValue.retail
+                          else if (vehicleData?.valuation?.estimatedValue?.retail && vehicleData.valuation.estimatedValue.retail > 0) {
+                            displayPrice = vehicleData.valuation.estimatedValue.retail;
+                          }
+                          // 4. Try vehicleData.valuation.privatePrice
+                          else if (vehicleData?.valuation?.privatePrice && vehicleData.valuation.privatePrice > 0) {
+                            displayPrice = vehicleData.valuation.privatePrice;
+                          }
+                          // 5. Try vehicleData.allValuations.private
+                          else if (vehicleData?.allValuations?.private && vehicleData.allValuations.private > 0) {
+                            displayPrice = vehicleData.allValuations.private;
+                          }
+                          // 6. Try vehicleData.estimatedValue
+                          else if (vehicleData?.estimatedValue && vehicleData.estimatedValue > 0) {
+                            displayPrice = vehicleData.estimatedValue;
+                          }
+                          // 7. Try vehicleData.price (database price)
+                          else if (vehicleData?.price && vehicleData.price > 0) {
+                            displayPrice = vehicleData.price;
+                          }
+                          
+                          console.log('🔍 DEBUG: Final displayPrice =', displayPrice);
+                          
+                          if (displayPrice && displayPrice > 0) {
+                            return displayPrice.toLocaleString();
+                          } else {
+                            return 'Not set';
+                          }
+                        })()}
+                      </span>
+                    </div>
                     <button type="button" onClick={handlePriceEdit} className="edit-price-button">
                       Edit price
                     </button>

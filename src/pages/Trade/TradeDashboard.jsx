@@ -15,6 +15,14 @@ const TradeDashboard = () => {
   const [lastUpdated, setLastUpdated] = useState(null);
   const refreshIntervalRef = useRef(null);
 
+  // Debug: Log subscription data
+  useEffect(() => {
+    console.log('🔍 Dashboard Subscription Data:', subscription);
+    console.log('   isTrialing:', subscription?.isTrialing);
+    console.log('   status:', subscription?.status);
+    console.log('   daysRemaining:', subscription?.daysRemaining);
+  }, [subscription]);
+
   // Fetch stats on mount and set up auto-refresh
   useEffect(() => {
     console.log('🔵 TradeDashboard mounted - Starting live analytics');
@@ -194,25 +202,59 @@ const TradeDashboard = () => {
             <div className="trial-offer-header">
               <div className="trial-offer-icon-large">🎉</div>
               <div className="trial-offer-content">
-                <h3>30-Day FREE Trial Available!</h3>
-                <p className="trial-offer-subtitle">Start listing immediately - Only £2.50 per car during trial</p>
-                <p className="trial-offer-details">Full subscription charge starts after 30 days</p>
+                <h3>Start Your Subscription - Special First Month Pricing!</h3>
+                <p className="trial-offer-subtitle">Pay only £2.50 per car for the first 30 days</p>
+                <p className="trial-offer-details">Regular monthly pricing starts after trial period</p>
               </div>
             </div>
             <Link to="/trade/subscription" className="btn-start-trial">
-              Start Free Trial →
+              View Packages →
             </Link>
           </div>
         ) : (
-          <div className={`subscription-card active`}>
+          <div className={`subscription-card ${subscription.isTrialing ? 'active' : 'active'}`}>
+            {subscription.isTrialing && (
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.15)',
+                color: 'white',
+                padding: '12px 20px',
+                borderRadius: '8px',
+                fontWeight: '600',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '16px',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}>
+                <span style={{ fontSize: '20px' }}>⏱️</span>
+                <span>Trial Period Active - {subscription.daysRemaining} days remaining</span>
+              </div>
+            )}
             <div className="subscription-header">
-              <div className="subscription-icon">✓</div>
+              <div className="subscription-icon">
+                {subscription.isTrialing ? '⏱️' : '✓'}
+              </div>
               <div className="subscription-details">
                 <h3>{subscription.plan?.name}</h3>
                 <p className="subscription-description">
                   {subscription.listingsUsed} of {subscription.listingsLimit || '∞'} listings used
                   {subscription.daysRemaining > 0 && ` • ${subscription.daysRemaining} days remaining`}
                 </p>
+                {subscription.isTrialing && subscription.plan?.price && (
+                  <p style={{
+                    marginTop: '8px',
+                    fontSize: '13px',
+                    color: 'white',
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    display: 'inline-block',
+                    border: '1px solid rgba(255, 255, 255, 0.2)'
+                  }}>
+                    💡 After trial: £{(subscription.plan.price / 100).toFixed(0)} + VAT per month
+                  </p>
+                )}
               </div>
             </div>
             <div className="usage-progress">
@@ -221,7 +263,7 @@ const TradeDashboard = () => {
                   className="progress-fill" 
                   style={{ 
                     width: `${usagePercentage}%`,
-                    background: usagePercentage > 90 ? '#dc2626' : usagePercentage > 70 ? '#f59e0b' : '#10b981'
+                    background: usagePercentage > 90 ? '#dc2626' : usagePercentage > 70 ? '#f59e0b' : 'white'
                   }}
                 ></div>
               </div>

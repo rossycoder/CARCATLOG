@@ -90,6 +90,24 @@ const TradeInventoryPage = () => {
     }
   };
 
+  const handleMarkAsSold = async (id, type) => {
+    if (!confirm('Mark this vehicle as sold?')) return;
+    
+    try {
+      if (type === 'bike') {
+        await tradeInventoryService.markBikeAsSold(id);
+      } else if (type === 'van') {
+        await tradeInventoryService.markVanAsSold(id);
+      } else {
+        await tradeInventoryService.markAsSold(id);
+      }
+      fetchAllInventory(); // Refresh inventory to show updated status
+    } catch (error) {
+      console.error('Failed to mark vehicle as sold:', error);
+      alert('Failed to mark vehicle as sold. Please try again.');
+    }
+  };
+
   const handleAddVehicleClick = (e, type) => {
     // Check if at limit
     if (subscription && subscription.listingsLimit !== null) {
@@ -431,6 +449,14 @@ const TradeInventoryPage = () => {
                       </svg>
                       View
                     </Link>
+                    {(vehicle.advertStatus || vehicle.status) === 'active' && (
+                      <button onClick={() => handleMarkAsSold(vehicle._id, vehicle.vehicleType)} className="btn-action btn-sold">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M10.97 4.97a.75.75 0 011.07 1.05l-3.99 4.99a.75.75 0 01-1.08.02L4.324 8.384a.75.75 0 111.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 01.02-.022z"/>
+                        </svg>
+                        Mark as Sold
+                      </button>
+                    )}
                     <button onClick={() => handleDelete(vehicle._id, vehicle.vehicleType)} className="btn-action btn-delete">
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M5.5 5.5A.5.5 0 016 6v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm3 .5a.5.5 0 00-1 0v6a.5.5 0 001 0V6z"/>

@@ -475,6 +475,17 @@
   border-color: #dc2626;
 }
 
+.btn-sold {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.btn-sold:hover {
+  background: #059669;
+  border-color: #059669;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;

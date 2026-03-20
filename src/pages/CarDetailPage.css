@@ -1560,3 +1560,32 @@
     display: none;
   }
 }
+
+/* Charging Information Section - Shows after Features on all devices */
+.charging-info-section {
+  display: block;
+}
+
+
+/* Mobile/Desktop specific EV sections visibility */
+.desktop-only-charging,
+.desktop-only-ev-costs {
+  display: block !important;
+}
+
+.mobile-only-charging,
+.mobile-only-ev-costs {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .desktop-only-charging,
+  .desktop-only-ev-costs {
+    display: none !important;
+  }
+  
+  .mobile-only-charging,
+  .mobile-only-ev-costs {
+    display: block !important;
+  }
+}

@@ -89,81 +89,94 @@
 
 .listing-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
 }
 
 .listing-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  border-color: #007bff;
 }
 
 .listing-image {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 220px;
   overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .listing-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.listing-card:hover .listing-image img {
+  transform: scale(1.05);
 }
 
 .status-badge {
   position: absolute;
   top: 12px;
   right: 12px;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 24px;
+  font-size: 0.8rem;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
 .status-active {
-  background: #28a745;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: white;
 }
 
 .status-sold {
-  background: #6c757d;
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
   color: white;
 }
 
 .status-expired {
-  background: #dc3545;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   color: white;
 }
 
 .status-draft {
-  background: #ffc107;
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
   color: #1a1a1a;
 }
 
 .status-pending {
-  background: #17a2b8;
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
   color: white;
 }
 
 .listing-details {
-  padding: 1.5rem;
+  padding: 1.75rem;
 }
 
 .listing-title {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #1a1a1a;
   margin-bottom: 0.5rem;
+  line-height: 1.3;
 }
 
 .listing-subtitle {
   color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+  font-weight: 500;
 }
 
 .listing-specs {
@@ -172,109 +185,128 @@
   align-items: center;
   color: #666;
   font-size: 0.9rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.listing-specs span {
+  white-space: nowrap;
 }
 
 .listing-price {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #007bff;
-  margin-bottom: 1rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.25rem;
 }
 
 .listing-package {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background: #f8f9fa;
-  border-radius: 6px;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
 }
 
 .package-badge {
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   color: #007bff;
+  letter-spacing: 0.5px;
 }
 
 .expiry-date {
   font-size: 0.8rem;
   color: #666;
+  font-weight: 500;
 }
 
 .listing-stats {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   font-size: 0.85rem;
   color: #666;
-  margin-bottom: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
+  margin-bottom: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 2px solid #f1f3f5;
+  font-weight: 500;
 }
 
 .listing-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
 .listing-actions button {
   flex: 1;
   min-width: 100px;
-  padding: 0.6rem 1rem;
+  padding: 0.75rem 1rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  letter-spacing: 0.3px;
+}
+
+.listing-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .btn-edit {
-  background: #007bff;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
   color: white;
 }
 
 .btn-edit:hover {
-  background: #0056b3;
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
 }
 
 .btn-view {
-  background: #17a2b8;
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
   color: white;
 }
 
 .btn-view:hover {
-  background: #138496;
+  background: linear-gradient(135deg, #138496 0%, #0f6674 100%);
 }
 
 .btn-sold {
-  background: #28a745;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: white;
 }
 
 .btn-sold:hover {
-  background: #218838;
+  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
 }
 
 .btn-delete {
-  background: #dc3545;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   color: white;
 }
 
 .btn-delete:hover {
-  background: #c82333;
+  background: linear-gradient(135deg, #c82333 0%, #a71d2a 100%);
 }
 
 .btn-payment {
-  background: #ffc107;
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
   color: #1a1a1a;
 }
 
 .btn-payment:hover {
-  background: #e0a800;
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
 }
 
 .btn-primary {

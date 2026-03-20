@@ -673,17 +673,66 @@
   .results-grid-autotrader {
     grid-template-columns: 1fr !important;
     gap: 16px !important;
-    padding: 16px 12px !important; /* Add padding here instead */
-    margin: 0 !important;
-    width: 100% !important;
-  }
-
-  /* Car cards must fill full width */
-  .car-card,
-  .car-listing-card {
+    padding: 16px 8px !important; /* Minimal padding for maximum card width */
+    margin: 0 auto !important; /* Center the grid */
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important; /* Center all cards */
+  }
+
+  /* Car cards even wider with minimal spacing */
+  .car-card,
+  .car-listing-card {
+    width: calc(100% - 24px) !important; /* Only 24px narrower - maximum width */
+    max-width: calc(100% - 24px) !important;
+    margin: 0 auto !important; /* Center each card */
+    overflow: visible !important;
+  }
+  
+  /* Image container must not clip */
+  .car-image-wrapper,
+  .car-image-container {
+    overflow: visible !important;
+    border-radius: 12px 12px 0 0 !important;
+  }
+  
+  /* Image itself should fit properly */
+  .car-image {
+    border-radius: 12px 12px 0 0 !important;
+    object-fit: cover !important;
+  }
+  
+  /* ULTRA CRITICAL: FORCE HEART BUTTON TO ALWAYS SHOW */
+  .car-card .heart-save-button,
+  .car-listing-card .heart-save-button,
+  a.car-card .heart-save-button,
+  .car-card .car-image-container .heart-save-button,
+  .car-card .car-image-container > .heart-save-button,
+  a.car-card .car-image-container > .heart-save-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 999999 !important;
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    width: 40px !important;
+    height: 40px !important;
+    background: white !important;
+    border: 2px solid #000 !important;
+    border-radius: 50% !important;
+  }
+  
+  .car-card .heart-save-button svg,
+  .car-listing-card .heart-save-button svg,
+  a.car-card .heart-save-button svg {
+    display: block !important;
+    width: 22px !important;
+    height: 22px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
   /* Car listing card mobile adjustments */

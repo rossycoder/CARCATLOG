@@ -28,10 +28,9 @@ const CarAdvertisingPricesPage = () => {
   const contactDetails = locationState.state?.contactDetails;
   const vehicleValuation = locationState.state?.vehicleValuation; // Get valuation from state
 
-  // COMPLETE FIX: Remove viewOnly logic entirely - all users should be able to select packages
-  // The viewOnly parameter was causing confusion and locking trade dealers out
-  // This page is for selecting advertising packages, so buttons should always be visible
-  const isViewOnly = false; // Always show package selection buttons
+  // Check if viewOnly parameter is in URL - allows users to browse pricing without restrictions
+  const searchParams = new URLSearchParams(locationState.search);
+  const isViewOnly = searchParams.get('viewOnly') === 'true';
   
   // Debug logging
   console.log('🔍 Package Selection Page - Always Enabled:', {
@@ -376,10 +375,10 @@ const CarAdvertisingPricesPage = () => {
       hasBusinessInfo: hasBusinessInfo()
     });
     
-    // If business info exists, allow trade selection
+    // If business info exists, force trade seller type
     if (hasBusinessInfo()) {
       setSellerType('trade');
-      console.log('✅ Auto-detected as TRADE seller (has business info)');
+      console.log('✅ Auto-detected as TRADE seller (has business info) - Private option disabled');
     } else if (advertData || vehicleData) {
       // No business info - force private seller type
       setSellerType('private');
@@ -400,7 +399,10 @@ const CarAdvertisingPricesPage = () => {
   };
 
   // If business info is missing, lock to private seller type
-  const isTradeOptionLocked = !hasBusinessInfo();
+  // If business info exists, lock to trade seller type
+  // BUT if viewOnly mode, allow toggling between trade/private to view prices
+  const isTradeOptionLocked = !isViewOnly && !hasBusinessInfo();
+  const isPrivateOptionLocked = !isViewOnly && hasBusinessInfo();
 
   // Separate effect to handle initial price range setting when vehicleData becomes available
   useEffect(() => {
@@ -663,7 +665,6 @@ const CarAdvertisingPricesPage = () => {
         
         <div className="page-title-section">
           <h1>Advertising prices</h1>
-          {sellerType === 'trade' && <p className="subtitle">All prices shown exclude VAT</p>}
         </div>
 
         <div className="filter-section">
@@ -709,6 +710,7 @@ const CarAdvertisingPricesPage = () => {
               <button 
                 type="button"
                 onClick={() => handleSellerTypeChange('private')}
+                disabled={isPrivateOptionLocked}
                 style={{ 
                   padding: '14px 40px', 
                   borderTop: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
@@ -716,13 +718,14 @@ const CarAdvertisingPricesPage = () => {
                   borderLeft: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
                   borderRight: sellerType === 'private' ? '2px solid #1a1a2e' : '1px solid #ddd',
                   borderRadius: '0 8px 8px 0',
-                  background: sellerType === 'private' ? 'white' : 'white',
-                  color: '#1a1a2e',
-                  cursor: 'pointer',
+                  background: isPrivateOptionLocked ? '#f5f5f5' : 'white',
+                  color: isPrivateOptionLocked ? '#999' : '#1a1a2e',
+                  cursor: isPrivateOptionLocked ? 'not-allowed' : 'pointer',
                   fontSize: '1rem',
                   fontWeight: sellerType === 'private' ? '500' : '400',
-                  opacity: 1
+                  opacity: isPrivateOptionLocked ? 0.5 : 1
                 }}
+                title={isPrivateOptionLocked ? 'Private option not available for trade sellers' : ''}
               >
                 Private
               </button>

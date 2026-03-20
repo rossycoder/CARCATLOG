@@ -84,6 +84,12 @@ export const deleteBike = async (id) => {
   return response.data;
 };
 
+// Mark bike as sold
+export const markBikeAsSold = async (id) => {
+  const response = await api.patch(`/bikes/${id}/sold`, {}, getAuthHeaders());
+  return response.data;
+};
+
 // Get van inventory for trade dealer
 export const getVanInventory = async (params = {}) => {
   const response = await api.get('/vans/dealer', {
@@ -102,6 +108,12 @@ export const publishVan = async (vanData) => {
 // Delete van
 export const deleteVan = async (id) => {
   const response = await api.delete(`/vans/${id}`, getAuthHeaders());
+  return response.data;
+};
+
+// Mark van as sold
+export const markVanAsSold = async (id) => {
+  const response = await api.patch(`/vans/${id}/sold`, {}, getAuthHeaders());
   return response.data;
 };
 
@@ -131,7 +143,9 @@ export default {
   getBikeInventory,
   publishBike,
   deleteBike,
+  markBikeAsSold,
   getVanInventory,
   publishVan,
-  deleteVan
+  deleteVan,
+  markVanAsSold
 };

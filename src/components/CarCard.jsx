@@ -129,7 +129,7 @@ const CarCard = ({ car }) => {
       <div className="car-image-container">
         {/* Save button INSIDE image container, positioned absolutely */}
         <button 
-          className={`save-button ${saved ? 'saved' : ''}`}
+          className={`save-button heart-save-button ${saved ? 'saved' : ''}`}
           onClick={handleSave}
           aria-label={saved ? 'Remove from saved' : 'Save car'}
         >
