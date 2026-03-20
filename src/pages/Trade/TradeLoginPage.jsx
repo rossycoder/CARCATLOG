@@ -38,7 +38,7 @@ const TradeLoginPage = () => {
       } else {
         // Check if it's an email verification error
         if (result.code === 'EMAIL_NOT_VERIFIED') {
-          setError('Please verify your email before logging in. Check your inbox for the verification link.');
+          setError('Please verify your email before logging in. Check your inbox and spam folder for the verification link.');
         } else {
           setError(result.message || 'Invalid email or password');
         }
