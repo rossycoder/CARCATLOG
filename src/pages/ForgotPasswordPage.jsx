@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import ReCaptcha from '../components/ReCaptcha/ReCaptcha';
 import './ForgotPasswordPage.css';
 
 const ForgotPasswordPage = () => {
@@ -8,12 +7,6 @@ const ForgotPasswordPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [recaptchaToken, setRecaptchaToken] = useState('');
-
-  const handleRecaptchaChange = (token) => {
-    setRecaptchaToken(token);
-    setError(''); // Clear any previous errors
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,11 +22,6 @@ const ForgotPasswordPage = () => {
       return;
     }
 
-    if (!recaptchaToken) {
-      setError('Please complete the reCAPTCHA verification');
-      return;
-    }
-
     setIsLoading(true);
     setError('');
 
@@ -41,10 +29,7 @@ const ForgotPasswordPage = () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email,
-          recaptchaToken 
-        })
+        body: JSON.stringify({ email })
       });
 
       const data = await response.json();
@@ -53,11 +38,9 @@ const ForgotPasswordPage = () => {
         setSuccess(true);
       } else {
         setError(data.message || 'Failed to send reset email');
-        setRecaptchaToken(''); // Reset reCAPTCHA on error
       }
     } catch (err) {
       setError('Unable to send reset email. Please try again.');
-      setRecaptchaToken(''); // Reset reCAPTCHA on error
     } finally {
       setIsLoading(false);
     }
