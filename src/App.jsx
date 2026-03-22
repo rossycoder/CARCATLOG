@@ -45,6 +45,9 @@ import AccessibilityStatementPage from './pages/TermsAndConditions/Accessibility
 import CookiesPolicyPage from './pages/TermsAndConditions/CookiesPolicyPage'
 import TermsOfUsePage from './pages/TermsAndConditions/TermsOfUsePage'
 
+// Admin Pages
+import AdminDashboardPage from './pages/Admin/AdminDashboardPage'
+
 // Bike Pages
 import BikesPage from './pages/Bikes/BikesPage'
 import UsedBikesPage from './pages/Bikes/UsedBikesPage'
@@ -148,6 +151,7 @@ function App() {
               <Route path="/search-results" element={<SearchResultsPage />} />
               <Route path="/saved-cars" element={<SavedCarsPage />} />
               <Route path="/my-listings" element={<MyListingsPage />} />
+              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
               <Route path="/valuation" element={<ValuationPage />} />
               <Route path="/valuation/identification" element={<VehicleIdentificationPage />} />
               <Route path="/valuation/results" element={<ValuationResultsPage />} />

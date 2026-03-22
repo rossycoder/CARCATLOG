@@ -575,9 +575,14 @@ const CarDetailPage = () => {
               </div>
 
               {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
-                <button className="phone-btn" onClick={() => trackInquiry('phone')}>
+                <a 
+                  href={`tel:${car.sellerContact?.phoneNumber || car.phoneNumber}`}
+                  className="phone-btn"
+                  onClick={() => trackInquiry('phone')}
+                  style={{ textDecoration: 'none', display: 'block' }}
+                >
                   📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
-                </button>
+                </a>
               )}
               {car.sellerContact?.allowEmailContact && car.sellerContact?.email && (
                 <a 
@@ -1041,9 +1046,14 @@ const CarDetailPage = () => {
                 {/* Contact Buttons */}
                 <div className="seller-contact-buttons">
                   {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
-                    <button className="call-seller-btn" onClick={() => trackInquiry('phone')}>
+                    <a 
+                      href={`tel:${car.sellerContact?.phoneNumber || car.phoneNumber}`}
+                      className="call-seller-btn"
+                      onClick={() => trackInquiry('phone')}
+                      style={{ textDecoration: 'none', display: 'block' }}
+                    >
                       📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
-                    </button>
+                    </a>
                   )}
                   {car.sellerContact?.allowEmailContact && car.sellerContact?.email && (
                     <a 
@@ -1081,9 +1091,14 @@ const CarDetailPage = () => {
               </div>
 
               {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
-                <button className="phone-btn" onClick={() => trackInquiry('phone')}>
+                <a 
+                  href={`tel:${car.sellerContact?.phoneNumber || car.phoneNumber}`}
+                  className="phone-btn"
+                  onClick={() => trackInquiry('phone')}
+                  style={{ textDecoration: 'none', display: 'block' }}
+                >
                   📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
-                </button>
+                </a>
               )}
               {car.sellerContact?.allowEmailContact && car.sellerContact?.email && (
                 <a 
