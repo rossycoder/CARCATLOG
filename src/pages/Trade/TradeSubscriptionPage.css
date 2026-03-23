@@ -95,6 +95,27 @@
   margin-bottom: 0;
 }
 
+/* Admin Fee Notice */
+.admin-fee-notice {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.15);
+  border-left: 4px solid #fbbf24;
+  border-radius: 4px;
+}
+
+.admin-fee-notice p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: white;
+  margin: 0;
+}
+
+.admin-fee-notice strong {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
 .subscription-header .subtitle {
   font-size: 18px;
   color: #666;

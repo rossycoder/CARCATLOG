@@ -193,7 +193,6 @@ const TradeSubscriptionPage = () => {
         <>
           <div className="subscription-header">
             <h1>Welcome{dealer?.dealershipName ? `, ${dealer.dealershipName}` : ''}!</h1>
-            <p>Choose your subscription package - Start with 30 days FREE trial</p>
             
             {/* 30-Day Free Trial Banner */}
             <div className="trial-offer-banner">
@@ -214,6 +213,9 @@ const TradeSubscriptionPage = () => {
                   <li>✓ Pay only the first month trial price to start listing immediately</li>
                   <li>✓ After 30 days, your chosen package activates at full price</li>
                 </ul>
+                <div className="admin-fee-notice">
+                  <p><strong>⚠️ Important:</strong> Please note there will be a one off £2.50 admin fee for every car per your selected package. This fee is to cover the API costs involved for each vehicle's 5 point HPI check, MOT Status Check & Vehicle Information Check which are used to populate each vehicle listing.</p>
+                </div>
               </div>
             </div>
           </div>

@@ -19,6 +19,8 @@ function MyListingsPage() {
   const [sortBy, setSortBy] = useState('Next Renewal Date');
   const [currentPage, setCurrentPage] = useState(1);
   const [quickFilter, setQuickFilter] = useState('all'); // 'all', 'active', 'expiring', 'overdue', 'recent'
+  const [viewMode, setViewMode] = useState('grouped'); // 'grouped' or 'list'
+  const [expandedDealers, setExpandedDealers] = useState({}); // Track which dealers are expanded
   const itemsPerPage = 6;
 
   useEffect(() => {
@@ -270,6 +272,43 @@ function MyListingsPage() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedListings = filteredListings.slice(startIndex, startIndex + itemsPerPage);
 
+    // Group listings by dealer/user
+    const groupListingsByDealer = (listings) => {
+      const grouped = {};
+      
+      listings.forEach(listing => {
+        const dealerKey = listing.ownerEmail || 'unknown';
+        if (!grouped[dealerKey]) {
+          grouped[dealerKey] = {
+            dealerName: listing.ownerName || 'Unknown User',
+            dealerEmail: listing.ownerEmail || 'No Email',
+            listings: []
+          };
+        }
+        grouped[dealerKey].listings.push(listing);
+      });
+      
+      return grouped;
+    };
+
+    const toggleDealer = (dealerEmail) => {
+      setExpandedDealers(prev => ({
+        ...prev,
+        [dealerEmail]: !prev[dealerEmail]
+      }));
+    };
+
+    const toggleAllDealers = (expand) => {
+      const newExpanded = {};
+      const grouped = groupListingsByDealer(filteredListings);
+      Object.keys(grouped).forEach(key => {
+        newExpanded[key] = expand;
+      });
+      setExpandedDealers(newExpanded);
+    };
+
+    const groupedListings = groupListingsByDealer(viewMode === 'grouped' ? filteredListings : paginatedListings);
+
     return (
       <div className="my-listings-page admin-view">
         <div className="admin-container">
@@ -381,7 +420,117 @@ function MyListingsPage() {
             </div>
           </div>
 
-          {/* Table */}
+          {/* View Mode Toggle */}
+          <div className="view-mode-section">
+            <div className="view-mode-toggle">
+              <button 
+                className={`view-mode-btn ${viewMode === 'grouped' ? 'active' : ''}`}
+                onClick={() => setViewMode('grouped')}
+              >
+                📁 Grouped by Dealer
+              </button>
+              <button 
+                className={`view-mode-btn ${viewMode === 'list' ? 'active' : ''}`}
+                onClick={() => setViewMode('list')}
+              >
+                📋 List View
+              </button>
+            </div>
+            {viewMode === 'grouped' && (
+              <div className="expand-controls">
+                <button className="expand-btn" onClick={() => toggleAllDealers(true)}>
+                  Expand All
+                </button>
+                <button className="expand-btn" onClick={() => toggleAllDealers(false)}>
+                  Collapse All
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Grouped View */}
+          {viewMode === 'grouped' ? (
+            <div className="grouped-listings-container">
+              {Object.keys(groupedListings).length === 0 ? (
+                <div className="no-data">No listings found</div>
+              ) : (
+                Object.entries(groupedListings).map(([dealerEmail, dealerData]) => (
+                  <div key={dealerEmail} className="dealer-group">
+                    <div 
+                      className="dealer-header"
+                      onClick={() => toggleDealer(dealerEmail)}
+                    >
+                      <div className="dealer-info">
+                        <span className="expand-icon">
+                          {expandedDealers[dealerEmail] ? '▼' : '▶'}
+                        </span>
+                        <div className="dealer-details">
+                          <h3>{dealerData.dealerName}</h3>
+                          <p className="dealer-email">{dealerData.dealerEmail}</p>
+                        </div>
+                      </div>
+                      <div className="dealer-stats">
+                        <span className="car-count">{dealerData.listings.length} {dealerData.listings.length === 1 ? 'car' : 'cars'}</span>
+                      </div>
+                    </div>
+                    
+                    {expandedDealers[dealerEmail] && (
+                      <div className="dealer-listings">
+                        <table className="admin-table">
+                          <thead>
+                            <tr>
+                              <th>Vehicle VIN</th>
+                              <th>Plan Type</th>
+                              <th>Next Renewal</th>
+                              <th>Status</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dealerData.listings.map((listing) => (
+                              <tr key={listing._id}>
+                                <td>{listing.vin || listing.registrationNumber || 'N/A'}</td>
+                                <td>{listing.advertisingPackage?.packageName || 'N/A'}</td>
+                                <td>
+                                  {listing.advertisingPackage?.expiryDate 
+                                    ? new Date(listing.advertisingPackage.expiryDate).toLocaleDateString('en-US', { 
+                                        month: 'short', 
+                                        day: 'numeric', 
+                                        year: 'numeric' 
+                                      })
+                                    : 'N/A'}
+                                </td>
+                                <td>
+                                  <span className={`status-badge ${listing.advertStatus === 'active' ? 'badge-active' : listing.advertStatus === 'sold' ? 'badge-sold' : listing.advertStatus === 'expired' ? 'badge-expired' : 'badge-draft'}`}>
+                                    {listing.advertStatus}
+                                  </span>
+                                </td>
+                                <td>
+                                  <button 
+                                    className="action-btn view-btn"
+                                    onClick={() => handleViewListing(listing._id, listing.vehicleType)}
+                                  >
+                                    View
+                                  </button>
+                                  <button 
+                                    className="action-btn edit-btn"
+                                    onClick={() => handleEditListing(listing._id, listing.vehicleType)}
+                                  >
+                                    Edit
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          ) : (
+          /* List View - Original Table */
           <div className="admin-table-wrapper">
             <table className="admin-table">
               <thead>
@@ -442,6 +591,7 @@ function MyListingsPage() {
               </tbody>
             </table>
           </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
