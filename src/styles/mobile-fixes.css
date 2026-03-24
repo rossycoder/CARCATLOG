@@ -601,8 +601,13 @@ a.call-seller-btn:active {
 @media (max-width: 768px) {
   /* Subscription/Pricing pages horizontal scroll */
   .subscription-plans-grid,
-  .pricing-cards {
+  .pricing-cards,
+  .car-advertising-prices-page .pricing-cards,
+  .van-advertising-prices-page .pricing-cards,
+  .bike-advertising-prices-page .pricing-cards,
+  .trade-subscription-page .subscription-plans-grid {
     display: flex !important;
+    flex-direction: row !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
     scroll-snap-type: x mandatory !important;
@@ -611,14 +616,20 @@ a.call-seller-btn:active {
     padding: 0 16px 24px !important;
     scroll-padding: 16px !important;
     grid-template-columns: unset !important;
+    flex-wrap: nowrap !important;
   }
 
   .subscription-plan-card,
-  .pricing-card {
+  .pricing-card,
+  .car-advertising-prices-page .pricing-card,
+  .van-advertising-prices-page .pricing-card,
+  .bike-advertising-prices-page .pricing-card,
+  .trade-subscription-page .subscription-plan-card {
     flex: 0 0 92% !important;
     min-width: 300px !important;
     max-width: 360px !important;
     scroll-snap-align: center !important;
+    flex-shrink: 0 !important;
   }
 
   /* Hide scrollbar but keep functionality */
