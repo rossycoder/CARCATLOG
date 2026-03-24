@@ -501,8 +501,33 @@
     text-align: center;
   }
   
+  /* Horizontal scroll for pricing cards on mobile */
   .pricing-cards {
-    grid-template-columns: 1fr;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 16px;
+    padding: 0 16px 24px;
+    scroll-padding: 16px;
+    margin-bottom: 40px;
+  }
+
+  .pricing-card {
+    flex: 0 0 85%;
+    min-width: 280px;
+    max-width: 320px;
+    scroll-snap-align: center;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .pricing-cards::-webkit-scrollbar {
+    display: none;
+  }
+  .pricing-cards {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   
   .newsletter-form {

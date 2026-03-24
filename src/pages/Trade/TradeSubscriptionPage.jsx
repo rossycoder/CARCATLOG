@@ -4,7 +4,6 @@ import { useTradeDealerContext } from '../../context/TradeDealerContext';
 import tradeSubscriptionService from '../../services/tradeSubscriptionService';
 import './TradeSubscriptionPage.css';
 
-// FIXED: Infinite loop and loading issues - Version 2.1
 const TradeSubscriptionPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,99 +16,70 @@ const TradeSubscriptionPage = () => {
 
   useEffect(() => {
     fetchPlansAndSubscription();
-  }, []); // Only fetch once on mount
+  }, []);
 
   useEffect(() => {
-    // Check for welcome message from navigation state
     if (location.state?.message) {
       setWelcomeMessage(location.state.message);
-      // Clear the message after showing it
       setTimeout(() => setWelcomeMessage(''), 5000);
-      // Clear the navigation state
       window.history.replaceState({}, document.title);
     }
-  }, [location.state?.message]); // Only when message changes
+  }, [location.state?.message]);
 
   const fetchPlansAndSubscription = async () => {
     try {
-      console.log('🔵 Fetching plans and subscription...');
       setLoading(true);
       const [plansData, subscriptionData] = await Promise.all([
         tradeSubscriptionService.getPlans(),
         tradeSubscriptionService.getCurrentSubscription()
       ]);
-      
-      console.log('✅ Plans received:', plansData);
-      console.log('✅ Subscription received:', subscriptionData);
-      
       setPlans(plansData);
       setCurrentSubscription(subscriptionData);
-      
-      // Check if user has ever used trial (even if it failed/expired)
-      if (subscriptionData && subscriptionData.hasUsedTrial) {
-        console.log('⚠️ User has already used trial period');
-      }
     } catch (err) {
-      console.error('❌ Error fetching subscription data:', err);
       setError('Failed to load subscription information');
     } finally {
       setLoading(false);
-      console.log('✅ Loading complete');
     }
   };
 
   const handleSelectPlan = async (planSlug) => {
     try {
-      console.log('🔵 Starting plan selection:', planSlug);
       setLoading(true);
       setError(null);
-
-      // Create checkout session
-      console.log('🔵 Calling createCheckoutSession...');
       const response = await tradeSubscriptionService.createCheckoutSession(planSlug);
-      console.log('🔵 Response received:', response);
-      
       if (response.success) {
-        // Check if we got a Stripe URL (production) or direct activation (development)
         if (response.url) {
-          // Production: Redirect to Stripe checkout
-          console.log('✅ Redirecting to Stripe checkout:', response.url);
           window.location.href = response.url;
-          // Don't set loading to false - we're redirecting
         } else if (response.subscription) {
-          // Development: Direct activation
-          console.log('✅ Subscription activated directly:', response.subscription);
           alert(`${response.message}\n\nYou can now access your dashboard and start listing vehicles!`);
-          
-          // Refresh subscription data
           await fetchPlansAndSubscription();
-          
-          // Navigate to dashboard
           navigate('/trade/dashboard');
         } else {
-          console.error('❌ Unexpected response format:', response);
           setError('Unexpected response from server. Please try again.');
           setLoading(false);
         }
       } else {
-        console.error('❌ Request failed:', response.message);
         setError(response.message || 'Failed to activate subscription');
         setLoading(false);
       }
     } catch (err) {
-      console.error('❌ Error selecting plan:', err);
-      console.error('Error details:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
       setError(err.response?.data?.message || err.message || 'Failed to activate subscription. Please try again.');
       setLoading(false);
     }
   };
 
-  const formatPrice = (priceInPence) => {
-    return `£${(priceInPence / 100).toFixed(0)}`;
+  const formatPrice = (priceInPence) => `£${(priceInPence / 100).toFixed(0)}`;
+
+  // Trial button label per plan
+  const getTrialLabel = (plan) => {
+    const trialMap = { bronze: '£50', silver: '£87.50', gold: '£150' };
+    const amount = trialMap[plan.slug] || '—';
+    return `Start today for just ${amount} + VAT`;
+  };
+
+  const getButtonLabel = (plan) => {
+    const labelMap = { bronze: 'Get Started', silver: 'Start Selling Faster', gold: 'Go Premium' };
+    return labelMap[plan.slug] || `Select ${plan.name}`;
   };
 
   if (loading) {
@@ -123,14 +93,12 @@ const TradeSubscriptionPage = () => {
     );
   }
 
-  if (error) {
+  if (error && !plans.length) {
     return (
       <div className="trade-subscription-page">
         <div className="error-container">
           <p className="error-message">{error}</p>
-          <button onClick={fetchPlansAndSubscription} className="retry-button">
-            Try Again
-          </button>
+          <button onClick={fetchPlansAndSubscription} className="retry-button">Try Again</button>
         </div>
       </div>
     );
@@ -138,16 +106,11 @@ const TradeSubscriptionPage = () => {
 
   return (
     <div className="trade-subscription-page">
+
       {welcomeMessage && (
         <div style={{
-          padding: '15px 20px',
-          marginBottom: '20px',
-          background: '#3b82f6',
-          color: 'white',
-          borderRadius: '8px',
-          textAlign: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto 20px'
+          padding: '14px 20px', background: '#3b82f6', color: 'white',
+          textAlign: 'center', fontSize: '14px'
         }}>
           {welcomeMessage}
         </div>
@@ -155,217 +118,131 @@ const TradeSubscriptionPage = () => {
 
       {error && (
         <div style={{
-          padding: '15px 20px',
-          marginBottom: '20px',
-          background: '#ef4444',
-          color: 'white',
-          borderRadius: '8px',
-          textAlign: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto 20px'
+          padding: '12px 20px', background: '#fef2f2', color: '#b91c1c',
+          textAlign: 'center', fontSize: '14px', borderBottom: '1px solid #fecaca'
         }}>
           {error}
         </div>
       )}
-      
-      {/* If user already has active subscription (including trial), redirect to dashboard */}
+
+      {/* Active subscription view */}
       {currentSubscription && (currentSubscription.status === 'active' || currentSubscription.status === 'trialing') ? (
         <div className="subscription-header">
           <h1>You're All Set!</h1>
           <p>Your subscription is active. Start listing your vehicles now!</p>
-          
           {currentSubscription.isTrialing && (
             <div className="trial-offer-banner">
-              <div className="trial-icon">
-                <img src="/images/icons/an-icon-design-of-service-vector.jpg" alt="Service Icon" className="trial-icon-img" />
-              </div>
               <div className="trial-content">
                 <h3>Trial Period Active!</h3>
                 <p>{currentSubscription.trialDaysLeft || 0} days remaining</p>
-                <p className="trial-details">You paid the first month trial price • Full subscription starts after trial ends</p>
+                <p>Full subscription starts after trial ends</p>
               </div>
             </div>
           )}
-          
-          <button 
-            className="continue-dashboard-btn"
-            onClick={() => navigate('/trade/dashboard')}
-          >
+          <button className="continue-dashboard-btn" onClick={() => navigate('/trade/dashboard')}>
             Go to Dashboard →
           </button>
         </div>
       ) : (
         <>
-          <div className="subscription-header">
-            <h1>Welcome{dealer?.dealershipName ? `, ${dealer.dealershipName}` : ''}!</h1>
-            
-            {/* 30-Day Free Trial Banner - Only show if user hasn't used trial before */}
-            {!currentSubscription?.hasUsedTrial && (
-              <div className="trial-offer-banner">
-                <div className="trial-icon">
-                  <svg width="50" height="50" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M32 18c-1.5 0-2.8.3-4 .8V16c0-2.2-1.8-4-4-4s-4 1.8-4 4v8c-1.2-.5-2.5-.8-4-.8-5.5 0-10 4.5-10 10v12c0 5.5 4.5 10 10 10h16c5.5 0 10-4.5 10-10V28c0-5.5-4.5-10-10-10z" fill="white" opacity="0.3"/>
-                    <circle cx="32" cy="20" r="8" fill="white"/>
-                    <path d="M34 18l-1.5-1.5c-.3-.3-.7-.3-1 0L30 18l-1.5-1.5c-.3-.3-.7-.3-1 0l-.5.5v3l.5.5c.3.3.7.3 1 0L30 19l1.5 1.5c.3.3.7.3 1 0l1.5-1.5 1.5 1.5c.3.3.7.3 1 0l.5-.5v-3l-.5-.5c-.3-.3-.7-.3-1 0L34 18z" fill="#10b981"/>
-                    <path d="M32 24c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" fill="#10b981"/>
-                  </svg>
+          {/* ── Hero ── */}
+          <div className="hero-section">
+            <h1 className="hero-title">
+              Sell More Cars. <span className="blue-text">For Less.</span>
+            </h1>
+            <p className="hero-subtitle">
+              List your vehicles, reach more buyers, and manage your stock<br />
+              — all with industry-leading pricing built for dealers.
+            </p>
+
+            <div className="hero-buttons">
+              <button className="start-trial-btn">Start 30-Day Free Trial</button>
+              <button className="compare-plans-btn">Compare Plans</button>
+            </div>
+
+            <div className="features-row">
+              <div className="feature"><span className="check">✓</span> No hidden fees</div>
+              <div className="feature"><span className="check">✓</span> Cancel anytime</div>
+              <div className="feature"><span className="check">✓</span> Instant listings</div>
+              <div className="feature"><span className="check">✓</span> Built for dealers</div>
+            </div>
+          </div>
+
+          {/* ── Pricing heading ── */}
+          <div className="pricing-section">
+            <h2 className="pricing-title">Simple, Transparent Pricing</h2>
+            <p className="pricing-subtitle">Start with a 30-day trial on any plan. Upgrade as you grow.</p>
+          </div>
+
+          {/* ── Plans ── */}
+          <div className="subscription-plans-grid">
+            {plans.map((plan) => (
+              <div key={plan.slug} className={`subscription-plan-card ${plan.slug}`}>
+
+                <div className={`plan-header ${plan.slug}-header`}>
+                  {plan.isPopular && <span className="popular-badge">★ Most Popular</span>}
+                  <h2>{plan.name.toUpperCase()}</h2>
+                  {plan.slug === 'gold' && (
+                    <div style={{ fontSize: '11px', marginTop: '4px', opacity: 0.85 }}>BEST VALUE</div>
+                  )}
                 </div>
-                <div className="trial-content">
-                  <h3>30-Day Trial on All Packages!</h3>
-                  <p><strong>How it works:</strong></p>
-                  <ul className="trial-steps">
-                    <li>✓ Choose your package below (Bronze, Silver, or Gold)</li>
-                    <li>✓ Enter your card details (you won't be charged the full amount yet)</li>
-                    <li>✓ Pay only the first month trial price to start listing immediately</li>
-                    <li>✓ After 30 days, your chosen package activates at full price</li>
-                  </ul>
-                  <div className="admin-fee-notice">
-                    <p><strong>⚠️ Important:</strong> Please note there will be a one off £2.50 admin fee for every car per your selected package. This fee is to cover the API costs involved for each vehicle's 5 point HPI check, MOT Status Check & Vehicle Information Check which are used to populate each vehicle listing.</p>
+
+                <div className="plan-content">
+                  <div className="plan-price">
+                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
+                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#555' }}>£</span>
+                      <span className="price-amount">{(plan.price / 100).toFixed(0)}</span>
+                      <span style={{ fontSize: '13px', color: '#888', marginLeft: '4px' }}>+ VAT</span>
+                    </div>
+
+                    {!currentSubscription?.hasUsedTrial && (
+                      <div className="trial-pricing">
+                        {getTrialLabel(plan)}
+                      </div>
+                    )}
                   </div>
+
+                  <div className="plan-features">
+                    <ul>
+                      {plan.features.map((feature, index) => (
+                        <li key={index}>{feature}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <button
+                    className={`select-plan-button ${plan.slug}-button`}
+                    onClick={() => handleSelectPlan(plan.slug)}
+                    disabled={loading || currentSubscription?.plan?.slug === plan.slug}
+                  >
+                    {loading ? 'Processing...' :
+                     currentSubscription?.plan?.slug === plan.slug ? 'Current Plan' :
+                     getButtonLabel(plan)}
+                  </button>
                 </div>
               </div>
-            )}
+            ))}
           </div>
 
-          <div className="subscription-plans-grid">
-        {/* BRONZE PLAN */}
-        <div className="subscription-plan-card bronze">
-          <div className="plan-header bronze-header">
-            <h2>BRONZE Package</h2>
+          {/* ── Admin Fee ── */}
+          <div className="admin-info" style={{ marginTop: '20px', marginBottom: '40px' }}>
+            <span>ℹ️ Additional Info: A £2.50 admin fee applies per vehicle to cover HPI &amp; MOT checks.</span>
           </div>
-          
-          <div className="plan-content">
-            <div className="plan-price">
-              <h3>Monthly Price:</h3>
-              <p className="price-amount">£1000</p>
-              <p className="vat-text">+ VAT</p>
-              {!currentSubscription?.hasUsedTrial && (
-                <p className="trial-pricing">First month trial: Only £50 + VAT (£60 total)</p>
-              )}
-            </div>
 
-            <div className="plan-summary">
-              <p><strong>Summary:</strong> Our Bronze Subscription lets you list up to 20 cars.</p>
+          {/* ── Why Dealers Choose (from sample image) ── */}
+          <div className="why-dealers-section">
+            <h2>Why Dealers Choose CarCatalog</h2>
+            <p className="why-subtitle">Start your 30-day trial today and see the difference.</p>
+            <div className="why-grid">
+              <div className="why-item">Reach more serious buyers</div>
+              <div className="why-item">Manage everything in one place</div>
+              <div className="why-item">Save money vs competitors</div>
+              <div className="why-item">Built specifically for car traders</div>
+              <div className="why-item">Manage everything in one place</div>
+              <div className="why-item">Fast, simple listing process</div>
             </div>
-
-            <div className="plan-features">
-              <h4>What's Included:</h4>
-              <ul>
-                <li>Attract buyers – Display your vehicle's best features with upto 100 photos</li>
-                <li>Attach a YouTube video for each vehicle to boost sales</li>
-                <li>We will provide your listing with a free basic HPI check & MOT status</li>
-                <li>A designated login area with a dealer dashboard to manage & update your stock</li>
-                <li>Unlimited listing alterations to keep your ads upto date</li>
-              </ul>
-            </div>
-
-            <button 
-              className="select-plan-button bronze-button"
-              onClick={() => handleSelectPlan('bronze')}
-              disabled={loading || currentSubscription?.plan?.slug === 'bronze'}
-            >
-              {loading ? 'Processing...' : currentSubscription?.plan?.slug === 'bronze' ? 'Current Plan' : 'Select BRONZE Package'}
-            </button>
           </div>
-        </div>
-
-        {/* SILVER PLAN */}
-        <div className="subscription-plan-card silver">
-          <div className="plan-header silver-header">
-            <h2>SILVER Package</h2>
-          </div>
-          
-          <div className="plan-content">
-            <div className="plan-price">
-              <h3>Monthly Price:</h3>
-              <p className="price-amount">£1500</p>
-              <p className="vat-text">+ VAT</p>
-              {!currentSubscription?.hasUsedTrial && (
-                <p className="trial-pricing">First month trial: Only £87.50 + VAT (£105 total)</p>
-              )}
-            </div>
-
-            <div className="plan-summary">
-              <p><strong>Summary:</strong> Our Silver Subscription lets you list up to 35 cars.</p>
-            </div>
-
-            <div className="plan-features">
-              <h4>What's Included:</h4>
-              <ul>
-                <li>Attract buyers – Display your vehicle's best features with upto 100 photos</li>
-                <li>Attach a YouTube video for each vehicle to boost sales</li>
-                <li>We will provide your listing with a free basic HPI check & MOT status</li>
-                <li>A designated login area with a dealer dashboard to manage & update your stock</li>
-                <li>Unlimited listing alterations to keep your ads upto date</li>
-              </ul>
-            </div>
-
-            <button 
-              className="select-plan-button silver-button"
-              onClick={() => handleSelectPlan('silver')}
-              disabled={loading || currentSubscription?.plan?.slug === 'silver'}
-            >
-              {loading ? 'Processing...' : currentSubscription?.plan?.slug === 'silver' ? 'Current Plan' : 'Select SILVER Package'}
-            </button>
-          </div>
-        </div>
-
-        {/* GOLD PLAN */}
-        <div className="subscription-plan-card gold">
-          <div className="plan-header gold-header">
-            <h2>GOLD Package</h2>
-          </div>
-          
-          <div className="plan-content">
-            <div className="plan-price">
-              <h3>Monthly Price:</h3>
-              <p className="price-amount">£2000</p>
-              <p className="vat-text">+ VAT</p>
-              {!currentSubscription?.hasUsedTrial && (
-                <p className="trial-pricing">First month trial: Only £150 + VAT (£180 total)</p>
-              )}
-            </div>
-
-            <div className="plan-summary">
-              <p><strong>Summary:</strong> Our Gold Subscription lets you list up to 60 cars.</p>
-            </div>
-
-            <div className="plan-features">
-              <h4>What's Included:</h4>
-              <ul>
-                <li>Attract buyers – Display your vehicle's best features with upto 100 photos</li>
-                <li>Attach a YouTube video for each vehicle to boost sales</li>
-                <li>We will provide your listing with a free basic HPI check & MOT status</li>
-                <li>A designated login area with a dealer dashboard to manage & update your stock</li>
-                <li>Unlimited listing alterations to keep your ads upto date</li>
-              </ul>
-            </div>
-
-            <button 
-              className="select-plan-button gold-button"
-              onClick={() => handleSelectPlan('gold')}
-              disabled={loading || currentSubscription?.plan?.slug === 'gold'}
-            >
-              {loading ? 'Processing...' : currentSubscription?.plan?.slug === 'gold' ? 'Current Plan' : 'Select GOLD Package'}
-            </button>
-          </div>
-        </div>
-
-        {/* End of plans grid */}
-      </div>
         </>
-      )}
-
-      {!currentSubscription && currentSubscription?.status !== 'active' && currentSubscription?.status !== 'trialing' && (
-        <div className="current-subscription-info">
-          <h3>Your Current Subscription</h3>
-          <div className="subscription-details">
-            <p><strong>Plan:</strong> {currentSubscription.plan?.name}</p>
-            <p><strong>Status:</strong> {currentSubscription.status}</p>
-            <p><strong>Listings Used:</strong> {currentSubscription.listingsUsed} / {currentSubscription.listingsLimit || 'Unlimited'}</p>
-            <p><strong>Next Billing Date:</strong> {new Date(currentSubscription.currentPeriodEnd).toLocaleDateString()}</p>
-          </div>
-        </div>
       )}
     </div>
   );

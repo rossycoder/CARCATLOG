@@ -593,6 +593,47 @@ a.call-seller-btn:active {
   opacity: 0.9;
 }
 
+/* ========================================
+   PRICING CARDS - MOBILE HORIZONTAL SCROLL
+   ======================================== */
+
+/* Apply to all pricing card grids on mobile */
+@media (max-width: 768px) {
+  /* Subscription/Pricing pages horizontal scroll */
+  .subscription-plans-grid,
+  .pricing-cards {
+    display: flex !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 16px !important;
+    padding: 0 16px 24px !important;
+    scroll-padding: 16px !important;
+    grid-template-columns: unset !important;
+  }
+
+  .subscription-plan-card,
+  .pricing-card {
+    flex: 0 0 92% !important;
+    min-width: 300px !important;
+    max-width: 360px !important;
+    scroll-snap-align: center !important;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .subscription-plans-grid::-webkit-scrollbar,
+  .pricing-cards::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  .subscription-plans-grid,
+  .pricing-cards {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+}
+
 /* Mobile-specific improvements for phone links */
 @media (max-width: 768px) {
   /* Make phone buttons more touch-friendly */

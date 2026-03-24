@@ -1,282 +1,224 @@
 .trade-subscription-page {
-  padding: 40px 20px;
-  max-width: 1400px;
-  margin: 0 auto;
-  background-color: #f5f5f5;
+  padding: 0;
+  margin: 0;
+  background-color: #ffffff;
   min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-.subscription-header {
+/* ── Hero Section — compact ── */
+.trade-subscription-page .hero-section {
   text-align: center;
-  margin-bottom: 50px;
+  padding: 36px 20px 10px;
+  background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.subscription-header h1 {
-  font-size: 32px;
+.trade-subscription-page .hero-title {
+  font-size: 40px;
   font-weight: 700;
   color: #1a1a1a;
-  margin-bottom: 10px;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
 }
 
-.subscription-header p {
-  font-size: 18px;
+.trade-subscription-page .blue-text { color: #4285f4; }
+
+.trade-subscription-page .hero-subtitle {
+  font-size: 15px;
   color: #666;
-  margin-bottom: 20px;
-}
-
-/* Trial Offer Banner */
-.trial-offer-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  padding: 16px 24px;
-  border-radius: 8px;
-  margin: 20px auto;
-  max-width: 700px;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-}
-
-.trial-icon {
-  font-size: 36px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.trial-icon-img {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-}
-
-.trial-content {
-  text-align: left;
-}
-
-.trial-content h3 {
-  font-size: 18px;
-  font-weight: 700;
-  margin: 0 0 6px 0;
-  color: white;
-}
-
-.trial-content p {
-  font-size: 14px;
-  margin: 2px 0;
-  color: rgba(255, 255, 255, 0.95);
-  line-height: 1.4;
-}
-
-.trial-details {
-  font-size: 12px !important;
-  color: rgba(255, 255, 255, 0.85) !important;
-  font-style: italic;
-}
-
-.trial-steps {
-  list-style: none;
-  padding: 0;
-  margin: 12px 0 0 0;
-  font-size: 14px;
-  line-height: 1.8;
-}
-
-.trial-steps li {
-  padding-left: 0;
-  color: rgba(255, 255, 255, 0.95);
-  margin-bottom: 6px;
-}
-
-.trial-steps li:last-child {
-  margin-bottom: 0;
-}
-
-/* Admin Fee Notice */
-.admin-fee-notice {
-  margin-top: 16px;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.15);
-  border-left: 4px solid #fbbf24;
-  border-radius: 4px;
-}
-
-.admin-fee-notice p {
-  font-size: 13px;
+  margin: 0 0 24px 0;
   line-height: 1.6;
-  color: white;
-  margin: 0;
+  max-width: 480px;
 }
 
-.admin-fee-notice strong {
-  color: #fbbf24;
-  font-weight: 600;
+.trade-subscription-page .hero-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
 }
 
-.subscription-header .subtitle {
-  font-size: 18px;
-  color: #666;
-}
-
-.continue-dashboard-btn {
-  display: inline-block;
-  padding: 14px 32px;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+.trade-subscription-page .start-trial-btn {
+  background: #34a853;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 12px 26px;
+  border-radius: 5px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 10px;
+  transition: background 0.2s;
+}
+.trade-subscription-page .start-trial-btn:hover { background: #2d9147; }
+
+.trade-subscription-page .compare-plans-btn {
+  background: white;
+  color: #444;
+  border: 1px solid #ccc;
+  padding: 12px 26px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.trade-subscription-page .compare-plans-btn:hover { background: #f1f3f4; }
+
+/* ── Features Row ── */
+.trade-subscription-page .features-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  background: white;
+  padding: 14px 24px;
+  border-radius: 8px;
+  max-width: 580px;
+  width: 100%;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+  flex-wrap: wrap;
 }
 
-.continue-dashboard-btn:hover {
-  background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+.trade-subscription-page .feature {
+  font-size: 13px;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
 }
 
+.trade-subscription-page .check {
+  color: #34a853;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+/* ── Pricing Section ── */
+.trade-subscription-page .pricing-section {
+  text-align: center;
+  padding: 10px 20px 20px;
+  background: white;
+}
+
+.trade-subscription-page .pricing-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.trade-subscription-page .pricing-subtitle {
+  font-size: 14px;
+  color: #888;
+  margin: 0 0 24px 0;
+}
+
+/* ── Plans Grid — always 3 columns ── */
 .subscription-plans-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 30px;
-  margin-bottom: 50px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px 36px;
 }
 
 .subscription-plan-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border: 1px solid #e8e8e8;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
 }
 
 .subscription-plan-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.13);
 }
 
+.subscription-plan-card.silver { border: 2px solid #4285f4; }
+
 .plan-header {
-  padding: 25px;
+  padding: 16px 16px 14px;
   text-align: center;
   color: white;
-  font-weight: 700;
   position: relative;
 }
 
-.trial-header {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-}
-
-.trial-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #fbbf24;
-  color: #1a1a1a;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
+.plan-header h2 {
+  margin: 0;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.5px;
 }
 
-.bronze-header {
-  background: linear-gradient(135deg, #cd7f32 0%, #b87333 100%);
-}
+.bronze-header { background: #cd7f32; }
+.silver-header  { background: #5f6368; }
+.gold-header    { background: #f0b429; color: #1a1a1a; }
 
-.silver-header {
-  background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%);
-}
-
-.gold-header {
-  background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
-}
-
-.plan-header h2 {
-  font-size: 28px;
-  margin: 0;
+.popular-badge {
+  display: block;
+  background: #4285f4;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 0;
+  margin-bottom: 6px;
+  border-radius: 4px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
+/* ── Plan Content ── */
 .plan-content {
-  padding: 30px;
+  padding: 20px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .plan-price {
   text-align: center;
-  margin-bottom: 25px;
-  padding-bottom: 25px;
-  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.plan-price h3 {
-  font-size: 16px;
-  color: #666;
-  margin-bottom: 10px;
-  font-weight: 600;
-}
-
-.plan-price .price-amount {
-  font-size: 48px;
-  font-weight: 700;
+.price-amount {
+  font-size: 36px;
+  font-weight: 800;
   color: #1a1a1a;
-  margin: 10px 0;
-}
-
-.plan-price .vat-text {
-  font-size: 14px;
-  color: #999;
-  font-weight: 500;
-}
-
-.plan-price .trial-duration {
-  font-size: 16px;
-  color: #10b981;
-  font-weight: 600;
-  margin-top: 5px;
-}
-
-.plan-price .trial-pricing {
-  font-size: 14px;
-  color: #10b981;
-  font-weight: 600;
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: #d1fae5;
-  border-radius: 6px;
-  border: 1px solid #6ee7b7;
-}
-
-.plan-summary {
-  margin-bottom: 25px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.plan-summary p {
   margin: 0;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #333;
+  line-height: 1;
+}
+
+.trial-pricing {
+  display: block;
+  font-size: 11px;
+  color: white;
+  background: #34a853;
+  margin: 10px 0 0 0;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 4px;
+  line-height: 1.4;
 }
 
 .plan-features {
-  margin-bottom: 30px;
-}
-
-.plan-features h4 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  flex: 1;
+  min-height: 200px;
 }
 
 .plan-features ul {
@@ -286,248 +228,245 @@
 }
 
 .plan-features li {
-  padding: 12px 0;
-  padding-left: 30px;
-  position: relative;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 12px;
   color: #555;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.plan-features li:last-child {
-  border-bottom: none;
+  margin-bottom: 8px;
+  padding-left: 18px;
+  position: relative;
+  line-height: 1.5;
 }
 
 .plan-features li:before {
-  content: '✓';
+  content: "✓";
+  color: #34a853;
+  font-weight: bold;
   position: absolute;
   left: 0;
-  color: #28a745;
-  font-weight: 700;
-  font-size: 18px;
+  font-size: 12px;
 }
 
+/* ── Select Buttons ── */
 .select-plan-button {
   width: 100%;
-  padding: 16px 24px;
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
+  padding: 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  transition: opacity 0.2s, transform 0.1s;
+  margin-top: auto;
+}
+.select-plan-button:active { transform: scale(0.98); }
+
+.bronze-button { background: #cd7f32; color: white; }
+.silver-button  { background: #4285f4; color: white; }
+.gold-button    { background: #f0b429; color: #1a1a1a; }
+
+.select-plan-button:hover    { opacity: 0.88; }
+.select-plan-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Admin Fee ── */
+.admin-info {
+  text-align: center;
+  background: #f0faf0;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #2d7a3a;
+  border: 1px solid #c3e6cb;
+  max-width: 960px;
+  margin: 0 auto 36px;
 }
 
-.trial-button {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+/* ── Why Dealers Section ── */
+.why-dealers-section {
+  background: #f8f9fa;
+  padding: 44px 20px;
+  text-align: center;
+  border-top: 1px solid #e8e8e8;
 }
 
-.trial-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-}
-
-.bronze-button {
-  background: linear-gradient(135deg, #cd7f32 0%, #b87333 100%);
-}
-
-.bronze-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #b87333 0%, #a66829 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(205, 127, 50, 0.4);
-}
-
-.silver-button {
-  background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%);
-}
-
-.silver-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #a8a8a8 0%, #909090 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(192, 192, 192, 0.4);
-}
-
-.gold-button {
-  background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
-}
-
-.gold-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ffb700 0%, #ff9700 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
-}
-
-.select-plan-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.current-subscription-info {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-top: 40px;
-}
-
-.current-subscription-info h3 {
-  font-size: 24px;
+.why-dealers-section h2 {
+  font-size: 22px;
   font-weight: 700;
   color: #1a1a1a;
-  margin-bottom: 20px;
+  margin: 0 0 6px 0;
 }
 
-.subscription-details {
+.why-dealers-section .why-subtitle {
+  font-size: 14px;
+  color: #888;
+  margin: 0 0 28px 0;
+}
+
+.why-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 40px;
+  max-width: 560px;
+  margin: 0 auto;
+  text-align: left;
 }
 
-.subscription-details p {
-  margin: 0;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  font-size: 15px;
+.why-item {
+  font-size: 13px;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.subscription-details strong {
+.why-item:before {
+  content: "✓";
+  color: #34a853;
+  font-weight: bold;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* ── Active Subscription ── */
+.subscription-header {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.subscription-header h1 {
+  font-size: 30px;
   color: #1a1a1a;
-  font-weight: 600;
+  margin-bottom: 12px;
 }
 
+.continue-dashboard-btn {
+  background: #34a853;
+  color: white;
+  border: none;
+  padding: 13px 30px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.trial-offer-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 8px;
+  padding: 16px 20px;
+  max-width: 500px;
+  margin: 20px auto;
+  text-align: left;
+}
+
+/* ── Loading / Error ── */
 .loading-container,
 .error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
   text-align: center;
+  padding: 80px 20px;
 }
 
 .spinner {
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #007bff;
+  border-top: 4px solid #34a853;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
+  width: 40px;
+  height: 40px;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 20px;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
+  0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
 .error-message {
-  color: #dc3545;
-  font-size: 18px;
+  color: #d93025;
+  font-size: 15px;
   margin-bottom: 20px;
 }
 
 .retry-button {
-  padding: 12px 24px;
-  background-color: #007bff;
+  background: #34a853;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 16px;
+  padding: 12px 28px;
+  border-radius: 5px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
-.retry-button:hover {
-  background-color: #0056b3;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
+/* ── Tablet 768-900px — 3 compact columns ── */
+@media (max-width: 900px) {
   .subscription-plans-grid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .trade-subscription-page {
-    padding: 20px 15px;
-  }
-
-  .subscription-header h1 {
-    font-size: 24px;
-  }
-
-  .subscription-header .subtitle {
-    font-size: 16px;
-  }
-
-  .subscription-plans-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .plan-price .price-amount {
-    font-size: 36px;
-  }
-
-  .subscription-details {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Mobile Responsive for Trial Banner */
-@media (max-width: 968px) {
-  .trial-offer-banner {
-    flex-direction: column;
-    padding: 16px 20px;
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-    text-align: center;
+    padding: 0 12px 28px;
   }
-
-  .trial-icon {
-    font-size: 36px;
-  }
-
-  .trial-content {
-    text-align: center;
-  }
-
-  .trial-content h3 {
-    font-size: 18px;
-  }
-
-  .trial-content p {
-    font-size: 14px;
-  }
-
-  .trial-details {
-    font-size: 12px !important;
-  }
+  .plan-header h2  { font-size: 13px; }
+  .price-amount    { font-size: 28px; }
+  .trial-pricing   { font-size: 10px; padding: 5px 8px; }
+  .plan-features li{ font-size: 11px; }
+  .select-plan-button { font-size: 12px; padding: 10px; }
 }
 
-@media (max-width: 768px) {
-  .trial-offer-banner {
-    padding: 12px 16px;
-    margin: 20px auto;
+/* ── Mobile <600px — horizontal scroll carousel ── */
+@media (max-width: 600px) {
+  .trade-subscription-page .hero-title    { font-size: 26px; }
+  .trade-subscription-page .hero-subtitle { font-size: 13px; }
+
+  .trade-subscription-page .hero-buttons  { flex-direction: column; align-items: center; gap: 10px; }
+  .trade-subscription-page .start-trial-btn,
+  .trade-subscription-page .compare-plans-btn { width: 200px; }
+
+  .trade-subscription-page .features-row  { gap: 10px; padding: 10px 12px; }
+  .trade-subscription-page .feature       { font-size: 11px; }
+
+  /* Horizontal scroll for pricing cards */
+  .subscription-plans-grid {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 16px;
+    padding: 0 16px 24px;
+    scroll-padding: 16px;
   }
 
-  .trial-icon {
-    font-size: 32px;
+  .subscription-plan-card {
+    flex: 0 0 85%;
+    min-width: 280px;
+    max-width: 320px;
+    min-height: 420px;
+    scroll-snap-align: center;
   }
 
-  .trial-content h3 {
-    font-size: 16px;
+  /* Hide scrollbar but keep functionality */
+  .subscription-plans-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .subscription-plans-grid {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
-  .trial-content p {
-    font-size: 13px;
-  }
+  .plan-header   { padding: 12px 10px; }
+  .plan-header h2{ font-size: 13px; }
+  .plan-content  { padding: 12px 10px 16px; }
+  .price-amount  { font-size: 28px; }
+  .trial-pricing { font-size: 10px; padding: 5px 8px; }
+  .plan-features { min-height: 160px; }
+  .plan-features li { font-size: 11px; margin-bottom: 5px; padding-left: 16px; line-height: 1.4; }
+  .plan-features li:before { font-size: 11px; }
+  .select-plan-button { font-size: 13px; padding: 10px 12px; }
+  .popular-badge { font-size: 10px; }
+
+  .why-grid      { grid-template-columns: 1fr; }
+  .trade-subscription-page .pricing-title { font-size: 22px; }
 }
