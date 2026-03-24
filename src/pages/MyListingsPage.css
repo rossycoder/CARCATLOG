@@ -321,6 +321,15 @@
   background: linear-gradient(135deg, #c82333 0%, #a71d2a 100%);
 }
 
+.btn-relist {
+  background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+  color: white;
+}
+
+.btn-relist:hover {
+  background: linear-gradient(135deg, #5a32a3 0%, #4a2885 100%);
+}
+
 .btn-payment {
   background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
   color: #1a1a1a;

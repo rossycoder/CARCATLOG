@@ -106,6 +106,29 @@ function MyListingsPage() {
     }
   };
 
+  const handleRelistVehicle = async (listingId, vehicleType = 'car') => {
+    try {
+      // Call relist endpoint to prepare vehicle
+      const response = await api.post(`/vehicles/${listingId}/relist`);
+      
+      if (response.data.success) {
+        const advertId = response.data.advertId || listingId;
+        
+        // Redirect to appropriate advertising prices page
+        if (vehicleType === 'bike') {
+          navigate(`/bikes/advertising-prices?advertId=${advertId}&resumePayment=true`);
+        } else if (vehicleType === 'van') {
+          navigate(`/vans/advertising-prices?advertId=${advertId}&resumePayment=true`);
+        } else {
+          navigate(`/sell-my-car/advertising-prices?advertId=${advertId}&resumePayment=true`);
+        }
+      }
+    } catch (err) {
+      console.error('Error relisting vehicle:', err);
+      alert(err.response?.data?.error || 'Failed to relist vehicle');
+    }
+  };
+
   const getStatusBadge = (listing) => {
     const status = listing.advertStatus;
     const now = new Date();
@@ -808,13 +831,24 @@ function MyListingsPage() {
                       </>
                     )}
                     {(listing.advertStatus === 'sold' || listing.advertStatus === 'expired') && (
-                      <button 
-                        onClick={() => handleViewListing(listing._id, listing.vehicleType)}
-                        className="btn-view"
-                        title="View listing"
-                      >
-                        👁️ View
-                      </button>
+                      <>
+                        <button 
+                          onClick={() => handleViewListing(listing._id, listing.vehicleType)}
+                          className="btn-view"
+                          title="View listing"
+                        >
+                          👁️ View
+                        </button>
+                        {listing.advertStatus === 'expired' && (
+                          <button 
+                            onClick={() => handleRelistVehicle(listing._id, listing.vehicleType)}
+                            className="btn-relist"
+                            title="Relist this vehicle"
+                          >
+                            🔄 Relist
+                          </button>
+                        )}
+                      </>
                     )}
                     <button 
                       onClick={() => handleDeleteListing(listing._id)}
