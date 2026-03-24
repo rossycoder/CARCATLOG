@@ -44,6 +44,11 @@ const TradeSubscriptionPage = () => {
       
       setPlans(plansData);
       setCurrentSubscription(subscriptionData);
+      
+      // Check if user has ever used trial (even if it failed/expired)
+      if (subscriptionData && subscriptionData.hasUsedTrial) {
+        console.log('⚠️ User has already used trial period');
+      }
     } catch (err) {
       console.error('❌ Error fetching subscription data:', err);
       setError('Failed to load subscription information');
@@ -194,30 +199,32 @@ const TradeSubscriptionPage = () => {
           <div className="subscription-header">
             <h1>Welcome{dealer?.dealershipName ? `, ${dealer.dealershipName}` : ''}!</h1>
             
-            {/* 30-Day Free Trial Banner */}
-            <div className="trial-offer-banner">
-              <div className="trial-icon">
-                <svg width="50" height="50" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M32 18c-1.5 0-2.8.3-4 .8V16c0-2.2-1.8-4-4-4s-4 1.8-4 4v8c-1.2-.5-2.5-.8-4-.8-5.5 0-10 4.5-10 10v12c0 5.5 4.5 10 10 10h16c5.5 0 10-4.5 10-10V28c0-5.5-4.5-10-10-10z" fill="white" opacity="0.3"/>
-                  <circle cx="32" cy="20" r="8" fill="white"/>
-                  <path d="M34 18l-1.5-1.5c-.3-.3-.7-.3-1 0L30 18l-1.5-1.5c-.3-.3-.7-.3-1 0l-.5.5v3l.5.5c.3.3.7.3 1 0L30 19l1.5 1.5c.3.3.7.3 1 0l1.5-1.5 1.5 1.5c.3.3.7.3 1 0l.5-.5v-3l-.5-.5c-.3-.3-.7-.3-1 0L34 18z" fill="#10b981"/>
-                  <path d="M32 24c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" fill="#10b981"/>
-                </svg>
-              </div>
-              <div className="trial-content">
-                <h3>30-Day Trial on All Packages!</h3>
-                <p><strong>How it works:</strong></p>
-                <ul className="trial-steps">
-                  <li>✓ Choose your package below (Bronze, Silver, or Gold)</li>
-                  <li>✓ Enter your card details (you won't be charged the full amount yet)</li>
-                  <li>✓ Pay only the first month trial price to start listing immediately</li>
-                  <li>✓ After 30 days, your chosen package activates at full price</li>
-                </ul>
-                <div className="admin-fee-notice">
-                  <p><strong>⚠️ Important:</strong> Please note there will be a one off £2.50 admin fee for every car per your selected package. This fee is to cover the API costs involved for each vehicle's 5 point HPI check, MOT Status Check & Vehicle Information Check which are used to populate each vehicle listing.</p>
+            {/* 30-Day Free Trial Banner - Only show if user hasn't used trial before */}
+            {!currentSubscription?.hasUsedTrial && (
+              <div className="trial-offer-banner">
+                <div className="trial-icon">
+                  <svg width="50" height="50" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M32 18c-1.5 0-2.8.3-4 .8V16c0-2.2-1.8-4-4-4s-4 1.8-4 4v8c-1.2-.5-2.5-.8-4-.8-5.5 0-10 4.5-10 10v12c0 5.5 4.5 10 10 10h16c5.5 0 10-4.5 10-10V28c0-5.5-4.5-10-10-10z" fill="white" opacity="0.3"/>
+                    <circle cx="32" cy="20" r="8" fill="white"/>
+                    <path d="M34 18l-1.5-1.5c-.3-.3-.7-.3-1 0L30 18l-1.5-1.5c-.3-.3-.7-.3-1 0l-.5.5v3l.5.5c.3.3.7.3 1 0L30 19l1.5 1.5c.3.3.7.3 1 0l1.5-1.5 1.5 1.5c.3.3.7.3 1 0l.5-.5v-3l-.5-.5c-.3-.3-.7-.3-1 0L34 18z" fill="#10b981"/>
+                    <path d="M32 24c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" fill="#10b981"/>
+                  </svg>
+                </div>
+                <div className="trial-content">
+                  <h3>30-Day Trial on All Packages!</h3>
+                  <p><strong>How it works:</strong></p>
+                  <ul className="trial-steps">
+                    <li>✓ Choose your package below (Bronze, Silver, or Gold)</li>
+                    <li>✓ Enter your card details (you won't be charged the full amount yet)</li>
+                    <li>✓ Pay only the first month trial price to start listing immediately</li>
+                    <li>✓ After 30 days, your chosen package activates at full price</li>
+                  </ul>
+                  <div className="admin-fee-notice">
+                    <p><strong>⚠️ Important:</strong> Please note there will be a one off £2.50 admin fee for every car per your selected package. This fee is to cover the API costs involved for each vehicle's 5 point HPI check, MOT Status Check & Vehicle Information Check which are used to populate each vehicle listing.</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="subscription-plans-grid">
@@ -232,7 +239,9 @@ const TradeSubscriptionPage = () => {
               <h3>Monthly Price:</h3>
               <p className="price-amount">£1000</p>
               <p className="vat-text">+ VAT</p>
-              <p className="trial-pricing">First month trial: Only £50 + VAT (£60 total)</p>
+              {!currentSubscription?.hasUsedTrial && (
+                <p className="trial-pricing">First month trial: Only £50 + VAT (£60 total)</p>
+              )}
             </div>
 
             <div className="plan-summary">
@@ -271,7 +280,9 @@ const TradeSubscriptionPage = () => {
               <h3>Monthly Price:</h3>
               <p className="price-amount">£1500</p>
               <p className="vat-text">+ VAT</p>
-              <p className="trial-pricing">First month trial: Only £87.50 + VAT (£105 total)</p>
+              {!currentSubscription?.hasUsedTrial && (
+                <p className="trial-pricing">First month trial: Only £87.50 + VAT (£105 total)</p>
+              )}
             </div>
 
             <div className="plan-summary">
@@ -310,7 +321,9 @@ const TradeSubscriptionPage = () => {
               <h3>Monthly Price:</h3>
               <p className="price-amount">£2000</p>
               <p className="vat-text">+ VAT</p>
-              <p className="trial-pricing">First month trial: Only £150 + VAT (£180 total)</p>
+              {!currentSubscription?.hasUsedTrial && (
+                <p className="trial-pricing">First month trial: Only £150 + VAT (£180 total)</p>
+              )}
             </div>
 
             <div className="plan-summary">
