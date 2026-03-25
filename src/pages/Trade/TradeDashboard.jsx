@@ -358,14 +358,31 @@ const TradeDashboard = () => {
         <div className="quick-actions-section">
           <h2 className="section-title">Quick Actions</h2>
           <div className="action-grid">
-            <Link to="/find-your-car" className="action-card primary-action">
+            <Link 
+              to="/find-your-car" 
+              className={`action-card primary-action ${subscription && subscription.listingsUsed >= subscription.listingsLimit ? 'disabled' : ''}`}
+              onClick={(e) => {
+                if (subscription && subscription.listingsUsed >= subscription.listingsLimit) {
+                  e.preventDefault();
+                  alert(`You have reached your listing limit of ${subscription.listingsLimit} vehicles. Please upgrade your plan to add more vehicles.`);
+                }
+              }}
+              style={{
+                opacity: subscription && subscription.listingsUsed >= subscription.listingsLimit ? 0.6 : 1,
+                cursor: subscription && subscription.listingsUsed >= subscription.listingsLimit ? 'not-allowed' : 'pointer'
+              }}
+            >
               <div className="action-icon">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                   <path d="M16 8V24M8 16H24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
                 </svg>
               </div>
               <h3>Add New Vehicle</h3>
-              <p>List a new vehicle in your inventory</p>
+              <p>
+                {subscription && subscription.listingsUsed >= subscription.listingsLimit 
+                  ? 'Limit reached - Upgrade to add more' 
+                  : 'List a new vehicle in your inventory'}
+              </p>
             </Link>
 
             <Link to="/trade/inventory" className="action-card">

@@ -155,14 +155,29 @@ const TradeSubscriptionPage = () => {
               — all with industry-leading pricing built for dealers.
             </p>
 
-            <div className="hero-buttons">
-              <button className="start-trial-btn">Start 30-Day Free Trial</button>
-              <button className="compare-plans-btn">Compare Plans</button>
+            {/* Trial Information Box - Always Visible */}
+            <div className="trial-info-box-permanent">
+              <h2>30-Day Trial on All Packages!</h2>
+              <h3>How it works:</h3>
+              <ul>
+                <li>✓ Choose your package below (Bronze, Silver, or Gold)</li>
+                <li>✓ Enter your card details (you won't be charged the full amount yet)</li>
+                <li>✓ Pay only the first month trial price to start listing immediately</li>
+                <li>✓ After 30 days, your chosen package activates at full price</li>
+              </ul>
+              <div className="trial-warning">
+                <span className="warning-icon">⚠️</span>
+                <p>
+                  <strong>Important:</strong> Please note there will be a one off £2.50 admin fee for every car per your 
+                  selected package. This fee is to cover the API costs involved for each vehicle's 5 point HPI 
+                  check, MOT Status Check & Vehicle Information Check which are used to populate each 
+                  vehicle listing.
+                </p>
+              </div>
             </div>
 
             <div className="features-row">
               <div className="feature"><span className="check">✓</span> No hidden fees</div>
-              <div className="feature"><span className="check">✓</span> Cancel anytime</div>
               <div className="feature"><span className="check">✓</span> Instant listings</div>
               <div className="feature"><span className="check">✓</span> Built for dealers</div>
             </div>
@@ -172,6 +187,13 @@ const TradeSubscriptionPage = () => {
           <div className="pricing-section">
             <h2 className="pricing-title">Simple, Transparent Pricing</h2>
             <p className="pricing-subtitle">Start with a 30-day trial on any plan. Upgrade as you grow.</p>
+            
+            {/* Mobile swipe indicator */}
+            <div className="mobile-swipe-indicator">
+              <span className="swipe-icon">👉</span>
+              <span className="swipe-text">Swipe to see more packages</span>
+              <span className="swipe-icon">👈</span>
+            </div>
           </div>
 
           {/* ── Plans ── */}
@@ -188,6 +210,14 @@ const TradeSubscriptionPage = () => {
                 </div>
 
                 <div className="plan-content">
+                  {/* Summary Line */}
+                  <div className="plan-summary">
+                    <strong>Summary:</strong> Our {plan.name} Subscription lets you list up to{' '}
+                    {plan.slug === 'bronze' && '20 cars'}
+                    {plan.slug === 'silver' && '35 cars'}
+                    {plan.slug === 'gold' && '50 cars'}
+                  </div>
+
                   <div className="plan-price">
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
                       <span style={{ fontSize: '18px', fontWeight: 700, color: '#555' }}>£</span>
@@ -229,9 +259,9 @@ const TradeSubscriptionPage = () => {
             <span>ℹ️ Additional Info: A £2.50 admin fee applies per vehicle to cover HPI &amp; MOT checks.</span>
           </div>
 
-          {/* ── Why Dealers Choose (from sample image) ── */}
+          {/* ── Why Dealers Should Choose CarCatalog ── */}
           <div className="why-dealers-section">
-            <h2>Why Dealers Choose CarCatalog</h2>
+            <h2>Why Dealers Should Choose CarCatalog</h2>
             <p className="why-subtitle">Start your 30-day trial today and see the difference.</p>
             <div className="why-grid">
               <div className="why-item">Reach more serious buyers</div>

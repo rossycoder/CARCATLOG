@@ -99,6 +99,70 @@
   font-size: 13px;
 }
 
+/* ── Trial Info Box - Permanent (Always Visible) ── */
+.trade-subscription-page .trial-info-box-permanent {
+  background: linear-gradient(135deg, #34a853 0%, #2d9147 100%);
+  color: white;
+  padding: 24px 20px;
+  margin: 20px auto;
+  max-width: 850px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+}
+
+.trade-subscription-page .trial-info-box-permanent h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: white;
+}
+
+.trade-subscription-page .trial-info-box-permanent h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  color: white;
+}
+
+.trade-subscription-page .trial-info-box-permanent ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+
+.trade-subscription-page .trial-info-box-permanent ul li {
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 4px 0;
+  color: white;
+}
+
+.trade-subscription-page .trial-warning {
+  background: rgba(255, 193, 7, 0.2);
+  border-left: 4px solid #ffc107;
+  padding: 12px 16px;
+  border-radius: 6px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.trade-subscription-page .warning-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.trade-subscription-page .trial-warning p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: white;
+}
+
+.trade-subscription-page .trial-warning strong {
+  font-weight: 700;
+}
+
 /* ── Pricing Section ── */
 .trade-subscription-page .pricing-section {
   text-align: center;
@@ -119,6 +183,41 @@
   margin: 0 0 24px 0;
 }
 
+/* ── Mobile Swipe Indicator ── */
+.trade-subscription-page .mobile-swipe-indicator {
+  display: none; /* Hidden by default on desktop */
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+  border-radius: 8px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.trade-subscription-page .swipe-icon {
+  font-size: 20px;
+  animation: swipe 1.5s ease-in-out infinite;
+}
+
+.trade-subscription-page .swipe-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes swipe {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
 /* ── Plans Grid — always 3 columns ── */
 .subscription-plans-grid {
   display: grid;
@@ -127,6 +226,7 @@
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 16px 36px;
+  align-items: start;
 }
 
 .subscription-plan-card {
@@ -154,6 +254,10 @@
   text-align: center;
   color: white;
   position: relative;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .plan-header h2 {
@@ -186,6 +290,24 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+
+/* ── Plan Summary ── */
+.plan-summary {
+  background: #f8f9fa;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #555;
+  text-align: center;
+  border-left: 3px solid #34a853;
+}
+
+.plan-summary strong {
+  color: #1a1a1a;
+  font-weight: 600;
 }
 
 .plan-price {
@@ -427,6 +549,11 @@
   .trade-subscription-page .features-row  { gap: 10px; padding: 10px 12px; }
   .trade-subscription-page .feature       { font-size: 11px; }
 
+  /* Show swipe indicator on mobile */
+  .trade-subscription-page .mobile-swipe-indicator {
+    display: flex;
+  }
+
   /* Horizontal scroll for pricing cards */
   .subscription-plans-grid {
     display: flex;
@@ -445,6 +572,13 @@
     max-width: 320px;
     min-height: 420px;
     scroll-snap-align: center;
+  }
+
+  /* Summary mobile */
+  .plan-summary {
+    font-size: 12px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
   }
 
   /* Hide scrollbar but keep functionality */
@@ -469,4 +603,43 @@
 
   .why-grid      { grid-template-columns: 1fr; }
   .trade-subscription-page .pricing-title { font-size: 22px; }
+  
+  /* Trial info box mobile */
+  .trade-subscription-page .trial-info-box-permanent {
+    padding: 18px 14px;
+    margin: 12px;
+  }
+  
+  .trade-subscription-page .trial-info-box-permanent h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .trade-subscription-page .trial-info-box-permanent h3 {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  
+  .trade-subscription-page .trial-info-box-permanent ul {
+    margin-bottom: 12px;
+  }
+  
+  .trade-subscription-page .trial-info-box-permanent ul li {
+    font-size: 12px;
+    padding: 3px 0;
+  }
+  
+  .trade-subscription-page .trial-warning {
+    padding: 10px 12px;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .trade-subscription-page .warning-icon {
+    font-size: 18px;
+  }
+  
+  .trade-subscription-page .trial-warning p {
+    font-size: 12px;
+  }
 }

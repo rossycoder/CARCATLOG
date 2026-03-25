@@ -188,8 +188,13 @@ const TradeInventoryPage = () => {
           <div className="header-actions">
             <Link 
               to="/find-your-car" 
-              className="btn-add-vehicle"
+              className={`btn-add-vehicle ${subscription && subscription.listingsUsed >= subscription.listingsLimit ? 'disabled' : ''}`}
               onClick={(e) => handleAddVehicleClick(e, 'car')}
+              style={{
+                opacity: subscription && subscription.listingsUsed >= subscription.listingsLimit ? 0.5 : 1,
+                cursor: subscription && subscription.listingsUsed >= subscription.listingsLimit ? 'not-allowed' : 'pointer',
+                pointerEvents: subscription && subscription.listingsUsed >= subscription.listingsLimit ? 'none' : 'auto'
+              }}
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -198,8 +203,13 @@ const TradeInventoryPage = () => {
             </Link>
             <Link 
               to="/bikes/find-your-bike" 
-              className="btn-add-vehicle btn-add-bike"
+              className={`btn-add-vehicle btn-add-bike ${subscription && subscription.listingsUsed >= subscription.listingsLimit ? 'disabled' : ''}`}
               onClick={(e) => handleAddVehicleClick(e, 'bike')}
+              style={{
+                opacity: subscription && subscription.listingsUsed >= subscription.listingsLimit ? 0.5 : 1,
+                cursor: subscription && subscription.listingsUsed >= subscription.listingsLimit ? 'not-allowed' : 'pointer',
+                pointerEvents: subscription && subscription.listingsUsed >= subscription.listingsLimit ? 'none' : 'auto'
+              }}
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -208,8 +218,13 @@ const TradeInventoryPage = () => {
             </Link>
             <Link 
               to="/vans/find-your-van" 
-              className="btn-add-vehicle btn-add-van"
+              className={`btn-add-vehicle btn-add-van ${subscription && subscription.listingsUsed >= subscription.listingsLimit ? 'disabled' : ''}`}
               onClick={(e) => handleAddVehicleClick(e, 'van')}
+              style={{
+                opacity: subscription && subscription.listingsUsed >= subscription.listingsLimit ? 0.5 : 1,
+                cursor: subscription && subscription.listingsUsed >= subscription.listingsLimit ? 'not-allowed' : 'pointer',
+                pointerEvents: subscription && subscription.listingsUsed >= subscription.listingsLimit ? 'none' : 'auto'
+              }}
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
