@@ -89,17 +89,10 @@
 
 .listing-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transition: all 0.3s ease;
-  border: 1px solid #e9ecef;
-}
-
-.listing-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  border-color: #007bff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid #e5e7eb;
 }
 
 .listing-image {
@@ -107,78 +100,62 @@
   width: 100%;
   height: 220px;
   overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f3f4f6;
 }
 
 .listing-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.listing-card:hover .listing-image img {
-  transform: scale(1.05);
 }
 
 .status-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 0.5rem 1rem;
-  border-radius: 24px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 6px !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  z-index: 999 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+  display: inline-block !important;
 }
 
 .status-active {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
+  background: #10b981 !important;
+  color: white !important;
 }
 
 .status-overdue {
-  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-  color: white;
-  animation: pulse 2s ease-in-out infinite;
+  background: #ef4444 !important;
+  color: white !important;
 }
 
 .status-expiring {
-  background: linear-gradient(135deg, #ffc107 0%, #ffeb3b 100%);
-  color: #1a1a1a;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
+  background: #f59e0b !important;
+  color: white !important;
 }
 
 .status-sold {
-  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-  color: white;
+  background: #6b7280 !important;
+  color: white !important;
 }
 
 .status-expired {
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-  color: white;
+  background: #dc2626 !important;
+  color: white !important;
 }
 
 .status-draft {
-  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-  color: #1a1a1a;
+  background: #8b5cf6 !important;
+  color: white !important;
 }
 
 .status-pending {
-  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-  color: white;
+  background: #3b82f6 !important;
+  color: white !important;
 }
 
 .listing-details {
@@ -215,12 +192,9 @@
 }
 
 .listing-price {
-  font-size: 1.75rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2563eb;
   margin-bottom: 1.25rem;
 }
 
@@ -230,9 +204,9 @@
   align-items: center;
   margin-bottom: 1.25rem;
   padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 8px;
-  border-left: 4px solid #007bff;
+  background: #f9fafb;
+  border-radius: 6px;
+  border-left: 3px solid #2563eb;
 }
 
 .package-badge {
@@ -262,81 +236,57 @@
 
 .listing-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
 .listing-actions button {
   flex: 1;
-  min-width: 100px;
-  padding: 0.75rem 1rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 700;
+  min-width: 90px;
+  padding: 0.6rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  letter-spacing: 0.3px;
-}
-
-.listing-actions button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  background: white;
+  color: #374151;
 }
 
 .btn-edit {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  background: #3b82f6;
   color: white;
-}
-
-.btn-edit:hover {
-  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+  border-color: #3b82f6;
 }
 
 .btn-view {
-  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  background: #6b7280;
   color: white;
-}
-
-.btn-view:hover {
-  background: linear-gradient(135deg, #138496 0%, #0f6674 100%);
+  border-color: #6b7280;
 }
 
 .btn-sold {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: #10b981;
   color: white;
-}
-
-.btn-sold:hover {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  border-color: #10b981;
 }
 
 .btn-delete {
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  background: #ef4444;
   color: white;
-}
-
-.btn-delete:hover {
-  background: linear-gradient(135deg, #c82333 0%, #a71d2a 100%);
+  border-color: #ef4444;
 }
 
 .btn-relist {
-  background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+  background: #8b5cf6;
   color: white;
-}
-
-.btn-relist:hover {
-  background: linear-gradient(135deg, #5a32a3 0%, #4a2885 100%);
+  border-color: #8b5cf6;
 }
 
 .btn-payment {
-  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-  color: #1a1a1a;
-}
-
-.btn-payment:hover {
-  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  background: #f59e0b;
+  color: white;
+  border-color: #f59e0b;
 }
 
 .btn-primary {
@@ -1132,5 +1082,817 @@
   .dealer-stats {
     width: 100%;
     justify-content: flex-start;
+  }
+}
+
+/* User Type Badges */
+.type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.badge-private {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.badge-trade {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+/* Business Info */
+.business-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trade-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.business-logo-small {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.business-link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.business-link:hover {
+  text-decoration: underline;
+}
+
+/* Vehicle Count */
+.vehicle-count {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+/* Admin Table Adjustments for User View */
+.admin-table th:nth-child(5),
+.admin-table td:nth-child(5) {
+  min-width: 150px;
+}
+
+.admin-table th:nth-child(6),
+.admin-table td:nth-child(6) {
+  min-width: 120px;
+}
+
+/* Admin View Styles */
+.admin-view {
+  background-color: #f8f9fa;
+}
+
+.admin-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.admin-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 2rem;
+}
+
+/* Admin Filters */
+.admin-filters {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.search-box {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.search-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+}
+
+.filter-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-item label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.filter-item select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: white;
+}
+
+/* Admin Stats Cards */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* Admin Table */
+.admin-table-wrapper {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+.admin-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.admin-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  color: #212529;
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.admin-table .account-name {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.admin-table .email {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.admin-table .phone {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+/* Admin Pagination */
+.admin-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  margin-top: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.pagination-info {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination-controls button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #333;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.pagination-controls button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Action Buttons */
+.action-link {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  text-decoration: none;
+}
+
+.action-link:hover {
+  text-decoration: underline;
+  color: #0056b3;
+}
+
+.action-link.view {
+  color: #007bff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 1rem;
+  }
+  
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .filter-row {
+    flex-direction: column;
+  }
+  
+  .admin-table-wrapper {
+    overflow-x: scroll;
+  }
+}
+
+/* User Vehicles Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 1200px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.modal-close:hover {
+  background-color: #f3f4f6;
+  color: #1a1a1a;
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.no-vehicles {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+
+/* Vehicles Grid in Modal */
+.vehicles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.vehicle-card-mini {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.vehicle-card-mini:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.vehicle-image-mini {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  background-color: #f3f4f6;
+}
+
+.vehicle-image-mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vehicle-image-mini .no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.status-badge-mini {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.status-badge-mini.active {
+  background-color: #10b981;
+  color: white;
+}
+
+.status-badge-mini.draft {
+  background-color: #6b7280;
+  color: white;
+}
+
+.status-badge-mini.sold {
+  background-color: #ef4444;
+  color: white;
+}
+
+.status-badge-mini.expired {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.vehicle-info-mini {
+  padding: 1rem;
+}
+
+.vehicle-info-mini h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+}
+
+.vehicle-year {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0 0 0.5rem 0;
+}
+
+.vehicle-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin: 0 0 1rem 0;
+}
+
+.vehicle-actions-mini {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-view-mini,
+.btn-edit-mini,
+.btn-sold-mini,
+.btn-relist-mini,
+.btn-delete-mini {
+  flex: 1;
+  min-width: 80px;
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.btn-view-mini {
+  background-color: white;
+  color: #2563eb;
+  border-color: #2563eb;
+}
+
+.btn-view-mini:hover {
+  background-color: #2563eb;
+  color: white;
+}
+
+.btn-edit-mini {
+  background-color: white;
+  color: #059669;
+  border-color: #059669;
+}
+
+.btn-edit-mini:hover {
+  background-color: #059669;
+  color: white;
+}
+
+.btn-sold-mini {
+  background-color: white;
+  color: #10b981;
+  border-color: #10b981;
+}
+
+.btn-sold-mini:hover {
+  background-color: #10b981;
+  color: white;
+}
+
+.btn-relist-mini {
+  background-color: white;
+  color: #8b5cf6;
+  border-color: #8b5cf6;
+}
+
+.btn-relist-mini:hover {
+  background-color: #8b5cf6;
+  color: white;
+}
+
+.btn-delete-mini {
+  background-color: white;
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.btn-delete-mini:hover {
+  background-color: #ef4444;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .vehicles-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-content {
+    max-height: 95vh;
+  }
+  
+  .modal-header,
+  .modal-body {
+    padding: 1rem;
+  }
+}
+
+/* Subscription Info in Modal */
+.subscription-info-mini {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #2563eb;
+}
+
+.subscription-info-mini .package-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: #2563eb;
+  color: white;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.subscription-info-mini .expiry-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.subscription-info-mini .expiry-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.subscription-info-mini .expiry-date {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+/* Subscription Info Column in Admin Table */
+.admin-table .subscription-info {
+  min-width: 200px;
+}
+
+.subscription-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.sub-plan-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.trial-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  background-color: #fbbf24;
+  color: #78350f;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sub-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #4a5568;
+  font-size: 0.8rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.active {
+  background-color: #10b981;
+}
+
+.status-dot.trialing {
+  background-color: #fbbf24;
+}
+
+.status-dot.past_due {
+  background-color: #ef4444;
+}
+
+.status-dot.cancelled {
+  background-color: #6b7280;
+}
+
+.status-dot.expired {
+  background-color: #dc2626;
+}
+
+.sub-expiry {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.sub-usage {
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Modal Header Subscription Info */
+.modal-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.modal-header-content h2 {
+  margin: 0;
+}
+
+.modal-subscription-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #2563eb;
+}
+
+.modal-sub-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.modal-sub-badge .plan-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.trial-badge-modal {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  background-color: #fbbf24;
+  color: #78350f;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-badge-modal {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge-modal.active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge-modal.trialing {
+  background-color: #fef3c7;
+  color: #78350f;
+}
+
+.status-badge-modal.past_due {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge-modal.cancelled {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.status-badge-modal.expired {
+  background-color: #fecaca;
+  color: #7f1d1d;
+}
+
+.modal-sub-details {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  flex-wrap: wrap;
+}
+
+.modal-sub-details .usage-info {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+@media (max-width: 768px) {
+  .modal-header-content {
+    gap: 0.5rem;
+  }
+  
+  .modal-subscription-info {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .modal-sub-badge {
+    gap: 0.5rem;
+  }
+  
+  .modal-sub-badge .plan-name {
+    font-size: 0.9rem;
+  }
+  
+  .modal-sub-details {
+    font-size: 0.8rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
   }
 }

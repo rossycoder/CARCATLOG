@@ -60,17 +60,18 @@ function AdminDashboardPage() {
     try {
       setLoading(true);
       setError('');
-      const response = await api.get('/admin/listings');
-      const allListings = response.data.listings || [];
-      setListings(allListings);
-      calculateStats(allListings);
+      // Fetch users instead of listings
+      const response = await api.get('/admin/users');
+      const allUsers = response.data.users || [];
+      setListings(allUsers); // Store users in listings state
+      calculateStats(allUsers);
     } catch (err) {
       console.error('[AdminDashboard] Error:', err);
       if (err.response?.status === 401 || err.response?.status === 403) {
         setError('Admin access required');
         navigate('/');
       } else {
-        setError(err.response?.data?.error || 'Failed to load listings');
+        setError(err.response?.data?.error || 'Failed to load users');
       }
     } finally {
       setLoading(false);
@@ -461,65 +462,97 @@ function AdminDashboardPage() {
                   </div>
                   
                   {expandedDealers[dealerEmail] && (
-                    <div className="dealer-listings">
-                      <table className="admin-table">
-                        <thead>
-                          <tr>
-                            <th>Vehicle VIN</th>
-                            <th>Plan Type</th>
-                            <th>Next Renewal</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {dealerData.listings.map((listing) => (
-                            <tr key={listing._id}>
-                              <td className="vin-column">
-                                {listing.vin || listing.registrationNumber || 'N/A'}
-                              </td>
-                              <td>
-                                {listing.advertisingPackage?.packageName || 'N/A'}
-                              </td>
-                              <td>
-                                {listing.advertisingPackage?.expiryDate 
-                                  ? new Date(listing.advertisingPackage.expiryDate).toLocaleDateString('en-US', { 
-                                      month: 'short', 
-                                      day: 'numeric', 
-                                      year: 'numeric' 
-                                    })
-                                  : 'N/A'}
-                              </td>
-                              <td>{getStatusBadge(listing)}</td>
-                              <td className="actions-column">
-                                <button 
-                                  className="action-btn view-btn"
-                                  onClick={() => {
-                                    const vehicleType = listing.vehicleType || 'car';
-                                    if (vehicleType === 'bike') {
-                                      navigate(`/bikes/${listing._id}`);
-                                    } else if (vehicleType === 'van') {
-                                      navigate(`/vans/${listing._id}`);
-                                    } else {
-                                      navigate(`/cars/${listing._id}`);
-                                    }
-                                  }}
-                                >
-                                  View
-                                </button>
-                                <button 
-                                  className="action-btn manage-btn"
-                                  onClick={() => {
-                                    navigate(`/admin/listings/${listing._id}`);
-                                  }}
-                                >
-                                  Manage
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div className="dealer-listings-cards">
+                      <div className="listings-grid">
+                        {dealerData.listings.map((listing) => {
+                          const primaryImage = listing.images?.[0] || '/placeholder-car.jpg';
+                          const expiryDate = listing.advertisingPackage?.expiryDate 
+                            ? new Date(listing.advertisingPackage.expiryDate)
+                            : null;
+                          
+                          return (
+                            <div key={listing._id} className="listing-card">
+                              <div className="listing-image">
+                                <img src={primaryImage} alt={`${listing.make} ${listing.model}`} />
+                                <div className="status-badge-overlay">
+                                  {getStatusBadge(listing)}
+                                </div>
+                              </div>
+                              
+                              <div className="listing-content">
+                                <h3 className="listing-title">
+                                  {listing.make} {listing.model}
+                                </h3>
+                                <p className="listing-subtitle">
+                                  {listing.year} • {listing.registrationNumber || 'No Reg'}
+                                </p>
+                                
+                                <div className="listing-details">
+                                  <span>{listing.mileage?.toLocaleString() || '0'} miles</span>
+                                  <span>•</span>
+                                  <span>{listing.transmission || 'N/A'}</span>
+                                  <span>•</span>
+                                  <span>{listing.fuelType || 'N/A'}</span>
+                                </div>
+                                
+                                <div className="listing-price">
+                                  £{listing.price?.toLocaleString() || '0'}
+                                </div>
+                                
+                                {listing.advertisingPackage && (
+                                  <div className="listing-package">
+                                    <span className="package-badge">
+                                      {listing.advertisingPackage.packageName}
+                                    </span>
+                                    {expiryDate && (
+                                      <span className="expiry-date">
+                                        Expires: {expiryDate.toLocaleDateString('en-GB', { 
+                                          day: '2-digit', 
+                                          month: '2-digit', 
+                                          year: 'numeric' 
+                                        })}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                <div className="listing-stats">
+                                  <span>👁️ {listing.views || 0} views</span>
+                                  <span>📅 Listed {new Date(listing.createdAt).toLocaleDateString('en-GB')}</span>
+                                </div>
+                                
+                                <div className="listing-actions">
+                                  <button 
+                                    className="btn-view"
+                                    onClick={() => {
+                                      const vehicleType = listing.vehicleType || 'car';
+                                      if (vehicleType === 'bike') {
+                                        navigate(`/bikes/${listing._id}`);
+                                      } else if (vehicleType === 'van') {
+                                        navigate(`/vans/${listing._id}`);
+                                      } else {
+                                        navigate(`/cars/${listing._id}`);
+                                      }
+                                    }}
+                                  >
+                                    👁️ View
+                                  </button>
+                                  <button 
+                                    className="btn-edit"
+                                    onClick={() => {
+                                      const vehicleType = listing.vehicleType || 'car';
+                                      const basePath = vehicleType === 'bike' ? '/bikes' : vehicleType === 'van' ? '/vans' : '';
+                                      navigate(`${basePath}/selling/advert/edit/${listing._id}`);
+                                    }}
+                                  >
+                                    ✏️ Edit
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -536,64 +569,68 @@ function AdminDashboardPage() {
               <tr>
                 <th>Account Name</th>
                 <th>Email</th>
-                <th>Vehicle VIN</th>
-                <th>Plan Type</th>
-                <th>Next Renewal</th>
-                <th>Status</th>
+                <th>Phone</th>
+                <th>User Type</th>
+                <th>Total Vehicles</th>
+                <th>Business Info</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {currentListings.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="no-data">No listings found</td>
+                  <td colSpan="7" className="no-data">No users found</td>
                 </tr>
               ) : (
-                currentListings.map((listing) => (
-                  <tr key={listing._id}>
+                currentListings.map((user) => (
+                  <tr key={user._id}>
                     <td className="account-name">
-                      {listing.ownerName || 'N/A'}
+                      {user.name || 'N/A'}
                     </td>
-                    <td>{listing.ownerEmail || 'N/A'}</td>
-                    <td className="vin-column">
-                      {listing.vin || listing.registrationNumber || 'N/A'}
+                    <td>{user.email || 'N/A'}</td>
+                    <td>{user.phone || 'N/A'}</td>
+                    <td>
+                      <span className={`user-type-badge ${user.type}`}>
+                        {user.type === 'trade' ? '🏢 Trade Dealer' : '👤 Private'}
+                      </span>
                     </td>
                     <td>
-                      {listing.advertisingPackage?.packageName || 'N/A'}
+                      <strong>{user.totalVehicles}</strong>
+                      {user.totalVehicles > 0 && (
+                        <span className="vehicle-breakdown-inline">
+                          {user.cars > 0 && ` (${user.cars} cars`}
+                          {user.bikes > 0 && `, ${user.bikes} bikes`}
+                          {user.vans > 0 && `, ${user.vans} vans`}
+                          {user.totalVehicles > 0 && ')'}
+                        </span>
+                      )}
                     </td>
                     <td>
-                      {listing.advertisingPackage?.expiryDate 
-                        ? new Date(listing.advertisingPackage.expiryDate).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric', 
-                            year: 'numeric' 
-                          })
-                        : 'N/A'}
+                      {user.type === 'trade' ? (
+                        <div className="business-info-cell">
+                          {user.businessLogo && (
+                            <img src={user.businessLogo} alt="Logo" className="business-logo-small" />
+                          )}
+                          {user.businessWebsite && (
+                            <a href={user.businessWebsite} target="_blank" rel="noopener noreferrer" className="business-link">
+                              🌐 Website
+                            </a>
+                          )}
+                          {!user.businessLogo && !user.businessWebsite && 'N/A'}
+                        </div>
+                      ) : (
+                        'N/A'
+                      )}
                     </td>
-                    <td>{getStatusBadge(listing)}</td>
                     <td className="actions-column">
                       <button 
                         className="action-btn view-btn"
                         onClick={() => {
-                          const vehicleType = listing.vehicleType || 'car';
-                          if (vehicleType === 'bike') {
-                            navigate(`/bikes/${listing._id}`);
-                          } else if (vehicleType === 'van') {
-                            navigate(`/vans/${listing._id}`);
-                          } else {
-                            navigate(`/cars/${listing._id}`);
-                          }
+                          // Navigate to user's listings
+                          navigate(`/my-listings?userId=${user._id}`);
                         }}
                       >
-                        View
-                      </button>
-                      <button 
-                        className="action-btn manage-btn"
-                        onClick={() => {
-                          navigate(`/admin/listings/${listing._id}`);
-                        }}
-                      >
-                        Manage
+                        View Listings
                       </button>
                     </td>
                   </tr>

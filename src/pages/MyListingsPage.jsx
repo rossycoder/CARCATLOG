@@ -12,6 +12,12 @@ function MyListingsPage() {
   const [error, setError] = useState('');
   const [isAdminView, setIsAdminView] = useState(false);
   
+  // Modal state for viewing user's vehicles
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userVehicles, setUserVehicles] = useState([]);
+  const [loadingVehicles, setLoadingVehicles] = useState(false);
+  const [showVehiclesModal, setShowVehiclesModal] = useState(false);
+  
   // Admin filters state - always declare, even if not admin
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -43,13 +49,24 @@ function MyListingsPage() {
       setLoading(true);
       setError('');
       console.log('[MyListings] Fetching listings for user:', user);
-      const response = await api.get('/vehicles/my-listings');
-      console.log('[MyListings] Response:', response.data);
-      setListings(response.data.listings || []);
-      setIsAdminView(response.data.isAdmin || false);
       
-      if (response.data.isAdmin) {
-        console.log('[MyListings] Admin view: Showing all listings from all users');
+      // Check if user is admin
+      const isAdmin = user?.isAdmin || user?.role === 'admin';
+      
+      if (isAdmin) {
+        // Admin: Fetch users list
+        console.log('[MyListings] Admin detected - fetching users list');
+        const response = await api.get('/admin/users');
+        console.log('[MyListings] Admin Response:', response.data);
+        console.log('[MyListings] Sample user data:', response.data.users?.[0]);
+        setListings(response.data.users || []);
+        setIsAdminView(true);
+      } else {
+        // Normal user: Fetch their listings
+        const response = await api.get('/vehicles/my-listings');
+        console.log('[MyListings] Response:', response.data);
+        setListings(response.data.listings || []);
+        setIsAdminView(false);
       }
     } catch (err) {
       console.error('[MyListings] Error fetching listings:', err);
@@ -67,8 +84,11 @@ function MyListingsPage() {
   };
 
   const handleEditListing = (listingId, vehicleType = 'car') => {
+    console.log('[MyListings] Edit clicked:', { listingId, vehicleType });
     const basePath = vehicleType === 'bike' ? '/bikes' : vehicleType === 'van' ? '/vans' : '';
-    navigate(`${basePath}/selling/advert/edit/${listingId}`);
+    const editPath = `${basePath}/selling/advert/edit/${listingId}`;
+    console.log('[MyListings] Navigating to:', editPath);
+    navigate(editPath);
   };
 
   const handleViewListing = (listingId, vehicleType = 'car') => {
@@ -134,38 +154,42 @@ function MyListingsPage() {
     const now = new Date();
     const expiryDate = listing.advertisingPackage?.expiryDate ? new Date(listing.advertisingPackage.expiryDate) : null;
     
-    // Check if overdue (expired but still active)
-    const isOverdue = status === 'active' && expiryDate && expiryDate < now;
+    // If car is active but expired, treat it as draft
+    const isExpired = status === 'active' && expiryDate && expiryDate < now;
+    const effectiveStatus = isExpired ? 'draft' : status;
     
-    // Check if expiring soon (within 7 days)
-    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const isExpiringSoon = status === 'active' && expiryDate && expiryDate > now && expiryDate <= sevenDaysFromNow;
+    console.log('[MyListings] Status Badge Debug:', {
+      carId: listing._id,
+      originalStatus: status,
+      effectiveStatus: effectiveStatus,
+      isExpired: isExpired
+    });
     
-    // Determine badge class and label
-    let badgeClass = '';
-    let label = '';
+    // Simple status mapping
+    const statusMap = {
+      active: { label: 'Active', className: 'status-active' },
+      sold: { label: 'Sold', className: 'status-sold' },
+      expired: { label: 'Draft', className: 'status-draft' },
+      draft: { label: 'Draft', className: 'status-draft' },
+      pending_payment: { label: 'Pending', className: 'status-pending' }
+    };
     
-    if (isOverdue) {
-      badgeClass = 'status-overdue';
-      label = 'Overdue';
-    } else if (isExpiringSoon) {
-      badgeClass = 'status-expiring';
-      label = 'Expiring Soon';
-    } else {
-      // Default status mapping
-      const statusMap = {
-        active: { label: 'Active', className: 'status-active' },
-        sold: { label: 'Sold', className: 'status-sold' },
-        expired: { label: 'Expired', className: 'status-expired' },
-        draft: { label: 'Draft', className: 'status-draft' },
-        pending_payment: { label: 'Pending Payment', className: 'status-pending' }
-      };
-      const statusInfo = statusMap[status] || { label: status, className: 'status-default' };
-      badgeClass = statusInfo.className;
-      label = statusInfo.label;
-    }
+    const statusInfo = statusMap[effectiveStatus] || { label: effectiveStatus, className: 'status-default' };
+    const badgeClass = statusInfo.className;
+    const label = statusInfo.label;
+    
+    console.log('[MyListings] Badge Result:', { badgeClass, label });
     
     return <span className={`status-badge ${badgeClass}`}>{label}</span>;
+  };
+
+  const isCarExpired = (listing) => {
+    const status = listing.advertStatus;
+    const now = new Date();
+    const expiryDate = listing.advertisingPackage?.expiryDate ? new Date(listing.advertisingPackage.expiryDate) : null;
+    
+    // Car is expired if it's active but expiry date has passed
+    return status === 'active' && expiryDate && expiryDate < now;
   };
 
   if (authLoading || loading) {
@@ -197,92 +221,42 @@ function MyListingsPage() {
     );
   }
 
-  // Admin Table View
+  // Admin Table View - Show Users
   if (isAdminView) {
-    // Calculate stats
-    const activeCount = listings.filter(l => l.advertStatus === 'active').length;
-    const expiringSoon = listings.filter(l => {
-      if (l.advertStatus !== 'active' || !l.advertisingPackage?.expiryDate) return false;
-      const expiryDate = new Date(l.advertisingPackage.expiryDate);
-      const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-      return expiryDate <= thirtyDaysFromNow && expiryDate > new Date();
-    }).length;
-    const overdue = listings.filter(l => {
-      if (!l.advertisingPackage?.expiryDate) return false;
-      return new Date(l.advertisingPackage.expiryDate) < new Date() && l.advertStatus === 'active';
-    }).length;
-    const recentSignUps = listings.filter(l => {
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      return new Date(l.createdAt) >= sevenDaysAgo;
-    }).length;
+    // Calculate stats for users
+    const totalUsers = listings.length;
+    const privateUsers = listings.filter(u => u.type === 'private').length;
+    const tradeDealers = listings.filter(u => u.type === 'trade').length;
+    const usersWithVehicles = listings.filter(u => u.totalVehicles > 0).length;
 
-    // Filter and sort listings
-    let filteredListings = listings.filter(listing => {
-      const now = new Date();
-      const expiryDate = listing.advertisingPackage?.expiryDate ? new Date(listing.advertisingPackage.expiryDate) : null;
-      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-      
-      // Quick filter (from stat cards)
-      if (quickFilter === 'active') {
-        if (listing.advertStatus !== 'active') return false;
-      } else if (quickFilter === 'expiring') {
-        // Show only listings expiring within 30 days
-        if (listing.advertStatus !== 'active' || !expiryDate) return false;
-        if (expiryDate <= now || expiryDate > thirtyDaysFromNow) return false;
-      } else if (quickFilter === 'overdue') {
-        // Show only overdue listings
-        if (listing.advertStatus !== 'active' || !expiryDate) return false;
-        if (expiryDate >= now) return false;
-      } else if (quickFilter === 'recent') {
-        // Show only recent sign-ups (last 7 days)
-        const createdDate = new Date(listing.createdAt);
-        if (createdDate < sevenDaysAgo) return false;
-      }
-      
+    // Filter and sort users
+    let filteredUsers = listings.filter(user => {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesSearch = 
-          listing.ownerName?.toLowerCase().includes(query) ||
-          listing.ownerEmail?.toLowerCase().includes(query) ||
-          listing.vin?.toLowerCase().includes(query) ||
-          listing.registrationNumber?.toLowerCase().includes(query);
+          user.name?.toLowerCase().includes(query) ||
+          user.email?.toLowerCase().includes(query) ||
+          user.phone?.toLowerCase().includes(query);
         if (!matchesSearch) return false;
       }
 
-      // Status filter
+      // User type filter
       if (statusFilter !== 'All') {
-        const statusMap = {
-          'Active': 'active',
-          'Expired': 'expired',
-          'Sold': 'sold',
-          'Pending': 'pending_payment'
-        };
-        if (listing.advertStatus !== statusMap[statusFilter]) return false;
-      }
-
-      // Plan filter
-      if (planFilter !== 'All Plans') {
-        const packageName = listing.advertisingPackage?.packageName?.toLowerCase() || '';
-        const filterValue = planFilter.toLowerCase();
-        if (!packageName.includes(filterValue)) {
-          return false;
-        }
+        if (statusFilter === 'Private' && user.type !== 'private') return false;
+        if (statusFilter === 'Trade' && user.type !== 'trade') return false;
       }
 
       return true;
     });
 
-    // Sort listings
-    filteredListings.sort((a, b) => {
+    // Sort users
+    filteredUsers.sort((a, b) => {
       switch (sortBy) {
-        case 'Next Renewal Date':
-          const dateA = a.advertisingPackage?.expiryDate ? new Date(a.advertisingPackage.expiryDate) : new Date(0);
-          const dateB = b.advertisingPackage?.expiryDate ? new Date(b.advertisingPackage.expiryDate) : new Date(0);
-          return dateA - dateB;
         case 'Name':
-          return (a.ownerName || '').localeCompare(b.ownerName || '');
+          return (a.name || '').localeCompare(b.name || '');
+        case 'Vehicles':
+          return b.totalVehicles - a.totalVehicles;
         case 'Recent':
           return new Date(b.createdAt) - new Date(a.createdAt);
         default:
@@ -291,52 +265,53 @@ function MyListingsPage() {
     });
 
     // Pagination
-    const totalPages = Math.ceil(filteredListings.length / itemsPerPage);
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedListings = filteredListings.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
 
-    // Group listings by dealer/user
-    const groupListingsByDealer = (listings) => {
-      const grouped = {};
-      
-      listings.forEach(listing => {
-        const dealerKey = listing.ownerEmail || 'unknown';
-        if (!grouped[dealerKey]) {
-          grouped[dealerKey] = {
-            dealerName: listing.ownerName || 'Unknown User',
-            dealerEmail: listing.ownerEmail || 'No Email',
-            listings: []
-          };
-        }
-        grouped[dealerKey].listings.push(listing);
-      });
-      
-      return grouped;
+    const handleViewUser = async (userId, userType) => {
+      try {
+        setLoadingVehicles(true);
+        setShowVehiclesModal(true);
+        
+        // Find user details
+        const user = listings.find(u => u._id === userId);
+        setSelectedUser(user);
+        
+        console.log('[Admin] Fetching vehicles for user:', userId, 'type:', userType);
+        
+        // Fetch user's vehicles
+        const endpoint = userType === 'trade' 
+          ? `/admin/users/${userId}/vehicles?dealerId=${userId}`
+          : `/admin/users/${userId}/vehicles`;
+        
+        console.log('[Admin] API endpoint:', endpoint);
+        
+        const response = await api.get(endpoint);
+        console.log('[Admin] API response:', response.data);
+        
+        setUserVehicles(response.data.vehicles || []);
+      } catch (error) {
+        console.error('[Admin] Error fetching user vehicles:', error);
+        console.error('[Admin] Error response:', error.response?.data);
+        alert(error.response?.data?.error || 'Failed to load user vehicles');
+        setShowVehiclesModal(false);
+      } finally {
+        setLoadingVehicles(false);
+      }
     };
 
-    const toggleDealer = (dealerEmail) => {
-      setExpandedDealers(prev => ({
-        ...prev,
-        [dealerEmail]: !prev[dealerEmail]
-      }));
+    const closeVehiclesModal = () => {
+      setShowVehiclesModal(false);
+      setSelectedUser(null);
+      setUserVehicles([]);
     };
-
-    const toggleAllDealers = (expand) => {
-      const newExpanded = {};
-      const grouped = groupListingsByDealer(filteredListings);
-      Object.keys(grouped).forEach(key => {
-        newExpanded[key] = expand;
-      });
-      setExpandedDealers(newExpanded);
-    };
-
-    const groupedListings = groupListingsByDealer(viewMode === 'grouped' ? filteredListings : paginatedListings);
 
     return (
       <div className="my-listings-page admin-view">
         <div className="admin-container">
           <div className="admin-header">
-            <h1>Live Subscription Accounts</h1>
+            <h1>All Users</h1>
           </div>
 
           {/* Filters Section */}
@@ -344,7 +319,7 @@ function MyListingsPage() {
             <div className="search-box">
               <input
                 type="text"
-                placeholder="Search by Name, Email, or VIN"
+                placeholder="Search by Name, Email, or Phone"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -353,38 +328,19 @@ function MyListingsPage() {
 
             <div className="filter-row">
               <div className="filter-item">
-                <label>Subscription Status:</label>
+                <label>User Type:</label>
                 <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                  <option value="Active">Active</option>
-                  <option value="Expired">Expired</option>
-                  <option value="Sold">Sold</option>
-                  <option value="Pending">Pending</option>
-                  <option value="All">All</option>
-                </select>
-              </div>
-
-              <div className="filter-item">
-                <label>Plan Type:</label>
-                <select value={planFilter} onChange={(e) => setPlanFilter(e.target.value)}>
-                  <option value="All Plans">All Plans</option>
-                  <optgroup label="Private Seller Plans">
-                    <option value="Bronze">Bronze</option>
-                    <option value="Silver">Silver</option>
-                    <option value="Gold">Gold</option>
-                  </optgroup>
-                  <optgroup label="Trade Dealer Plans">
-                    <option value="TRADE BRONZE">TRADE BRONZE</option>
-                    <option value="TRADE SILVER">TRADE SILVER</option>
-                    <option value="TRADE GOLD">TRADE GOLD</option>
-                  </optgroup>
+                  <option value="All">All Users</option>
+                  <option value="Private">Private Sellers</option>
+                  <option value="Trade">Trade Dealers</option>
                 </select>
               </div>
 
               <div className="filter-item">
                 <label>Sort by:</label>
                 <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                  <option value="Next Renewal Date">Next Renewal Date</option>
                   <option value="Name">Name</option>
+                  <option value="Vehicles">Total Vehicles</option>
                   <option value="Recent">Recent</option>
                 </select>
               </div>
@@ -393,234 +349,134 @@ function MyListingsPage() {
 
           {/* Stats Cards */}
           <div className="admin-stats">
-            <div 
-              className={`stat-card ${quickFilter === 'active' ? 'active-filter' : ''}`}
-              onClick={() => {
-                setQuickFilter(quickFilter === 'active' ? 'all' : 'active');
-                setCurrentPage(1);
-              }}
-              style={{ cursor: 'pointer' }}
-              title="Click to filter active accounts"
-            >
-              <span className="stat-label">Total Active Accounts:</span>
-              <span className="stat-value">{activeCount}</span>
+            <div className="stat-card">
+              <span className="stat-label">Total Users:</span>
+              <span className="stat-value">{totalUsers}</span>
             </div>
-            <div 
-              className={`stat-card expiring ${quickFilter === 'expiring' ? 'active-filter' : ''}`}
-              onClick={() => {
-                setQuickFilter(quickFilter === 'expiring' ? 'all' : 'expiring');
-                setCurrentPage(1);
-              }}
-              style={{ cursor: 'pointer' }}
-              title="Click to filter expiring soon"
-            >
-              <span className="stat-label">Expiring Soon:</span>
-              <span className="stat-value">{expiringSoon}</span>
+            <div className="stat-card">
+              <span className="stat-label">Private Sellers:</span>
+              <span className="stat-value">{privateUsers}</span>
             </div>
-            <div 
-              className={`stat-card overdue ${quickFilter === 'overdue' ? 'active-filter' : ''}`}
-              onClick={() => {
-                setQuickFilter(quickFilter === 'overdue' ? 'all' : 'overdue');
-                setCurrentPage(1);
-              }}
-              style={{ cursor: 'pointer' }}
-              title="Click to filter overdue"
-            >
-              <span className="stat-label">Overdue:</span>
-              <span className="stat-value">{overdue}</span>
+            <div className="stat-card">
+              <span className="stat-label">Trade Dealers:</span>
+              <span className="stat-value">{tradeDealers}</span>
             </div>
-            <div 
-              className={`stat-card recent ${quickFilter === 'recent' ? 'active-filter' : ''}`}
-              onClick={() => {
-                setQuickFilter(quickFilter === 'recent' ? 'all' : 'recent');
-                setCurrentPage(1);
-              }}
-              style={{ cursor: 'pointer' }}
-              title="Click to filter recent sign-ups"
-            >
-              <span className="stat-label">Recent Sign-Ups:</span>
-              <span className="stat-value">{recentSignUps}</span>
+            <div className="stat-card">
+              <span className="stat-label">Users with Vehicles:</span>
+              <span className="stat-value">{usersWithVehicles}</span>
             </div>
           </div>
 
-          {/* View Mode Toggle */}
-          <div className="view-mode-section">
-            <div className="view-mode-toggle">
-              <button 
-                className={`view-mode-btn ${viewMode === 'grouped' ? 'active' : ''}`}
-                onClick={() => setViewMode('grouped')}
-              >
-                📁 Grouped by Dealer
-              </button>
-              <button 
-                className={`view-mode-btn ${viewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
-              >
-                📋 List View
-              </button>
-            </div>
-            {viewMode === 'grouped' && (
-              <div className="expand-controls">
-                <button className="expand-btn" onClick={() => toggleAllDealers(true)}>
-                  Expand All
-                </button>
-                <button className="expand-btn" onClick={() => toggleAllDealers(false)}>
-                  Collapse All
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Grouped View */}
-          {viewMode === 'grouped' ? (
-            <div className="grouped-listings-container">
-              {Object.keys(groupedListings).length === 0 ? (
-                <div className="no-data">No listings found</div>
-              ) : (
-                Object.entries(groupedListings).map(([dealerEmail, dealerData]) => (
-                  <div key={dealerEmail} className="dealer-group">
-                    <div 
-                      className="dealer-header"
-                      onClick={() => toggleDealer(dealerEmail)}
-                    >
-                      <div className="dealer-info">
-                        <span className="expand-icon">
-                          {expandedDealers[dealerEmail] ? '▼' : '▶'}
-                        </span>
-                        <div className="dealer-details">
-                          <h3>{dealerData.dealerName}</h3>
-                          <p className="dealer-email">{dealerData.dealerEmail}</p>
-                        </div>
-                      </div>
-                      <div className="dealer-stats">
-                        <span className="car-count">{dealerData.listings.length} {dealerData.listings.length === 1 ? 'car' : 'cars'}</span>
-                      </div>
-                    </div>
-                    
-                    {expandedDealers[dealerEmail] && (
-                      <div className="dealer-listings">
-                        <table className="admin-table">
-                          <thead>
-                            <tr>
-                              <th>Vehicle VIN</th>
-                              <th>Plan Type</th>
-                              <th>Next Renewal</th>
-                              <th>Status</th>
-                              <th>Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {dealerData.listings.map((listing) => (
-                              <tr key={listing._id}>
-                                <td>{listing.vin || listing.registrationNumber || 'N/A'}</td>
-                                <td>{listing.advertisingPackage?.packageName || 'N/A'}</td>
-                                <td>
-                                  {listing.advertisingPackage?.expiryDate 
-                                    ? new Date(listing.advertisingPackage.expiryDate).toLocaleDateString('en-US', { 
-                                        month: 'short', 
-                                        day: 'numeric', 
-                                        year: 'numeric' 
-                                      })
-                                    : 'N/A'}
-                                </td>
-                                <td>
-                                  <span className={`status-badge ${listing.advertStatus === 'active' ? 'badge-active' : listing.advertStatus === 'sold' ? 'badge-sold' : listing.advertStatus === 'expired' ? 'badge-expired' : 'badge-draft'}`}>
-                                    {listing.advertStatus}
-                                  </span>
-                                </td>
-                                <td>
-                                  <button 
-                                    className="action-btn view-btn"
-                                    onClick={() => handleViewListing(listing._id, listing.vehicleType)}
-                                  >
-                                    View
-                                  </button>
-                                  <button 
-                                    className="action-btn edit-btn"
-                                    onClick={() => handleEditListing(listing._id, listing.vehicleType)}
-                                  >
-                                    Edit
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          ) : (
-          /* List View - Original Table */
+          {/* Users Table */}
           <div className="admin-table-wrapper">
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Account Name</th>
+                  <th>Name</th>
                   <th>Email</th>
-                  <th>Vehicle VIN</th>
-                  <th>Plan Type</th>
-                  <th>Next Renewal</th>
-                  <th>Status</th>
+                  <th>Phone</th>
+                  <th>User Type</th>
+                  <th>Total Vehicles</th>
+                  <th>Subscription/Package</th>
+                  <th>Business Info</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {paginatedListings.length === 0 ? (
+                {paginatedUsers.length === 0 ? (
                   <tr>
-                    <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
-                      No listings found
+                    <td colSpan="8" style={{ textAlign: 'center', padding: '2rem' }}>
+                      No users found
                     </td>
                   </tr>
                 ) : (
-                  paginatedListings.map((listing) => (
-                    <tr key={listing._id}>
-                      <td className="account-name">{listing.ownerName || 'Unknown'}</td>
-                      <td className="email">{listing.ownerEmail || 'N/A'}</td>
-                      <td className="vin">{listing.vin || listing.registrationNumber || 'N/A'}</td>
-                      <td className="plan-type">{listing.advertisingPackage?.packageName || 'N/A'}</td>
-                      <td className="renewal-date">
-                        {listing.advertisingPackage?.expiryDate 
-                          ? new Date(listing.advertisingPackage.expiryDate).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric', 
-                              year: 'numeric' 
-                            })
-                          : 'N/A'}
+                  paginatedUsers.map((user) => {
+                    console.log('[MyListings] Rendering user:', user.name, 'Type:', user.type);
+                    return (
+                    <tr key={user._id}>
+                      <td className="account-name">{user.name || 'Unknown'}</td>
+                      <td className="email">{user.email || 'N/A'}</td>
+                      <td className="phone">{user.phone || 'N/A'}</td>
+                      <td className="user-type">
+                        {user.type ? (
+                          <span className={`type-badge ${user.type === 'trade' ? 'badge-trade' : 'badge-private'}`}>
+                            {user.type === 'trade' ? 'Trade Dealer' : 'Private Seller'}
+                          </span>
+                        ) : (
+                          <span style={{color: '#999'}}>Unknown</span>
+                        )}
                       </td>
-                      <td className="status">
-                        {getStatusBadge(listing)}
+                      <td className="vehicle-count">
+                        {user.totalVehicles} ({user.cars} cars, {user.bikes} bikes, {user.vans} vans)
+                      </td>
+                      <td className="subscription-info">
+                        {user.type === 'trade' && user.subscription ? (
+                          <div className="subscription-details">
+                            <div className="sub-plan-badge">
+                              {user.subscription.planName}
+                              {user.subscription.isTrialing && <span className="trial-badge">Trial</span>}
+                            </div>
+                            <div className="sub-status">
+                              <span className={`status-dot ${user.subscription.status}`}></span>
+                              {user.subscription.status}
+                            </div>
+                            <div className="sub-expiry">
+                              Expires: {new Date(user.subscription.currentPeriodEnd).toLocaleDateString('en-GB', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </div>
+                            {user.subscription.listingsLimit && (
+                              <div className="sub-usage">
+                                {user.subscription.listingsUsed} / {user.subscription.listingsLimit} listings
+                              </div>
+                            )}
+                          </div>
+                        ) : user.type === 'private' ? (
+                          <span style={{color: '#999', fontSize: '0.875rem'}}>Individual packages per car</span>
+                        ) : (
+                          <span style={{color: '#999', fontSize: '0.875rem'}}>No subscription</span>
+                        )}
+                      </td>
+                      <td className="business-info">
+                        {user.type === 'trade' ? (
+                          <div className="trade-info">
+                            {user.businessLogo && (
+                              <img src={user.businessLogo} alt="Logo" className="business-logo-small" />
+                            )}
+                            {user.businessWebsite && (
+                              <a href={user.businessWebsite} target="_blank" rel="noopener noreferrer" className="business-link">
+                                🌐 Website
+                              </a>
+                            )}
+                            {!user.businessLogo && !user.businessWebsite && 'N/A'}
+                          </div>
+                        ) : (
+                          'N/A'
+                        )}
                       </td>
                       <td className="actions">
                         <button 
                           className="action-link view"
-                          onClick={() => handleViewListing(listing._id, listing.vehicleType)}
+                          onClick={() => handleViewUser(user._id, user.type)}
                         >
-                          View
-                        </button>
-                        <span className="separator">|</span>
-                        <button 
-                          className="action-link manage"
-                          onClick={() => handleEditListing(listing._id, listing.vehicleType)}
-                        >
-                          Manage
+                          View Vehicles
                         </button>
                       </td>
                     </tr>
-                  ))
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
-          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="admin-pagination">
               <div className="pagination-info">
-                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredListings.length)} of {filteredListings.length} entries
+                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredUsers.length)} of {filteredUsers.length} entries
               </div>
               <div className="pagination-controls">
                 <button 
@@ -653,12 +509,163 @@ function MyListingsPage() {
                 >
                   Next
                 </button>
-                <button 
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  ▶
-                </button>
+              </div>
+            </div>
+          )}
+
+          {/* User Vehicles Modal */}
+          {showVehiclesModal && (
+            <div className="modal-overlay" onClick={closeVehiclesModal}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                  <div className="modal-header-content">
+                    <h2>{selectedUser?.name}'s Vehicles</h2>
+                    {selectedUser?.type === 'trade' && selectedUser?.subscription && (
+                      <div className="modal-subscription-info">
+                        <div className="modal-sub-badge">
+                          <span className="plan-name">{selectedUser.subscription.planName}</span>
+                          {selectedUser.subscription.isTrialing && (
+                            <span className="trial-badge-modal">Trial</span>
+                          )}
+                          <span className={`status-badge-modal ${selectedUser.subscription.status}`}>
+                            {selectedUser.subscription.status}
+                          </span>
+                        </div>
+                        <div className="modal-sub-details">
+                          <span>Expires: {new Date(selectedUser.subscription.currentPeriodEnd).toLocaleDateString('en-GB', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                          })}</span>
+                          {selectedUser.subscription.listingsLimit && (
+                            <span className="usage-info">
+                              • {selectedUser.subscription.listingsUsed} / {selectedUser.subscription.listingsLimit} listings used
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <button className="modal-close" onClick={closeVehiclesModal}>×</button>
+                </div>
+                <div className="modal-body">
+                  {loadingVehicles ? (
+                    <div className="loading-state">
+                      <div className="spinner"></div>
+                      <p>Loading vehicles...</p>
+                    </div>
+                  ) : userVehicles.length === 0 ? (
+                    <div className="no-vehicles">
+                      <p>No vehicles found for this user</p>
+                    </div>
+                  ) : (
+                    <div className="vehicles-grid">
+                      {userVehicles.map((vehicle) => {
+                        console.log('[Modal] Vehicle:', vehicle._id, 'Package:', vehicle.advertisingPackage);
+                        return (
+                        <div key={vehicle._id} className="vehicle-card-mini">
+                          <div className="vehicle-image-mini">
+                            {vehicle.images?.[0] ? (
+                              <img src={vehicle.images[0]} alt={`${vehicle.make} ${vehicle.model}`} />
+                            ) : (
+                              <div className="no-image">No Image</div>
+                            )}
+                            <span className={`status-badge-mini ${vehicle.advertStatus}`}>
+                              {vehicle.advertStatus}
+                            </span>
+                          </div>
+                          <div className="vehicle-info-mini">
+                            <h3>{vehicle.make} {vehicle.model}</h3>
+                            <p className="vehicle-year">{vehicle.year} • {vehicle.registrationNumber}</p>
+                            <p className="vehicle-price">£{vehicle.price?.toLocaleString()}</p>
+                            
+                            {/* Subscription Details */}
+                            {/* For Trade Dealers - Show dealer subscription */}
+                            {vehicle.dealerSubscription && (
+                              <div className="subscription-info-mini">
+                                <div className="package-badge">
+                                  {vehicle.dealerSubscription.planName}
+                                  {vehicle.dealerSubscription.isTrialing && ' (Trial)'}
+                                </div>
+                                {vehicle.dealerSubscription.expiryDate && (
+                                  <div className="expiry-info">
+                                    <span className="expiry-label">Expires:</span>
+                                    <span className="expiry-date">
+                                      {new Date(vehicle.dealerSubscription.expiryDate).toLocaleDateString('en-GB', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric'
+                                      })}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
+                            {/* For Private Sellers - Show individual car package */}
+                            {!vehicle.dealerSubscription && vehicle.advertisingPackage && vehicle.advertisingPackage.packageName && (
+                              <div className="subscription-info-mini">
+                                <div className="package-badge">
+                                  {vehicle.advertisingPackage.packageName}
+                                </div>
+                                {vehicle.advertisingPackage.expiryDate && (
+                                  <div className="expiry-info">
+                                    <span className="expiry-label">Expires:</span>
+                                    <span className="expiry-date">
+                                      {new Date(vehicle.advertisingPackage.expiryDate).toLocaleDateString('en-GB', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric'
+                                      })}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
+                            <div className="vehicle-actions-mini">
+                              <button 
+                                className="btn-view-mini"
+                                onClick={() => handleViewListing(vehicle._id, vehicle.vehicleType || 'car')}
+                              >
+                                👁️ View
+                              </button>
+                              <button 
+                                className="btn-edit-mini"
+                                onClick={() => handleEditListing(vehicle._id, vehicle.vehicleType || 'car')}
+                              >
+                                ✏️ Edit
+                              </button>
+                              {vehicle.advertStatus === 'active' && (
+                                <button 
+                                  className="btn-sold-mini"
+                                  onClick={() => handleMarkAsSold(vehicle._id)}
+                                >
+                                  ✓ Sold
+                                </button>
+                              )}
+                              {(vehicle.advertStatus === 'draft' || vehicle.advertStatus === 'expired') && (
+                                <button 
+                                  className="btn-relist-mini"
+                                  onClick={() => handleRelistVehicle(vehicle._id, vehicle.vehicleType || 'car')}
+                                >
+                                  🔄 Relist
+                                </button>
+                              )}
+                              <button 
+                                className="btn-delete-mini"
+                                onClick={() => handleDeleteListing(vehicle._id)}
+                              >
+                                🗑️ Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -704,7 +711,7 @@ function MyListingsPage() {
                     src={listing.images?.[0] || '/images/dummy/placeholder-car.jpg'} 
                     alt={`${listing.make} ${listing.model}`}
                   />
-                  {getStatusBadge(listing.advertStatus)}
+                  {getStatusBadge(listing)}
                 </div>
 
                 <div className="listing-details">
@@ -760,7 +767,7 @@ function MyListingsPage() {
                   </div>
 
                   <div className="listing-actions">
-                    {listing.advertStatus === 'active' && (
+                    {listing.advertStatus === 'active' && !isCarExpired(listing) && (
                       <>
                         <button 
                           onClick={() => handleViewListing(listing._id, listing.vehicleType)}
@@ -783,13 +790,27 @@ function MyListingsPage() {
                         </button>
                       </>
                     )}
-                    {listing.advertStatus === 'draft' && (
+                    {(listing.advertStatus === 'draft' || listing.advertStatus === 'expired' || isCarExpired(listing)) && (
                       <>
+                        <button 
+                          onClick={() => handleViewListing(listing._id, listing.vehicleType)}
+                          className="btn-view"
+                          title="View listing"
+                        >
+                          👁️ View
+                        </button>
+                        <button 
+                          onClick={() => handleRelistVehicle(listing._id, listing.vehicleType)}
+                          className="btn-relist"
+                          title="Relist this vehicle"
+                        >
+                          🔄 Relist
+                        </button>
                         <button 
                           onClick={() => handleEditListing(listing._id, listing.vehicleType)}
                           className="btn-edit"
                         >
-                          Continue Editing
+                          ✏️ Edit
                         </button>
                       </>
                     )}
@@ -809,10 +830,10 @@ function MyListingsPage() {
                               navigate(`/sell-my-car/advertising-prices?advertId=${advertId}&resumePayment=true`);
                             }
                           }}
-                          className="btn-payment"
-                          title="Complete payment to activate listing"
+                          className="btn-relist"
+                          title="Relist this vehicle with a new package"
                         >
-                          💳 Complete Payment
+                          🔄 Relist
                         </button>
                         <button 
                           onClick={() => handleEditListing(listing._id, listing.vehicleType)}
@@ -830,7 +851,7 @@ function MyListingsPage() {
                         </button>
                       </>
                     )}
-                    {(listing.advertStatus === 'sold' || listing.advertStatus === 'expired') && (
+                    {(listing.advertStatus === 'sold' || listing.advertStatus === 'expired') && !isCarExpired(listing) && (
                       <>
                         <button 
                           onClick={() => handleViewListing(listing._id, listing.vehicleType)}

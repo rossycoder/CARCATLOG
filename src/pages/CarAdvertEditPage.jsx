@@ -297,8 +297,21 @@ const CarAdvertEditPage = () => {
           setCarStatus(vehicleData.advertStatus); // Store car status
           setIsDealerCar(vehicleData.isDealerListing || false); // Store if it's a dealer car
           
-          // CRITICAL: Authorization check - verify user owns this car
-          if (user && vehicleData.userId && vehicleData.userId !== user._id) {
+          // CRITICAL: Authorization check - verify user owns this car (skip for admin)
+          const isAdmin = user?.isAdmin || user?.role === 'admin';
+          
+          // Convert ObjectIds to strings for comparison
+          const vehicleUserId = vehicleData.userId?._id?.toString() || vehicleData.userId?.toString();
+          const currentUserId = user?._id?.toString() || user?.id?.toString();
+          
+          console.log('🔐 Authorization check:', {
+            vehicleUserId,
+            currentUserId,
+            isAdmin,
+            match: vehicleUserId === currentUserId
+          });
+          
+          if (user && vehicleUserId && vehicleUserId !== currentUserId && !isAdmin) {
             console.error('❌ Authorization failed: User does not own this car');
             setLoadError('You do not have permission to edit this advert');
             setIsLoading(false);
@@ -306,8 +319,16 @@ const CarAdvertEditPage = () => {
             return;
           }
           
+          // Log if admin is editing someone else's car
+          if (isAdmin && vehicleUserId && vehicleUserId !== currentUserId) {
+            console.log('👑 Admin editing car owned by another user');
+          }
+          
           // CRITICAL: Authorization check for trade dealers
-          if (isTradeDealer && vehicleData.dealerId && vehicleData.dealerId !== dealer._id) {
+          const vehicleDealerId = vehicleData.dealerId?._id?.toString() || vehicleData.dealerId?.toString();
+          const currentDealerId = dealer?._id?.toString() || dealer?.id?.toString();
+          
+          if (isTradeDealer && vehicleDealerId && vehicleDealerId !== currentDealerId) {
             console.error('❌ Authorization failed: Dealer does not own this car');
             setLoadError('You do not have permission to edit this advert');
             setIsLoading(false);

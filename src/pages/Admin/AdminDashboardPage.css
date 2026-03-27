@@ -766,3 +766,220 @@
     justify-content: flex-start;
   }
 }
+
+/* Dealer Listings Cards */
+.dealer-listings-cards {
+  padding: 1.5rem;
+  background: #f9fafb;
+}
+
+.dealer-listings-cards .listings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.dealer-listings-cards .listing-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid #e5e7eb;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dealer-listings-cards .listing-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.dealer-listings-cards .listing-image {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.dealer-listings-cards .listing-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dealer-listings-cards .status-badge-overlay {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  z-index: 10 !important;
+}
+
+.dealer-listings-cards .status-badge-overlay .status-badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.dealer-listings-cards .listing-content {
+  padding: 1.25rem;
+}
+
+.dealer-listings-cards .listing-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 0.25rem 0;
+}
+
+.dealer-listings-cards .listing-subtitle {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0 0 0.75rem 0;
+}
+
+.dealer-listings-cards .listing-details {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.75rem;
+}
+
+.dealer-listings-cards .listing-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 1rem;
+}
+
+.dealer-listings-cards .listing-package {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  border-left: 3px solid #2563eb;
+}
+
+.dealer-listings-cards .package-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #2563eb;
+  letter-spacing: 0.5px;
+}
+
+.dealer-listings-cards .expiry-date {
+  font-size: 0.75rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.dealer-listings-cards .listing-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.dealer-listings-cards .listing-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dealer-listings-cards .listing-actions button {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dealer-listings-cards .btn-view {
+  background: #6b7280;
+  color: white;
+  border-color: #6b7280;
+}
+
+.dealer-listings-cards .btn-view:hover {
+  background: #4b5563;
+}
+
+.dealer-listings-cards .btn-edit {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.dealer-listings-cards .btn-edit:hover {
+  background: #2563eb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dealer-listings-cards .listings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* User Type Badge */
+.user-type-badge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.user-type-badge.trade {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.user-type-badge.private {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* Vehicle Breakdown Inline */
+.vehicle-breakdown-inline {
+  font-size: 0.8rem;
+  color: #666;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+/* Business Info Cell */
+.business-info-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.business-logo-small {
+  max-width: 60px;
+  max-height: 30px;
+  object-fit: contain;
+}
+
+.business-link {
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.business-link:hover {
+  text-decoration: underline;
+}
