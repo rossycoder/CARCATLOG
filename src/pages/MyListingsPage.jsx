@@ -225,8 +225,6 @@ function MyListingsPage() {
   if (isAdminView) {
     // Calculate stats for users
     const totalUsers = listings.length;
-    const privateUsers = listings.filter(u => u.type === 'private').length;
-    const tradeDealers = listings.filter(u => u.type === 'trade').length;
     const usersWithVehicles = listings.filter(u => u.totalVehicles > 0).length;
 
     // Filter and sort users
@@ -239,12 +237,6 @@ function MyListingsPage() {
           user.email?.toLowerCase().includes(query) ||
           user.phone?.toLowerCase().includes(query);
         if (!matchesSearch) return false;
-      }
-
-      // User type filter
-      if (statusFilter !== 'All') {
-        if (statusFilter === 'Private' && user.type !== 'private') return false;
-        if (statusFilter === 'Trade' && user.type !== 'trade') return false;
       }
 
       return true;
@@ -328,15 +320,6 @@ function MyListingsPage() {
 
             <div className="filter-row">
               <div className="filter-item">
-                <label>User Type:</label>
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                  <option value="All">All Users</option>
-                  <option value="Private">Private Sellers</option>
-                  <option value="Trade">Trade Dealers</option>
-                </select>
-              </div>
-
-              <div className="filter-item">
                 <label>Sort by:</label>
                 <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                   <option value="Name">Name</option>
@@ -354,14 +337,6 @@ function MyListingsPage() {
               <span className="stat-value">{totalUsers}</span>
             </div>
             <div className="stat-card">
-              <span className="stat-label">Private Sellers:</span>
-              <span className="stat-value">{privateUsers}</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-label">Trade Dealers:</span>
-              <span className="stat-value">{tradeDealers}</span>
-            </div>
-            <div className="stat-card">
               <span className="stat-label">Users with Vehicles:</span>
               <span className="stat-value">{usersWithVehicles}</span>
             </div>
@@ -375,7 +350,6 @@ function MyListingsPage() {
                   <th>Name</th>
                   <th>Email</th>
                   <th>Phone</th>
-                  <th>User Type</th>
                   <th>Total Vehicles</th>
                   <th>Subscription/Package</th>
                   <th>Business Info</th>
@@ -397,15 +371,6 @@ function MyListingsPage() {
                       <td className="account-name">{user.name || 'Unknown'}</td>
                       <td className="email">{user.email || 'N/A'}</td>
                       <td className="phone">{user.phone || 'N/A'}</td>
-                      <td className="user-type">
-                        {user.type ? (
-                          <span className={`type-badge ${user.type === 'trade' ? 'badge-trade' : 'badge-private'}`}>
-                            {user.type === 'trade' ? 'Trade Dealer' : 'Private Seller'}
-                          </span>
-                        ) : (
-                          <span style={{color: '#999'}}>Unknown</span>
-                        )}
-                      </td>
                       <td className="vehicle-count">
                         {user.totalVehicles} ({user.cars} cars, {user.bikes} bikes, {user.vans} vans)
                       </td>
@@ -434,7 +399,7 @@ function MyListingsPage() {
                             )}
                           </div>
                         ) : user.type === 'private' ? (
-                          <span style={{color: '#999', fontSize: '0.875rem'}}>Individual packages per car</span>
+                          <span style={{color: '#999', fontSize: '0.875rem'}}>PAYG (Pay As You Go)</span>
                         ) : (
                           <span style={{color: '#999', fontSize: '0.875rem'}}>No subscription</span>
                         )}
@@ -561,7 +526,15 @@ function MyListingsPage() {
                   ) : (
                     <div className="vehicles-grid">
                       {userVehicles.map((vehicle) => {
-                        console.log('[Modal] Vehicle:', vehicle._id, 'Package:', vehicle.advertisingPackage);
+                        console.log('[Modal] Vehicle:', vehicle._id);
+                        console.log('[Modal] - dealerSubscription:', vehicle.dealerSubscription);
+                        console.log('[Modal] - advertisingPackage:', vehicle.advertisingPackage);
+                        console.log('[Modal] - sellerContact:', vehicle.sellerContact);
+                        console.log('[Modal] - sellerContact.type:', vehicle.sellerContact?.type);
+                        if (vehicle.advertisingPackage) {
+                          console.log('[Modal] - packageName:', vehicle.advertisingPackage.packageName);
+                          console.log('[Modal] - packageId:', vehicle.advertisingPackage.packageId);
+                        }
                         return (
                         <div key={vehicle._id} className="vehicle-card-mini">
                           <div className="vehicle-image-mini">
@@ -603,10 +576,19 @@ function MyListingsPage() {
                             )}
                             
                             {/* For Private Sellers - Show individual car package */}
-                            {!vehicle.dealerSubscription && vehicle.advertisingPackage && vehicle.advertisingPackage.packageName && (
+                            {!vehicle.dealerSubscription && vehicle.advertisingPackage && (vehicle.advertisingPackage.packageName || vehicle.advertisingPackage.packageId) && (
                               <div className="subscription-info-mini">
                                 <div className="package-badge">
-                                  {vehicle.advertisingPackage.packageName}
+                                  {/* Check sellerContact.type first, then fallback to checking packageName for "TRADE" */}
+                                  {(vehicle.sellerContact?.type === 'trade' || 
+                                    vehicle.advertisingPackage.packageName?.toUpperCase().includes('TRADE')) 
+                                    ? 'Trade ' : 'Private '}
+                                  {/* Remove "TRADE" prefix from packageName if it exists */}
+                                  {vehicle.advertisingPackage.packageName?.replace(/^TRADE\s+/i, '') || 
+                                   (vehicle.advertisingPackage.packageId ? 
+                                     vehicle.advertisingPackage.packageId.charAt(0).toUpperCase() + 
+                                     vehicle.advertisingPackage.packageId.slice(1) : 
+                                     'Package')}
                                 </div>
                                 {vehicle.advertisingPackage.expiryDate && (
                                   <div className="expiry-info">
@@ -748,10 +730,19 @@ function MyListingsPage() {
                     £{listing.price?.toLocaleString() || '0'}
                   </div>
 
-                  {listing.advertisingPackage && (
+                  {listing.advertisingPackage && (listing.advertisingPackage.packageName || listing.advertisingPackage.packageId) && (
                     <div className="listing-package">
                       <span className="package-badge">
-                        {listing.advertisingPackage.packageName || listing.advertisingPackage.packageId}
+                        {/* Check sellerContact.type first, then fallback to checking packageName for "TRADE" */}
+                        {(listing.sellerContact?.type === 'trade' || 
+                          listing.advertisingPackage.packageName?.toUpperCase().includes('TRADE')) 
+                          ? 'Trade ' : 'Private '}
+                        {/* Remove "TRADE" prefix from packageName if it exists */}
+                        {listing.advertisingPackage.packageName?.replace(/^TRADE\s+/i, '') || 
+                         (listing.advertisingPackage.packageId ? 
+                           listing.advertisingPackage.packageId.charAt(0).toUpperCase() + 
+                           listing.advertisingPackage.packageId.slice(1) : 
+                           'Package')}
                       </span>
                       {listing.advertisingPackage.expiryDate && (
                         <span className="expiry-date">

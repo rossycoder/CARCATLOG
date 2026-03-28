@@ -570,7 +570,6 @@ function AdminDashboardPage() {
                 <th>Account Name</th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>User Type</th>
                 <th>Total Vehicles</th>
                 <th>Business Info</th>
                 <th>Actions</th>
@@ -579,7 +578,7 @@ function AdminDashboardPage() {
             <tbody>
               {currentListings.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="no-data">No users found</td>
+                  <td colSpan="6" className="no-data">No users found</td>
                 </tr>
               ) : (
                 currentListings.map((user) => (
@@ -589,11 +588,6 @@ function AdminDashboardPage() {
                     </td>
                     <td>{user.email || 'N/A'}</td>
                     <td>{user.phone || 'N/A'}</td>
-                    <td>
-                      <span className={`user-type-badge ${user.type}`}>
-                        {user.type === 'trade' ? '🏢 Trade Dealer' : '👤 Private'}
-                      </span>
-                    </td>
                     <td>
                       <strong>{user.totalVehicles}</strong>
                       {user.totalVehicles > 0 && (
