@@ -239,8 +239,54 @@ function MyListingsPage() {
         if (!matchesSearch) return false;
       }
 
+      // Subscription Status filter
+      if (statusFilter !== 'All') {
+        console.log(`[Filter] Checking ${user.name} - Type: ${user.type}, Has subscription:`, !!user.subscription);
+        if (user.type === 'trade' && user.subscription) {
+          const subStatus = user.subscription.status;
+          console.log(`[Filter] ${user.name} subscription status: ${subStatus}, isTrialing: ${user.subscription.isTrialing}`);
+          if (statusFilter === 'Active' && subStatus !== 'active') return false;
+          if (statusFilter === 'Trialing' && !user.subscription.isTrialing) return false;
+          if (statusFilter === 'Expired' && subStatus !== 'expired') return false;
+          if (statusFilter === 'Canceled' && subStatus !== 'canceled') return false;
+        } else {
+          // If user doesn't have subscription and filter is not "All", exclude them
+          console.log(`[Filter] ${user.name} excluded - no subscription`);
+          return false;
+        }
+      }
+
+      // Plan Type filter
+      if (planFilter !== 'All Plans') {
+        console.log(`[Filter] Checking plan for ${user.name} - Filter: ${planFilter}`);
+        if (planFilter === 'PAYG') {
+          // Show only private users for PAYG
+          if (user.type !== 'private') {
+            console.log(`[Filter] ${user.name} excluded - not private user`);
+            return false;
+          }
+        } else if (user.type === 'trade' && user.subscription) {
+          const planName = user.subscription.planName?.toLowerCase() || '';
+          console.log(`[Filter] ${user.name} plan name: ${planName}`);
+          
+          // Check for Bronze, Silver, Gold, Starter, Professional, Premium
+          if (planFilter === 'Bronze' && !planName.includes('bronze')) return false;
+          if (planFilter === 'Silver' && !planName.includes('silver')) return false;
+          if (planFilter === 'Gold' && !planName.includes('gold')) return false;
+          if (planFilter === 'Starter' && !planName.includes('starter')) return false;
+          if (planFilter === 'Professional' && !planName.includes('professional')) return false;
+          if (planFilter === 'Premium' && !planName.includes('premium')) return false;
+        } else {
+          // User doesn't match the plan filter
+          console.log(`[Filter] ${user.name} excluded - doesn't match plan filter`);
+          return false;
+        }
+      }
+
       return true;
     });
+
+    console.log(`[Filter] Total users after filtering: ${filteredUsers.length}`);
 
     // Sort users
     filteredUsers.sort((a, b) => {
@@ -319,6 +365,31 @@ function MyListingsPage() {
             </div>
 
             <div className="filter-row">
+              <div className="filter-item">
+                <label>Subscription Status:</label>
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                  <option value="All">All</option>
+                  <option value="Active">Active</option>
+                  <option value="Trialing">Trialing</option>
+                  <option value="Expired">Expired</option>
+                  <option value="Canceled">Canceled</option>
+                </select>
+              </div>
+              
+              <div className="filter-item">
+                <label>Plan Type:</label>
+                <select value={planFilter} onChange={(e) => setPlanFilter(e.target.value)}>
+                  <option value="All Plans">All Plans</option>
+                  <option value="Bronze">Bronze</option>
+                  <option value="Silver">Silver</option>
+                  <option value="Gold">Gold</option>
+                  <option value="Starter">Starter</option>
+                  <option value="Professional">Professional</option>
+                  <option value="Premium">Premium</option>
+                  <option value="PAYG">PAYG (Private)</option>
+                </select>
+              </div>
+              
               <div className="filter-item">
                 <label>Sort by:</label>
                 <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
@@ -551,6 +622,20 @@ function MyListingsPage() {
                             <h3>{vehicle.make} {vehicle.model}</h3>
                             <p className="vehicle-year">{vehicle.year} • {vehicle.registrationNumber}</p>
                             <p className="vehicle-price">£{vehicle.price?.toLocaleString()}</p>
+                            
+                            {/* Listed Date */}
+                            {vehicle.createdAt && (
+                              <div className="listed-date-mini">
+                                <span className="listed-label">📅 Listed:</span>
+                                <span className="listed-value">
+                                  {new Date(vehicle.createdAt).toLocaleDateString('en-GB', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric'
+                                  })}
+                                </span>
+                              </div>
+                            )}
                             
                             {/* Subscription Details */}
                             {/* For Trade Dealers - Show dealer subscription */}

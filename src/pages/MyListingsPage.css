@@ -1701,6 +1701,29 @@
   font-weight: 600;
 }
 
+/* Listed Date in Modal */
+.listed-date-mini {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  background-color: #f0f9ff;
+  border-radius: 6px;
+  border-left: 3px solid #0ea5e9;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.listed-date-mini .listed-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.listed-date-mini .listed-value {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
 /* Subscription Info Column in Admin Table */
 .admin-table .subscription-info {
   min-width: 200px;
