@@ -27,6 +27,7 @@ function MyListingsPage() {
   const [quickFilter, setQuickFilter] = useState('all'); // 'all', 'active', 'expiring', 'overdue', 'recent'
   const [viewMode, setViewMode] = useState('grouped'); // 'grouped' or 'list'
   const [expandedDealers, setExpandedDealers] = useState({}); // Track which dealers are expanded
+  const [adminViewMode, setAdminViewMode] = useState('cars'); // 'cars' or 'users'
   const itemsPerPage = 6;
 
   useEffect(() => {
@@ -42,7 +43,7 @@ function MyListingsPage() {
     // Fetch listings
     fetchMyListings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, authLoading]);
+  }, [user, authLoading, adminViewMode]);
 
   const fetchMyListings = async () => {
     try {
@@ -54,12 +55,25 @@ function MyListingsPage() {
       const isAdmin = user?.isAdmin || user?.role === 'admin';
       
       if (isAdmin) {
-        // Admin: Fetch users list
-        console.log('[MyListings] Admin detected - fetching users list');
-        const response = await api.get('/admin/users');
-        console.log('[MyListings] Admin Response:', response.data);
-        console.log('[MyListings] Sample user data:', response.data.users?.[0]);
-        setListings(response.data.users || []);
+        // Admin: Fetch based on view mode
+        if (adminViewMode === 'cars') {
+          console.log('[MyListings] Admin detected - fetching all listings');
+          const response = await api.get('/admin/listings', {
+            params: {
+              sortBy: 'createdAt',
+              sortOrder: 'desc'
+            }
+          });
+          console.log('[MyListings] Admin Response:', response.data);
+          console.log('[MyListings] Sample listing data:', response.data.listings?.[0]);
+          setListings(response.data.listings || []);
+        } else {
+          console.log('[MyListings] Admin detected - fetching users list');
+          const response = await api.get('/admin/users');
+          console.log('[MyListings] Admin Response:', response.data);
+          console.log('[MyListings] Sample user data:', response.data.users?.[0]);
+          setListings(response.data.users || []);
+        }
         setIsAdminView(true);
       } else {
         // Normal user: Fetch their listings
@@ -221,524 +235,517 @@ function MyListingsPage() {
     );
   }
 
-  // Admin Table View - Show Users
+  // Admin View - Toggle between Cars and Users
   if (isAdminView) {
-    // Calculate stats for users
-    const totalUsers = listings.length;
-    const usersWithVehicles = listings.filter(u => u.totalVehicles > 0).length;
+    // Render based on adminViewMode
+    if (adminViewMode === 'cars') {
+      // CARS VIEW
+      const totalListings = listings.length;
+      const activeListings = listings.filter(l => l.advertStatus === 'active').length;
 
-    // Filter and sort users
-    let filteredUsers = listings.filter(user => {
-      // Search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch = 
-          user.name?.toLowerCase().includes(query) ||
-          user.email?.toLowerCase().includes(query) ||
-          user.phone?.toLowerCase().includes(query);
-        if (!matchesSearch) return false;
-      }
-
-      // Subscription Status filter
-      if (statusFilter !== 'All') {
-        console.log(`[Filter] Checking ${user.name} - Type: ${user.type}, Has subscription:`, !!user.subscription);
-        if (user.type === 'trade' && user.subscription) {
-          const subStatus = user.subscription.status;
-          console.log(`[Filter] ${user.name} subscription status: ${subStatus}, isTrialing: ${user.subscription.isTrialing}`);
-          if (statusFilter === 'Active' && subStatus !== 'active') return false;
-          if (statusFilter === 'Trialing' && !user.subscription.isTrialing) return false;
-          if (statusFilter === 'Expired' && subStatus !== 'expired') return false;
-          if (statusFilter === 'Canceled' && subStatus !== 'canceled') return false;
-        } else {
-          // If user doesn't have subscription and filter is not "All", exclude them
-          console.log(`[Filter] ${user.name} excluded - no subscription`);
-          return false;
+      // Filter and sort listings
+      let filteredListings = listings.filter(listing => {
+        // Search filter
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          const matchesSearch = 
+            listing.ownerName?.toLowerCase().includes(query) ||
+            listing.ownerEmail?.toLowerCase().includes(query) ||
+            listing.make?.toLowerCase().includes(query) ||
+            listing.model?.toLowerCase().includes(query) ||
+            listing.registrationNumber?.toLowerCase().includes(query);
+          if (!matchesSearch) return false;
         }
-      }
 
-      // Plan Type filter
-      if (planFilter !== 'All Plans') {
-        console.log(`[Filter] Checking plan for ${user.name} - Filter: ${planFilter}`);
-        if (planFilter === 'PAYG') {
-          // Show only private users for PAYG
-          if (user.type !== 'private') {
-            console.log(`[Filter] ${user.name} excluded - not private user`);
-            return false;
-          }
-        } else if (user.type === 'trade' && user.subscription) {
-          const planName = user.subscription.planName?.toLowerCase() || '';
-          console.log(`[Filter] ${user.name} plan name: ${planName}`);
-          
-          // Check for Bronze, Silver, Gold, Starter, Professional, Premium
-          if (planFilter === 'Bronze' && !planName.includes('bronze')) return false;
-          if (planFilter === 'Silver' && !planName.includes('silver')) return false;
-          if (planFilter === 'Gold' && !planName.includes('gold')) return false;
-          if (planFilter === 'Starter' && !planName.includes('starter')) return false;
-          if (planFilter === 'Professional' && !planName.includes('professional')) return false;
-          if (planFilter === 'Premium' && !planName.includes('premium')) return false;
-        } else {
-          // User doesn't match the plan filter
-          console.log(`[Filter] ${user.name} excluded - doesn't match plan filter`);
-          return false;
+        // Status filter
+        if (statusFilter !== 'All') {
+          const statusMap = {
+            'Active': 'active',
+            'Expired': 'expired',
+            'Sold': 'sold',
+            'Draft': 'draft',
+            'Pending': 'pending_payment'
+          };
+          if (listing.advertStatus !== statusMap[statusFilter]) return false;
         }
-      }
 
-      return true;
-    });
+        // Plan Type filter
+        if (planFilter !== 'All Plans') {
+          const packageName = listing.advertisingPackage?.packageName?.toLowerCase() || '';
+          if (planFilter === 'Bronze' && !packageName.includes('bronze')) return false;
+          if (planFilter === 'Silver' && !packageName.includes('silver')) return false;
+          if (planFilter === 'Gold' && !packageName.includes('gold')) return false;
+        }
 
-    console.log(`[Filter] Total users after filtering: ${filteredUsers.length}`);
+        return true;
+      });
 
-    // Sort users
-    filteredUsers.sort((a, b) => {
-      switch (sortBy) {
-        case 'Name':
-          return (a.name || '').localeCompare(b.name || '');
-        case 'Vehicles':
-          return b.totalVehicles - a.totalVehicles;
-        case 'Recent':
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        default:
-          return 0;
-      }
-    });
+      // Sort listings
+      filteredListings.sort((a, b) => {
+        switch (sortBy) {
+          case 'Name':
+            return (a.ownerName || '').localeCompare(b.ownerName || '');
+          case 'Vehicles':
+            return (`${a.make} ${a.model}`).localeCompare(`${b.make} ${b.model}`);
+          case 'Recent':
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          default:
+            return 0;
+        }
+      });
 
-    // Pagination
-    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+      // Pagination
+      const totalPages = Math.ceil(filteredListings.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const paginatedListings = filteredListings.slice(startIndex, startIndex + itemsPerPage);
 
-    const handleViewUser = async (userId, userType) => {
-      try {
-        setLoadingVehicles(true);
-        setShowVehiclesModal(true);
-        
-        // Find user details
-        const user = listings.find(u => u._id === userId);
-        setSelectedUser(user);
-        
-        console.log('[Admin] Fetching vehicles for user:', userId, 'type:', userType);
-        
-        // Fetch user's vehicles
-        const endpoint = userType === 'trade' 
-          ? `/admin/users/${userId}/vehicles?dealerId=${userId}`
-          : `/admin/users/${userId}/vehicles`;
-        
-        console.log('[Admin] API endpoint:', endpoint);
-        
-        const response = await api.get(endpoint);
-        console.log('[Admin] API response:', response.data);
-        
-        setUserVehicles(response.data.vehicles || []);
-      } catch (error) {
-        console.error('[Admin] Error fetching user vehicles:', error);
-        console.error('[Admin] Error response:', error.response?.data);
-        alert(error.response?.data?.error || 'Failed to load user vehicles');
-        setShowVehiclesModal(false);
-      } finally {
-        setLoadingVehicles(false);
-      }
-    };
-
-    const closeVehiclesModal = () => {
-      setShowVehiclesModal(false);
-      setSelectedUser(null);
-      setUserVehicles([]);
-    };
-
-    return (
-      <div className="my-listings-page admin-view">
-        <div className="admin-container">
-          <div className="admin-header">
-            <h1>All Users</h1>
-          </div>
-
-          {/* Filters Section */}
-          <div className="admin-filters">
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="Search by Name, Email, or Phone"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <span className="search-icon">🔍</span>
-            </div>
-
-            <div className="filter-row">
-              <div className="filter-item">
-                <label>Subscription Status:</label>
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                  <option value="All">All</option>
-                  <option value="Active">Active</option>
-                  <option value="Trialing">Trialing</option>
-                  <option value="Expired">Expired</option>
-                  <option value="Canceled">Canceled</option>
-                </select>
-              </div>
-              
-              <div className="filter-item">
-                <label>Plan Type:</label>
-                <select value={planFilter} onChange={(e) => setPlanFilter(e.target.value)}>
-                  <option value="All Plans">All Plans</option>
-                  <option value="Bronze">Bronze</option>
-                  <option value="Silver">Silver</option>
-                  <option value="Gold">Gold</option>
-                  <option value="Starter">Starter</option>
-                  <option value="Professional">Professional</option>
-                  <option value="Premium">Premium</option>
-                  <option value="PAYG">PAYG (Private)</option>
-                </select>
-              </div>
-              
-              <div className="filter-item">
-                <label>Sort by:</label>
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                  <option value="Name">Name</option>
-                  <option value="Vehicles">Total Vehicles</option>
-                  <option value="Recent">Recent</option>
-                </select>
+      return (
+        <div className="my-listings-page admin-view">
+          <div className="admin-container">
+            <div className="admin-header">
+              <h1>All Listings</h1>
+              <div className="view-toggle">
+                <button 
+                  className={`toggle-btn ${adminViewMode === 'cars' ? 'active' : ''}`}
+                  onClick={() => setAdminViewMode('cars')}
+                >
+                  🚗 Cars View
+                </button>
+                <button 
+                  className={`toggle-btn ${adminViewMode === 'users' ? 'active' : ''}`}
+                  onClick={() => setAdminViewMode('users')}
+                >
+                  👥 Users View
+                </button>
               </div>
             </div>
-          </div>
 
-          {/* Stats Cards */}
-          <div className="admin-stats">
-            <div className="stat-card">
-              <span className="stat-label">Total Users:</span>
-              <span className="stat-value">{totalUsers}</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-label">Users with Vehicles:</span>
-              <span className="stat-value">{usersWithVehicles}</span>
-            </div>
-          </div>
+            {/* Filters Section */}
+            <div className="admin-filters">
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="Search by Name, Email, Vehicle, or Reg"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <span className="search-icon">🔍</span>
+              </div>
 
-          {/* Users Table */}
-          <div className="admin-table-wrapper">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Total Vehicles</th>
-                  <th>Subscription/Package</th>
-                  <th>Business Info</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedUsers.length === 0 ? (
+              <div className="filter-row">
+                <div className="filter-item">
+                  <label>Status:</label>
+                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                    <option value="All">All</option>
+                    <option value="Active">Active</option>
+                    <option value="Sold">Sold</option>
+                    <option value="Draft">Draft</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Expired">Expired</option>
+                  </select>
+                </div>
+                
+                <div className="filter-item">
+                  <label>Plan Type:</label>
+                  <select value={planFilter} onChange={(e) => setPlanFilter(e.target.value)}>
+                    <option value="All Plans">All Plans</option>
+                    <option value="Bronze">Bronze</option>
+                    <option value="Silver">Silver</option>
+                    <option value="Gold">Gold</option>
+                  </select>
+                </div>
+                
+                <div className="filter-item">
+                  <label>Sort by:</label>
+                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                    <option value="Recent">Recent</option>
+                    <option value="Name">Owner Name</option>
+                    <option value="Vehicles">Vehicle</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="admin-stats">
+              <div className="stat-card">
+                <span className="stat-label">Total Listings:</span>
+                <span className="stat-value">{totalListings}</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Active Listings:</span>
+                <span className="stat-value">{activeListings}</span>
+              </div>
+            </div>
+
+            {/* Listings Table */}
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
                   <tr>
-                    <td colSpan="8" style={{ textAlign: 'center', padding: '2rem' }}>
-                      No users found
-                    </td>
+                    <th>Vehicle</th>
+                    <th>Owner</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Package</th>
+                    <th>Listed Date</th>
+                    <th>Actions</th>
                   </tr>
-                ) : (
-                  paginatedUsers.map((user) => {
-                    console.log('[MyListings] Rendering user:', user.name, 'Type:', user.type);
-                    return (
-                    <tr key={user._id}>
-                      <td className="account-name">{user.name || 'Unknown'}</td>
-                      <td className="email">{user.email || 'N/A'}</td>
-                      <td className="phone">{user.phone || 'N/A'}</td>
-                      <td className="vehicle-count">
-                        {user.totalVehicles} ({user.cars} cars, {user.bikes} bikes, {user.vans} vans)
-                      </td>
-                      <td className="subscription-info">
-                        {user.type === 'trade' && user.subscription ? (
-                          <div className="subscription-details">
-                            <div className="sub-plan-badge">
-                              {user.subscription.planName}
-                              {user.subscription.isTrialing && <span className="trial-badge">Trial</span>}
-                            </div>
-                            <div className="sub-status">
-                              <span className={`status-dot ${user.subscription.status}`}></span>
-                              {user.subscription.status}
-                            </div>
-                            <div className="sub-expiry">
-                              Expires: {new Date(user.subscription.currentPeriodEnd).toLocaleDateString('en-GB', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric'
-                              })}
-                            </div>
-                            {user.subscription.listingsLimit && (
-                              <div className="sub-usage">
-                                {user.subscription.listingsUsed} / {user.subscription.listingsLimit} listings
-                              </div>
-                            )}
-                          </div>
-                        ) : user.type === 'private' ? (
-                          <span style={{color: '#999', fontSize: '0.875rem'}}>PAYG (Pay As You Go)</span>
-                        ) : (
-                          <span style={{color: '#999', fontSize: '0.875rem'}}>No subscription</span>
-                        )}
-                      </td>
-                      <td className="business-info">
-                        {user.type === 'trade' ? (
-                          <div className="trade-info">
-                            {user.businessLogo && (
-                              <img src={user.businessLogo} alt="Logo" className="business-logo-small" />
-                            )}
-                            {user.businessWebsite && (
-                              <a href={user.businessWebsite} target="_blank" rel="noopener noreferrer" className="business-link">
-                                🌐 Website
-                              </a>
-                            )}
-                            {!user.businessLogo && !user.businessWebsite && 'N/A'}
-                          </div>
-                        ) : (
-                          'N/A'
-                        )}
-                      </td>
-                      <td className="actions">
-                        <button 
-                          className="action-link view"
-                          onClick={() => handleViewUser(user._id, user.type)}
-                        >
-                          View Vehicles
-                        </button>
+                </thead>
+                <tbody>
+                  {paginatedListings.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
+                        No listings found
                       </td>
                     </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="admin-pagination">
-              <div className="pagination-info">
-                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredUsers.length)} of {filteredUsers.length} entries
-              </div>
-              <div className="pagination-controls">
-                <button 
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </button>
-                {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                  const pageNum = i + 1;
-                  return (
-                    <button
-                      key={pageNum}
-                      className={currentPage === pageNum ? 'active' : ''}
-                      onClick={() => setCurrentPage(pageNum)}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-                {totalPages > 5 && <span>...</span>}
-                {totalPages > 5 && (
-                  <button onClick={() => setCurrentPage(totalPages)}>
-                    {totalPages}
-                  </button>
-                )}
-                <button 
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* User Vehicles Modal */}
-          {showVehiclesModal && (
-            <div className="modal-overlay" onClick={closeVehiclesModal}>
-              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                  <div className="modal-header-content">
-                    <h2>{selectedUser?.name}'s Vehicles</h2>
-                    {selectedUser?.type === 'trade' && selectedUser?.subscription && (
-                      <div className="modal-subscription-info">
-                        <div className="modal-sub-badge">
-                          <span className="plan-name">{selectedUser.subscription.planName}</span>
-                          {selectedUser.subscription.isTrialing && (
-                            <span className="trial-badge-modal">Trial</span>
-                          )}
-                          <span className={`status-badge-modal ${selectedUser.subscription.status}`}>
-                            {selectedUser.subscription.status}
-                          </span>
-                        </div>
-                        <div className="modal-sub-details">
-                          <span>Expires: {new Date(selectedUser.subscription.currentPeriodEnd).toLocaleDateString('en-GB', {
+                  ) : (
+                    paginatedListings.map((listing) => (
+                      <tr key={listing._id}>
+                        <td className="vehicle-info">
+                          <div className="vehicle-details">
+                            <strong>{listing.make} {listing.model}</strong>
+                            <div className="vehicle-meta">
+                              {listing.year} • {listing.registrationNumber || 'N/A'}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="account-name">{listing.ownerName || 'Unknown'}</td>
+                        <td className="email">{listing.ownerEmail || 'N/A'}</td>
+                        <td className="status-cell">
+                          {getStatusBadge(listing)}
+                        </td>
+                        <td className="package-cell">
+                          {listing.advertisingPackage?.packageName || 'N/A'}
+                        </td>
+                        <td className="date-cell">
+                          {new Date(listing.createdAt).toLocaleDateString('en-GB', {
                             day: '2-digit',
                             month: 'short',
                             year: 'numeric'
-                          })}</span>
-                          {selectedUser.subscription.listingsLimit && (
-                            <span className="usage-info">
-                              • {selectedUser.subscription.listingsUsed} / {selectedUser.subscription.listingsLimit} listings used
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <button className="modal-close" onClick={closeVehiclesModal}>×</button>
-                </div>
-                <div className="modal-body">
-                  {loadingVehicles ? (
-                    <div className="loading-state">
-                      <div className="spinner"></div>
-                      <p>Loading vehicles...</p>
-                    </div>
-                  ) : userVehicles.length === 0 ? (
-                    <div className="no-vehicles">
-                      <p>No vehicles found for this user</p>
-                    </div>
-                  ) : (
-                    <div className="vehicles-grid">
-                      {userVehicles.map((vehicle) => {
-                        console.log('[Modal] Vehicle:', vehicle._id);
-                        console.log('[Modal] - dealerSubscription:', vehicle.dealerSubscription);
-                        console.log('[Modal] - advertisingPackage:', vehicle.advertisingPackage);
-                        console.log('[Modal] - sellerContact:', vehicle.sellerContact);
-                        console.log('[Modal] - sellerContact.type:', vehicle.sellerContact?.type);
-                        if (vehicle.advertisingPackage) {
-                          console.log('[Modal] - packageName:', vehicle.advertisingPackage.packageName);
-                          console.log('[Modal] - packageId:', vehicle.advertisingPackage.packageId);
-                        }
-                        return (
-                        <div key={vehicle._id} className="vehicle-card-mini">
-                          <div className="vehicle-image-mini">
-                            {vehicle.images?.[0] ? (
-                              <img src={vehicle.images[0]} alt={`${vehicle.make} ${vehicle.model}`} />
-                            ) : (
-                              <div className="no-image">No Image</div>
-                            )}
-                            <span className={`status-badge-mini ${vehicle.advertStatus}`}>
-                              {vehicle.advertStatus}
-                            </span>
-                          </div>
-                          <div className="vehicle-info-mini">
-                            <h3>{vehicle.make} {vehicle.model}</h3>
-                            <p className="vehicle-year">{vehicle.year} • {vehicle.registrationNumber}</p>
-                            <p className="vehicle-price">£{vehicle.price?.toLocaleString()}</p>
-                            
-                            {/* Listed Date */}
-                            {vehicle.createdAt && (
-                              <div className="listed-date-mini">
-                                <span className="listed-label">📅 Listed:</span>
-                                <span className="listed-value">
-                                  {new Date(vehicle.createdAt).toLocaleDateString('en-GB', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                    year: 'numeric'
-                                  })}
-                                </span>
-                              </div>
-                            )}
-                            
-                            {/* Subscription Details */}
-                            {/* For Trade Dealers - Show dealer subscription */}
-                            {vehicle.dealerSubscription && (
-                              <div className="subscription-info-mini">
-                                <div className="package-badge">
-                                  {vehicle.dealerSubscription.planName}
-                                  {vehicle.dealerSubscription.isTrialing && ' (Trial)'}
-                                </div>
-                                {vehicle.dealerSubscription.expiryDate && (
-                                  <div className="expiry-info">
-                                    <span className="expiry-label">Expires:</span>
-                                    <span className="expiry-date">
-                                      {new Date(vehicle.dealerSubscription.expiryDate).toLocaleDateString('en-GB', {
-                                        day: '2-digit',
-                                        month: 'short',
-                                        year: 'numeric'
-                                      })}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                            
-                            {/* For Private Sellers - Show individual car package */}
-                            {!vehicle.dealerSubscription && vehicle.advertisingPackage && (vehicle.advertisingPackage.packageName || vehicle.advertisingPackage.packageId) && (
-                              <div className="subscription-info-mini">
-                                <div className="package-badge">
-                                  {/* Check sellerContact.type first, then fallback to checking packageName for "TRADE" */}
-                                  {(vehicle.sellerContact?.type === 'trade' || 
-                                    vehicle.advertisingPackage.packageName?.toUpperCase().includes('TRADE')) 
-                                    ? 'Trade ' : 'Private '}
-                                  {/* Remove "TRADE" prefix from packageName if it exists */}
-                                  {vehicle.advertisingPackage.packageName?.replace(/^TRADE\s+/i, '') || 
-                                   (vehicle.advertisingPackage.packageId ? 
-                                     vehicle.advertisingPackage.packageId.charAt(0).toUpperCase() + 
-                                     vehicle.advertisingPackage.packageId.slice(1) : 
-                                     'Package')}
-                                </div>
-                                {vehicle.advertisingPackage.expiryDate && (
-                                  <div className="expiry-info">
-                                    <span className="expiry-label">Expires:</span>
-                                    <span className="expiry-date">
-                                      {new Date(vehicle.advertisingPackage.expiryDate).toLocaleDateString('en-GB', {
-                                        day: '2-digit',
-                                        month: 'short',
-                                        year: 'numeric'
-                                      })}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                            
-                            <div className="vehicle-actions-mini">
-                              <button 
-                                className="btn-view-mini"
-                                onClick={() => handleViewListing(vehicle._id, vehicle.vehicleType || 'car')}
-                              >
-                                👁️ View
-                              </button>
-                              <button 
-                                className="btn-edit-mini"
-                                onClick={() => handleEditListing(vehicle._id, vehicle.vehicleType || 'car')}
-                              >
-                                ✏️ Edit
-                              </button>
-                              {vehicle.advertStatus === 'active' && (
-                                <button 
-                                  className="btn-sold-mini"
-                                  onClick={() => handleMarkAsSold(vehicle._id)}
-                                >
-                                  ✓ Sold
-                                </button>
-                              )}
-                              {(vehicle.advertStatus === 'draft' || vehicle.advertStatus === 'expired') && (
-                                <button 
-                                  className="btn-relist-mini"
-                                  onClick={() => handleRelistVehicle(vehicle._id, vehicle.vehicleType || 'car')}
-                                >
-                                  🔄 Relist
-                                </button>
-                              )}
-                              <button 
-                                className="btn-delete-mini"
-                                onClick={() => handleDeleteListing(vehicle._id)}
-                              >
-                                🗑️ Delete
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        );
-                      })}
-                    </div>
+                          })}
+                        </td>
+                        <td className="actions">
+                          <button 
+                            className="action-link view"
+                            onClick={() => handleViewListing(listing._id, listing.vehicleType)}
+                          >
+                            View
+                          </button>
+                          <button 
+                            className="action-link edit"
+                            onClick={() => handleEditListing(listing._id, listing.vehicleType)}
+                          >
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                    ))
                   )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="admin-pagination">
+                <div className="pagination-info">
+                  Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredListings.length)} of {filteredListings.length} entries
+                </div>
+                <div className="pagination-controls">
+                  <button 
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        className={currentPage === pageNum ? 'active' : ''}
+                        onClick={() => setCurrentPage(pageNum)}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  {totalPages > 5 && <span>...</span>}
+                  {totalPages > 5 && (
+                    <button onClick={() => setCurrentPage(totalPages)}>
+                      {totalPages}
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    } else {
+      // USERS VIEW (existing code)
+      const totalUsers = listings.length;
+      const usersWithVehicles = listings.filter(u => u.totalVehicles > 0).length;
+
+      // Filter and sort users
+      let filteredUsers = listings.filter(user => {
+        // Search filter
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          const matchesSearch = 
+            user.name?.toLowerCase().includes(query) ||
+            user.email?.toLowerCase().includes(query) ||
+            user.phone?.toLowerCase().includes(query);
+          if (!matchesSearch) return false;
+        }
+
+        // Subscription Status filter
+        if (statusFilter !== 'All') {
+          if (user.type === 'trade' && user.subscription) {
+            const subStatus = user.subscription.status;
+            if (statusFilter === 'Active' && subStatus !== 'active') return false;
+            if (statusFilter === 'Trialing' && user.subscription.isTrialing !== true) return false;
+            if (statusFilter === 'Expired' && subStatus !== 'expired') return false;
+            if (statusFilter === 'Canceled' && subStatus !== 'canceled') return false;
+          } else {
+            return false;
+          }
+        }
+
+        // Plan Type filter
+        if (planFilter !== 'All Plans') {
+          if (planFilter === 'PAYG') {
+            if (user.type !== 'private') return false;
+          } else if (user.type === 'trade' && user.subscription) {
+            const planName = user.subscription.planName?.toLowerCase() || '';
+            if (planFilter === 'Bronze' && !planName.includes('bronze')) return false;
+            if (planFilter === 'Silver' && !planName.includes('silver')) return false;
+            if (planFilter === 'Gold' && !planName.includes('gold')) return false;
+          } else {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      // Sort users
+      filteredUsers.sort((a, b) => {
+        switch (sortBy) {
+          case 'Name':
+            return (a.name || '').localeCompare(b.name || '');
+          case 'Vehicles':
+            return b.totalVehicles - a.totalVehicles;
+          case 'Recent':
+            const vehicleDateA = a.mostRecentVehicleDate ? new Date(a.mostRecentVehicleDate) : new Date(a.createdAt || 0);
+            const vehicleDateB = b.mostRecentVehicleDate ? new Date(b.mostRecentVehicleDate) : new Date(b.createdAt || 0);
+            return vehicleDateB - vehicleDateA;
+          default:
+            return 0;
+        }
+      });
+
+      // Pagination
+      const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+
+      return (
+        <div className="my-listings-page admin-view">
+          <div className="admin-container">
+            <div className="admin-header">
+              <h1>All Users</h1>
+              <div className="view-toggle">
+                <button 
+                  className={`toggle-btn ${adminViewMode === 'cars' ? 'active' : ''}`}
+                  onClick={() => setAdminViewMode('cars')}
+                >
+                  🚗 Cars View
+                </button>
+                <button 
+                  className={`toggle-btn ${adminViewMode === 'users' ? 'active' : ''}`}
+                  onClick={() => setAdminViewMode('users')}
+                >
+                  👥 Users View
+                </button>
+              </div>
+            </div>
+
+            {/* Filters Section */}
+            <div className="admin-filters">
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="Search by Name, Email, or Phone"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <span className="search-icon">🔍</span>
+              </div>
+
+              <div className="filter-row">
+                <div className="filter-item">
+                  <label>Subscription Status:</label>
+                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                    <option value="All">All</option>
+                    <option value="Active">Active</option>
+                    <option value="Trialing">Trialing</option>
+                    <option value="Expired">Expired</option>
+                    <option value="Canceled">Canceled</option>
+                  </select>
+                </div>
+                
+                <div className="filter-item">
+                  <label>Plan Type:</label>
+                  <select value={planFilter} onChange={(e) => setPlanFilter(e.target.value)}>
+                    <option value="All Plans">All Plans</option>
+                    <option value="Bronze">Bronze</option>
+                    <option value="Silver">Silver</option>
+                    <option value="Gold">Gold</option>
+                    <option value="PAYG">PAYG (Private)</option>
+                  </select>
+                </div>
+                
+                <div className="filter-item">
+                  <label>Sort by:</label>
+                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                    <option value="Name">Name</option>
+                    <option value="Vehicles">Total Vehicles</option>
+                    <option value="Recent">Recent</option>
+                  </select>
                 </div>
               </div>
             </div>
-          )}
+
+            {/* Stats Cards */}
+            <div className="admin-stats">
+              <div className="stat-card">
+                <span className="stat-label">Total Users:</span>
+                <span className="stat-value">{totalUsers}</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Users with Vehicles:</span>
+                <span className="stat-value">{usersWithVehicles}</span>
+              </div>
+            </div>
+
+            {/* Users Table */}
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Total Vehicles</th>
+                    <th>Subscription/Package</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>
+                        No users found
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedUsers.map((user) => (
+                      <tr key={user._id}>
+                        <td className="account-name">{user.name || 'Unknown'}</td>
+                        <td className="email">{user.email || 'N/A'}</td>
+                        <td className="phone">{user.phone || 'N/A'}</td>
+                        <td className="vehicle-count">
+                          {user.totalVehicles} ({user.cars} cars, {user.bikes} bikes, {user.vans} vans)
+                        </td>
+                        <td className="subscription-info">
+                          {user.type === 'trade' && user.subscription ? (
+                            <div className="subscription-details">
+                              <div className="sub-plan-badge">
+                                {user.subscription.planName}
+                                {user.subscription.isTrialing && <span className="trial-badge">Trial</span>}
+                              </div>
+                              <div className="sub-status">
+                                <span className={`status-dot ${user.subscription.status}`}></span>
+                                {user.subscription.status}
+                              </div>
+                            </div>
+                          ) : user.type === 'private' ? (
+                            <span style={{color: '#999', fontSize: '0.875rem'}}>PAYG</span>
+                          ) : (
+                            <span style={{color: '#999', fontSize: '0.875rem'}}>No subscription</span>
+                          )}
+                        </td>
+                        <td className="actions">
+                          <button 
+                            className="action-link view"
+                            onClick={() => {
+                              // Switch to cars view and filter by this user
+                              setAdminViewMode('cars');
+                              setSearchQuery(user.email);
+                            }}
+                          >
+                            View Vehicles
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="admin-pagination">
+                <div className="pagination-info">
+                  Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredUsers.length)} of {filteredUsers.length} entries
+                </div>
+                <div className="pagination-controls">
+                  <button 
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        className={currentPage === pageNum ? 'active' : ''}
+                        onClick={() => setCurrentPage(pageNum)}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  {totalPages > 5 && <span>...</span>}
+                  {totalPages > 5 && (
+                    <button onClick={() => setCurrentPage(totalPages)}>
+                      {totalPages}
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   // Regular User View

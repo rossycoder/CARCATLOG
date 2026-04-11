@@ -171,9 +171,12 @@ function AdminDashboardPage() {
           const dateB = b.advertisingPackage?.expiryDate ? new Date(b.advertisingPackage.expiryDate) : new Date(0);
           return dateA - dateB;
         case 'Name':
-          return (a.ownerName || '').localeCompare(b.ownerName || '');
+          return (a.name || '').localeCompare(b.name || '');
         case 'Recent':
-          return new Date(b.createdAt) - new Date(a.createdAt);
+          // Sort by most recent vehicle listing date, fallback to user creation date
+          const vehicleDateA = a.mostRecentVehicleDate ? new Date(a.mostRecentVehicleDate) : new Date(a.createdAt || 0);
+          const vehicleDateB = b.mostRecentVehicleDate ? new Date(b.mostRecentVehicleDate) : new Date(b.createdAt || 0);
+          return vehicleDateB - vehicleDateA;
         default:
           return 0;
       }
