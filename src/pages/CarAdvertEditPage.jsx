@@ -2704,7 +2704,7 @@ const CarAdvertEditPage = () => {
               Show "I'm happy with my ad" if:
               1. New user car without payment completed
             */}
-            {(isDealerCar || (vehicleData?.advertisingPackage?.packageId)) ? (
+            {(isDealerCar || (vehicleData?.advertisingPackage?.packageId) || (user?.isAdmin || user?.role === 'admin')) ? (
               <button
                 onClick={handleSave}
                 disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}

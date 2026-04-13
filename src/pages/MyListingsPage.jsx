@@ -686,10 +686,24 @@ function MyListingsPage() {
                         <td className="actions">
                           <button 
                             className="action-link view"
-                            onClick={() => {
-                              // Switch to cars view and filter by this user
-                              setAdminViewMode('cars');
-                              setSearchQuery(user.email);
+                            onClick={async () => {
+                              setSelectedUser(user);
+                              setShowVehiclesModal(true);
+                              setLoadingVehicles(true);
+                              try {
+                                const userId = user._id?.toString() || user._id;
+                                const isTradeUser = user.type === 'trade';
+                                const queryParams = isTradeUser ? { params: { dealerId: userId } } : {};
+                                console.log('[Admin] Fetching vehicles for:', userId, 'type:', user.type, 'params:', queryParams);
+                                const res = await api.get(`/admin/users/${userId}/vehicles`, queryParams);
+                                setUserVehicles(res.data.vehicles || []);
+                              } catch (e) {
+                                console.error('Failed to fetch vehicles:', e);
+                                console.error('Error status:', e.response?.status, 'Error data:', e.response?.data);
+                                setUserVehicles([]);
+                              } finally {
+                                setLoadingVehicles(false);
+                              }
                             }}
                           >
                             View Vehicles
@@ -743,6 +757,94 @@ function MyListingsPage() {
               </div>
             )}
           </div>
+
+          {/* Vehicles Modal */}
+          {showVehiclesModal && (
+            <div className="vehicles-modal-overlay" onClick={() => setShowVehiclesModal(false)}>
+              <div className="vehicles-modal" onClick={e => e.stopPropagation()}>
+                <div className="vehicles-modal-header">
+                  <h2>{selectedUser?.name || selectedUser?.email}'s Vehicles</h2>
+                  <button className="modal-close-btn" onClick={() => setShowVehiclesModal(false)}>✕</button>
+                </div>
+                <div className="vehicles-modal-body">
+                  {loadingVehicles ? (
+                    <div className="modal-loading"><div className="spinner"></div><p>Loading vehicles...</p></div>
+                  ) : userVehicles.length === 0 ? (
+                    <p className="modal-empty">No vehicles found for this user.</p>
+                  ) : (
+                    <div className="modal-listings-grid">
+                      {userVehicles.map(v => (
+                        <div key={v._id} className="listing-card">
+                          <div className="listing-image">
+                            <img src={v.images?.[0] || '/images/dummy/placeholder-car.jpg'} alt={`${v.make} ${v.model}`} />
+                            {getStatusBadge(v)}
+                          </div>
+                          <div className="listing-details">
+                            <h3 className="listing-title">{v.make} {v.model}</h3>
+                            <p className="listing-subtitle">{v.year} • {v.registrationNumber || 'N/A'}</p>
+                            <div className="listing-specs">
+                              <span>{v.mileage?.toLocaleString() || '0'} miles</span>
+                              <span>•</span>
+                              <span>{v.transmission || 'Manual'}</span>
+                              <span>•</span>
+                              <span>{v.fuelType || 'Petrol'}</span>
+                            </div>
+                            <div className="listing-price">£{v.price?.toLocaleString() || '0'}</div>
+                            {v.advertisingPackage && (v.advertisingPackage.packageName || v.advertisingPackage.packageId) && (
+                              <div className="listing-package">
+                                <span className="package-badge">
+                                  {v.advertisingPackage.packageName?.replace(/^TRADE\s+/i, '') ||
+                                    (v.advertisingPackage.packageId ?
+                                      v.advertisingPackage.packageId.charAt(0).toUpperCase() + v.advertisingPackage.packageId.slice(1)
+                                      : 'Package')}
+                                </span>
+                                {v.advertisingPackage.expiryDate && (
+                                  <span className="expiry-date">
+                                    Expires: {new Date(v.advertisingPackage.expiryDate).toLocaleDateString()}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            <div className="listing-stats">
+                              <span>👁️ {v.viewCount || 0} views</span>
+                              <span>📅 Listed {new Date(v.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <div className="listing-actions">
+                              {v.advertStatus === 'active' && !isCarExpired(v) && (
+                                <>
+                                  <button className="btn-view" onClick={() => handleViewListing(v._id, v.vehicleType)}>👁️ View</button>
+                                  <button className="btn-edit" onClick={() => { setShowVehiclesModal(false); handleEditListing(v._id, v.vehicleType); }}>✏️ Edit</button>
+                                  <button className="btn-sold" onClick={() => handleMarkAsSold(v._id)}>✓ Mark as Sold</button>
+                                </>
+                              )}
+                              {(v.advertStatus === 'draft' || v.advertStatus === 'expired' || isCarExpired(v)) && (
+                                <>
+                                  <button className="btn-view" onClick={() => handleViewListing(v._id, v.vehicleType)}>👁️ View</button>
+                                  <button className="btn-relist" onClick={() => { setShowVehiclesModal(false); handleRelistVehicle(v._id, v.vehicleType); }}>🔄 Relist</button>
+                                  <button className="btn-edit" onClick={() => { setShowVehiclesModal(false); handleEditListing(v._id, v.vehicleType); }}>✏️ Edit</button>
+                                </>
+                              )}
+                              {v.advertStatus === 'pending_payment' && (
+                                <>
+                                  <button className="btn-relist" onClick={() => { setShowVehiclesModal(false); handleRelistVehicle(v._id, v.vehicleType); }}>🔄 Relist</button>
+                                  <button className="btn-edit" onClick={() => { setShowVehiclesModal(false); handleEditListing(v._id, v.vehicleType); }}>✏️ Edit</button>
+                                  <button className="btn-view" onClick={() => handleViewListing(v._id, v.vehicleType)}>👁️ Preview</button>
+                                </>
+                              )}
+                              {v.advertStatus === 'sold' && !isCarExpired(v) && (
+                                <button className="btn-view" onClick={() => handleViewListing(v._id, v.vehicleType)}>👁️ View</button>
+                              )}
+                              <button className="btn-delete" onClick={() => handleDeleteListing(v._id)}>🗑️ Delete</button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
