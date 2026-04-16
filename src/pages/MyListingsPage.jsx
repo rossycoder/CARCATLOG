@@ -378,73 +378,87 @@ function MyListingsPage() {
               </div>
             </div>
 
-            {/* Listings Table */}
-            <div className="admin-table-wrapper">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Vehicle</th>
-                    <th>Owner</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Package</th>
-                    <th>Listed Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedListings.length === 0 ? (
-                    <tr>
-                      <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
-                        No listings found
-                      </td>
-                    </tr>
-                  ) : (
-                    paginatedListings.map((listing) => (
-                      <tr key={listing._id}>
-                        <td className="vehicle-info">
-                          <div className="vehicle-details">
-                            <strong>{listing.make} {listing.model}</strong>
-                            <div className="vehicle-meta">
-                              {listing.year} • {listing.registrationNumber || 'N/A'}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="account-name">{listing.ownerName || 'Unknown'}</td>
-                        <td className="email">{listing.ownerEmail || 'N/A'}</td>
-                        <td className="status-cell">
-                          {getStatusBadge(listing)}
-                        </td>
-                        <td className="package-cell">
-                          {listing.advertisingPackage?.packageName || 'N/A'}
-                        </td>
-                        <td className="date-cell">
-                          {new Date(listing.createdAt).toLocaleDateString('en-GB', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </td>
-                        <td className="actions">
-                          <button 
-                            className="action-link view"
-                            onClick={() => handleViewListing(listing._id, listing.vehicleType)}
-                          >
-                            View
-                          </button>
-                          <button 
-                            className="action-link edit"
-                            onClick={() => handleEditListing(listing._id, listing.vehicleType)}
-                          >
-                            Edit
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+            {/* Listings Grid */}
+            {paginatedListings.length === 0 ? (
+              <div className="no-listings-state">
+                <div className="empty-icon">🚗</div>
+                <h2>No listings found</h2>
+              </div>
+            ) : (
+              <div className="listings-grid">
+                {paginatedListings.map((listing) => (
+                  <div key={listing._id} className="listing-card">
+                    <div className="listing-image">
+                      <img
+                        src={listing.images?.[0] || '/images/dummy/placeholder-car.jpg'}
+                        alt={`${listing.make} ${listing.model}`}
+                      />
+                      {getStatusBadge(listing)}
+                    </div>
+                    <div className="listing-details">
+                      <h3 className="listing-title">{listing.make} {listing.model}</h3>
+                      <p className="listing-subtitle">{listing.year} • {listing.registrationNumber || 'N/A'}</p>
+                      <div className="listing-owner">
+                        <span className="owner-badge">👤 {listing.ownerName || listing.ownerEmail || 'Unknown'}</span>
+                      </div>
+                      <div className="listing-specs">
+                        <span>{listing.mileage?.toLocaleString() || '0'} miles</span>
+                        <span>•</span>
+                        <span>{listing.transmission || 'Manual'}</span>
+                        <span>•</span>
+                        <span>{listing.fuelType || 'Petrol'}</span>
+                      </div>
+                      <div className="listing-price">£{listing.price?.toLocaleString() || '0'}</div>
+                      {listing.advertisingPackage && (listing.advertisingPackage.packageName || listing.advertisingPackage.packageId) && (
+                        <div className="listing-package">
+                          <span className="package-badge">
+                            {listing.advertisingPackage.packageName?.replace(/^TRADE\s+/i, '') ||
+                              (listing.advertisingPackage.packageId ?
+                                listing.advertisingPackage.packageId.charAt(0).toUpperCase() + listing.advertisingPackage.packageId.slice(1)
+                                : 'Package')}
+                          </span>
+                          {listing.advertisingPackage.expiryDate && (
+                            <span className="expiry-date">
+                              Expires: {new Date(listing.advertisingPackage.expiryDate).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <div className="listing-stats">
+                        <span>👁️ {listing.viewCount || 0} views</span>
+                        <span>📅 Listed {new Date(listing.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <div className="listing-actions">
+                        {listing.advertStatus === 'active' && !isCarExpired(listing) && (
+                          <>
+                            <button className="btn-view" onClick={() => handleViewListing(listing._id, listing.vehicleType)}>👁️ View</button>
+                            <button className="btn-edit" onClick={() => handleEditListing(listing._id, listing.vehicleType)}>✏️ Edit</button>
+                            <button className="btn-sold" onClick={() => handleMarkAsSold(listing._id)}>✓ Mark as Sold</button>
+                          </>
+                        )}
+                        {(listing.advertStatus === 'draft' || listing.advertStatus === 'expired' || isCarExpired(listing)) && (
+                          <>
+                            <button className="btn-view" onClick={() => handleViewListing(listing._id, listing.vehicleType)}>👁️ View</button>
+                            <button className="btn-relist" onClick={() => handleRelistVehicle(listing._id, listing.vehicleType)}>🔄 Relist</button>
+                            <button className="btn-edit" onClick={() => handleEditListing(listing._id, listing.vehicleType)}>✏️ Edit</button>
+                          </>
+                        )}
+                        {listing.advertStatus === 'pending_payment' && (
+                          <>
+                            <button className="btn-view" onClick={() => handleViewListing(listing._id, listing.vehicleType)}>👁️ Preview</button>
+                            <button className="btn-edit" onClick={() => handleEditListing(listing._id, listing.vehicleType)}>✏️ Edit</button>
+                          </>
+                        )}
+                        {listing.advertStatus === 'sold' && !isCarExpired(listing) && (
+                          <button className="btn-view" onClick={() => handleViewListing(listing._id, listing.vehicleType)}>👁️ View</button>
+                        )}
+                        <button className="btn-delete" onClick={() => handleDeleteListing(listing._id)}>🗑️ Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Pagination */}
             {totalPages > 1 && (
