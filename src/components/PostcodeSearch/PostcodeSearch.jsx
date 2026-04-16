@@ -112,18 +112,21 @@ function PostcodeSearch() {
         <div className="search-results">
           <div className="results-header">
             <h3>Search Results</h3>
-            <div className="results-info">
-              <p>
-                <strong>{searchResults.count}</strong> car{searchResults.count !== 1 ? 's' : ''} found 
-                within <strong>{searchResults.radius} miles</strong> of{' '}
-                <strong>{searchResults.postcode}</strong>
-              </p>
-            </div>
+            {searchResults.count > 0 && (
+              <div className="results-info">
+                <p>
+                  <strong>{searchResults.count}</strong> car{searchResults.count !== 1 ? 's' : ''} found 
+                  within <strong>{searchResults.radius} miles</strong> of{' '}
+                  <strong>{searchResults.postcode}</strong>
+                </p>
+              </div>
+            )}
           </div>
 
           {searchResults.count === 0 ? (
             <div className="no-results">
-              <p>No cars found in this area. Try increasing the search radius.</p>
+              <p>No cars found within <strong>{searchResults.radius} miles</strong> of <strong>{searchResults.postcode}</strong>.</p>
+              <p style={{ fontSize: '0.9rem', color: '#888', marginTop: '0.5rem' }}>Try increasing the search radius or enter a different postcode.</p>
             </div>
           ) : (
             <div className="results-grid">

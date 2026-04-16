@@ -157,26 +157,29 @@
 
 .results-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
 .result-item {
   position: relative;
+  min-width: 0; /* prevent overflow */
 }
 
 .distance-badge {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 0.75rem;
+  left: 0.75rem;
+  right: auto;
   background: rgba(0, 123, 255, 0.95);
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 0.35rem 0.75rem;
   border-radius: 20px;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 10;
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {
@@ -186,7 +189,11 @@
   }
 
   .postcode-search-form-container {
-    padding: 1.5rem;
+    padding: 1.25rem;
+  }
+
+  .search-results {
+    padding: 1.25rem;
   }
 
   .form-row {
@@ -198,7 +205,7 @@
   }
 
   .form-input {
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px;
     -webkit-appearance: none;
     appearance: none;
   }
@@ -213,6 +220,12 @@
 
   .results-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .distance-badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
   }
 }
 

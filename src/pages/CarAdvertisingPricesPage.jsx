@@ -768,7 +768,9 @@ const CarAdvertisingPricesPage = () => {
           </div>
         </div>
 
-        <div className="pricing-cards">
+        <div className="pricing-cards-wrapper">
+          <p className="swipe-hint">← Swipe to view more packages →</p>
+          <div className="pricing-cards">
           {packages.map((pkg) => (
             <div key={pkg.id} className={`pricing-card ${pkg.popular ? 'popular' : ''}`}>
               {pkg.popular && <div className="popular-badge">Most Popular</div>}
@@ -816,6 +818,7 @@ const CarAdvertisingPricesPage = () => {
               </div>
             </div>
           ))}
+        </div>
         </div>
 
 
