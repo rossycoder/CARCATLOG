@@ -29,7 +29,7 @@ api.interceptors.request.use(
       token = tradeToken;
     } 
     // Use user token for user-specific endpoints
-    else if (url.includes('/vehicles/my-listings') || url.includes('/auth/me') || url.includes('/user') || url.includes('/admin')) {
+    else if (url.includes('/vehicles/my-listings') || url.includes('/auth/me') || url.includes('/user') || url.includes('/admin') || url.includes('/adverts')) {
       token = userToken;
     }
     // For other endpoints, prefer the token based on current path

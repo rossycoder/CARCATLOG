@@ -1916,6 +1916,7 @@ const CarAdvertEditPage = () => {
               </div>
             )}
             
+            {carStatus !== 'active' && (
             <div className="price-section">
               <div className="price-display-wrapper">
                 {!isPriceEditing ? (
@@ -2032,6 +2033,7 @@ const CarAdvertEditPage = () => {
                 )}
               </p>
             </div>
+            )}
           </section>
 
           {/* Vehicle Specifications */}
@@ -2395,8 +2397,8 @@ const CarAdvertEditPage = () => {
             )}
           </section>
 
-          {/* Business Information Section - VISIBLE FOR ALL USERS */}
-          {!isOverviewEditing && !isVehicleDetailsEditing && (
+          {/* Business Information Section - HIDE when Save Changes mode (active car) */}
+          {!isOverviewEditing && !isVehicleDetailsEditing && carStatus !== 'active' && (
             <section className="business-info-section">
               <h3>Business Information (Optional)</h3>
               
@@ -2434,12 +2436,14 @@ const CarAdvertEditPage = () => {
                   type="text"
                   id="businessName"
                   value={advertData.businessName}
-                  onChange={(e) => setAdvertData({
+                  onChange={(e) => isDealerCar && carStatus === 'active' ? null : setAdvertData({
                     ...advertData,
                     businessName: e.target.value
                   })}
+                  readOnly={isDealerCar && carStatus === 'active'}
                   placeholder="e.g., ABC Motors Ltd"
                   className="form-input"
+                  style={isDealerCar && carStatus === 'active' ? { backgroundColor: '#f5f5f5', cursor: 'default' } : {}}
                 />
               </div>
               
@@ -2451,12 +2455,14 @@ const CarAdvertEditPage = () => {
                   type="url"
                   id="businessWebsite"
                   value={advertData.businessWebsite}
-                  onChange={(e) => setAdvertData({
+                  onChange={(e) => isDealerCar && carStatus === 'active' ? null : setAdvertData({
                     ...advertData,
                     businessWebsite: e.target.value
                   })}
+                  readOnly={isDealerCar && carStatus === 'active'}
                   placeholder="https://www.yourbusiness.com"
                   className="form-input"
+                  style={isDealerCar && carStatus === 'active' ? { backgroundColor: '#f5f5f5', cursor: 'default' } : {}}
                 />
               </div>
               
@@ -2464,6 +2470,7 @@ const CarAdvertEditPage = () => {
                 <label htmlFor="businessLogo">
                   Business Logo <span className="optional">(Optional)</span>
                 </label>
+                {!(isDealerCar && carStatus === 'active') && (
                 <input
                   type="file"
                   id="businessLogo"
@@ -2471,9 +2478,11 @@ const CarAdvertEditPage = () => {
                   onChange={handleLogoUpload}
                   className="form-input"
                 />
+                )}
                 {advertData.businessLogo && (
                   <div className="logo-preview">
                     <img src={advertData.businessLogo} alt="Business logo" />
+                    {!(isDealerCar && carStatus === 'active') && (
                     <button
                       type="button"
                       onClick={() => setAdvertData({...advertData, businessLogo: ''})}
@@ -2481,6 +2490,7 @@ const CarAdvertEditPage = () => {
                     >
                       Remove
                     </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -2704,7 +2714,7 @@ const CarAdvertEditPage = () => {
               Show "I'm happy with my ad" if:
               1. New user car without payment completed
             */}
-            {(isDealerCar || (vehicleData?.advertisingPackage?.packageId) || (user?.isAdmin || user?.role === 'admin')) ? (
+            {(isDealerCar || vehicleData?.advertisingPackage?.packageId || (carStatus === 'active' && vehicleData?.advertisingPackage?.packageId) || (user?.isAdmin || user?.role === 'admin')) ? (
               <button
                 onClick={handleSave}
                 disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}

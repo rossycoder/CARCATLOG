@@ -548,9 +548,9 @@ export const generateEnhancedVehicleReport = (vehicleData, registration) => {
   doc.roundedRect(15, y, PW - 30, 24, 2, 2, 'F');
   y += 7;
   const addChecks = [
-    { text: 'Not imported',       pass: !vehicleData.imported },
-    { text: 'Not exported',       pass: !vehicleData.exported },
-    { text: 'No colour changes',  pass: !vehicleData.colourChanges },
+    { text: vehicleData.imported  ? 'Imported'        : 'Not imported',    pass: !vehicleData.imported },
+    { text: vehicleData.exported  ? 'Exported'        : 'Not exported',    pass: !vehicleData.exported },
+    { text: vehicleData.colourChanges ? 'Colour changes recorded' : 'No colour changes', pass: !vehicleData.colourChanges },
   ];
   doc.setFontSize(9);
   addChecks.forEach((c, i) => {

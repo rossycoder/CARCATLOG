@@ -1,1058 +1,766 @@
 import jsPDF from 'jspdf';
+import { LOGO_BASE64 } from './logoBase64';
 
-// Helper function to safely convert any value to string
-const safeString = (value) => {
-  if (value === null || value === undefined) return 'N/A';
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return String(value);
-  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-  if (typeof value === 'object') return JSON.stringify(value);
-  return String(value);
+// ─── Safe value helpers ───────────────────────────────────────────────────────
+const safeString = (v) => {
+  if (v === null || v === undefined) return 'N/A';
+  if (typeof v === 'string') return v.trim() || 'N/A';
+  if (typeof v === 'number') return String(v);
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+  return String(v);
 };
 
-// Helper function to add watermark on each page
-const addWatermark = (doc, pageWidth, pageHeight) => {
+const formatEngineSize = (v) => {
+  if (!v) return 'N/A';
+  const s = String(v).replace(/L+$/i, '');
+  const n = parseFloat(s);
+  if (isNaN(n)) return 'N/A';
+  return n.toFixed(1) + 'L';
+};
+
+const fmtDate = (d) => {
+  if (!d) return 'N/A';
   try {
-    const logoUrl = 'https://res.cloudinary.com/dexgkptpg/image/upload/v1765219299/carcatalog/logo.jpg';
-    doc.saveGraphicsState();
-    doc.setGState(new doc.GState({ opacity: 0.05 }));
-    
-    const logoSize = 40;
-    const positions = [
-      { x: pageWidth / 2 - logoSize / 2, y: pageHeight / 2 - logoSize / 2 },
-      { x: 30, y: 100 },
-      { x: pageWidth - 70, y: 100 },
-      { x: 30, y: pageHeight - 140 },
-      { x: pageWidth - 70, y: pageHeight - 140 }
-    ];
-    
-    positions.forEach(pos => {
-      doc.addImage(logoUrl, 'JPEG', pos.x, pos.y, logoSize, logoSize);
-    });
-    
-    doc.restoreGraphicsState();
-  } catch (error) {
-    console.log('Logo watermark could not be loaded');
-  }
+    return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch { return String(d); }
 };
 
-// Helper function to add header (only on first page)
-const addHeader = (doc, pageWidth, isFirstPage = false) => {
-  if (!isFirstPage) return;
-  
-  doc.setFillColor(26, 35, 126);
-  doc.rect(0, 0, pageWidth, 50, 'F');
-  doc.setFillColor(33, 150, 243);
-  doc.rect(0, 0, pageWidth, 30, 'F');
-
-  try {
-    const logoUrl = 'https://res.cloudinary.com/dexgkptpg/image/upload/v1765219299/carcatalog/logo.jpg';
-    doc.addImage(logoUrl, 'JPEG', 15, 8, 25, 25);
-  } catch (error) {
-    console.log('Header logo could not be loaded');
-  }
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
-  doc.setFont('helvetica', 'bold');
-  doc.text('CARCATLOG', 45, 18);
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Professional Vehicle History Report', 45, 26);
-  
-  doc.setFontSize(8);
-  doc.text('Report ID: VHR-' + Date.now(), pageWidth - 15, 15, { align: 'right' });
-  doc.text('Generated: ' + new Date().toLocaleDateString('en-GB'), pageWidth - 15, 20, { align: 'right' });
-  
-  doc.setTextColor(0, 0, 0);
+// ─── Color palette (AutoTrader-inspired) ─────────────────────────────────────
+const C = {
+  orange:     [255, 90,  0],    // AutoTrader orange
+  darkGrey:   [34,  34,  34],
+  midGrey:    [85,  85,  85],
+  lightGrey:  [240, 240, 240],
+  border:     [220, 220, 220],
+  white:      [255, 255, 255],
+  green:      [0,   153, 68],
+  red:        [204, 0,   0],
+  amber:      [255, 153, 0],
+  blue:       [0,   112, 192],
+  rowAlt:     [248, 248, 248],
+  tagBg:      [255, 245, 235],
+  pass:       [0,   153, 68],
+  fail:       [204, 0,   0],
 };
 
-// Helper function to add footer (only on last page)
-const addFooter = (doc, pageWidth, pageHeight, pageNum, isLastPage = false) => {
-  if (!isLastPage) {
-    // Just add page number on non-last pages
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    doc.text('Page ' + pageNum, pageWidth / 2, pageHeight - 10, { align: 'center' });
-    return;
-  }
-  
-  const footerY = pageHeight - 25;
-  
-  doc.setFillColor(26, 35, 126);
-  doc.rect(0, footerY, pageWidth, 25, 'F');
-  
-  try {
-    const logoUrl = 'https://res.cloudinary.com/dexgkptpg/image/upload/v1765219299/carcatalog/logo.jpg';
-    doc.addImage(logoUrl, 'JPEG', 15, footerY + 5, 15, 15);
-  } catch (error) {
-    console.log('Footer logo could not be loaded');
-  }
-  
-  doc.setFontSize(7);
-  doc.setTextColor(200, 200, 200);
-  doc.setFont('helvetica', 'normal');
-  doc.text('This report is valid for 30 days from generation date.', 35, footerY + 8);
-  doc.text('Data sourced from DVLA, insurance databases, and finance records.', 35, footerY + 12);
-  
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.text('2024 CARCATLOG', 35, footerY + 17);
-  
-  doc.setTextColor(33, 150, 243);
-  doc.text('www.carcatlog.com', pageWidth - 15, footerY + 12, { align: 'right' });
-  
-  doc.setTextColor(200, 200, 200);
-  doc.setFontSize(8);
-  doc.text('Page ' + pageNum, pageWidth / 2, footerY + 17, { align: 'center' });
+// ─── Drawing helpers ──────────────────────────────────────────────────────────
+const setFont = (doc, size, style = 'normal', color = C.darkGrey) => {
+  doc.setFontSize(size);
+  doc.setFont('helvetica', style);
+  doc.setTextColor(...color);
 };
 
-// Helper function to check if new page is needed
-const checkNewPage = (doc, yPos, requiredSpace, pageWidth, pageHeight, pageNum, totalPages) => {
-  if (yPos + requiredSpace > pageHeight - 35) {
+const divider = (doc, y, PW, color = C.border) => {
+  doc.setDrawColor(...color);
+  doc.setLineWidth(0.3);
+  doc.line(15, y, PW - 15, y);
+  return y + 4;
+};
+
+const pill = (doc, x, y, w, h, text, bgColor, textColor = C.white) => {
+  doc.setFillColor(...bgColor);
+  doc.roundedRect(x, y, w, h, h / 2, h / 2, 'F');
+  setFont(doc, 7.5, 'bold', textColor);
+  doc.text(text, x + w / 2, y + h / 2 + 2.5, { align: 'center' });
+};
+
+// ─── Page overflow guard ──────────────────────────────────────────────────────
+const guard = (doc, y, need, PH, state, PW, addFooterFn) => {
+  if (y + need > PH - 20) {
+    addFooterFn(doc, PW, PH, state.page, false);
     doc.addPage();
-    pageNum++;
-    addWatermark(doc, pageWidth, pageHeight);
-    addHeader(doc, pageWidth, false);
-    addFooter(doc, pageWidth, pageHeight, pageNum, false);
-    return { yPos: 20, pageNum };
+    state.page++;
+    return 20;
   }
-  return { yPos, pageNum };
+  return y;
 };
 
-export const generateEnhancedVehicleReport = (vehicleData, registration) => {
+// ─── Header ───────────────────────────────────────────────────────────────────
+const drawHeader = (doc, PW, reg, reportId) => {
+  // White header background
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, PW, 24, 'F');
+
+  // Logo is 1024x1024 square - use 20x20mm to keep aspect ratio
   try {
-    if (!vehicleData) {
-      throw new Error('Vehicle data is required to generate PDF');
-    }
-    
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    let yPos = 20;
-    let pageNum = 1;
+    doc.addImage(LOGO_BASE64, 'JPEG', 10, 2, 20, 20);
+  } catch (e) {
+    doc.setFontSize(16); doc.setFont('helvetica', 'bold');
+    doc.setTextColor(220, 53, 69); doc.text('Car', 15, 15);
+    const cw = doc.getTextWidth('Car');
+    doc.setTextColor(0, 102, 204); doc.text('Cat', 15 + cw, 15);
+    const ctw = doc.getTextWidth('Cat');
+    doc.setTextColor(255, 152, 0); doc.text('ALog', 15 + cw + ctw, 15);
+  }
 
-    // Add watermark and header for first page
-    addWatermark(doc, pageWidth, pageHeight);
-    addHeader(doc, pageWidth, true);
-
-  yPos = 60;
-
-  // ============================================
-  // REGISTRATION PLATE - UK Style
-  // ============================================
-  doc.setFillColor(255, 204, 0);
-  doc.setDrawColor(0, 0, 0);
-  doc.setLineWidth(2);
-  doc.roundedRect(15, yPos, 80, 18, 2, 2, 'FD');
-  
-  doc.setFontSize(20);
+  // "Vehicle History Report" text next to logo
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0, 0, 0);
-  doc.text(registration, 55, yPos + 12, { align: 'center' });
-  
-  doc.setFontSize(9);
+  doc.setTextColor(...C.darkGrey);
+  doc.text('Vehicle History Report', 34, 11);
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(120, 120, 120);
+  doc.text('www.carcatalog.co.uk', 34, 17);
+
+  // Report ID and date on right
+  doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 100, 100);
-  doc.text(`Report Date: ${new Date().toLocaleDateString('en-GB')} at ${new Date().toLocaleTimeString('en-GB')}`, 100, yPos + 12);
-  
-  doc.setTextColor(0, 0, 0);
-  yPos += 28;
+  doc.text('Report ID: ' + reportId, PW - 15, 10, { align: 'right' });
+  doc.text('Generated: ' + new Date().toLocaleDateString('en-GB'), PW - 15, 17, { align: 'right' });
 
-  // ============================================
-  // SAFETY STATUS - Colorful Cards with Icons
-  // ============================================
-  ({ yPos, pageNum } = checkNewPage(doc, yPos, 50, pageWidth, pageHeight, pageNum));
-  
-  // Section header with blue background
-  doc.setFillColor(33, 150, 243);
-  doc.roundedRect(15, yPos, pageWidth - 30, 10, 2, 2, 'F');
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.text('Safety Check Summary', 20, yPos + 7);
-  
-  yPos += 15;
+  // Orange bottom border line
+  doc.setDrawColor(...C.orange);
+  doc.setLineWidth(1.5);
+  doc.line(0, 24, PW, 24);
 
-  const checks = [
-    { 
-      label: 'Theft Check', 
-      status: vehicleData.stolen ? 'ALERT' : 'CLEAR',
-      passed: !vehicleData.stolen,
-      icon: vehicleData.stolen ? '✗' : '✓'
-    },
-    { 
-      label: 'Write-Off', 
-      status: vehicleData.writeOff ? 'ALERT' : 'CLEAR',
-      passed: !vehicleData.writeOff,
-      icon: vehicleData.writeOff ? '✗' : '✓'
-    },
-    { 
-      label: 'Finance', 
-      status: vehicleData.outstandingFinance ? 'ALERT' : 'CLEAR',
-      passed: !vehicleData.outstandingFinance,
-      icon: vehicleData.outstandingFinance ? '✗' : '✓'
-    }
-  ];
+  // Dark sub-bar
+  doc.setFillColor(...C.darkGrey);
+  doc.rect(0, 25.5, PW, 7, 'F');
+  doc.setFontSize(6.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(180, 180, 180);
+  doc.text('Powered by CheckCarDetails | Data sourced from DVLA, insurance & finance databases', 15, 30);
+};
 
-  const cardWidth = (pageWidth - 50) / 3;
-  const cardHeight = 28;
-  
-  checks.forEach((check, index) => {
-    const cardX = 20 + (index * (cardWidth + 5));
-    
-    // Card background with shadow effect
-    if (check.passed) {
-      doc.setFillColor(232, 245, 233); // Light green
-      doc.setDrawColor(76, 175, 80); // Green border
-    } else {
-      doc.setFillColor(255, 235, 238); // Light red
-      doc.setDrawColor(244, 67, 54); // Red border
-    }
-    
-    doc.setLineWidth(1.5);
-    doc.roundedRect(cardX, yPos, cardWidth, cardHeight, 3, 3, 'FD');
-    
-    // Icon circle
-    if (check.passed) {
-      doc.setFillColor(76, 175, 80); // Green
-    } else {
-      doc.setFillColor(244, 67, 54); // Red
-    }
-    doc.circle(cardX + 8, yPos + 10, 5, 'F');
-    
-    // Icon text
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 255, 255);
-    doc.text(check.icon, cardX + 8, yPos + 12, { align: 'center' });
-    
-    // Label
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(33, 37, 41);
-    doc.text(check.label, cardX + 16, yPos + 10);
-    
-    // Status
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(check.passed ? 76 : 244, check.passed ? 175 : 67, check.passed ? 80 : 54);
-    doc.text(check.status, cardX + 16, yPos + 16);
-    
-    // Description
-    doc.setFontSize(7);
-    doc.setTextColor(100, 100, 100);
-    const desc = check.passed ? 'No records found' : 'Issue detected';
-    doc.text(desc, cardX + 16, yPos + 21);
-  });
-  
-  doc.setTextColor(0, 0, 0);
-  yPos += 35;
+// ─── Footer ───────────────────────────────────────────────────────────────────
+const drawFooter = (doc, PW, PH, pageNum, isLast) => {
+  const fy = PH - 12;
+  doc.setFillColor(...C.lightGrey);
+  doc.rect(0, fy - 2, PW, 14, 'F');
 
-  // ============================================
-  // WARNINGS & CAUTIONS DETAILS
-  // ============================================
-  if (vehicleData.writeOff || vehicleData.outstandingFinance || vehicleData.stolen) {
-    ({ yPos, pageNum } = checkNewPage(doc, yPos, 60, pageWidth, pageHeight, pageNum));
-    
-    // Warnings Section
-    if (vehicleData.writeOff) {
-      doc.setFillColor(254, 242, 242);
-      doc.setDrawColor(220, 53, 69);
-      doc.setLineWidth(1.5);
-      doc.roundedRect(15, yPos, pageWidth - 30, 35, 4, 4, 'FD');
-      
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(220, 53, 69);
-      doc.text('⚠️ WARNINGS', 20, yPos + 8);
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(33, 37, 41);
-      doc.text('Insurance write-off recorded', 20, yPos + 16);
-      
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(60, 60, 60);
-      doc.text(`This vehicle has been written off by an insurance company on ${vehicleData.writeOffDate || 'N/A'}`, 20, yPos + 22);
-      doc.text(`Status: ${vehicleData.writeOffCategory || 'CAT S'} - ${vehicleData.writeOffDescription || 'Structural damage, can be repaired'}`, 20, yPos + 27);
-      
-      yPos += 40;
-    }
-    
-    // Cautions Section
-    if (vehicleData.outstandingFinance) {
-      ({ yPos, pageNum } = checkNewPage(doc, yPos, 60, pageWidth, pageHeight, pageNum));
-      
-      doc.setFillColor(255, 243, 205);
-      doc.setDrawColor(255, 193, 7);
-      doc.setLineWidth(1.5);
-      doc.roundedRect(15, yPos, pageWidth - 30, 50, 4, 4, 'FD');
-      
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(133, 100, 4);
-      doc.text('⚠️ CAUTIONS', 20, yPos + 8);
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(33, 37, 41);
-      doc.text('Outstanding finance recorded', 20, yPos + 16);
-      
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(60, 60, 60);
-      doc.text(`There's an outstanding finance agreement attached to this vehicle`, 20, yPos + 22);
-      
-      const financeDetails = [
-        ['Finance company:', vehicleData.financeCompany || 'SAMPLE LTD'],
-        ['Agreement type:', vehicleData.financeType || 'Hire Purchase'],
-        ['Agreement number:', vehicleData.financeAgreementNumber || 'N/A'],
-        ['Agreement start date:', vehicleData.financeStartDate || 'N/A'],
-        ['Agreement term:', vehicleData.financeTerm || 'N/A'],
-        ['Contact number:', vehicleData.financeContact || 'N/A']
-      ];
-      
-      let finY = yPos + 28;
-      financeDetails.forEach(([label, value]) => {
-        doc.setFont('helvetica', 'bold');
-        doc.text(label, 20, finY);
-        doc.setFont('helvetica', 'normal');
-        doc.text(value, 75, finY);
-        finY += 5;
-      });
-      
-      yPos += 55;
-    }
+  // Logo image in footer
+  try {
+    doc.addImage(LOGO_BASE64, 'JPEG', 12, fy - 1, 22, 7);
+  } catch (e) {
+    doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+    doc.setTextColor(220, 53, 69); doc.text('Car', 15, fy + 4);
+    const cw = doc.getTextWidth('Car');
+    doc.setTextColor(0, 102, 204); doc.text('Cat', 15 + cw, fy + 4);
+    const ctw = doc.getTextWidth('Cat');
+    doc.setTextColor(255, 152, 0); doc.text('alog', 15 + cw + ctw, fy + 4);
   }
 
-  // ============================================
-  // REPORT SUMMARY - Comprehensive Overview
-  // ============================================
-  ({ yPos, pageNum } = checkNewPage(doc, yPos, 50, pageWidth, pageHeight, pageNum));
-  
-  // Section header with blue background
-  doc.setFillColor(33, 150, 243);
-  doc.roundedRect(15, yPos, pageWidth - 30, 10, 2, 2, 'F');
-  
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.text('Report Summary', 20, yPos + 7);
-  
   doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
-  doc.text('Complete overview of vehicle check results', pageWidth - 20, yPos + 7, { align: 'right' });
-  
-  yPos += 15;
-  
-  // Summary text
-  const totalChecks = 3;
-  const passedChecks = [!vehicleData.stolen, !vehicleData.writeOff, !vehicleData.outstandingFinance].filter(Boolean).length;
-  
-  doc.setFillColor(240, 248, 255);
-  doc.roundedRect(15, yPos, pageWidth - 30, 20, 2, 2, 'F');
-  
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(60, 60, 60);
-  
-  const summaryText = `This vehicle has passed ${safeString(passedChecks)} out of ${safeString(totalChecks)} safety checks. ` +
-    (vehicleData.mileage ? `Current mileage: ${safeString(Number(vehicleData.mileage).toLocaleString())} miles. ` : '') +
-    (vehicleData.previousOwners !== undefined ? `${safeString(vehicleData.previousOwners)} previous owner(s). ` : '') +
-    (passedChecks === totalChecks ? 'No major issues detected.' : 'Please review alerts below for details.');
-  
-  const splitText = doc.splitTextToSize(summaryText, pageWidth - 50);
-  doc.text(splitText, 20, yPos + 7);
-  
-  yPos += 25;
-  
-  // Important note about recalls
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'italic');
-  doc.setTextColor(120, 120, 120);
-  doc.text('Note: Reports do not include manufacturer safety recalls. Check with the manufacturer for recall information.', 20, yPos);
-  
-  yPos += 10;
-
-  // ============================================
-  // VEHICLE DETAILS - Professional Table with Blue Header
-  // ============================================
-  ({ yPos, pageNum } = checkNewPage(doc, yPos, 90, pageWidth, pageHeight, pageNum));
-  
-  // Section header with gradient effect
-  doc.setFillColor(33, 150, 243);
-  doc.roundedRect(15, yPos, pageWidth - 30, 10, 2, 2, 'F');
-  
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.text('Vehicle Details', 20, yPos + 7);
-  
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Compare this information with the seller\'s description', pageWidth - 20, yPos + 7, { align: 'right' });
-  
-  yPos += 15;
-
-  // Vehicle name/title with colored background
-  doc.setFillColor(240, 248, 255);
-  doc.roundedRect(15, yPos - 3, pageWidth - 30, 12, 2, 2, 'F');
-  
-  doc.setFontSize(13);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(33, 150, 243);
-  const vehicleTitle = `${vehicleData.make || ''} ${vehicleData.model || ''} ${vehicleData.variant || ''}`.trim().toUpperCase();
-  doc.text(vehicleTitle, 20, yPos + 5);
-  yPos += 15;
-
-  // Comprehensive details in two columns with alternating row colors
-  const leftCol = 20;
-  const rightCol = pageWidth / 2 + 5;
-  const labelWidth = 50;
-  
-  const leftDetails = [
-    ['Registration', safeString(registration)],
-    ['Manufacture year', safeString(vehicleData.year || vehicleData.manufactureYear)],
-    ['First registered', safeString(vehicleData.firstRegistered || vehicleData.registrationDate)],
-    ['Make', safeString(vehicleData.make)],
-    ['Model', safeString(vehicleData.model)],
-    ['Body type', safeString(vehicleData.bodyType)],
-    ['Colour', safeString(vehicleData.colour || vehicleData.color)],
-    ['Transmission', safeString(vehicleData.transmission)]
-  ];
-  
-  const rightDetails = [
-    ['Engine number', safeString(vehicleData.engineNumber)],
-    ['Engine capacity', vehicleData.engineSize ? safeString(vehicleData.engineSize) + 'L' : safeString(vehicleData.engineCapacity)],
-    ['Fuel type', safeString(vehicleData.fuelType)],
-    ['CO₂ emissions', vehicleData.co2Emissions ? safeString(vehicleData.co2Emissions) + ' g/km' : 'N/A'],
-    ['Road tax (12 months)', vehicleData.annualTax ? '£' + safeString(vehicleData.annualTax) : 'N/A'],
-    ['Doors', safeString(vehicleData.doors)],
-    ['Seats', safeString(vehicleData.seats)],
-    ['Drive type', safeString(vehicleData.driveType)]
-  ];
-  
-  doc.setFontSize(9);
-  let leftY = yPos;
-  leftDetails.forEach(([label, value], index) => {
-    // Alternating row background
-    if (index % 2 === 0) {
-      doc.setFillColor(250, 250, 250);
-      doc.rect(15, leftY - 4, (pageWidth - 30) / 2 - 2, 7, 'F');
-    }
-    
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(100, 100, 100);
-    doc.text(label, leftCol, leftY);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(33, 37, 41);
-    doc.text(value, leftCol + labelWidth, leftY);
-    leftY += 7;
-  });
-  
-  let rightY = yPos;
-  rightDetails.forEach(([label, value], index) => {
-    // Alternating row background
-    if (index % 2 === 0) {
-      doc.setFillColor(250, 250, 250);
-      doc.rect(rightCol - 5, rightY - 4, (pageWidth - 30) / 2 - 2, 7, 'F');
-    }
-    
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(100, 100, 100);
-    doc.text(label, rightCol, rightY);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(33, 37, 41);
-    doc.text(value, rightCol + labelWidth, rightY);
-    rightY += 7;
-  });
-
-  yPos = Math.max(leftY, rightY) + 3;
-  
-  // Road tax disclaimer
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'italic');
   doc.setTextColor(100, 100, 100);
-  const disclaimer = '**The road tax figure quoted is the current rate only, and may be subject to change in the future.';
-  doc.text(disclaimer, 20, yPos);
-  
-  yPos += 10;
+  doc.text('www.carcatalog.co.uk  |  This report is valid for 30 days', 38, fy + 4);
+  doc.text('Page ' + pageNum, PW - 15, fy + 4, { align: 'right' });
+};
 
-  // ============================================
-  // ALL CLEAR CHECKS - Detailed with Icons
-  // ============================================
-  ({ yPos, pageNum } = checkNewPage(doc, yPos, 60, pageWidth, pageHeight, pageNum));
-  
-  // Section header with green background
-  doc.setFillColor(76, 175, 80);
-  doc.roundedRect(15, yPos, pageWidth - 30, 10, 2, 2, 'F');
-  
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.text('All Clear', 20, yPos + 7);
-  
-  yPos += 15;
-  
-  // Info box with light green background
-  doc.setFillColor(232, 245, 233);
-  doc.roundedRect(15, yPos, pageWidth - 30, 45, 2, 2, 'F');
-  
-  yPos += 8;
-  
-  const clearChecks = [
-    { label: 'Not recorded as stolen', passed: !vehicleData.stolen },
-    { label: 'Not recorded as scrapped', passed: true },
-    { label: 'No third-party interest', passed: true },
-    { label: vehicleData.mileageDiscrepancy ? 'Mileage discrepancies found' : 'No mileage discrepancies', passed: !vehicleData.mileageDiscrepancy }
-  ];
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  
-  clearChecks.forEach((check, index) => {
-    // Checkmark or X with colored circle
-    if (check.passed) {
-      doc.setFillColor(76, 175, 80);
-    } else {
-      doc.setFillColor(244, 67, 54);
-    }
-    doc.circle(23, yPos + (index * 7) - 1, 2, 'F');
-    
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.text(check.passed ? 'v' : 'x', 23, yPos + (index * 7), { align: 'center' });
-    
-    // Text
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    doc.text(check.label, 30, yPos + (index * 7));
-  });
-  
-  yPos += 32;
-  
-  // Mileage info note
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'italic');
-  doc.setTextColor(120, 120, 120);
-  doc.text('Mileage information can come from the DVLA, BVRLA and MOT.', 20, yPos);
-  yPos += 4;
-  if (vehicleData.mileage) {
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(76, 175, 80);
-    doc.setFontSize(9);
-    doc.text('Latest mileage: ' + safeString(Number(vehicleData.mileage).toLocaleString()) + ' miles', 20, yPos);
-  }
-  
-  yPos += 10;
+// ─── Section title ────────────────────────────────────────────────────────────
+const sectionTitle = (doc, y, PW, title) => {
+  setFont(doc, 10, 'bold', C.darkGrey);
+  doc.text(title.toUpperCase(), 15, y);
+  doc.setDrawColor(...C.orange);
+  doc.setLineWidth(1.5);
+  doc.line(15, y + 2, 15 + doc.getTextWidth(title.toUpperCase()), y + 2);
+  doc.setLineWidth(0.3);
+  doc.setDrawColor(...C.border);
+  doc.line(15, y + 2, PW - 15, y + 2);
+  return y + 9;
+};
 
-  // ============================================
-  // PLATE CHANGES (if any)
-  // ============================================
-  if (vehicleData.plateChanges && vehicleData.plateChanges.length > 0) {
-    ({ yPos, pageNum } = checkNewPage(doc, yPos, 40, pageWidth, pageHeight, pageNum));
-    
-    doc.setFillColor(255, 243, 205);
-    doc.setDrawColor(255, 193, 7);
-    doc.setLineWidth(1.5);
-    doc.roundedRect(15, yPos, pageWidth - 30, 30 + (vehicleData.plateChanges.length * 6), 4, 4, 'FD');
-    
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(133, 100, 4);
-    doc.text('🔄 To Review', 20, yPos + 8);
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(60, 60, 60);
-    doc.text('This vehicle has had plate changes', 20, yPos + 16);
-    
-    yPos += 22;
-    
-    // Table header
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text('From', 25, yPos);
-    doc.text('To', 80, yPos);
-    doc.text('Date changed', 135, yPos);
-    yPos += 6;
-    
-    // Table rows
-    doc.setFont('helvetica', 'normal');
-    vehicleData.plateChanges.forEach(change => {
-      doc.text(safeString(change.from), 25, yPos);
-      doc.text(safeString(change.to), 80, yPos);
-      doc.text(safeString(change.date), 135, yPos);
-      yPos += 6;
-    });
-    
-    yPos += 10;
-  }
+// ─── Check badge ──────────────────────────────────────────────────────────────
+const checkBadge = (doc, x, y, w, h, pass, label, desc) => {
+  const bg   = pass ? [240, 250, 244] : [254, 242, 242];
+  const border = pass ? C.green : C.red;
 
-  // ============================================
-  // MILEAGE HISTORY TABLE - Colorful Design
-  // ============================================
-  if (vehicleData.mileageHistory && vehicleData.mileageHistory.length > 0) {
-    ({ yPos, pageNum } = checkNewPage(doc, yPos, 80, pageWidth, pageHeight, pageNum));
-    
-    // Section header with teal background
-    doc.setFillColor(0, 150, 136);
-    doc.roundedRect(15, yPos, pageWidth - 30, 10, 2, 2, 'F');
-    
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 255, 255);
-    doc.text('Mileage History', 20, yPos + 7);
-    
-    yPos += 15;
-    
-    // Table header with teal gradient
-    doc.setFillColor(0, 150, 136);
-    doc.roundedRect(20, yPos - 3, pageWidth - 40, 10, 2, 2, 'F');
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 255, 255);
-    doc.text('Date', 25, yPos + 3);
-    doc.text('Source', 70, yPos + 3);
-    doc.text('Mileage', 120, yPos + 3);
-    yPos += 12;
-    
-    // Table rows
-    doc.setFont('helvetica', 'normal');
-    const displayCount = Math.min(vehicleData.mileageHistory.length, 10);
-    vehicleData.mileageHistory.slice(0, displayCount).forEach((record, index) => {
-      if (index % 2 === 0) {
-        doc.setFillColor(255, 255, 255);
-      } else {
-        doc.setFillColor(248, 249, 250);
-      }
-      doc.rect(20, yPos - 4, pageWidth - 40, 6, 'F');
-      
-      doc.setTextColor(33, 37, 41);
-      doc.text(safeString(record.date || record.year), 25, yPos);
-      doc.text(safeString(record.source || 'MOT'), 70, yPos);
-      doc.text(record.mileage ? safeString(record.mileage.toLocaleString()) : 'N/A', 120, yPos);
-      yPos += 6;
-    });
-    
-    if (vehicleData.mileageHistory.length > displayCount) {
-      doc.setFontSize(8);
-      doc.setTextColor(33, 150, 243);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Show More', 25, yPos + 3);
-    }
-    
-    yPos += 10;
-    
-    // Disclaimer
-    doc.setFontSize(7);
-    doc.setFont('helvetica', 'italic');
-    doc.setTextColor(100, 100, 100);
-    const mileageDisclaimer = 'Disclaimer: Some MOT mileage data may have been removed due to input errors. Small differences in records could be due to information being pulled from different data sources.';
-    const splitDisclaimer = doc.splitTextToSize(mileageDisclaimer, pageWidth - 50);
-    doc.text(splitDisclaimer, 20, yPos);
-    
-    yPos += 15;
-  }
+  doc.setFillColor(...bg);
+  doc.setDrawColor(...border);
+  doc.setLineWidth(0.8);
+  doc.roundedRect(x, y, w, h, 2, 2, 'FD');
 
-  // ============================================
-  // PREVIOUS KEEPERS - Colorful Section
-  // ============================================
-  ({ yPos, pageNum } = checkNewPage(doc, yPos, 40, pageWidth, pageHeight, pageNum));
-  
-  // Section header with orange/amber background
-  doc.setFillColor(255, 152, 0);
-  doc.roundedRect(15, yPos, pageWidth - 30, 10, 2, 2, 'F');
-  
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.text('Previous Keepers', 20, yPos + 7);
-  
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Frequent changes may indicate vehicle issues', pageWidth - 20, yPos + 7, { align: 'right' });
-  
-  yPos += 15;
-  
-  // Info box with light background
-  doc.setFillColor(255, 248, 225);
-  doc.roundedRect(15, yPos, pageWidth - 30, 25, 2, 2, 'F');
-  
-  yPos += 8;
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(33, 37, 41);
-  
-  const keeperDetails = [
-    ['Number of previous keepers', safeString(vehicleData.previousOwners)],
-    ['Last keeper change', safeString(vehicleData.lastKeeperChange)]
-  ];
-  
-  keeperDetails.forEach(([label, value]) => {
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(100, 100, 100);
-    doc.text(label, 20, yPos);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(255, 152, 0);
-    doc.text(value, 90, yPos);
-    yPos += 7;
-  });
-  
-  yPos += 10;
-
-  // ============================================
-  // MOT HISTORY - Professional Table with Colored Headers
-  // ============================================
-  ({ yPos, pageNum } = checkNewPage(doc, yPos, 80, pageWidth, pageHeight, pageNum));
-  
-  // Section header with purple background
-  doc.setFillColor(156, 39, 176);
-  doc.roundedRect(15, yPos, pageWidth - 30, 10, 2, 2, 'F');
-  
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.text('MOT History', 20, yPos + 7);
-  
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Yearly safety and environmental inspection', pageWidth - 20, yPos + 7, { align: 'right' });
-  
-  yPos += 15;
-
-  if (vehicleData.motHistory && vehicleData.motHistory.length > 0) {
-    // MOT expiry status with colored badge
-    const latestMot = vehicleData.motHistory[0];
-    if (latestMot.expiry) {
-      doc.setFillColor(255, 235, 238);
-      doc.roundedRect(15, yPos, pageWidth - 30, 10, 2, 2, 'F');
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(244, 67, 54);
-      doc.text(`⚠ This vehicle's MOT expired on ${safeString(latestMot.expiry)}`, 20, yPos + 6);
-      yPos += 15;
-    }
-    
-    // Table header with gradient
-    doc.setFillColor(156, 39, 176);
-    doc.roundedRect(20, yPos - 3, pageWidth - 40, 10, 2, 2, 'F');
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 255, 255);
-    doc.text('Test date', 25, yPos + 3);
-    doc.text('Mileage', 70, yPos + 3);
-    doc.text('Result', 115, yPos + 3);
-    doc.text('Details', 155, yPos + 3);
-    yPos += 12;
-    
-    // Table rows with colorful badges
-    doc.setFont('helvetica', 'normal');
-    const displayCount = Math.min(vehicleData.motHistory.length, 10);
-    vehicleData.motHistory.slice(0, displayCount).forEach((mot, index) => {
-      // Check if we need a new page
-      if (yPos > pageHeight - 50) {
-        doc.addPage();
-        pageNum++;
-        addWatermark(doc, pageWidth, pageHeight);
-        addHeader(doc, pageWidth);
-        addFooter(doc, pageWidth, pageHeight, pageNum);
-        yPos = 60;
-      }
-      
-      // Alternating row colors
-      if (index % 2 === 0) {
-        doc.setFillColor(255, 255, 255);
-      } else {
-        doc.setFillColor(248, 249, 250);
-      }
-      doc.rect(20, yPos - 4, pageWidth - 40, 9, 'F');
-      
-      doc.setTextColor(33, 37, 41);
-      doc.setFontSize(9);
-      doc.text(safeString(mot.date), 25, yPos);
-      doc.text(mot.mileage ? safeString(mot.mileage.toLocaleString()) : 'N/A', 70, yPos);
-      
-      // Result badge with rounded corners and colors
-      if (mot.result === 'PASS') {
-        doc.setFillColor(76, 175, 80); // Green
-        doc.setTextColor(255, 255, 255);
-      } else {
-        doc.setFillColor(244, 67, 54); // Red
-        doc.setTextColor(255, 255, 255);
-      }
-      doc.roundedRect(113, yPos - 3, 25, 6, 1, 1, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      doc.text(safeString(mot.result), 125.5, yPos + 1, { align: 'center' });
-      
-      // Show details link in blue
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(33, 150, 243);
-      doc.text('Show details', 155, yPos);
-      
-      yPos += 9;
-    });
-    
-    if (vehicleData.motHistory.length > displayCount) {
-      doc.setFontSize(8);
-      doc.setTextColor(33, 150, 243);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Show More', 25, yPos + 3);
-    }
-    
-    yPos += 10;
+  // Icon circle
+  doc.setFillColor(...border);
+  doc.circle(x + 9, y + h / 2, 4, 'F');
+  // Draw tick or cross using lines instead of unicode
+  doc.setDrawColor(...C.white);
+  doc.setLineWidth(1.2);
+  if (pass) {
+    // Tick mark
+    doc.line(x + 6.5, y + h / 2, x + 8.5, y + h / 2 + 2.5);
+    doc.line(x + 8.5, y + h / 2 + 2.5, x + 11.5, y + h / 2 - 2);
   } else {
-    // No MOT history available - show clean message
-    doc.setFillColor(255, 248, 225);
-    doc.roundedRect(15, yPos, pageWidth - 30, 25, 2, 2, 'F');
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(100, 100, 100);
-    doc.text('MOT history not available for this vehicle', 20, yPos + 10);
-    
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'italic');
-    doc.text('This may be because the vehicle is too new or MOT data is not yet available.', 20, yPos + 17);
-    
-    yPos += 30;
+    // Cross mark
+    doc.line(x + 6.5, y + h / 2 - 2.5, x + 11.5, y + h / 2 + 2.5);
+    doc.line(x + 11.5, y + h / 2 - 2.5, x + 6.5, y + h / 2 + 2.5);
   }
 
-  yPos += 5;
+  setFont(doc, 8, 'bold', C.darkGrey);
+  doc.text(label, x + 17, y + h / 2 - 1);
+  setFont(doc, 7, 'normal', pass ? C.green : C.red);
+  doc.text(pass ? 'CLEAR' : 'ALERT', x + 17, y + h / 2 + 5);
+  setFont(doc, 6.5, 'normal', C.midGrey);
+  doc.text(desc, x + 17, y + h / 2 + 10);
+};
 
-  // ============================================
-  // MILEAGE GRAPH - Visual Representation
-  // ============================================
-  if (vehicleData.mileageHistory && vehicleData.mileageHistory.length > 1) {
-    ({ yPos, pageNum } = checkNewPage(doc, yPos, 75, pageWidth, pageHeight, pageNum));
-    
-    doc.setFillColor(248, 249, 250);
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.5);
-    doc.roundedRect(15, yPos, pageWidth - 30, 70, 4, 4, 'FD');
-    
-    doc.setFontSize(13);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(33, 37, 41);
-    doc.text('📈 Mileage History Graph', 20, yPos + 8);
-    yPos += 18;
+// ─── Key-value row ─────────────────────────────────────────────────────────────
+const kvRow = (doc, x, y, w, label, value, alt = false) => {
+  if (alt) { doc.setFillColor(...C.rowAlt); doc.rect(x, y - 3, w, 7, 'F'); }
+  setFont(doc, 7.5, 'normal', C.midGrey);
+  doc.text(label, x + 3, y + 1);
+  setFont(doc, 7.5, 'bold', C.darkGrey);
+  doc.text(safeString(value), x + w * 0.5, y + 1);
+  return y + 7;
+};
 
-    const graphX = 30;
-    const graphY = yPos;
-    const graphWidth = pageWidth - 60;
-    const graphHeight = 45;
+// ─── Main export ──────────────────────────────────────────────────────────────
+export const generateEnhancedVehicleReport = (vehicleData, registration) => {
+  if (!vehicleData) throw new Error('Vehicle data required');
 
-    // Graph background
-    doc.setFillColor(255, 255, 255);
-    doc.roundedRect(graphX, graphY, graphWidth, graphHeight, 2, 2, 'F');
-    
-    // Grid lines
-    doc.setDrawColor(230, 230, 230);
+  const doc   = new jsPDF({ unit: 'mm', format: 'a4' });
+  const PW    = doc.internal.pageSize.getWidth();
+  const PH    = doc.internal.pageSize.getHeight();
+  const state = { page: 1 };
+  const rId   = 'VHR-' + Date.now().toString().slice(-8);
+  const reg   = registration.toUpperCase();
+
+  let y = 0;
+  const g = (need) => { y = guard(doc, y, need, PH, state, PW, drawFooter); };
+
+  // ── Page 1 header ────────────────────────────────────────────────────────
+  drawHeader(doc, PW, reg, rId);
+  y = 38;
+
+  // ── Registration plate + vehicle name ────────────────────────────────────
+  // Yellow plate
+  doc.setFillColor(255, 209, 0);
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(1.5);
+  doc.roundedRect(15, y, 68, 14, 2, 2, 'FD');
+  setFont(doc, 16, 'bold', C.darkGrey);
+  doc.text(reg, 49, y + 10, { align: 'center' });
+
+  // Vehicle name
+  const vName = [vehicleData.year, vehicleData.make, vehicleData.model, vehicleData.variant]
+    .filter(Boolean).join(' ').toUpperCase();
+  setFont(doc, 13, 'bold', C.darkGrey);
+  doc.text(vName || 'VEHICLE', 90, y + 7);
+  setFont(doc, 8, 'normal', C.midGrey);
+  doc.text('Report Date: ' + new Date().toLocaleDateString('en-GB') + '  |  ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }), 90, y + 13);
+  y += 22;
+
+  // ── Safety summary bar ────────────────────────────────────────────────────
+  const stolen    = !!vehicleData.stolen;
+  const writeOff  = !!vehicleData.writeOff;
+  const finance   = !!vehicleData.outstandingFinance;
+  const allClear  = !stolen && !writeOff && !finance;
+
+  doc.setFillColor(...(allClear ? [240, 250, 244] : [254, 242, 242]));
+  doc.roundedRect(15, y, PW - 30, 10, 2, 2, 'F');
+  doc.setFillColor(...(allClear ? C.green : C.red));
+  doc.roundedRect(15, y, 3, 10, 1, 1, 'F');
+  setFont(doc, 9, 'bold', allClear ? C.green : C.red);
+  doc.text(allClear ? 'ALL CHECKS PASSED - No issues found' : 'ISSUES DETECTED - Please review below', 22, y + 7);
+
+  const passCount = [!stolen, !writeOff, !finance].filter(Boolean).length;
+  setFont(doc, 8, 'normal', C.midGrey);
+  doc.text(passCount + ' of 3 checks passed', PW - 18, y + 7, { align: 'right' });
+  y += 16;
+
+  // ── Three check cards ─────────────────────────────────────────────────────
+  g(28);
+  const cw = (PW - 38) / 3;
+  checkBadge(doc, 15,        y, cw, 24, !stolen,   'Theft Check',     stolen   ? 'Reported stolen'    : 'No theft records');
+  checkBadge(doc, 17 + cw,   y, cw, 24, !writeOff, 'Write-Off',       writeOff ? 'Insurance write-off' : 'No write-off records');
+  checkBadge(doc, 19 + cw*2, y, cw, 24, !finance,  'Finance',         finance  ? 'Outstanding finance' : 'No finance detected');
+  y += 31;
+
+  // ── REPORT SUMMARY (always shown - AutoTrader style) ─────────────────────
+  g(12);
+  y = sectionTitle(doc, y, PW, 'Report Summary');
+
+  setFont(doc, 7.5, 'normal', C.darkGrey);
+  doc.text('This is a summary of the vehicle check results.', 15, y);
+  y += 8;
+
+  // ── WARNINGS section (always shown) ──────────────────────────────────────
+  g(12);
+  y = sectionTitle(doc, y, PW, 'Warnings');
+
+  if (writeOff || stolen) {
+    if (writeOff) {
+      g(32);
+      doc.setFillColor(...C.red);
+      doc.setDrawColor(...C.red);
+      doc.setLineWidth(0.3);
+      doc.triangle(20, y + 1, 16.5, y + 7.5, 23.5, y + 7.5, 'F');
+      doc.setFillColor(...C.white);
+      doc.rect(19.4, y + 2.5, 1.2, 3.2, 'F');
+      doc.circle(20, y + 6.8, 0.7, 'F');
+
+      setFont(doc, 8.5, 'bold', [0, 80, 200]);
+      doc.text('Insurance write-off recorded', 27, y + 6);
+      const wotw = doc.getTextWidth('Insurance write-off recorded');
+      doc.setDrawColor(0, 80, 200); doc.setLineWidth(0.3);
+      doc.line(27, y + 7, 27 + wotw, y + 7);
+      y += 12;
+
+      setFont(doc, 7.5, 'normal', C.darkGrey);
+      const woDate = vehicleData.writeOffDate ? fmtDate(vehicleData.writeOffDate) : null;
+      doc.text('This vehicle has been written off by an insurance company' + (woDate ? ' on ' + woDate : '') + '.', 15, y);
+      y += 6;
+      if (vehicleData.writeOffCategory && vehicleData.writeOffCategory !== 'N/A' && vehicleData.writeOffCategory !== 'none') {
+        doc.text('Status is: CAT ' + vehicleData.writeOffCategory + (vehicleData.writeOffDescription ? ' - ' + vehicleData.writeOffDescription : ''), 15, y);
+        y += 6;
+      }
+      doc.setDrawColor(...C.border); doc.setLineWidth(0.3);
+      doc.line(15, y + 2, PW - 15, y + 2);
+      y += 8;
+    }
+
+    if (stolen) {
+      g(20);
+      doc.setFillColor(...C.red);
+      doc.triangle(20, y + 1, 16.5, y + 7.5, 23.5, y + 7.5, 'F');
+      doc.setFillColor(...C.white);
+      doc.rect(19.4, y + 2.5, 1.2, 3.2, 'F');
+      doc.circle(20, y + 6.8, 0.7, 'F');
+
+      setFont(doc, 8.5, 'bold', [0, 80, 200]);
+      doc.text('Stolen vehicle recorded', 27, y + 6);
+      const stw = doc.getTextWidth('Stolen vehicle recorded');
+      doc.setDrawColor(0, 80, 200); doc.setLineWidth(0.3);
+      doc.line(27, y + 7, 27 + stw, y + 7);
+      y += 12;
+
+      setFont(doc, 7.5, 'normal', C.darkGrey);
+      doc.text('This vehicle has been reported as stolen.', 15, y);
+      y += 8;
+    }
+  } else {
+    // No warnings - show clear message
+    g(10);
+    doc.setFillColor(240, 250, 244);
+    doc.setDrawColor(...C.green);
     doc.setLineWidth(0.3);
-    for (let i = 1; i < 5; i++) {
-      const gridY = graphY + (i * graphHeight / 5);
-      doc.line(graphX, gridY, graphX + graphWidth, gridY);
-    }
-
-    // Axes
-    doc.setDrawColor(150, 150, 150);
-    doc.setLineWidth(0.8);
-    doc.line(graphX, graphY + graphHeight, graphX + graphWidth, graphY + graphHeight);
-    doc.line(graphX, graphY, graphX, graphY + graphHeight);
-
-    // Calculate scale
-    const mileages = vehicleData.mileageHistory.map(h => h.mileage);
-    const maxMileage = Math.max(...mileages);
-    const minMileage = Math.min(...mileages);
-    const range = maxMileage - minMileage || 1;
-
-    // Draw gradient area
-    doc.setFillColor(33, 150, 243);
-    doc.setGState(new doc.GState({ opacity: 0.1 }));
-    
-    vehicleData.mileageHistory.forEach((point, index) => {
-      if (index < vehicleData.mileageHistory.length - 1) {
-        const x = graphX + (index / (vehicleData.mileageHistory.length - 1)) * graphWidth;
-        const y = graphY + graphHeight - ((point.mileage - minMileage) / range) * graphHeight;
-        const nextPoint = vehicleData.mileageHistory[index + 1];
-        const nextX = graphX + ((index + 1) / (vehicleData.mileageHistory.length - 1)) * graphWidth;
-        const nextY = graphY + graphHeight - ((nextPoint.mileage - minMileage) / range) * graphHeight;
-        
-        doc.triangle(x, graphY + graphHeight, x, y, nextX, nextY, 'F');
-        doc.triangle(x, graphY + graphHeight, nextX, graphY + graphHeight, nextX, nextY, 'F');
-      }
-    });
-    
-    doc.setGState(new doc.GState({ opacity: 1 }));
-
-    // Draw line
-    doc.setDrawColor(33, 150, 243);
-    doc.setLineWidth(2.5);
-    
-    vehicleData.mileageHistory.forEach((point, index) => {
-      const x = graphX + (index / (vehicleData.mileageHistory.length - 1)) * graphWidth;
-      const y = graphY + graphHeight - ((point.mileage - minMileage) / range) * graphHeight;
-      
-      if (index < vehicleData.mileageHistory.length - 1) {
-        const nextPoint = vehicleData.mileageHistory[index + 1];
-        const nextX = graphX + ((index + 1) / (vehicleData.mileageHistory.length - 1)) * graphWidth;
-        const nextY = graphY + graphHeight - ((nextPoint.mileage - minMileage) / range) * graphHeight;
-        doc.line(x, y, nextX, nextY);
-      }
-      
-      // Draw point
-      doc.setFillColor(33, 150, 243);
-      doc.circle(x, y, 2.5, 'F');
-      doc.setDrawColor(255, 255, 255);
-      doc.setLineWidth(1);
-      doc.circle(x, y, 2.5, 'D');
-    });
-
-    // Labels
-    doc.setFontSize(7);
-    doc.setTextColor(100, 100, 100);
-    doc.setFont('helvetica', 'normal');
-    
-    doc.text(safeString(maxMileage.toLocaleString()), graphX - 5, graphY + 3, { align: 'right' });
-    doc.text(safeString(minMileage.toLocaleString()), graphX - 5, graphY + graphHeight, { align: 'right' });
-    doc.text('miles', graphX - 5, graphY - 2, { align: 'right' });
-    
-    // X-axis labels
-    const labelInterval = Math.ceil(vehicleData.mileageHistory.length / 5);
-    vehicleData.mileageHistory.forEach((point, index) => {
-      if (index % labelInterval === 0 || index === vehicleData.mileageHistory.length - 1) {
-        const x = graphX + (index / (vehicleData.mileageHistory.length - 1)) * graphWidth;
-        const label = point.year || point.date || '';
-        doc.text(safeString(label), x, graphY + graphHeight + 5, { align: 'center' });
-      }
-    });
-
-    doc.setTextColor(0, 0, 0);
-    yPos += graphHeight + 12;
+    doc.roundedRect(15, y, PW - 30, 9, 2, 2, 'FD');
+    setFont(doc, 7.5, 'normal', C.green);
+    doc.text('No warnings recorded for this vehicle.', 20, y + 6);
+    y += 14;
   }
 
-  // ============================================
-  // ENVIRONMENTAL IMPACT - Green Theme (Only if CO2 data available)
-  // ============================================
-  const co2Value = vehicleData.co2Emissions?.value || vehicleData.co2Emissions;
-  
-  if (co2Value) {
-    ({ yPos, pageNum } = checkNewPage(doc, yPos, 50, pageWidth, pageHeight, pageNum));
-    
-    // Section header with green background
-    doc.setFillColor(76, 175, 80);
-    doc.roundedRect(15, yPos, pageWidth - 30, 10, 2, 2, 'F');
-    
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 255, 255);
-    doc.text('Environmental Impact', 20, yPos + 7);
-    
-    doc.setFontSize(7);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Lower emissions = Better for environment', pageWidth - 20, yPos + 7, { align: 'right' });
-    
-    yPos += 15;
-    
-    // Info box with light green background
-    doc.setFillColor(232, 245, 233);
-    doc.roundedRect(15, yPos, pageWidth - 30, 25, 2, 2, 'F');
-    
-    yPos += 10;
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(60, 60, 60);
-    doc.text('CO2 emissions', 20, yPos);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(14);
-    doc.setTextColor(76, 175, 80);
-    doc.text(safeString(co2Value) + ' g/km', 70, yPos);
-    
-    yPos += 10;
-    
-    // Environmental disclaimer
-    doc.setFontSize(7);
-    doc.setFont('helvetica', 'italic');
-    doc.setTextColor(120, 120, 120);
-    doc.text('Disclaimer: This information is not covered by the data guarantee.', 20, yPos);
-    
-    yPos += 15;
+  // ── CAUTIONS section (always shown) ──────────────────────────────────────
+  g(12);
+  y = sectionTitle(doc, y, PW, 'Cautions');
+
+  if (finance) {
+
+    g(20);
+    doc.setFillColor(...C.amber);
+    doc.setDrawColor(...C.amber);
+    doc.setLineWidth(0.3);
+    doc.triangle(20, y + 1, 16.5, y + 7.5, 23.5, y + 7.5, 'F');
+    doc.setFillColor(...C.white);
+    doc.rect(19.4, y + 2.5, 1.2, 3.2, 'F');
+    doc.circle(20, y + 6.8, 0.7, 'F');
+
+    setFont(doc, 8.5, 'bold', [0, 80, 200]);
+    doc.text('Outstanding finance recorded', 27, y + 6);
+    const fintw = doc.getTextWidth('Outstanding finance recorded');
+    doc.setDrawColor(0, 80, 200); doc.setLineWidth(0.3);
+    doc.line(27, y + 7, 27 + fintw, y + 7);
+    y += 12;
+
+    setFont(doc, 7.5, 'normal', C.darkGrey);
+    doc.text("There's an outstanding finance agreement attached to this vehicle.", 15, y);
+    y += 8;
+
+    const finRows = [
+      ['Finance company',             safeString(vehicleData.financeCompany)],
+      ['Agreement type',              safeString(vehicleData.financeType)],
+      ['Agreement number',            safeString(vehicleData.financeAgreementNumber)],
+      ['Agreement start date',        safeString(vehicleData.financeStartDate)],
+      ['Agreement term',              safeString(vehicleData.financeTerm)],
+      ['Contact number',              safeString(vehicleData.financeContact)],
+      ['Finance vehicle description', safeString(vehicleData.financeVehicleDescription)],
+    ].filter(([, v]) => v !== 'N/A');
+
+    finRows.forEach(([label, value], i) => {
+      g(8);
+      if (i % 2 === 0) { doc.setFillColor(...C.rowAlt); doc.rect(15, y - 2, PW - 30, 7, 'F'); }
+      doc.setDrawColor(...C.border); doc.setLineWidth(0.15);
+      doc.line(15, y + 5, PW - 15, y + 5);
+      setFont(doc, 7.5, 'normal', C.midGrey);
+      doc.text(label, 18, y + 3);
+      setFont(doc, 7.5, 'normal', C.darkGrey);
+      doc.text(value, 100, y + 3);
+      y += 7;
+    });
+    y += 6;
+  } else {
+    // No cautions - show clear message
+    g(10);
+    doc.setFillColor(240, 250, 244);
+    doc.setDrawColor(...C.green);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(15, y, PW - 30, 9, 2, 2, 'FD');
+    setFont(doc, 7.5, 'normal', C.green);
+    doc.text('No cautions recorded for this vehicle.', 20, y + 6);
+    y += 14;
   }
 
-  // ============================================
-  // ADDITIONAL CHECKS - Import/Export/Color Changes
-  // ============================================
-  ({ yPos, pageNum } = checkNewPage(doc, yPos, 40, pageWidth, pageHeight, pageNum));
-  
-  // Section header with gray background
-  doc.setFillColor(96, 125, 139);
-  doc.roundedRect(15, yPos, pageWidth - 30, 10, 2, 2, 'F');
-  
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.text('Additional Checks', 20, yPos + 7);
-  
-  yPos += 15;
-  
-  // Info box
-  doc.setFillColor(236, 239, 241);
-  doc.roundedRect(15, yPos, pageWidth - 30, 25, 2, 2, 'F');
-  
-  yPos += 8;
-  
-  const additionalChecks = [
-    { label: 'Not imported', passed: !vehicleData.imported },
-    { label: 'Not exported', passed: !vehicleData.exported },
-    { label: 'No colour changes', passed: !vehicleData.colourChanges && vehicleData.colourChanges !== true }
+  // ── Summary text ──────────────────────────────────────────────────────────
+  g(16);
+  setFont(doc, 7.5, 'normal', C.midGrey);
+  const sumText = 'This vehicle has passed ' + passCount + ' out of 3 safety checks.' +
+    (vehicleData.mileage ? '  Current mileage: ' + Number(vehicleData.mileage).toLocaleString() + ' miles.' : '') +
+    (vehicleData.previousOwners != null ? '  ' + vehicleData.previousOwners + ' previous keeper(s).' : '') +
+    (allClear ? '  No major issues detected.' : '  Please review alerts above.');
+  const lines = doc.splitTextToSize(sumText, PW - 30);
+  doc.text(lines, 15, y);
+  y += lines.length * 4 + 6;
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // VEHICLE DETAILS
+  // ════════════════════════════════════════════════════════════════════════════
+  g(12);
+  y = sectionTitle(doc, y, PW, 'Vehicle Details');
+
+  const half = (PW - 33) / 2;
+  const leftData = [
+    ['Registration',     reg],
+    ['Year of manufacture', safeString(vehicleData.year || vehicleData.manufactureYear)],
+    ['First registered', fmtDate(vehicleData.firstRegistered || vehicleData.registrationDate)],
+    ['Make',             safeString(vehicleData.make)],
+    ['Model',            safeString(vehicleData.model)],
+    ['Variant',          safeString(vehicleData.variant)],
+    ['Body type',        safeString(vehicleData.bodyType)],
+    ['Colour',           safeString(vehicleData.colour || vehicleData.color)],
   ];
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  
-  additionalChecks.forEach((check, index) => {
-    // Checkmark with colored circle
-    if (check.passed) {
-      doc.setFillColor(76, 175, 80);
-    } else {
-      doc.setFillColor(255, 152, 0);
-    }
-    doc.circle(23, yPos + (index * 6) - 1, 2, 'F');
-    
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.text(check.passed ? 'v' : '!', 23, yPos + (index * 6), { align: 'center' });
-    
-    // Text
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    doc.text(check.label, 30, yPos + (index * 6));
+  const rightData = [
+    ['Engine capacity',  formatEngineSize(vehicleData.engineSize || vehicleData.engineCapacity)],
+    ['Engine number',    safeString(vehicleData.engineNumber)],
+    ['Fuel type',        safeString(vehicleData.fuelType)],
+    ['Transmission',     safeString(vehicleData.transmission)],
+    ['Doors',            safeString(vehicleData.doors)],
+    ['Seats',            safeString(vehicleData.seats)],
+    ['Drive type',       safeString(vehicleData.driveType)],
+    ['CO2 Emissions',    vehicleData.co2Emissions ? safeString(vehicleData.co2Emissions) + ' g/km' : 'N/A'],
+  ];
+
+  g(leftData.length * 7 + 8);
+  const startY = y;
+  leftData.forEach(([l, v], i) => {
+    kvRow(doc, 15, y + i * 7, half, l, v, i % 2 === 0);
   });
-  
-  yPos += 20;
+  rightData.forEach(([l, v], i) => {
+    kvRow(doc, 18 + half, y + i * 7, half, l, v, i % 2 === 0);
+  });
+  y += leftData.length * 7 + 6;
 
-    // Add footer on last page
-    addFooter(doc, pageWidth, pageHeight, pageNum, true);
-
-    // Save the PDF
-    doc.save('CARCATLOG-Vehicle-Report-' + registration + '-' + new Date().toISOString().split('T')[0] + '.pdf');
-    
-    console.log('PDF generated successfully for:', registration);
-  } catch (error) {
-    console.error('Error in generateEnhancedVehicleReport:', error);
-    console.error('Error stack:', error.stack);
-    console.error('Vehicle data:', vehicleData);
-    throw new Error('Failed to generate PDF: ' + error.message);
+  // Road tax + insurance
+  if (vehicleData.annualTax || vehicleData.insuranceGroup) {
+    g(12);
+    doc.setFillColor(...C.tagBg);
+    doc.roundedRect(15, y, PW - 30, 9, 2, 2, 'F');
+    setFont(doc, 7.5, 'normal', C.midGrey);
+    if (vehicleData.annualTax) doc.text('Road Tax (12m): £' + safeString(vehicleData.annualTax), 20, y + 6);
+    if (vehicleData.insuranceGroup) doc.text('Insurance Group: ' + safeString(vehicleData.insuranceGroup), 90, y + 6);
+    setFont(doc, 6.5, 'italic', C.midGrey);
+    doc.text('*Road tax is current rate and may change.', PW - 18, y + 6, { align: 'right' });
+    y += 14;
   }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // ALL CLEAR SECTION
+  // ════════════════════════════════════════════════════════════════════════════
+  g(14);
+  y = sectionTitle(doc, y, PW, 'All Clear Checks');
+
+  const clearChecks = [
+    { label: 'Not recorded as stolen',   pass: !vehicleData.stolen },
+    { label: 'Not recorded as scrapped', pass: !vehicleData.scrapped },
+    { label: 'No third-party interest',  pass: !vehicleData.outstandingFinance },
+    { label: 'No mileage discrepancies', pass: !vehicleData.mileageDiscrepancy },
+    { label: !vehicleData.imported  ? 'Not imported'      : 'Imported',       pass: !vehicleData.imported },
+    { label: !vehicleData.exported  ? 'Not exported'      : 'Exported',       pass: !vehicleData.exported },
+    { label: !vehicleData.colourChanges ? 'No colour changes' : 'Colour changes recorded', pass: !vehicleData.colourChanges },
+  ];
+
+  g(clearChecks.length * 6 + 4);
+  clearChecks.forEach((c, i) => {
+    if (i % 2 === 0) { doc.setFillColor(...C.rowAlt); doc.rect(15, y - 2, PW - 30, 7, 'F'); }
+    doc.setFillColor(...(c.pass ? C.green : C.red));
+    doc.circle(21, y + 1.5, 2.5, 'F');
+    // Draw tick or cross using lines
+    doc.setDrawColor(...C.white);
+    doc.setLineWidth(0.8);
+    if (c.pass) {
+      doc.line(19.2, y + 1.5, 20.8, y + 3.2);
+      doc.line(20.8, y + 3.2, 23.2, y - 0.5);
+    } else {
+      doc.line(19.2, y - 0.5, 22.8, y + 3.5);
+      doc.line(22.8, y - 0.5, 19.2, y + 3.5);
+    }
+    setFont(doc, 7.5, 'normal', C.darkGrey);
+    doc.text(c.label, 27, y + 3.5);
+    y += 6;
+  });
+  y += 6;
+
+  if (vehicleData.mileage) {
+    setFont(doc, 8, 'bold', C.green);
+    doc.text('Latest recorded mileage: ' + Number(vehicleData.mileage).toLocaleString() + ' miles', 15, y);
+    y += 6;
+  }
+  setFont(doc, 6.5, 'italic', C.midGrey);
+  doc.text('Mileage data sourced from DVLA, BVRLA and MOT records.', 15, y);
+  y += 8;
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PREVIOUS KEEPERS
+  // ════════════════════════════════════════════════════════════════════════════
+  g(22);
+  y = sectionTitle(doc, y, PW, 'Previous Keepers');
+
+  doc.setFillColor(...C.rowAlt);
+  doc.roundedRect(15, y, PW - 30, 16, 2, 2, 'F');
+  setFont(doc, 22, 'bold', C.orange);
+  doc.text(safeString(vehicleData.previousOwners), 30, y + 13);
+  setFont(doc, 7.5, 'normal', C.midGrey);
+  doc.text('Number of previous keepers', 42, y + 7);
+  if (vehicleData.lastKeeperChange) {
+    doc.text('Last keeper change: ' + fmtDate(vehicleData.lastKeeperChange), 42, y + 13);
+  }
+  setFont(doc, 6.5, 'italic', C.midGrey);
+  doc.text('Frequent keeper changes may indicate problems with the vehicle.', PW - 18, y + 13, { align: 'right' });
+  y += 22;
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // TO REVIEW — Plate Changes
+  // ════════════════════════════════════════════════════════════════════════════
+  const plateList = vehicleData.plateChanges || vehicleData.plateChangesList || [];
+  const plateArr  = Array.isArray(plateList) ? plateList : [];
+  if (plateArr.length > 0) {
+    g(14);
+    y = sectionTitle(doc, y, PW, 'To Review');
+
+    // Info icon + title
+    doc.setFillColor(...C.blue);
+    doc.circle(22, y + 8, 4, 'F');
+    setFont(doc, 8, 'bold', C.white);
+    doc.text('i', 22, y + 10, { align: 'center' });
+    setFont(doc, 9, 'bold', [0, 80, 200]);
+    doc.text('This vehicle has had plate changes', 30, y + 10);
+    y += 18;
+
+    // Table header
+    doc.setFillColor(...C.lightGrey);
+    doc.setDrawColor(...C.border);
+    doc.setLineWidth(0.3);
+    doc.rect(15, y, PW - 30, 8, 'FD');
+    setFont(doc, 7.5, 'bold', C.darkGrey);
+    doc.text('From',         22,  y + 5.5);
+    doc.text('To',           80,  y + 5.5);
+    doc.text('Date changed', 140, y + 5.5);
+    y += 9;
+
+    plateArr.slice(0, 10).forEach((p, i) => {
+      g(8);
+      if (i % 2 === 0) { doc.setFillColor(...C.rowAlt); doc.rect(15, y - 2, PW - 30, 7, 'F'); }
+      doc.setDrawColor(...C.border); doc.setLineWidth(0.15);
+      doc.line(15, y + 5, PW - 15, y + 5);
+      setFont(doc, 7.5, 'bold', C.darkGrey);
+      doc.text(safeString(p.from || p.previousVrm || p.Previous || p.previous), 22, y + 3);
+      doc.text(safeString(p.to   || p.newVrm     || p.Current  || p.current),  80, y + 3);
+      setFont(doc, 7.5, 'normal', C.darkGrey);
+      doc.text(fmtDate(p.date || p.dateOfChange || p.Date), 140, y + 3);
+      y += 7;
+    });
+    y += 8;
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // MILEAGE HISTORY — Graph + Table (matching screenshot style)
+  // ════════════════════════════════════════════════════════════════════════════
+  if (vehicleData.mileageHistory && vehicleData.mileageHistory.length > 0) {
+    const mhData = vehicleData.mileageHistory;
+    const mils   = mhData.map(r => r.mileage || 0);
+    const maxM   = Math.max(...mils);
+    const latestMil = mils[mils.length - 1];
+
+    // Latest mileage badge
+    g(10);
+    doc.setFillColor(...C.rowAlt);
+    doc.setDrawColor(...C.border);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(15, y, 85, 8, 2, 2, 'FD');
+    setFont(doc, 7.5, 'normal', C.darkGrey);
+    doc.text('Latest mileage: ', 19, y + 5.5);
+    setFont(doc, 7.5, 'bold', C.darkGrey);
+    doc.text(Number(latestMil).toLocaleString() + ' miles', 52, y + 5.5);
+    y += 13;
+
+    // Graph (only if 2+ data points)
+    if (mhData.length > 1) {
+      g(70);
+      y = sectionTitle(doc, y, PW, 'Mileage History');
+
+      const yAxisW = 20;
+      const gx = 15 + yAxisW;
+      const gy = y + 2;
+      const gw = PW - 30 - yAxisW;
+      const gh = 48;
+
+      // Y-axis scale: round up to nearest 10k
+      const yStepVal = Math.ceil(maxM / 5 / 10000) * 10000 || 10000;
+      const yMax = yStepVal * 5;
+
+      // Graph background
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(...C.border);
+      doc.setLineWidth(0.3);
+      doc.rect(gx, gy, gw, gh, 'FD');
+
+      // Horizontal grid lines + Y labels
+      doc.setDrawColor(230, 230, 230);
+      doc.setLineWidth(0.2);
+      for (let i = 0; i <= 5; i++) {
+        const val   = i * yStepVal;
+        const lineY = gy + gh - (val / yMax) * gh;
+        if (i > 0 && i < 5) doc.line(gx, lineY, gx + gw, lineY);
+        setFont(doc, 6, 'normal', C.midGrey);
+        const label = val >= 1000 ? Math.round(val / 1000) + 'k' : String(val);
+        doc.text(label, gx - 2, lineY + 1.5, { align: 'right' });
+      }
+
+      // Dark navy line (like screenshot)
+      doc.setDrawColor(26, 35, 100);
+      doc.setLineWidth(1.5);
+      for (let i = 0; i < mhData.length - 1; i++) {
+        const x1 = gx + (i / (mhData.length - 1)) * gw;
+        const y1 = gy + gh - ((mhData[i].mileage || 0) / yMax) * gh;
+        const x2 = gx + ((i + 1) / (mhData.length - 1)) * gw;
+        const y2 = gy + gh - ((mhData[i + 1].mileage || 0) / yMax) * gh;
+        doc.line(x1, y1, x2, y2);
+      }
+
+      // Dots
+      mhData.forEach((pt, i) => {
+        const x  = gx + (i / (mhData.length - 1)) * gw;
+        const py = gy + gh - ((pt.mileage || 0) / yMax) * gh;
+        doc.setFillColor(26, 35, 100); doc.circle(x, py, 1.5, 'F');
+        doc.setFillColor(255, 255, 255); doc.circle(x, py, 0.7, 'F');
+      });
+
+      // X-axis: first and last date
+      setFont(doc, 6, 'normal', C.midGrey);
+      doc.text(fmtDate(mhData[0].date), gx, gy + gh + 5);
+      doc.text(fmtDate(mhData[mhData.length - 1].date), gx + gw, gy + gh + 5, { align: 'right' });
+
+      // Legend
+      doc.setFillColor(26, 35, 100);
+      doc.rect(gx, gy + gh + 11, 8, 1.5, 'F');
+      setFont(doc, 6.5, 'normal', C.darkGrey);
+      doc.text('Mileage', gx + 10, gy + gh + 12.5);
+
+      y += gh + 24;
+    }
+
+    // Table
+    g(16);
+    doc.setFillColor(...C.lightGrey);
+    doc.setDrawColor(...C.border);
+    doc.setLineWidth(0.3);
+    doc.rect(15, y, PW - 30, 8, 'FD');
+    setFont(doc, 7.5, 'bold', C.darkGrey);
+    doc.text('Date',    22,  y + 5.5);
+    doc.text('Source',  85,  y + 5.5);
+    doc.text('Mileage', 145, y + 5.5);
+    y += 9;
+
+    // Show most recent first
+    mhData.slice().reverse().slice(0, 15).forEach((r, i) => {
+      g(8);
+      if (i % 2 === 0) { doc.setFillColor(...C.rowAlt); doc.rect(15, y - 2, PW - 30, 7, 'F'); }
+      doc.setDrawColor(...C.border); doc.setLineWidth(0.15);
+      doc.line(15, y + 5, PW - 15, y + 5);
+      setFont(doc, 7.5, 'normal', C.darkGrey);
+      doc.text(fmtDate(r.date || r.year), 22, y + 3);
+      doc.text(safeString(r.source || 'MOT'), 85, y + 3);
+      setFont(doc, 7.5, 'bold', C.darkGrey);
+      doc.text(r.mileage ? Number(r.mileage).toLocaleString() : 'N/A', 145, y + 3);
+      y += 7;
+    });
+
+    setFont(doc, 6.5, 'italic', C.midGrey);
+    doc.text('Mileage information can come from the DVLA, BVRLA and MOT.', 15, y + 4);
+    y += 12;
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // MOT HISTORY
+  // ════════════════════════════════════════════════════════════════════════════
+  g(16);
+  y = sectionTitle(doc, y, PW, 'MOT History');
+
+  const motList = vehicleData.motHistory || vehicleData.motTests || [];
+  if (motList.length > 0) {
+    // Header row
+    doc.setFillColor(...C.darkGrey);
+    doc.roundedRect(15, y, PW - 30, 8, 1, 1, 'F');
+    setFont(doc, 7.5, 'bold', C.white);
+    doc.text('Test Date',   22,  y + 5.5);
+    doc.text('Mileage',     72,  y + 5.5);
+    doc.text('Result',      112, y + 5.5);
+    doc.text('Advisories',  145, y + 5.5);
+    y += 10;
+
+    motList.slice(0, 12).forEach((mot, i) => {
+      g(9);
+      if (i % 2 === 0) { doc.setFillColor(...C.rowAlt); doc.rect(15, y - 2, PW - 30, 8, 'F'); }
+
+      const testDate    = mot.testDate || mot.date || mot.completedDate;
+      const testMileage = mot.odometerValue || mot.mileage;
+      const result      = mot.testResult || mot.result || '';
+      const pass        = result === 'PASSED' || result === 'PASS';
+      const adv         = (mot.advisoryText || []).length + (mot.defects || []).length;
+
+      setFont(doc, 7.5, 'normal', C.darkGrey);
+      doc.text(testDate ? new Date(testDate).toLocaleDateString('en-GB') : 'N/A', 22, y + 3);
+      doc.text(testMileage ? Number(testMileage).toLocaleString() : 'N/A', 72, y + 3);
+
+      // Result pill
+      pill(doc, 110, y - 1, 26, 7, pass ? 'PASS' : 'FAIL', pass ? C.green : C.red);
+
+      setFont(doc, 7.5, 'normal', adv > 0 ? C.amber : C.midGrey);
+      doc.text(adv > 0 ? adv + ' item(s)' : 'None', 145, y + 3);
+      y += 8;
+    });
+  } else {
+    doc.setFillColor(...C.rowAlt);
+    doc.roundedRect(15, y, PW - 30, 14, 2, 2, 'F');
+    setFont(doc, 8, 'normal', C.midGrey);
+    doc.text('MOT history not available for this vehicle.', 22, y + 6);
+    setFont(doc, 7, 'italic', C.midGrey);
+    doc.text('This may be because the vehicle is too new, or MOT data is not yet available.', 22, y + 11);
+    y += 20;
+  }
+  y += 6;
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // CO2 / ENVIRONMENTAL
+  // ════════════════════════════════════════════════════════════════════════════
+  const co2 = vehicleData.co2Emissions?.value || vehicleData.co2Emissions;
+  if (co2) {
+    g(22);
+    y = sectionTitle(doc, y, PW, 'Environmental Impact');
+    doc.setFillColor(240, 250, 244);
+    doc.roundedRect(15, y, PW - 30, 14, 2, 2, 'F');
+    setFont(doc, 18, 'bold', C.green);
+    doc.text(safeString(co2) + ' g/km', 30, y + 10);
+    setFont(doc, 7.5, 'normal', C.midGrey);
+    doc.text('CO2 Emissions', 75, y + 7);
+    setFont(doc, 6.5, 'italic', C.midGrey);
+    doc.text('Lower emissions = Lower road tax. Disclaimer: not covered by data guarantee.', 75, y + 12);
+    y += 20;
+  }
+
+  // ── Final footer ──────────────────────────────────────────────────────────
+  drawFooter(doc, PW, PH, state.page, true);
+
+  doc.save('CARCATLOG-' + reg + '-' + new Date().toISOString().split('T')[0] + '.pdf');
 };

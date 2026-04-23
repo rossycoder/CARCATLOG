@@ -297,6 +297,15 @@
   position: relative;
 }
 
+/* Mobile App Hero Overlay - hidden on desktop */
+.mobile-hero-overlay {
+  display: none;
+}
+
+.mobile-coming-soon-badge {
+  display: none;
+}
+
 /* Welcome Hero Section */
 .welcome-hero-section {
   padding: var(--section-padding-lg) var(--spacing-5);
@@ -635,7 +644,7 @@
 
   align-items: center;
 
-  gap: 1.5rem;
+  gap: 2.5rem;
 
   justify-content: space-between;
 
@@ -1184,10 +1193,12 @@
     min-height: 900px !important;
     padding: var(--spacing-2) var(--spacing-2) var(--spacing-3) !important;
     border-radius: var(--radius-lg) !important;
-    background-image: url('/images/brands/backgroundmobile.png') !important;
-    background-size: contain !important;
-    background-position: center 10% !important;
+    background-image: url('/images/brands/mobile image.jpeg') !important;
+    background-size: 100% auto !important;
+    background-position: top center !important;
     background-repeat: no-repeat !important;
+    background-color: #cc0000 !important;
+    position: relative !important;
     align-items: flex-end !important;
     display: flex !important;
     justify-content: center !important;
@@ -1197,12 +1208,48 @@
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      transparent 68%,
-      rgba(255,255,255,0.02) 75%,
-      rgba(255,255,255,0.2) 85%,
-      rgba(255,255,255,0.65) 94%,
-      rgba(255,255,255,0.92) 100%
+      transparent 60%,
+      rgba(255,255,255,0.05) 70%,
+      rgba(255,255,255,0.3) 80%,
+      rgba(255,255,255,0.75) 90%,
+      rgba(255,255,255,0.95) 100%
     ) !important;
+  }
+
+  /* Mobile App text overlay */
+  .mobile-hero-overlay {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    position: absolute !important;
+    top: 18px !important;
+    left: 18px !important;
+    z-index: 3 !important;
+    pointer-events: none !important;
+  }
+
+  .mobile-hero-app-text {
+    font-size: 5.5rem !important;
+    font-weight: 900 !important;
+    color: white !important;
+    line-height: 1 !important;
+    letter-spacing: -1px !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    font-family: var(--font-family-heading) !important;
+  }
+
+  .mobile-coming-soon-badge {
+    display: flex !important;
+    align-self: flex-start !important;
+    background: white !important;
+    color: #cc0000 !important;
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    padding: 7px 20px !important;
+    border-radius: 20px !important;
+    letter-spacing: 0.5px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+    margin-bottom: 10px !important;
   }
 
   .search-container-hero {
@@ -1462,11 +1509,12 @@
   .hero-section-with-search .container {
     min-height: 850px !important;
     border-radius: var(--radius-lg) !important;
-    background-position: center 10% !important;
+    background-position: top center !important;
     padding: var(--spacing-2) var(--spacing-2) var(--spacing-3) !important;
-    background-image: url('/images/brands/backgroundmobile.png') !important;
-    background-size: contain !important;
+    background-image: url('/images/brands/mobile image.jpeg') !important;
+    background-size: 100% auto !important;
     background-repeat: no-repeat !important;
+    background-color: #cc0000 !important;
     display: flex !important;
     align-items: flex-end !important;
     justify-content: center !important;
@@ -1476,11 +1524,11 @@
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      transparent 70%,
-      rgba(255,255,255,0.02) 77%,
-      rgba(255,255,255,0.2) 87%,
-      rgba(255,255,255,0.65) 95%,
-      rgba(255,255,255,0.92) 100%
+      transparent 60%,
+      rgba(255,255,255,0.05) 70%,
+      rgba(255,255,255,0.3) 80%,
+      rgba(255,255,255,0.75) 90%,
+      rgba(255,255,255,0.95) 100%
     ) !important;
   }
   

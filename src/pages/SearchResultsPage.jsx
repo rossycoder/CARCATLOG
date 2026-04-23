@@ -18,20 +18,23 @@ function SearchResultsPage() {
   const [searchSaved, setSearchSaved] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   
-  const [filters, setFilters] = useState({
-    make: 'All',
-    minPrice: '',
-    maxPrice: '',
-    minYear: '',
-    maxYear: '',
-    maxMileage: '',
-    transmission: 'All',
-    fuelType: 'All',
-    colour: 'All',
-    bodyType: 'All',
-    doors: 'All',
-    seats: 'All',
-    sortBy: 'distance'
+  const [filters, setFilters] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      make: 'All',
+      minPrice: '',
+      maxPrice: '',
+      minYear: '',
+      maxYear: '',
+      maxMileage: '',
+      transmission: 'All',
+      fuelType: 'All',
+      colour: 'All',
+      bodyType: 'All',
+      doors: 'All',
+      seats: 'All',
+      sortBy: params.get('sortBy') || 'distance'
+    };
   });
 
   const [activeFilter, setActiveFilter] = useState('All');
@@ -153,10 +156,10 @@ function SearchResultsPage() {
 
     if (postcodeParam) {
       setPostcode(postcodeParam);
-      setRadius(parseInt(radiusParam) || 25);
+      setRadius(parseInt(radiusParam) || 1000);
       // Save postcode to localStorage for use on detail pages
       localStorage.setItem('userPostcode', postcodeParam);
-      performSearch(postcodeParam, parseInt(radiusParam) || 25, filterParams);
+      performSearch(postcodeParam, parseInt(radiusParam) || 1000, filterParams);
     } else {
       // Load all cars if no postcode provided
       // Clear saved postcode if no postcode search
@@ -569,8 +572,14 @@ function SearchResultsPage() {
       case 'mileage-low':
         results.sort((a, b) => a.mileage - b.mileage);
         break;
+      case 'mileage-high':
+        results.sort((a, b) => b.mileage - a.mileage);
+        break;
       case 'year-new':
         results.sort((a, b) => b.year - a.year);
+        break;
+      case 'year-old':
+        results.sort((a, b) => a.year - b.year);
         break;
       case 'date-newest':
         // Sort by creation date (newest first)

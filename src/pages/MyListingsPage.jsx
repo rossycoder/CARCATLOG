@@ -140,21 +140,29 @@ function MyListingsPage() {
     }
   };
 
-  const handleRelistVehicle = async (listingId, vehicleType = 'car') => {
+  const handleRelistVehicle = async (listingId, vehicleType = 'car', listing = null) => {
     try {
       // Call relist endpoint to prepare vehicle
       const response = await api.post(`/vehicles/${listingId}/relist`);
       
       if (response.data.success) {
         const advertId = response.data.advertId || listingId;
+        const carPrice = listing?.price || listing?.estimatedValue || null;
         
+        const navState = carPrice ? {
+          state: {
+            advertId,
+            vehicleData: { price: carPrice, estimatedValue: carPrice }
+          }
+        } : {};
+
         // Redirect to appropriate advertising prices page
         if (vehicleType === 'bike') {
-          navigate(`/bikes/advertising-prices?advertId=${advertId}&resumePayment=true`);
+          navigate(`/bikes/advertising-prices?advertId=${advertId}&resumePayment=true`, navState);
         } else if (vehicleType === 'van') {
-          navigate(`/vans/advertising-prices?advertId=${advertId}&resumePayment=true`);
+          navigate(`/vans/advertising-prices?advertId=${advertId}&resumePayment=true`, navState);
         } else {
-          navigate(`/sell-my-car/advertising-prices?advertId=${advertId}&resumePayment=true`);
+          navigate(`/sell-my-car/advertising-prices?advertId=${advertId}&resumePayment=true`, navState);
         }
       }
     } catch (err) {
@@ -390,9 +398,16 @@ function MyListingsPage() {
                   <div key={listing._id} className="listing-card">
                     <div className="listing-image">
                       <img
-                        src={listing.images?.[0] || '/images/dummy/placeholder-car.jpg'}
+                        src={listing.images?.[0] || ''}
                         alt={`${listing.make} ${listing.model}`}
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                        style={!listing.images?.[0] ? { display: 'none' } : {}}
                       />
+                      {(!listing.images?.[0]) && (
+                        <div style={{ width: '100%', height: '100%', minHeight: '160px', background: '#e9ecef', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#adb5bd', fontSize: '14px' }}>
+                          No photo
+                        </div>
+                      )}
                       {getStatusBadge(listing)}
                     </div>
                     <div className="listing-details">
@@ -439,7 +454,7 @@ function MyListingsPage() {
                         {(listing.advertStatus === 'draft' || listing.advertStatus === 'expired' || isCarExpired(listing)) && (
                           <>
                             <button className="btn-view" onClick={() => handleViewListing(listing._id, listing.vehicleType)}>👁️ View</button>
-                            <button className="btn-relist" onClick={() => handleRelistVehicle(listing._id, listing.vehicleType)}>🔄 Relist</button>
+                            <button className="btn-relist" onClick={() => handleRelistVehicle(listing._id, listing.vehicleType, listing)}>🔄 Relist</button>
                             <button className="btn-edit" onClick={() => handleEditListing(listing._id, listing.vehicleType)}>✏️ Edit</button>
                           </>
                         )}
@@ -790,7 +805,10 @@ function MyListingsPage() {
                       {userVehicles.map(v => (
                         <div key={v._id} className="listing-card">
                           <div className="listing-image">
-                            <img src={v.images?.[0] || '/images/dummy/placeholder-car.jpg'} alt={`${v.make} ${v.model}`} />
+                            <img src={v.images?.[0] || ''} alt={`${v.make} ${v.model}`} onError={(e) => { e.target.style.display = 'none'; }} style={!v.images?.[0] ? { display: 'none' } : {}} />
+                            {(!v.images?.[0]) && (
+                              <div style={{ width: '100%', height: '100%', minHeight: '120px', background: '#e9ecef', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#adb5bd', fontSize: '13px' }}>No photo</div>
+                            )}
                             {getStatusBadge(v)}
                           </div>
                           <div className="listing-details">
@@ -834,13 +852,13 @@ function MyListingsPage() {
                               {(v.advertStatus === 'draft' || v.advertStatus === 'expired' || isCarExpired(v)) && (
                                 <>
                                   <button className="btn-view" onClick={() => handleViewListing(v._id, v.vehicleType)}>👁️ View</button>
-                                  <button className="btn-relist" onClick={() => { setShowVehiclesModal(false); handleRelistVehicle(v._id, v.vehicleType); }}>🔄 Relist</button>
+                                  <button className="btn-relist" onClick={() => { setShowVehiclesModal(false); handleRelistVehicle(v._id, v.vehicleType, v); }}>🔄 Relist</button>
                                   <button className="btn-edit" onClick={() => { setShowVehiclesModal(false); handleEditListing(v._id, v.vehicleType); }}>✏️ Edit</button>
                                 </>
                               )}
                               {v.advertStatus === 'pending_payment' && (
                                 <>
-                                  <button className="btn-relist" onClick={() => { setShowVehiclesModal(false); handleRelistVehicle(v._id, v.vehicleType); }}>🔄 Relist</button>
+                                  <button className="btn-relist" onClick={() => { setShowVehiclesModal(false); handleRelistVehicle(v._id, v.vehicleType, v); }}>🔄 Relist</button>
                                   <button className="btn-edit" onClick={() => { setShowVehiclesModal(false); handleEditListing(v._id, v.vehicleType); }}>✏️ Edit</button>
                                   <button className="btn-view" onClick={() => handleViewListing(v._id, v.vehicleType)}>👁️ Preview</button>
                                 </>
@@ -898,9 +916,16 @@ function MyListingsPage() {
               <div key={listing._id} className="listing-card">
                 <div className="listing-image">
                   <img 
-                    src={listing.images?.[0] || '/images/dummy/placeholder-car.jpg'} 
+                    src={listing.images?.[0] || ''}
                     alt={`${listing.make} ${listing.model}`}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                    style={!listing.images?.[0] ? { display: 'none' } : {}}
                   />
+                  {(!listing.images?.[0]) && (
+                    <div style={{ width: '100%', height: '100%', minHeight: '160px', background: '#e9ecef', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#adb5bd', fontSize: '14px' }}>
+                      No photo
+                    </div>
+                  )}
                   {getStatusBadge(listing)}
                 </div>
 
@@ -999,7 +1024,7 @@ function MyListingsPage() {
                           👁️ View
                         </button>
                         <button 
-                          onClick={() => handleRelistVehicle(listing._id, listing.vehicleType)}
+                          onClick={() => handleRelistVehicle(listing._id, listing.vehicleType, listing)}
                           className="btn-relist"
                           title="Relist this vehicle"
                         >
@@ -1017,16 +1042,19 @@ function MyListingsPage() {
                       <>
                         <button 
                           onClick={() => {
-                            // Redirect to appropriate advertising prices page based on vehicle type
                             const vehicleType = listing.vehicleType || 'car';
                             const advertId = listing.advertId || listing._id;
+                            const carPrice = listing?.price || listing?.estimatedValue || null;
+                            const navState = carPrice ? {
+                              state: { advertId, vehicleData: { price: carPrice, estimatedValue: carPrice } }
+                            } : {};
                             
                             if (vehicleType === 'bike') {
-                              navigate(`/bikes/advertising-prices?advertId=${advertId}&resumePayment=true`);
+                              navigate(`/bikes/advertising-prices?advertId=${advertId}&resumePayment=true`, navState);
                             } else if (vehicleType === 'van') {
-                              navigate(`/vans/advertising-prices?advertId=${advertId}&resumePayment=true`);
+                              navigate(`/vans/advertising-prices?advertId=${advertId}&resumePayment=true`, navState);
                             } else {
-                              navigate(`/sell-my-car/advertising-prices?advertId=${advertId}&resumePayment=true`);
+                              navigate(`/sell-my-car/advertising-prices?advertId=${advertId}&resumePayment=true`, navState);
                             }
                           }}
                           className="btn-relist"
@@ -1061,7 +1089,7 @@ function MyListingsPage() {
                         </button>
                         {listing.advertStatus === 'expired' && (
                           <button 
-                            onClick={() => handleRelistVehicle(listing._id, listing.vehicleType)}
+                            onClick={() => handleRelistVehicle(listing._id, listing.vehicleType, listing)}
                             className="btn-relist"
                             title="Relist this vehicle"
                           >

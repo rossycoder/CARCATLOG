@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { carService } from '../services/carService';
 import { generateEnhancedVehicleReport } from '../utils/enhancedPdfGenerator';
+import api from '../services/api';
 import './PaymentSuccessPage.css';
 
 const PaymentSuccessPage = () => {
@@ -27,84 +27,81 @@ const PaymentSuccessPage = () => {
   const generateVehicleReport = async () => {
     try {
       setIsLoading(true);
-      console.log('Fetching comprehensive vehicle data for:', registration);
-      
-      // Use basic lookup API for display (comprehensive data fetched via webhook)
-      const response = await carService.basicLookup(registration, 0);
-      
-      console.log('Enhanced API Response:', response);
-      
-      if (!response.success || !response.data) {
-        throw new Error(response.error || 'Unable to fetch vehicle details');
+      console.log('Running complete vehicle check for:', registration);
+
+      // Single call — fetches history + MOT, uses cache if available, stores results
+      const resp = await api.post('/vehicle-history/complete-check', { vrm: registration.toUpperCase() });
+
+      if (!resp?.data?.success || !resp?.data?.data) {
+        throw new Error(resp?.data?.error || 'Unable to fetch vehicle data');
       }
-      
-      const enhancedData = response.data;
-      
-      // Helper function to safely extract value from {value, source} format or direct value
-      const getValue = (field) => {
-        if (field === null || field === undefined) return null;
-        if (typeof field === 'object' && field !== null && 'value' in field) {
-          return field.value;
-        }
-        return field;
-      };
-      
-      // Format the data for PDF (same structure as VehicleCheckPage)
+
+      const h = resp.data.data;
+      const motHistory = Array.isArray(h.motHistory) ? h.motHistory : [];
+
+      console.log(`✅ History loaded. MOT tests: ${motHistory.length}, Owners: ${h.numberOfPreviousKeepers}`);
+
+      // Map to PDF shape
       const combinedData = {
-        vrm: registration.toUpperCase(),
-        checkDate: new Date().toISOString(),
-        // Vehicle details
-        make: getValue(enhancedData.make) || 'Unknown',
-        model: getValue(enhancedData.model) || 'Unknown',
-        variant: getValue(enhancedData.variant),
-        year: getValue(enhancedData.year),
-        colour: getValue(enhancedData.color),
-        fuelType: getValue(enhancedData.fuelType),
-        engineSize: getValue(enhancedData.engineSize),
-        transmission: getValue(enhancedData.transmission),
-        bodyType: getValue(enhancedData.bodyType),
-        doors: getValue(enhancedData.doors),
-        seats: getValue(enhancedData.seats),
-        // Safety checks
-        stolen: enhancedData.isStolen || false,
-        writeOff: enhancedData.isWrittenOff || false,
-        outstandingFinance: enhancedData.hasOutstandingFinance || false,
-        writeOffCategory: enhancedData.writeOffCategory || null,
-        // Additional info
-        previousOwners: getValue(enhancedData.previousOwners) || 0,
-        mileage: getValue(enhancedData.mileage) || 0,
-        serviceHistory: 'Contact seller for service history',
-        motStatus: getValue(enhancedData.motStatus) || 'Unknown',
-        motExpiryDate: getValue(enhancedData.motExpiry) || getValue(enhancedData.motDue),
-        // Running costs
-        co2Emissions: enhancedData.runningCosts?.co2Emissions || enhancedData.co2Emissions || null,
-        insuranceGroup: getValue(enhancedData.runningCosts?.insuranceGroup) || getValue(enhancedData.insuranceGroup),
-        annualTax: getValue(enhancedData.runningCosts?.annualTax) || getValue(enhancedData.annualTax),
-        // MOT History - Add this data
-        motHistory: enhancedData.motHistory || [],
-        // Mileage History
-        mileageHistory: enhancedData.mileageHistory || [],
-        // Valuation
-        valuation: enhancedData.valuation ? {
-          estimatedValue: enhancedData.valuation.estimatedValue ? {
-            retail: getValue(enhancedData.valuation.estimatedValue.retail),
-            private: getValue(enhancedData.valuation.estimatedValue.private),
-            partExchange: getValue(enhancedData.valuation.estimatedValue.partExchange)
-          } : null
-        } : null,
-        // Full data for reference
-        fullData: enhancedData
+        vrm:              registration.toUpperCase(),
+        checkDate:        h.checkDate || new Date().toISOString(),
+        make:             h.make             || 'Unknown',
+        model:            h.model            || 'Unknown',
+        variant:          h.variant,
+        year:             h.yearOfManufacture,
+        manufactureYear:  h.yearOfManufacture,
+        colour:           h.colour           || h.color,
+        color:            h.colour           || h.color,
+        fuelType:         h.fuelType,
+        engineSize:       h.engineCapacity ? (h.engineCapacity > 10 ? (h.engineCapacity / 1000).toFixed(3) : h.engineCapacity.toFixed(3)) : null,
+        engineCapacity:   h.engineCapacity,
+        transmission:     h.transmission,
+        bodyType:         h.bodyType,
+        doors:            h.doors,
+        seats:            h.seats,
+        driveType:        h.driveType,
+        engineNumber:     h.engineNumber,
+        firstRegistered:  h.firstRegistered  || h.registrationDate,
+        registrationDate: h.firstRegistered  || h.registrationDate,
+        stolen:              h.isStolen             || false,
+        writeOff:            h.isWrittenOff         || false,
+        outstandingFinance:  h.hasOutstandingFinance || false,
+        writeOffCategory:    h.writeOffCategory     || h.writeOffDetails?.category || null,
+        writeOffDate:        h.writeOffDetails?.date || null,
+        writeOffDescription: h.writeOffDetails?.description || null,
+        financeCompany:      h.financeDetails?.lender || null,
+        financeType:         h.financeDetails?.type   || null,
+        financeAgreementNumber: h.financeDetails?.agreementNumber || null,
+        financeStartDate:    h.financeDetails?.startDate ? new Date(h.financeDetails.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : null,
+        financeTerm:         h.financeDetails?.term || null,
+        financeContact:      h.financeDetails?.contactNumber || null,
+        financeVehicleDescription: h.financeDetails?.vehicleDescription || null,
+        previousOwners:   h.numberOfPreviousKeepers ?? h.previousOwners ?? 0,
+        lastKeeperChange: h.keeperChangesList?.[0]?.date || null,
+        mileage:          h.mileage,
+        mileageDiscrepancy: false,
+        mileageHistory:   h.mileageHistory || [],
+        motStatus:        h.motStatus,
+        motExpiryDate:    h.motExpiryDate,
+        motHistory:       motHistory,
+        co2Emissions:     h.co2Emissions,
+        annualTax:        h.annualTax,
+        insuranceGroup:   h.insuranceGroup,
+        imported:         h.imported  || h.isImported  || false,
+        exported:         h.exported  || h.isExported  || false,
+        scrapped:         h.scrapped  || h.isScrapped  || false,
+        colourChanges:    (h.colourChanges || 0) > 0,
+        plateChanges:     h.plateChangesList || [],
+        valuation:        h.valuation || null,
       };
-      
-      console.log('Combined vehicle data for PDF:', combinedData);
+
       setVehicleData(combinedData);
-      
-      // Auto-download PDF after data is loaded
+
+      // Auto-download PDF
       setTimeout(() => {
-        console.log('Auto-downloading enhanced PDF report...');
-        generateEnhancedVehicleReport(combinedData, registration);
-      }, 1000); // Small delay to ensure state is updated
-      
+        generateEnhancedVehicleReport(combinedData, registration.toUpperCase());
+      }, 800);
+
     } catch (err) {
       console.error('Error generating vehicle report:', err);
       setError(err.message || 'Failed to generate vehicle report. Please try again or contact support.');
@@ -130,7 +127,7 @@ const PaymentSuccessPage = () => {
       }
       
       // Use enhanced PDF generator
-      generateEnhancedVehicleReport(vehicleData, registration);
+      generateEnhancedVehicleReport(vehicleData, registration.toUpperCase());
       console.log('PDF generation completed successfully');
     } catch (error) {
       console.error('Error generating PDF:', error);

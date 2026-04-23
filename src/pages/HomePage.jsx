@@ -8,7 +8,7 @@ import AdvertisingPromotionSection from '../components/AdvertisingPromotionSecti
 import { carService } from '../services/carService';
 import { filterService } from '../services/filterService';
 import './HomePage.css';
-import './HomePage-responsive-fix.css';
+
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -195,7 +195,13 @@ const HomePage = () => {
         <section className="hero-section-with-search">
         <div className="hero-background-overlay"></div>
         <div className="container">
+          {/* Mobile App Text Overlay - only "App" stays top-left */}
+          <div className="mobile-hero-overlay">
+            <span className="mobile-hero-app-text">App</span>
+          </div>
           <div className="hero-content">
+            {/* Coming Soon badge - above search bar, mobile only */}
+            <div className="mobile-coming-soon-badge">Coming Soon</div>
             {/* Search Bar */}
             <div className="search-container-hero">
               <div className="search-field-group">
@@ -383,7 +389,7 @@ const HomePage = () => {
           <h2>Buying essentials</h2>
           <div className="essentials-grid">
             <div className="essential-card clickable-card" onClick={() => navigate('/vehicle-check')}>
-              <div className="essential-icon">📋</div>
+              <div className="essential-icon">≡ƒôï</div>
               <h3>Check a car's history</h3>
               <p>Make informed decisions with a full background check before buying your next vehicle.</p>
               <div className="card-action-icon">
@@ -393,12 +399,12 @@ const HomePage = () => {
               </div>
             </div>
             <div className="essential-card">
-              <div className="essential-icon">🛡️</div>
+              <div className="essential-icon">≡ƒ¢í∩╕Å</div>
               <h3>Security advice</h3>
               <p>Guidance on staying safe when buying or selling a car.</p>
             </div>
             <div className="essential-card clickable-card" onClick={() => navigate('/valuation')}>
-              <div className="essential-icon">🏷️</div>
+              <div className="essential-icon">≡ƒÅ╖∩╕Å</div>
               <h3>What's it worth</h3>
               <p>Get a valuation to help you price your car for sale or part-exchange.</p>
               <div className="card-action-icon">
