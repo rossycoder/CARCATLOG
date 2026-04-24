@@ -957,10 +957,12 @@
   
   .search-container-hero {
     max-width: 90% !important;
+    width: 90% !important;
     padding: var(--spacing-4) !important;
     margin: 0 auto !important;
     box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15) !important;
     backdrop-filter: blur(10px) !important;
+    overflow: visible !important;
   }
   
   .search-field-group {
@@ -974,9 +976,21 @@
     font-size: 0.95rem !important;
   }
   
+  .search-button-group {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: var(--spacing-3) !important;
+  }
+
   .search-button {
     width: 100% !important;
     justify-content: center !important;
+  }
+
+  .more-options-link {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
   }
 }
   
@@ -1193,8 +1207,8 @@
     min-height: 900px !important;
     padding: var(--spacing-2) var(--spacing-2) var(--spacing-3) !important;
     border-radius: var(--radius-lg) !important;
-    background-image: url('/images/brands/mobile image.jpeg') !important;
-    background-size: 100% auto !important;
+    background-image: url('/images/brands/mobile%20image.jpeg') !important;
+    background-size: cover !important;
     background-position: top center !important;
     background-repeat: no-repeat !important;
     background-color: #cc0000 !important;
@@ -1511,8 +1525,8 @@
     border-radius: var(--radius-lg) !important;
     background-position: top center !important;
     padding: var(--spacing-2) var(--spacing-2) var(--spacing-3) !important;
-    background-image: url('/images/brands/mobile image.jpeg') !important;
-    background-size: 100% auto !important;
+    background-image: url('/images/brands/mobile%20image.jpeg') !important;
+    background-size: cover !important;
     background-repeat: no-repeat !important;
     background-color: #cc0000 !important;
     display: flex !important;
