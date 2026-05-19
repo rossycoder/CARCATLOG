@@ -19,7 +19,6 @@ const CarAdvertEditPage = () => {
   // CRITICAL: Check authentication on mount
   useEffect(() => {
     if (!user && !isTradeAuthenticated) {
-      console.log('❌ User not authenticated, redirecting to signin');
       // Redirect to signin with return URL
       navigate(`/signin?redirect=/selling/advert/edit/${advertId}`);
     }
@@ -125,18 +124,14 @@ const CarAdvertEditPage = () => {
     
     try {
       setIsUploading(true);
-      console.log('📤 Uploading business logo...');
       
       // Convert file to base64
       const base64Image = await uploadService.fileToBase64(file);
-      console.log('✅ File converted to base64, length:', base64Image.length);
       
       // Upload to backend
       const response = await uploadService.uploadImage(base64Image, advertId);
-      console.log('📡 Upload response:', response);
       
       const logoUrl = response.data?.url || response.url;
-      console.log('🔗 Logo URL extracted:', logoUrl);
       
       if (logoUrl) {
         const updatedAdvertData = {
@@ -145,13 +140,10 @@ const CarAdvertEditPage = () => {
         };
         
         setAdvertData(updatedAdvertData);
-        console.log('✅ Business logo uploaded successfully:', logoUrl);
         
         // CRITICAL: Auto-save business logo to database
         try {
-          console.log('💾 Auto-saving business logo to database...');
           await advertService.updateAdvert(advertId, updatedAdvertData, vehicleData);
-          console.log('✅ Business logo saved to database');
         } catch (saveError) {
           console.error('❌ Failed to save business logo:', saveError);
           // Don't show error to user - logo is uploaded, just not saved yet
@@ -175,9 +167,7 @@ const CarAdvertEditPage = () => {
     
     const timeout = setTimeout(async () => {
       try {
-        console.log('💾 Auto-saving business info...');
         await advertService.updateAdvert(advertId, advertData, vehicleData);
-        console.log('✅ Business info saved successfully');
       } catch (error) {
         console.error('❌ Failed to save business info:', error);
       }
@@ -205,9 +195,7 @@ const CarAdvertEditPage = () => {
         const displayPrice = valuation.private || valuation.Private || valuation.retail;
         
         if (displayPrice && displayPrice > 0) {
-          console.log('💰 Setting price from enhanced data:', displayPrice, 'type:', typeof displayPrice);
           setAdvertData(prev => {
-            console.log('💰 Previous price:', prev.price, 'type:', typeof prev.price);
             return {
               ...prev,
               price: parseFloat(displayPrice) // Ensure it's a number
@@ -250,7 +238,6 @@ const CarAdvertEditPage = () => {
     try {
       setIsLoading(true);
       setLoadError(null);
-      console.log('📥 Loading advert data for ID:', advertId);
       
       if (!advertId) {
         console.error('❌ No advert ID provided');
@@ -260,20 +247,12 @@ const CarAdvertEditPage = () => {
       
       // Try to fetch from vehicle API first (for cars created via DVLA lookup)
       try {
-        console.log('🔍 Fetching vehicle data from /api/vehicles/', advertId);
         const vehicleResponse = await api.get(`/vehicles/${advertId}`);
         
         if (vehicleResponse.data && vehicleResponse.data.data) {
-          console.log('✅ Vehicle found in vehicles collection');
           const vehicleData = vehicleResponse.data.data;
           
           // CRITICAL DEBUG: Check what price data is in database
-          console.log('💰 Database price data:', {
-            price: vehicleData.price,
-            estimatedValue: vehicleData.estimatedValue,
-            valuation: vehicleData.valuation,
-            allValuations: vehicleData.allValuations
-          });
           
           // Ensure allValuations and valuation are properly structured
           const enhancedVehicleData = {
@@ -304,12 +283,6 @@ const CarAdvertEditPage = () => {
           const vehicleUserId = vehicleData.userId?._id?.toString() || vehicleData.userId?.toString();
           const currentUserId = user?._id?.toString() || user?.id?.toString();
           
-          console.log('🔐 Authorization check:', {
-            vehicleUserId,
-            currentUserId,
-            isAdmin,
-            match: vehicleUserId === currentUserId
-          });
           
           if (user && vehicleUserId && vehicleUserId !== currentUserId && !isAdmin) {
             console.error('❌ Authorization failed: User does not own this car');
@@ -321,7 +294,6 @@ const CarAdvertEditPage = () => {
           
           // Log if admin is editing someone else's car
           if (isAdmin && vehicleUserId && vehicleUserId !== currentUserId) {
-            console.log('👑 Admin editing car owned by another user');
           }
           
           // CRITICAL: Authorization check for trade dealers
@@ -336,18 +308,6 @@ const CarAdvertEditPage = () => {
             return;
           }
           
-          console.log('🚗 Car loaded:', {
-            advertStatus: vehicleData.advertStatus,
-            isDealerListing: vehicleData.isDealerListing,
-            dealerId: vehicleData.dealerId,
-            hasAdvertisingPackage: !!vehicleData.advertisingPackage?.packageId,
-            packageId: vehicleData.advertisingPackage?.packageId,
-            willShowSaveButton: vehicleData.isDealerListing || !!vehicleData.advertisingPackage?.packageId,
-            motDue: vehicleData.motDue,
-            motExpiry: vehicleData.motExpiry,
-            motStatus: vehicleData.motStatus,
-            motHistoryLength: vehicleData.motHistory?.length || 0
-          });
           
           // Populate form fields with existing data
           // Prefer private sale price if available
@@ -355,16 +315,9 @@ const CarAdvertEditPage = () => {
                                 enhancedVehicleData.allValuations?.private || 
                                 enhancedVehicleData.price || 0;
           
-          console.log('💰 Setting price field to:', preferredPrice);
-          console.log('💰 Available prices:', {
-            privatePrice: enhancedVehicleData.valuation?.privatePrice,
-            allValuationsPrivate: enhancedVehicleData.allValuations?.private,
-            dbPrice: enhancedVehicleData.price
-          });
           
           // Ensure price is a valid number
           const finalPrice = preferredPrice && preferredPrice > 0 ? parseFloat(preferredPrice) : 0;
-          console.log('💰 Final price being set:', finalPrice, 'type:', typeof finalPrice);
           
           setAdvertData(prev => ({
             ...prev,
@@ -390,34 +343,13 @@ const CarAdvertEditPage = () => {
           
           // Add a timeout to log the state after it's been set
           setTimeout(() => {
-            console.log('💰 State updated - advertData.price is now:', finalPrice);
           }, 100);
           
-          console.log('✅ Form fields populated with existing data');
-          console.log('🏃 Running costs populated:', {
-            combined: String(vehicleData.runningCosts?.fuelEconomy?.combined || ''),
-            annualTax: String(vehicleData.runningCosts?.annualTax || ''),
-            co2Emissions: String(vehicleData.runningCosts?.co2Emissions || '')
-          });
-          console.log('🏃 Full advertData.runningCosts:', {
-            fuelEconomy: {
-              urban: String(vehicleData.runningCosts?.fuelEconomy?.urban || ''),
-              extraUrban: String(vehicleData.runningCosts?.fuelEconomy?.extraUrban || ''),
-              combined: String(vehicleData.runningCosts?.fuelEconomy?.combined || '')
-            },
-            annualTax: String(vehicleData.runningCosts?.annualTax || ''),
-            insuranceGroup: String(vehicleData.runningCosts?.insuranceGroup || ''),
-            co2Emissions: String(vehicleData.runningCosts?.co2Emissions || '')
-          });
-          console.log('🔍 fieldSources state:', fieldSources);
-          console.log('🔍 fieldSources.runningCosts:', fieldSources?.runningCosts);
           
           // Don't fetch MOT data to avoid API charges
           // For new users: MOT data should come from the initial vehicle lookup API call
           // For existing cars: MOT data should already be in the car document from when payment was completed
           if (vehicleData.registrationNumber) {
-            console.log('⚠️ Skipping MOT API call to avoid charges');
-            console.log('💡 MOT data should be available in car document already or from initial lookup');
           }
           
           // 🔒 PROTECTED: Check if we need to fetch enhanced data
@@ -434,18 +366,6 @@ const CarAdvertEditPage = () => {
           const needsMOTData = !vehicleData.motDue && !vehicleData.motExpiry;
           const hasMOTHistory = vehicleData.motHistory && vehicleData.motHistory.length > 0;
           
-          console.log('🔍 Enhanced data check:', {
-            needsValuation,
-            needsRunningCosts,
-            needsEnhancedData,
-            isNewUserCar,
-            advertStatus: vehicleData.advertStatus,
-            hasValuation: !!vehicleData.valuation?.privatePrice,
-            hasRunningCosts: !!vehicleData.runningCosts?.annualTax,
-            hasMOTData: !!(vehicleData.motDue || vehicleData.motExpiry),
-            hasMOTHistory,
-            registrationNumber: vehicleData.registrationNumber
-          });
           
           // 🔒 PROTECTED: Only fetch for NEW cars OR if critical data is missing
           // NEVER fetch for existing cars with payment completed
@@ -453,28 +373,17 @@ const CarAdvertEditPage = () => {
           const shouldFetchMOT = isNewUserCar && needsMOTData && !hasMOTHistory;
           
           if (!shouldFetchEnhancedData && !shouldFetchMOT) {
-            console.log('✅ Skipping API calls - data already in database or payment completed');
-            console.log('💰 Saving API costs by using cached data');
           }
           
           // Only fetch enhanced data for NEW user cars (draft/pending_payment)
           if (vehicleData.registrationNumber && (shouldFetchEnhancedData || shouldFetchMOT)) {
             if (isNewUserCar) {
-              console.log('🆕 New user car detected - fetching fresh API data for running costs and valuation');
             } else if (needsMOTData) {
-              console.log('🔧 MOT data missing - fetching from API...');
             } else {
-              console.log('🔍 Existing car missing data - fetching enhanced data...');
             }
             
             try {
               const enhancedVehicleData = await lookupVehicle(vehicleData.registrationNumber, vehicleData.mileage);
-              console.log('✅ Enhanced data fetched:', enhancedVehicleData);
-              console.log('🔍 Enhanced data runningCosts check:', {
-                hasRunningCosts: !!enhancedVehicleData.runningCosts,
-                runningCostsValue: enhancedVehicleData.runningCosts,
-                runningCostsType: typeof enhancedVehicleData.runningCosts
-              });
               
               // Update vehicle data with enhanced information
               if (enhancedVehicleData.valuation) {
@@ -497,19 +406,15 @@ const CarAdvertEditPage = () => {
                     ...prev,
                     price: privatePrice
                   }));
-                  console.log('✅ Price set from valuation:', privatePrice);
                 }
               } else {
                 // No valuation available - keep existing price or let user set manually
-                console.log('⚠️ No valuation data available - user must set price manually');
                 if (!vehicleData.price || vehicleData.price === 0) {
-                  console.log('💡 Tip: Research similar vehicles to set a fair price');
                 }
               }
               
               // Update running costs
               if (enhancedVehicleData.runningCosts) {
-                console.log('🏃 Updating running costs from enhanced data:', enhancedVehicleData.runningCosts);
                 
                 setAdvertData(prev => {
                   const newRunningCosts = {
@@ -523,7 +428,6 @@ const CarAdvertEditPage = () => {
                     co2Emissions: String(enhancedVehicleData.runningCosts.co2Emissions || '')
                   };
                   
-                  console.log('🏃 New running costs to set:', newRunningCosts);
                   
                   return {
                     ...prev,
@@ -531,7 +435,6 @@ const CarAdvertEditPage = () => {
                   };
                 });
               } else {
-                console.log('⚠️ No running costs in enhanced data');
               }
               
               // CRITICAL: Only update MOT data if it doesn't already exist in database
@@ -539,7 +442,6 @@ const CarAdvertEditPage = () => {
               const hasMOTDataInDB = vehicleData.motHistory && vehicleData.motHistory.length > 0;
               
               if (!hasMOTDataInDB && (enhancedVehicleData.motStatus || enhancedVehicleData.motDue || enhancedVehicleData.motExpiry)) {
-                console.log('🔧 Updating MOT data from enhanced data (first time)');
                 const motDataToSave = {
                   motStatus: enhancedVehicleData.motStatus || vehicleData.motStatus,
                   motDue: enhancedVehicleData.motDue || enhancedVehicleData.motExpiry || vehicleData.motDue,
@@ -560,22 +462,18 @@ const CarAdvertEditPage = () => {
                 
                 // CRITICAL: Save MOT data to database immediately
                 try {
-                  console.log('💾 Saving MOT data to database...');
                   await api.patch(`/vehicles/${advertId}`, {
                     motStatus: motDataToSave.motStatus,
                     motDue: motDataToSave.motDue,
                     motExpiry: motDataToSave.motExpiry,
                     motHistory: motDataToSave.motHistory
                   });
-                  console.log('✅ MOT data saved to database successfully');
                 } catch (saveError) {
                   console.error('❌ Failed to save MOT data to database:', saveError.message);
                 }
               } else if (hasMOTDataInDB) {
-                console.log('✅ MOT data already exists in database - skipping update to prevent duplicate API calls');
               } else {
                 // FALLBACK: Try fetching MOT from DVLA if CheckCarDetails didn't have it
-                console.log('⚠️ No MOT data from CheckCarDetails, trying DVLA...');
                 try {
                   const dvlaResponse = await api.post('/vehicles/dvla-lookup', {
                     registrationNumber: vehicleData.registrationNumber
@@ -588,7 +486,6 @@ const CarAdvertEditPage = () => {
                       motExpiry: dvlaResponse.data.data.motExpiryDate
                     };
                     
-                    console.log('✅ MOT data fetched from DVLA:', dvlaMotData);
                     
                     // CRITICAL: Update frontend state while preserving valuation
                     setVehicleData(prev => ({
@@ -603,9 +500,7 @@ const CarAdvertEditPage = () => {
                     
                     // Save to database
                     await api.patch(`/vehicles/${advertId}`, dvlaMotData);
-                    console.log('✅ DVLA MOT data saved to database');
                   } else {
-                    console.log('⚠️ No MOT data available from DVLA either');
                   }
                 } catch (dvlaError) {
                   console.error('❌ Failed to fetch MOT from DVLA:', dvlaError.message);
@@ -616,7 +511,6 @@ const CarAdvertEditPage = () => {
                 // For new cars (2020+), calculate MOT due date (3 years from first registration)
                 const motDueYear = enhancedVehicleData.year + 3;
                 const motDueDate = `${motDueYear}-10-31`; // Approximate date
-                console.log(`🔧 Setting MOT due for new car: ${motDueDate}`);
                 
                 const newCarMotData = {
                   motStatus: 'Not due',
@@ -637,14 +531,11 @@ const CarAdvertEditPage = () => {
                 
                 // CRITICAL: Save calculated MOT data to database
                 try {
-                  console.log('💾 Saving calculated MOT data to database...');
                   await api.patch(`/vehicles/${advertId}`, newCarMotData);
-                  console.log('✅ Calculated MOT data saved to database successfully');
                 } catch (saveError) {
                   console.error('❌ Failed to save calculated MOT data:', saveError.message);
                 }
               } else {
-                console.log('🔧 No MOT data available, setting default message');
                 setVehicleData(prev => ({
                   ...prev,
                   motStatus: 'Contact seller',
@@ -656,25 +547,19 @@ const CarAdvertEditPage = () => {
               console.warn('⚠️ Failed to fetch enhanced data:', enhancedError.message);
             }
           } else {
-            console.log('⚠️ Skipping enhanced data fetch - data already available in database or no registration');
           }
           
           setIsLoading(false);
           return;
         }
       } catch (vehicleErr) {
-        console.log('⚠️ Vehicle not found in vehicles collection, trying adverts...');
       }
       
       // Fallback to advert service (for backward compatibility)
       const response = await advertService.getAdvert(advertId);
       
-      console.log('Advert Response:', response);
       
       if (response.success && response.data) {
-        console.log('Vehicle Data:', response.data.vehicleData);
-        console.log('Advert Data:', response.data.advertData);
-        console.log('Estimated Value:', response.data.vehicleData?.estimatedValue);
         
         // CRITICAL: Merge with existing vehicleData to preserve any data already loaded
         setVehicleData(prev => ({
@@ -695,8 +580,6 @@ const CarAdvertEditPage = () => {
         // For new users: MOT data should come from the initial vehicle lookup API call
         // For existing cars: MOT data should already be in the car document from when payment was completed
         if (response.data.vehicleData?.registrationNumber) {
-          console.log('⚠️ Skipping MOT API call to avoid charges');
-          console.log('💡 MOT data should be available in car document already or from initial lookup');
         }
         
         // 🔒 PROTECTED: Check if we need to fetch enhanced data
@@ -715,33 +598,18 @@ const CarAdvertEditPage = () => {
         const needsMOTData = !response.data.vehicleData?.motDue && !response.data.vehicleData?.motExpiry;
         const hasMOTHistory = response.data.vehicleData?.motHistory && response.data.vehicleData.motHistory.length > 0;
         
-        console.log('🔍 Enhanced data check (fallback):', {
-          needsValuation,
-          needsRunningCosts,
-          needsEnhancedData,
-          isNewUserCar,
-          advertStatus: response.data.vehicleData?.advertStatus,
-          hasValuation: !!response.data.vehicleData?.valuation?.privatePrice,
-          hasRunningCosts: !!response.data.vehicleData?.runningCosts?.annualTax,
-          needsMOTData,
-          hasMOTHistory
-        });
         
         // 🔒 PROTECTED: Only fetch for NEW cars OR if critical data is missing
         const shouldFetchEnhancedData = isNewUserCar && needsEnhancedData;
         const shouldFetchMOT = isNewUserCar && needsMOTData && !hasMOTHistory;
         
         if (!shouldFetchEnhancedData && !shouldFetchMOT) {
-          console.log('✅ Skipping API calls (fallback) - data already in database or payment completed');
-          console.log('💰 Saving API costs by using cached data');
         }
         
         // Only fetch enhanced data for NEW user cars (draft/pending_payment)
         if (response.data.vehicleData?.registrationNumber && (shouldFetchEnhancedData || shouldFetchMOT)) {
           if (isNewUserCar) {
-            console.log('🆕 New user car detected (fallback) - fetching fresh API data for running costs and valuation');
           } else {
-            console.log('🔍 Existing car missing data (fallback) - fetching enhanced data...');
           }
           
           try {
@@ -749,7 +617,6 @@ const CarAdvertEditPage = () => {
               response.data.vehicleData.registrationNumber, 
               response.data.vehicleData.mileage
             );
-            console.log('✅ Enhanced data fetched:', enhancedVehicleData);
             
             // Update vehicle data with enhanced information
             if (enhancedVehicleData.valuation) {
@@ -768,7 +635,6 @@ const CarAdvertEditPage = () => {
                                  enhancedVehicleData.valuation.estimatedValue;
               
               if (privatePrice) {
-                console.log('💰 Updating price from enhanced data:', privatePrice);
                 setAdvertData(prev => ({
                   ...prev,
                   price: privatePrice
@@ -801,7 +667,6 @@ const CarAdvertEditPage = () => {
             const hasMOTDataInDB = response.data.vehicleData?.motHistory && response.data.vehicleData.motHistory.length > 0;
             
             if (!hasMOTDataInDB && (enhancedVehicleData.motStatus || enhancedVehicleData.motDue || enhancedVehicleData.motExpiry)) {
-              console.log('🔧 Updating MOT data from enhanced data (fallback - first time)');
               setVehicleData(prev => ({
                 ...prev,
                 motStatus: enhancedVehicleData.motStatus,
@@ -816,15 +681,12 @@ const CarAdvertEditPage = () => {
                   motDue: enhancedVehicleData.motDue || enhancedVehicleData.motExpiry,
                   motExpiry: enhancedVehicleData.motExpiry || enhancedVehicleData.motDue
                 });
-                console.log('✅ MOT data saved (fallback)');
               } catch (saveError) {
                 console.error('❌ Failed to save MOT data (fallback):', saveError.message);
               }
             } else if (hasMOTDataInDB) {
-              console.log('✅ MOT data already exists in database (fallback) - skipping update');
             } else {
               // DVLA Fallback in advert service path
-              console.log('⚠️ No MOT from CheckCarDetails (fallback), trying DVLA...');
               try {
                 const dvlaResponse = await api.post('/vehicles/dvla-lookup', {
                   registrationNumber: response.data.vehicleData.registrationNumber
@@ -837,7 +699,6 @@ const CarAdvertEditPage = () => {
                     motExpiry: dvlaResponse.data.data.motExpiryDate
                   };
                   
-                  console.log('✅ MOT from DVLA (fallback):', dvlaMotData);
                   setVehicleData(prev => ({ 
                     ...prev, 
                     ...dvlaMotData,
@@ -848,7 +709,6 @@ const CarAdvertEditPage = () => {
                     price: prev.price
                   }));
                   await api.patch(`/vehicles/${advertId}`, dvlaMotData);
-                  console.log('✅ DVLA MOT saved (fallback)');
                 }
               } catch (dvlaError) {
                 console.error('❌ DVLA MOT fetch failed (fallback):', dvlaError.message);
@@ -858,7 +718,6 @@ const CarAdvertEditPage = () => {
             console.warn('⚠️ Failed to fetch enhanced data:', enhancedError.message);
           }
         } else {
-          console.log('⚠️ Skipping enhanced data fetch - data already available in database or no registration');
         }
         
         // Handle price carefully - prefer PRIVATE sale price
@@ -883,13 +742,6 @@ const CarAdvertEditPage = () => {
         if (priceValue === null || priceValue === undefined) {
           priceValue = '';
         }
-        console.log('💰 Setting price to:', priceValue, '(Private Sale preferred)');
-        console.log('💰 Available prices:');
-        console.log('   - privatePrice:', response.data.vehicleData?.valuation?.privatePrice);
-        console.log('   - allValuations.private:', response.data.vehicleData?.allValuations?.private);
-        console.log('   - advertPrice:', response.data.advertData?.price);
-        console.log('   - estimatedValue:', response.data.vehicleData?.estimatedValue);
-        console.log('   - FINAL PRICE USED:', priceValue);
         
         setAdvertData({
           price: priceValue,
@@ -934,13 +786,7 @@ const CarAdvertEditPage = () => {
           businessWebsite: response.data.vehicleData?.sellerContact?.businessWebsite || response.data.advertData?.businessWebsite || ''
         });
         
-        console.log('🏢 Business info loaded:', {
-          businessName: response.data.vehicleData?.sellerContact?.businessName || response.data.advertData?.businessName,
-          businessLogo: response.data.vehicleData?.sellerContact?.businessLogo || response.data.advertData?.businessLogo,
-          businessWebsite: response.data.vehicleData?.sellerContact?.businessWebsite || response.data.advertData?.businessWebsite
-        });
         
-        console.log('✅ Advert data loaded successfully');
       } else {
         console.error('❌ Failed to load advert:', response.message);
         throw new Error(response.message || 'Failed to load advert data');
@@ -950,16 +796,12 @@ const CarAdvertEditPage = () => {
       setLoadError(error.message || 'Failed to load advert data');
       // Don't redirect immediately, let user retry
     } finally {
-      console.log('🏁 Setting isLoading to false');
       setIsLoading(false);
     }
   }, [advertId, navigate, lookupVehicle]);
 
   // Fetch MOT data from API
   const fetchMOTData = async (vrm) => {
-    console.log('⚠️ MOT API call disabled to avoid charges');
-    console.log('💡 MOT data should be available in car document already');
-    console.log('� VRM requested:', vrm);
     
     // Set loading to false and empty data
     setMotLoading(false);
@@ -983,29 +825,12 @@ const CarAdvertEditPage = () => {
       if (availablePrice && availablePrice > 0) {
         const numericPrice = parseFloat(availablePrice);
         if (!isNaN(numericPrice) && numericPrice > 0) {
-          console.log('🔧 Auto-fixing price - setting to:', numericPrice);
-          console.log('🔧 Price source:', {
-            'valuation.estimatedValue.private': vehicleData.valuation?.estimatedValue?.private,
-            'valuation.estimatedValue.retail': vehicleData.valuation?.estimatedValue?.retail,
-            'valuation.privatePrice': vehicleData.valuation?.privatePrice,
-            'allValuations.private': vehicleData.allValuations?.private,
-            'estimatedValue': vehicleData.estimatedValue,
-            'price': vehicleData.price,
-            'selectedPrice': numericPrice
-          });
           setAdvertData(prev => ({
             ...prev,
             price: numericPrice
           }));
         }
       } else {
-        console.log('⚠️ No valid price found in any source:', {
-          'valuation.estimatedValue': vehicleData.valuation?.estimatedValue,
-          'valuation.privatePrice': vehicleData.valuation?.privatePrice,
-          'allValuations.private': vehicleData.allValuations?.private,
-          'estimatedValue': vehicleData.estimatedValue,
-          'price': vehicleData.price
-        });
       }
     }
   }, [vehicleData, advertData.price]);
@@ -1067,7 +892,6 @@ const CarAdvertEditPage = () => {
   
   // Handle price editing
   const handlePriceEdit = () => {
-    console.log('🖱️ Edit price button clicked!');
     setIsPriceEditing(true);
   };
   
@@ -1090,9 +914,7 @@ const CarAdvertEditPage = () => {
         price: priceValue // Ensure price is a number
       };
       
-      console.log('💰 Saving price:', priceValue);
       const response = await advertService.updateAdvert(advertId, updatedAdvertData, vehicleData);
-      console.log('✅ Price saved successfully:', response);
       
       // Update local state with the saved price
       setAdvertData(prev => ({
@@ -1118,7 +940,6 @@ const CarAdvertEditPage = () => {
   
   // Handle vehicle details edit (make, model, variant only)
   const handleVehicleDetailsEdit = () => {
-    console.log('🖱️ Edit vehicle details button clicked!');
     
     // Initialize editable data with current values
     setEditableVehicleData({
@@ -1133,7 +954,6 @@ const CarAdvertEditPage = () => {
   // Handle vehicle details save
   const handleVehicleDetailsSave = async () => {
     try {
-      console.log('💾 Saving vehicle details:', editableVehicleData);
       
       // Validate make and model (required fields)
       if (!editableVehicleData.make || !editableVehicleData.make.trim()) {
@@ -1150,10 +970,6 @@ const CarAdvertEditPage = () => {
       setErrors(prev => ({ ...prev, make: null, model: null, variant: null }));
       
       // CRITICAL DEBUG: Log what we're about to save
-      console.log('🔍 Saving vehicle details:');
-      console.log('   editableVehicleData.make:', editableVehicleData.make);
-      console.log('   editableVehicleData.model:', editableVehicleData.model);
-      console.log('   editableVehicleData.variant:', editableVehicleData.variant);
       
       // Update only make, model, and variant
       const updateData = {
@@ -1162,7 +978,6 @@ const CarAdvertEditPage = () => {
         variant: editableVehicleData.variant ? editableVehicleData.variant.trim() : ''
       };
       
-      console.log('💾 Update data being sent:', updateData);
       
       // Save to backend (will update both Car and VehicleHistory)
       // CRITICAL: Pass empty object as advertData, and updateData as vehicleData
@@ -1171,7 +986,6 @@ const CarAdvertEditPage = () => {
         ...updateData
       });
       
-      console.log('✅ Vehicle details saved successfully:', response);
       
       // Update local state
       setVehicleData(prev => ({
@@ -1179,7 +993,6 @@ const CarAdvertEditPage = () => {
         ...updateData
       }));
       
-      console.log('✅ Local state updated with new data:', updateData);
       
       // Show success message
       alert('Vehicle details saved successfully! Page will reload to show changes.');
@@ -1206,13 +1019,11 @@ const CarAdvertEditPage = () => {
       model: vehicleData.model || '',
       variant: vehicleData.variant || ''
     };
-    console.log('🔄 Resetting editable data:', resetData);
     setEditableVehicleData(resetData);
   };
   
   // Handle Overview section edit (model, variant, motDue, engineSize, doors, transmission, seats, fuelType, color)
   const handleOverviewEdit = () => {
-    console.log('🖱️ Overview edit button clicked!');
     setEditableOverviewData({
       model: vehicleData.model || '',
       variant: vehicleData.variant || '',
@@ -1230,7 +1041,6 @@ const CarAdvertEditPage = () => {
   // Handle Overview save
   const handleOverviewSave = async () => {
     try {
-      console.log('💾 Saving Overview data:', editableOverviewData);
       
       // Validate model (required)
       if (!editableOverviewData.model || !editableOverviewData.model.trim()) {
@@ -1254,7 +1064,6 @@ const CarAdvertEditPage = () => {
         color: editableOverviewData.color ? editableOverviewData.color.trim() : null
       };
       
-      console.log('💾 Saving to database:', updateData);
       
       // Save to backend
       const response = await advertService.updateAdvert(advertId, {}, {
@@ -1262,7 +1071,6 @@ const CarAdvertEditPage = () => {
         ...updateData
       });
       
-      console.log('✅ Overview saved successfully:', response);
       
       // Update local state
       setVehicleData(prev => ({
@@ -1355,8 +1163,6 @@ const CarAdvertEditPage = () => {
     
     const timeout = setTimeout(async () => {
       try {
-        console.log('🔧 Saving features (debounced):', { features: newFeatures, serviceHistory });
-        console.log('🔧 Advert ID:', advertId);
         
         // Send both features and serviceHistory
         const updateData = { 
@@ -1365,7 +1171,6 @@ const CarAdvertEditPage = () => {
         };
         
         await advertService.updateAdvert(advertId, updateData, vehicleData);
-        console.log('Features and service history saved successfully');
       } catch (error) {
         console.error('Error saving features:', error);
         console.error('Error details:', error.response?.data);
@@ -1387,7 +1192,6 @@ const CarAdvertEditPage = () => {
     const timeout = setTimeout(async () => {
       try {
         await advertService.updateAdvert(advertId, { ...advertData, videoUrl: url }, vehicleData);
-        console.log('Video URL saved successfully');
       } catch (error) {
         console.error('Error saving video URL:', error);
       }
@@ -1427,7 +1231,6 @@ const CarAdvertEditPage = () => {
     const timeout = setTimeout(async () => {
       try {
         await advertService.updateAdvert(advertId, { ...advertData, runningCosts: newRunningCosts }, vehicleData);
-        console.log('Running costs saved successfully');
       } catch (error) {
         console.error('Error saving running costs:', error);
       }
@@ -1582,14 +1385,6 @@ const CarAdvertEditPage = () => {
   };
 
   const handlePublish = () => {
-    console.log('📤 Publishing advert with data:', {
-      advertDataKeys: Object.keys(advertData),
-      businessName: advertData.businessName,
-      businessLogo: advertData.businessLogo,
-      businessWebsite: advertData.businessWebsite,
-      hasLogo: !!(advertData.businessLogo && advertData.businessLogo.trim()),
-      hasWebsite: !!(advertData.businessWebsite && advertData.businessWebsite.trim())
-    });
     
     // Navigate to seller contact details page
     navigate(`/selling/advert/contact/${advertId}`, {
@@ -1725,7 +1520,6 @@ const CarAdvertEditPage = () => {
                     const photoUrl = typeof photo === 'string' ? photo : photo.url;
                     const photoId = typeof photo === 'string' ? `photo-${index}` : photo.id;
                     
-                    console.log(`📸 Photo ${index}:`, photo, '→ URL:', photoUrl);
                     
                     return (
                       <div key={photoId} className="photo-item">
@@ -1926,10 +1720,6 @@ const CarAdvertEditPage = () => {
                       <span className="price-value">
                         {(() => {
                           // Debug logging
-                          console.log('🔍 DEBUG: advertData.price =', advertData.price, 'type:', typeof advertData.price);
-                          console.log('🔍 DEBUG: vehicleData?.estimatedValue =', vehicleData?.estimatedValue);
-                          console.log('🔍 DEBUG: vehicleData?.allValuations =', vehicleData?.allValuations);
-                          console.log('🔍 DEBUG: vehicleData?.valuation =', vehicleData?.valuation);
                           
                           // Try multiple sources for the price
                           let displayPrice = null;
@@ -1963,7 +1753,6 @@ const CarAdvertEditPage = () => {
                             displayPrice = vehicleData.price;
                           }
                           
-                          console.log('🔍 DEBUG: Final displayPrice =', displayPrice);
                           
                           if (displayPrice && displayPrice > 0) {
                             return displayPrice.toLocaleString();

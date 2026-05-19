@@ -48,33 +48,10 @@ import TermsOfUsePage from './pages/TermsAndConditions/TermsOfUsePage'
 // Admin Pages
 import AdminDashboardPage from './pages/Admin/AdminDashboardPage'
 
-// Bike Pages
-import BikesPage from './pages/Bikes/BikesPage'
-import UsedBikesPage from './pages/Bikes/UsedBikesPage'
-import NewBikesPage from './pages/Bikes/NewBikesPage'
-import SellYourBikePage from './pages/Bikes/SellYourBikePage'
-import BikeSearchResultsPage from './pages/Bikes/BikeSearchResultsPage'
-import BikeDetailPage from './pages/Bikes/BikeDetailPage'
-import BikeFinderFormPage from './pages/Bikes/BikeFinderFormPage'
-import BikeAdvertEditPage from './pages/Bikes/BikeAdvertEditPage'
-import BikeSellerContactPage from './pages/Bikes/BikeSellerContactPage'
-import BikeAdvertisingPricesPage from './pages/Bikes/BikeAdvertisingPricesPage'
-import BikeAdvertPaymentSuccessPage from './pages/Bikes/BikeAdvertPaymentSuccessPage'
-import BikeCheckPage from './pages/Bikes/BikeCheckPage'
-
-// Van Pages
-import VansPage from './pages/Vans/VansPage'
-import UsedVansPage from './pages/Vans/UsedVansPage'
-import NewVansPage from './pages/Vans/NewVansPage'
-import SellYourVanPage from './pages/Vans/SellYourVanPage'
-import VanFinderFormPage from './pages/Vans/VanFinderFormPage'
-import VanCheckPage from './pages/Vans/VanCheckPage'
-import VanAdvertEditPage from './pages/Vans/VanAdvertEditPage'
-import VanSellerContactPage from './pages/Vans/VanSellerContactPage'
-import VanAdvertisingPricesPage from './pages/Vans/VanAdvertisingPricesPage'
-import VanAdvertPaymentSuccessPage from './pages/Vans/VanAdvertPaymentSuccessPage'
-import VanDetailPage from './pages/Vans/VanDetailPage'
-import VanSearchResultsPage from './pages/Vans/VanSearchResultsPage'
+// BIKES & VANS DISABLED - Car-only deployment
+// import BikesPage from './pages/Bikes/BikesPage'
+// import UsedBikesPage from './pages/Bikes/UsedBikesPage'
+// ... (all bike/van imports removed)
 
 // Trade Dealer Pages
 import TradeLoginPage from './pages/Trade/TradeLoginPage'
@@ -177,33 +154,7 @@ function App() {
               <Route path="/accessibility-statement" element={<AccessibilityStatementPage />} />
               <Route path="/cookies-policy" element={<CookiesPolicyPage />} />
               
-              {/* Bike Routes */}
-              <Route path="/bikes" element={<BikesPage />} />
-              <Route path="/bikes/used-bikes" element={<UsedBikesPage />} />
-              <Route path="/bikes/new-bikes" element={<NewBikesPage />} />
-              <Route path="/bikes/sell-your-bike" element={<SellYourBikePage />} />
-              <Route path="/bikes/find-your-bike" element={<BikeFinderFormPage />} />
-              <Route path="/bikes/check" element={<BikeCheckPage />} />
-              <Route path="/bikes/selling/advert/edit/:advertId" element={<BikeAdvertEditPage />} />
-              <Route path="/bikes/selling/advert/contact/:advertId" element={<BikeSellerContactPage />} />
-              <Route path="/bikes/advertising-prices" element={<BikeAdvertisingPricesPage />} />
-              <Route path="/bikes/advert-payment-success" element={<BikeAdvertPaymentSuccessPage />} />
-              <Route path="/bikes/search-results" element={<BikeSearchResultsPage />} />
-              <Route path="/bikes/:id" element={<BikeDetailPage />} />
-              
-              {/* Van Routes */}
-              <Route path="/vans" element={<VansPage />} />
-              <Route path="/vans/used-vans" element={<UsedVansPage />} />
-              <Route path="/vans/new-vans" element={<NewVansPage />} />
-              <Route path="/vans/sell-your-van" element={<SellYourVanPage />} />
-              <Route path="/vans/find-your-van" element={<VanFinderFormPage />} />
-              <Route path="/vans/check" element={<VanCheckPage />} />
-              <Route path="/vans/selling/advert/edit/:advertId" element={<VanAdvertEditPage />} />
-              <Route path="/vans/selling/advert/contact/:advertId" element={<VanSellerContactPage />} />
-              <Route path="/vans/advertising-prices" element={<VanAdvertisingPricesPage />} />
-              <Route path="/vans/advert-payment-success" element={<VanAdvertPaymentSuccessPage />} />
-              <Route path="/vans/search-results" element={<VanSearchResultsPage />} />
-              <Route path="/vans/:id" element={<VanDetailPage />} />
+              {/* BIKES & VANS ROUTES DISABLED - Car-only deployment */}
               
               {/* Trade Dealer Routes */}
               <Route path="/trade/login" element={<TradeLoginPage />} />

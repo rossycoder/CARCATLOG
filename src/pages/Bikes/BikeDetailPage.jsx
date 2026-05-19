@@ -71,7 +71,6 @@ const BikeDetailPage = () => {
         url += `?postcode=${encodeURIComponent(userPostcode)}`;
       }
       
-      console.log('Fetching bike details from:', url);
       
       const response = await fetch(url, {
         headers: {

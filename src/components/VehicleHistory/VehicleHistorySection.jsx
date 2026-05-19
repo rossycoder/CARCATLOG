@@ -20,11 +20,9 @@ const VehicleHistorySection = ({ vrm, carData }) => {
         // Check both historyCheckId (for cars) and historyCheckData (for vans/bikes)
         if (carData && (carData.historyCheckId || carData.historyCheckData)) {
           const historySource = carData.historyCheckId || carData.historyCheckData;
-          console.log('[VehicleHistory] Using vehicle history from car data:', historySource);
           
           // If historyCheckData exists (vans/bikes), transform it to match expected format
           if (carData.historyCheckData && !carData.historyCheckId) {
-            console.log('[VehicleHistory] Transforming historyCheckData for van/bike');
             const transformedData = {
               isStolen: carData.historyCheckData.stolen || false,
               isScrapped: carData.historyCheckData.scrapped || false,
@@ -45,7 +43,6 @@ const VehicleHistorySection = ({ vrm, carData }) => {
         }
         
         // If no history data in car document, show informative message
-        console.log('[VehicleHistory] No vehicle history found in car data for:', vrm);
         setError({
           message: 'Vehicle history information is not available for this vehicle',
           nextSteps: [
@@ -231,16 +228,6 @@ const VehicleHistorySection = ({ vrm, carData }) => {
                                 severity.trim() !== '';
         
         // Debug log
-        console.log('[WriteOff Check]', {
-          isWrittenOff,
-          hasAccidentHistory: historyData.hasAccidentHistory,
-          isWrittenOffFlag: historyData.isWrittenOff,
-          severity,
-          writeOffCategory: historyData.writeOffCategory,
-          accidentDetailsSeverity: historyData.accidentDetails?.severity,
-          hasValidSeverity,
-          result: !isWrittenOff && !hasValidSeverity
-        });
         
         // If no write-off data at all, it's passed (clean vehicle)
         if (!isWrittenOff && !hasValidSeverity) {

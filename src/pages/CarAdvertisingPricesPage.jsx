@@ -33,35 +33,17 @@ const CarAdvertisingPricesPage = () => {
   const isViewOnly = searchParams.get('viewOnly') === 'true';
   
   // Debug logging
-  console.log('🔍 Package Selection Page - Always Enabled:', {
-    hasAdvertData: !!advertData,
-    hasVehicleData: !!vehicleData,
-    sellerType,
-    isViewOnly
-  });
 
   // Debug logging for received data
-  console.log('🔍 PRICING PAGE: Received data from navigation:', {
-    advertId,
-    'advertData keys': advertData ? Object.keys(advertData) : 'null',
-    'vehicleData keys': vehicleData ? Object.keys(vehicleData) : 'null',
-    'advertData.price': advertData?.price,
-    'vehicleData.price': vehicleData?.price,
-    'vehicleData.estimatedValue': vehicleData?.estimatedValue,
-    'vehicleValuation': vehicleValuation,
-    'vehicleValuation type': typeof vehicleValuation
-  });
 
   // Fetch advert data ONLY if not passed via state AND no vehicleData exists
   // CRITICAL FIX: Prevent duplicate API calls by checking both advertData AND vehicleData
   useEffect(() => {
     // Only fetch if we have advertId but BOTH advertData AND vehicleData are missing
     if (advertId && !advertData && !vehicleData) {
-      console.log('📸 Fetching advert data for advertId:', advertId);
       advertService.getAdvert(advertId)
         .then(response => {
           if (response.success && response.data) {
-            console.log('📸 Fetched advert data with', response.data.advertData?.photos?.length || 0, 'photos');
             setAdvertData(response.data.advertData);
             setVehicleData(response.data.vehicleData);
           }
@@ -70,9 +52,6 @@ const CarAdvertisingPricesPage = () => {
           console.error('Failed to fetch advert data:', error);
         });
     } else if (advertData || vehicleData) {
-      console.log('✅ Using data from navigation state - NO API CALL NEEDED');
-      console.log('📸 advertData photos:', advertData?.photos?.length || 0);
-      console.log('🚗 vehicleData available:', !!vehicleData);
     }
   }, [advertId]); // Removed advertData from dependencies to prevent loops
 
@@ -249,15 +228,12 @@ const CarAdvertisingPricesPage = () => {
 
   // Calculate the appropriate price range based on vehicle valuation
   const calculatePriceRange = (valuation, isTradeType) => {
-    console.log('📊 calculatePriceRange called with:', { valuation, isTradeType, type: typeof valuation });
     
     if (!valuation || isNaN(valuation)) {
-      console.log('❌ Invalid valuation:', valuation);
       return null;
     }
     
     const value = parseFloat(valuation);
-    console.log('💰 Parsed value:', value);
     
     if (isTradeType) {
       // Trade pricing tiers
@@ -292,20 +268,12 @@ const CarAdvertisingPricesPage = () => {
         selectedRange = 'over-24995';
       }
       
-      console.log(`✅ Selected range for £${value}: ${selectedRange}`);
       return selectedRange;
     }
   };
 
   // Auto-select price range on component mount if valuation is available
   useEffect(() => {
-    console.log('🔍 DEBUGGING: useEffect triggered with data:', {
-      vehicleValuation,
-      advertData,
-      vehicleData,
-      sellerType,
-      'vehicleData keys': vehicleData ? Object.keys(vehicleData) : 'null'
-    });
     
     // Extract numeric valuation from various possible sources
     // CRITICAL FIX: Use user's entered price if no valuation available
@@ -334,55 +302,31 @@ const CarAdvertisingPricesPage = () => {
       valuationSource = 'advertData.price (user-entered)';
     }
     
-    console.log('💰 Valuation extraction result:', {
-      valuation,
-      valuationSource,
-      'vehicleData.price': vehicleData?.price,
-      'advertData.price': advertData?.price,
-      'vehicleData.allValuations': vehicleData?.allValuations,
-      'vehicleData.estimatedValue': vehicleData?.estimatedValue
-    });
     
     if (valuation && !isNaN(valuation) && valuation > 0) {
       const calculatedRange = calculatePriceRange(valuation, sellerType === 'trade');
       if (calculatedRange) {
-        console.log(`🔒 Auto-selecting price range: ${calculatedRange} for valuation: £${valuation} (source: ${valuationSource}, seller type: ${sellerType})`);
-        console.log(`🔒 Current priceRange state before update: ${priceRange}`);
         
         // FORCE UPDATE: Always set the calculated range regardless of current state
-        console.log(`🔄 FORCE UPDATE: Setting price range to ${calculatedRange}`);
         setPriceRange(calculatedRange);
         setIsPriceRangeLocked(true);
         
-        console.log(`🔒 Price range should now be: ${calculatedRange}`);
       }
     } else {
       // No valuation data - allow manual selection
       setIsPriceRangeLocked(false);
-      console.log('🔓 No valuation data - manual price range selection enabled');
     }
   }, [vehicleValuation, advertData, vehicleData, sellerType]); // Removed priceRange from dependencies to prevent loops
 
   // Auto-detect seller type based on business info and lock if no business info
   useEffect(() => {
-    console.log('🔍 Auto-detection check:', {
-      hasAdvertData: !!advertData,
-      hasVehicleData: !!vehicleData,
-      businessLogo: advertData?.businessLogo,
-      businessWebsite: advertData?.businessWebsite,
-      vehicleBusinessLogo: vehicleData?.sellerContact?.businessLogo,
-      vehicleBusinessWebsite: vehicleData?.sellerContact?.businessWebsite,
-      hasBusinessInfo: hasBusinessInfo()
-    });
     
     // If business info exists, force trade seller type
     if (hasBusinessInfo()) {
       setSellerType('trade');
-      console.log('✅ Auto-detected as TRADE seller (has business info) - Private option disabled');
     } else if (advertData || vehicleData) {
       // No business info - force private seller type
       setSellerType('private');
-      console.log('🔒 LOCKED to PRIVATE seller (no business info) - Trade option disabled');
     }
   }, [advertData, vehicleData]);
 
@@ -407,10 +351,8 @@ const CarAdvertisingPricesPage = () => {
   // Separate effect to handle initial price range setting when vehicleData becomes available
   useEffect(() => {
     if (vehicleData?.price && typeof vehicleData.price === 'number' && priceRange === 'under-1000') {
-      console.log('🚀 INITIAL: vehicleData.price available, forcing price range calculation');
       const calculatedRange = calculatePriceRange(vehicleData.price, sellerType === 'trade');
       if (calculatedRange && calculatedRange !== 'under-1000') {
-        console.log(`🚀 INITIAL: Setting price range to ${calculatedRange} for £${vehicleData.price}`);
         setPriceRange(calculatedRange);
         setIsPriceRangeLocked(true);
       }
@@ -420,10 +362,8 @@ const CarAdvertisingPricesPage = () => {
   // EMERGENCY FALLBACK: Force correct price range if we detect the wrong one is being used
   useEffect(() => {
     if (priceRange === 'under-1000' && vehicleData?.price && vehicleData.price > 1000) {
-      console.log('🚨 EMERGENCY FALLBACK: Detected under-1000 with high value vehicle, forcing correction');
       const correctRange = calculatePriceRange(vehicleData.price, sellerType === 'trade');
       if (correctRange) {
-        console.log(`🚨 EMERGENCY: Correcting ${priceRange} to ${correctRange} for £${vehicleData.price}`);
         setPriceRange(correctRange);
         setIsPriceRangeLocked(true);
       }
@@ -432,7 +372,6 @@ const CarAdvertisingPricesPage = () => {
 
   // Reset price range when seller type changes
   const handleSellerTypeChange = (type) => {
-    console.log('🔄 Seller type changed to:', type);
     setSellerType(type);
     
     // If price range is locked (auto-selected), recalculate for new seller type
@@ -460,7 +399,6 @@ const CarAdvertisingPricesPage = () => {
       if (valuation && !isNaN(valuation) && valuation > 0) {
         const calculatedRange = calculatePriceRange(valuation, type === 'trade');
         if (calculatedRange) {
-          console.log(`🔄 Recalculated price range for ${type}: ${calculatedRange} (valuation: £${valuation})`);
           setPriceRange(calculatedRange);
         }
       }
@@ -468,7 +406,6 @@ const CarAdvertisingPricesPage = () => {
       // Manual selection - reset to first option for the new seller type
       const firstOption = type === 'trade' ? 'under-1000' : 'under-1000';
       setPriceRange(firstOption);
-      console.log(`🔄 Reset to first option for ${type}: ${firstOption}`);
     }
   };
 
@@ -546,18 +483,6 @@ const CarAdvertisingPricesPage = () => {
         actualVehicleValue = advertData.price;
       }
       
-      console.log('💰 Payment request vehicle value extraction:', {
-        actualVehicleValue,
-        priceRange,
-        'priceRange state': priceRange,
-        'isPriceRangeLocked': isPriceRangeLocked,
-        'vehicleData.estimatedValue': vehicleData?.estimatedValue,
-        'vehicleData.estimatedValue type': typeof vehicleData?.estimatedValue,
-        'vehicleData.valuation': vehicleData?.valuation,
-        'vehicleValuation': vehicleValuation,
-        'advertData.price': advertData?.price,
-        'vehicleData.price': vehicleData?.price
-      });
       
       const requestBody = {
         packageId: pkg.id,
@@ -583,9 +508,6 @@ const CarAdvertisingPricesPage = () => {
         sellerType: sellerType
       };
       
-      console.log('📦 Payment request - Seller Type:', sellerType);
-      console.log('📸 Sending payment request with', advertData?.photos?.length || 0, 'photos');
-      console.log('📸 Photo URLs:', advertData?.photos?.map(p => p.url).slice(0, 3), '...');
       
       const response = await fetch(`${API_BASE_URL}/payments/create-car-checkout-session`, {
         method: 'POST',

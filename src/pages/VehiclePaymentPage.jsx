@@ -27,7 +27,6 @@ const VehiclePaymentPage = () => {
   const fetchVehicleData = async () => {
     try {
       setIsLoading(true);
-      console.log('⚠️ Skipping API calls to avoid charges - using basic data for payment page');
       
       // For payment page, we don't need full vehicle data
       // Just set basic info for display
@@ -52,7 +51,6 @@ const VehiclePaymentPage = () => {
         _completeness: 'payment_mode'
       };
       
-      console.log('Using basic data for payment page:', basicData);
       setVehicleData(basicData);
       
     } catch (err) {
@@ -68,8 +66,6 @@ const VehiclePaymentPage = () => {
     try {
       setIsProcessingPayment(true);
       
-      console.log('🚨 PROCESSING REAL PAYMENT for:', registration);
-      console.log('⚠️  This will charge £4.95 to the customer card!');
       
       // Create Stripe checkout session
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -88,7 +84,6 @@ const VehiclePaymentPage = () => {
       
       if (data.success && data.data.url) {
         // Redirect to Stripe Checkout
-        console.log('Redirecting to Stripe Checkout...');
         window.location.href = data.data.url;
       } else {
         throw new Error(data.error || 'Failed to create payment session');

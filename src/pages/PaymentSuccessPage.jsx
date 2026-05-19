@@ -27,7 +27,6 @@ const PaymentSuccessPage = () => {
   const generateVehicleReport = async () => {
     try {
       setIsLoading(true);
-      console.log('Running complete vehicle check for:', registration);
 
       // Single call — fetches history + MOT, uses cache if available, stores results
       const resp = await api.post('/vehicle-history/complete-check', { vrm: registration.toUpperCase() });
@@ -39,7 +38,6 @@ const PaymentSuccessPage = () => {
       const h = resp.data.data;
       const motHistory = Array.isArray(h.motHistory) ? h.motHistory : [];
 
-      console.log(`✅ History loaded. MOT tests: ${motHistory.length}, Owners: ${h.numberOfPreviousKeepers}`);
 
       // Map to PDF shape
       const combinedData = {
@@ -116,10 +114,6 @@ const PaymentSuccessPage = () => {
 
   const handleDownloadReport = () => {
     try {
-      console.log('=== PDF Download Debug ===');
-      console.log('vehicleData exists:', !!vehicleData);
-      console.log('vehicleData:', JSON.stringify(vehicleData, null, 2));
-      console.log('registration:', registration);
       
       if (!vehicleData) {
         alert('Vehicle data not available. Please refresh the page.');
@@ -128,7 +122,6 @@ const PaymentSuccessPage = () => {
       
       // Use enhanced PDF generator
       generateEnhancedVehicleReport(vehicleData, registration.toUpperCase());
-      console.log('PDF generation completed successfully');
     } catch (error) {
       console.error('Error generating PDF:', error);
       console.error('Error details:', error.message);

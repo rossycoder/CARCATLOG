@@ -12,7 +12,6 @@ const useBikeLookup = () => {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 Looking up bike:', registration, 'with mileage:', mileage);
       
       const result = await bikeService.lookupBikeByRegistration(registration, mileage);
       
@@ -72,8 +71,6 @@ const useBikeLookup = () => {
         
         setSources(fieldSources);
         
-        console.log('✅ Bike lookup successful:', normalizedData);
-        console.log('💰 Running costs found:', {
           urbanMpg: normalizedData.urbanMpg,
           extraUrbanMpg: normalizedData.extraUrbanMpg,
           combinedMpg: normalizedData.combinedMpg,
@@ -85,9 +82,7 @@ const useBikeLookup = () => {
         
         // Show note if using fallback data
         if (isMockData) {
-          console.log('⚠️ Using generated/fallback data - please verify details');
         } else if (fromDatabase) {
-          console.log('✅ Using cached database data - saved API cost!');
         }
         
         return normalizedData;

@@ -32,7 +32,6 @@ export const getValuation = async (vrm, mileage, forceRefresh = false) => {
         return await getCachedValuation(vrm);
       } catch (cacheError) {
         // If no cached data, continue to API call
-        console.log('No cached valuation found, proceeding with API call');
       }
     }
     

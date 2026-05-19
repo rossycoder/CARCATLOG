@@ -27,7 +27,6 @@ const AdvertPaymentSuccessPage = () => {
 
   const autoCompletePurchase = async () => {
     try {
-      console.log('🚀 Auto-completing purchase for session:', sessionId);
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       
       // Wait a bit for purchase record to be created
@@ -46,7 +45,6 @@ const AdvertPaymentSuccessPage = () => {
       const data = await response.json();
 
       if (data.success) {
-        console.log('✅ Purchase auto-completed successfully!');
       } else {
         console.warn('⚠️ Auto-complete failed:', data.error);
       }
@@ -63,7 +61,6 @@ const AdvertPaymentSuccessPage = () => {
       
       if (data.success) {
         setPurchaseData(data.data);
-        console.log('Purchase details loaded:', data.data);
       } else {
         console.error('Failed to load purchase details:', data.error);
       }

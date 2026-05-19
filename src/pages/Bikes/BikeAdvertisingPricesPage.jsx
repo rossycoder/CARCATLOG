@@ -85,8 +85,6 @@ const BikeAdvertisingPricesPage = () => {
       setProcessingPackageId(pkg.id);
       setError(null);
       
-      console.log('🚨 PROCESSING BIKE PAYMENT for package:', pkg.name);
-      console.log('⚠️  This will charge:', pkg.price);
       
       // Create Stripe checkout session for bike advertising package
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -117,8 +115,6 @@ const BikeAdvertisingPricesPage = () => {
         }
       };
       
-      console.log('📤 Sending bike payment request to:', `${API_BASE_URL}/payments/create-bike-checkout-session`);
-      console.log('📦 Request body:', requestBody);
       
       const response = await fetch(`${API_BASE_URL}/payments/create-bike-checkout-session`, {
         method: 'POST',
@@ -128,7 +124,6 @@ const BikeAdvertisingPricesPage = () => {
         body: JSON.stringify(requestBody),
       });
       
-      console.log('📥 Response status:', response.status);
       
       if (!response.ok) {
         let errorMessage = `Payment request failed (${response.status})`;
@@ -146,11 +141,9 @@ const BikeAdvertisingPricesPage = () => {
       }
       
       const data = await response.json();
-      console.log('📊 Response data:', data);
       
       if (data.success && data.data && data.data.url) {
         // Redirect to Stripe Checkout
-        console.log('✅ Redirecting to Stripe Checkout:', data.data.url);
         window.location.href = data.data.url;
       } else {
         console.error('❌ Invalid response format:', data);

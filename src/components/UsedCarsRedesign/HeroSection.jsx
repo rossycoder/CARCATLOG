@@ -22,9 +22,7 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
     const fetchCarCount = async () => {
       try {
         setLoadingCount(true);
-        console.log('Fetching car count from API...');
         const count = await carService.getCarCount();
-        console.log('Car count received:', count);
         setCarCount(count || 0);
       } catch (error) {
         console.error('Error fetching car count:', error);
@@ -40,7 +38,6 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
         setLoadingMakes(true);
         const makesData = await filterService.getMakes();
         setMakes(makesData);
-        console.log('Fetched makes from database:', makesData.length);
       } catch (err) {
         console.error('Error fetching makes:', err);
         setMakes([]);

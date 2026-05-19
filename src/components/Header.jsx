@@ -56,29 +56,28 @@ const Header = () => {
     document.addEventListener('click', handleClickOutside);
   }
 
+  // BIKES & VANS DISABLED - Car-only deployment
   const categories = [
     { name: 'Cars', path: '/' },
-    { name: 'Bikes', path: '/bikes' },
-    { name: 'Vans', path: '/vans' },
+    // { name: 'Bikes', path: '/bikes' },
+    // { name: 'Vans', path: '/vans' },
   ];
 
-  // Check if current page is a bikes page or vans page
-  const isBikesPage = location.pathname.startsWith('/bikes');
-  const isVansPage = location.pathname.startsWith('/vans');
+  // Car-only deployment - bikes/vans disabled
+  const isBikesPage = false; // location.pathname.startsWith('/bikes');
+  const isVansPage = false; // location.pathname.startsWith('/vans');
 
-  // Determine logo link based on current page
-  const logoLink = isBikesPage ? '/bikes' : isVansPage ? '/vans' : '/';
+  // Logo always links to home (cars)
+  const logoLink = '/';
 
   return (
     <header className="header">
-      {/* TOP NAVIGATION - Desktop Only */}
-      <div className="top-nav">
+      {/* TOP NAVIGATION - Desktop Only - BIKES & VANS DISABLED */}
+      {/* <div className="top-nav">
         <nav className="top-nav-links">
           <Link to="/" className={`top-nav-link ${!isBikesPage && !isVansPage ? 'active' : ''}`}>Cars</Link>
-          <Link to="/bikes" className={`top-nav-link ${isBikesPage ? 'active' : ''}`}>Bikes</Link>
-          <Link to="/vans" className={`top-nav-link ${isVansPage ? 'active' : ''}`}>Vans</Link>
         </nav>
-      </div>
+      </div> */}
 
       {/* MAIN HEADER */}
       <div className="main-header">
@@ -103,31 +102,12 @@ const Header = () => {
           />
         </Link>
 
-        {/* DESKTOP MAIN NAV */}
+        {/* DESKTOP MAIN NAV - Car-only */}
         <nav className="main-nav">
-          {isBikesPage ? (
-            <>
-              <Link to="/bikes/used-bikes" className="main-nav-link">Used bikes</Link>
-              <Link to="/bikes/new-bikes" className="main-nav-link">New bikes</Link>
-              <Link to="/bikes/sell-your-bike" className="main-nav-link">Sell your bike</Link>
-           
-            </>
-          ) : isVansPage ? (
-            <>
-              <Link to="/vans/used-vans" className="main-nav-link">Used vans</Link>
-              <Link to="/vans/new-vans" className="main-nav-link">New vans</Link>
-              <Link to="/vans/sell-your-van" className="main-nav-link">Sell your van</Link>
-             
-            </>
-          ) : (
-            <>
-              <Link to="/used-cars" className="main-nav-link">Used cars</Link>
-              <Link to="/new-cars" className="main-nav-link">New cars</Link>
-              <Link to="/sell-your-car" className="main-nav-link">Sell your car</Link>
-              <Link to="/valuation" className="main-nav-link">Value your car</Link>
-         
-            </>
-          )}
+          <Link to="/used-cars" className="main-nav-link">Used cars</Link>
+          <Link to="/new-cars" className="main-nav-link">New cars</Link>
+          <Link to="/sell-your-car" className="main-nav-link">Sell your car</Link>
+          <Link to="/valuation" className="main-nav-link">Value your car</Link>
         </nav>
 
         {/* RIGHT - Icons (Saved + Account) */}
@@ -265,59 +245,16 @@ const Header = () => {
           <div style={{ width: '32px' }} />
         </div>
 
-        {/* CHANNEL SWITCHER - Inside Mobile Menu */}
-        <ul className="channel-switcher" role="menu">
-          {categories.map((category) => {
-            const isActive = category.path === '/bikes' 
-              ? isBikesPage 
-              : category.path === '/vans' 
-                ? isVansPage
-                : !isBikesPage && !isVansPage;
-            return (
-              <li key={category.path} role="none">
-                <a
-                  href={category.path}
-                  role="menuitem"
-                  aria-current={isActive ? "true" : "false"}
-                  className={isActive ? 'active' : ''}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate(category.path);
-                    closeMenu();
-                  }}
-                >
-                  {category.name}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
+        {/* CHANNEL SWITCHER DISABLED - Car-only deployment */}
 
         <div className="mobile-menu-divider" />
 
         <div className="mobile-menu-section">
-          {isBikesPage ? (
-            <>
-              <Link to="/bikes/used-bikes" className="mobile-menu-link" onClick={closeMenu}>Used bikes</Link>
-              <Link to="/bikes/new-bikes" className="mobile-menu-link" onClick={closeMenu}>New bikes</Link>
-              <Link to="/bikes/sell-your-bike" className="mobile-menu-link" onClick={closeMenu}>Sell your bike</Link>
-              <Link to="/valuation" className="mobile-menu-link" onClick={closeMenu}>Value your bike</Link>
-            </>
-          ) : isVansPage ? (
-            <>
-              <Link to="/vans/used-vans" className="mobile-menu-link" onClick={closeMenu}>Used vans</Link>
-              <Link to="/vans/new-vans" className="mobile-menu-link" onClick={closeMenu}>New vans</Link>
-              <Link to="/vans/sell-your-van" className="mobile-menu-link" onClick={closeMenu}>Sell your van</Link>
-              <Link to="/valuation" className="mobile-menu-link" onClick={closeMenu}>Value your van</Link>
-            </>
-          ) : (
-            <>
-              <Link to="/used-cars" className="mobile-menu-link" onClick={closeMenu}>Used cars</Link>
-              <Link to="/new-cars" className="mobile-menu-link" onClick={closeMenu}>New cars</Link>
-              <Link to="/sell-your-car" className="mobile-menu-link" onClick={closeMenu}>Sell your car</Link>
-              <Link to="/valuation" className="mobile-menu-link" onClick={closeMenu}>Value your car</Link>
-            </>
-          )}
+          {/* Car-only navigation */}
+          <Link to="/used-cars" className="mobile-menu-link" onClick={closeMenu}>Used cars</Link>
+          <Link to="/new-cars" className="mobile-menu-link" onClick={closeMenu}>New cars</Link>
+          <Link to="/sell-your-car" className="mobile-menu-link" onClick={closeMenu}>Sell your car</Link>
+          <Link to="/valuation" className="mobile-menu-link" onClick={closeMenu}>Value your car</Link>
         </div>
 
         <div className="mobile-menu-divider" />

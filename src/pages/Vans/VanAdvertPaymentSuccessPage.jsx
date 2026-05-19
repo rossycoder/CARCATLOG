@@ -26,7 +26,6 @@ const VanAdvertPaymentSuccessPage = () => {
 
   const autoCompletePurchase = async () => {
     try {
-      console.log('🔄 Auto-completing van purchase for session:', sessionId);
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const response = await fetch(`${API_BASE_URL}/payments/auto-complete`, {
         method: 'POST',
@@ -39,8 +38,6 @@ const VanAdvertPaymentSuccessPage = () => {
       const data = await response.json();
       
       if (data.success) {
-        console.log('✅ Van purchase auto-completed successfully!');
-        console.log('   Vehicle ID:', data.vehicleId);
         // Refresh purchase data to show updated status
         setTimeout(() => fetchPurchaseDetails(), 1000);
       } else {
@@ -59,7 +56,6 @@ const VanAdvertPaymentSuccessPage = () => {
       
       if (data.success) {
         setPurchaseData(data.data);
-        console.log('Purchase details loaded:', data.data);
       } else {
         console.error('Failed to load purchase details:', data.error);
       }

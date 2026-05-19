@@ -32,7 +32,6 @@ const NewCarsPage = () => {
       setLoadingMakes(true);
       const makesData = await filterService.getMakes();
       setMakes(makesData);
-      console.log('Fetched makes from database:', makesData.length);
     } catch (err) {
       console.error('Error fetching makes:', err);
       setMakes([]);

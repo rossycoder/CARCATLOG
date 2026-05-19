@@ -51,7 +51,6 @@ function BikeSearchResultsPage() {
     // Check if we have any filter parameters
     const hasFilters = Array.from(params.keys()).length > 0;
     
-    console.log('BikeSearchResultsPage mounted with params:', Object.fromEntries(params));
 
     if (hasFilters) {
       // Perform filtered search
@@ -75,7 +74,6 @@ function BikeSearchResultsPage() {
         filterParams[key] = value;
       }
       
-      console.log('[BikeSearchResultsPage] Performing filtered search with:', filterParams);
       
       // Check if postcode is provided - use postcode search for distance calculation
       const hasPostcode = filterParams.postcode && filterParams.postcode.trim() !== '';
@@ -83,7 +81,6 @@ function BikeSearchResultsPage() {
       
       let response;
       if (hasPostcode) {
-        console.log('[BikeSearchResultsPage] Using postcode search for distance calculation');
         // Use postcode search endpoint to get distance
         response = await bikeService.searchBikesByPostcode(
           filterParams.postcode,
@@ -91,18 +88,15 @@ function BikeSearchResultsPage() {
           filterParams // Pass other filters
         );
       } else {
-        console.log('[BikeSearchResultsPage] Using normal search (no distance)');
         // Use normal search endpoint (no distance calculation)
         response = await bikeService.searchBikes(filterParams);
       }
       
-      console.log('[BikeSearchResultsPage] Search response:', response);
       
       if (response.success) {
         const bikes = response.data?.results || response.bikes || [];
         const total = response.data?.count || response.total || bikes.length;
         
-        console.log('[BikeSearchResultsPage] Found bikes:', total);
         
         // Transform to match expected format
         const transformedData = {
@@ -113,7 +107,6 @@ function BikeSearchResultsPage() {
           showingAllBikes: false
         };
         
-        console.log('[BikeSearchResultsPage] Setting filtered results:', transformedData);
         setSearchResults(transformedData);
         setFilteredResults(transformedData);
       } else {
@@ -174,11 +167,9 @@ function BikeSearchResultsPage() {
       
       let response;
       if (userPostcode) {
-        console.log('[BikeSearchResultsPage] Loading all bikes with distance from:', userPostcode);
         // Use postcode search with large radius to get all bikes with distance
         response = await bikeService.searchBikesByPostcode(userPostcode, 500); // 500 miles = all UK
       } else {
-        console.log('[BikeSearchResultsPage] Loading all bikes without distance');
         response = await bikeService.getBikes({});
       }
       
@@ -193,7 +184,6 @@ function BikeSearchResultsPage() {
         showingAllBikes: true
       };
       
-      console.log('[BikeSearchResultsPage] Loaded bikes:', total, 'with distance:', !!userPostcode);
       setSearchResults(transformedData);
       setFilteredResults(transformedData);
     } catch (err) {

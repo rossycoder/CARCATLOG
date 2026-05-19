@@ -64,9 +64,6 @@ function SearchResultsPage() {
   }, [savedCars, filteredResults]);
 
   useEffect(() => {
-    console.log('🔵 SearchResultsPage useEffect TRIGGERED');
-    console.log('🔵 location.search:', location.search);
-    console.log('🔵 location.state:', location.state);
     
     // Get search parameters from URL or location state
     const params = new URLSearchParams(location.search);
@@ -93,7 +90,6 @@ function SearchResultsPage() {
     const sortByParam = params.get('sortBy'); // Get sort parameter
     const openFilterParam = params.get('openFilter'); // Check if filter should auto-open
 
-    console.log('🔵 SearchResultsPage mounted with params:', {
       postcodeParam,
       radiusParam,
       makeParam,
@@ -122,13 +118,11 @@ function SearchResultsPage() {
 
     // Auto-open filter if explicitly requested via URL parameter
     if (openFilterParam === 'true') {
-      console.log('Auto-opening filter modal due to openFilter=true parameter');
       setShowFilterModal(true);
     }
 
     // Update sortBy filter if provided in URL
     if (sortByParam) {
-      console.log('Setting sortBy from URL:', sortByParam);
       setFilters(prev => ({ ...prev, sortBy: sortByParam }));
     }
 
@@ -173,80 +167,57 @@ function SearchResultsPage() {
     setError('');
 
     try {
-      console.log('Performing search with:', { searchPostcode, searchRadius, filterParams });
       const response = await carService.searchCarsByPostcode(searchPostcode, searchRadius);
       
-      console.log('Full search response:', response);
-      console.log('Response success:', response.success);
-      console.log('Response data:', response.data);
-      console.log('🔍 RAW API RESULTS:', response.data?.results);
-      console.log('🔍 FIRST CAR DISTANCE:', response.data?.results?.[0]?.distance);
       
       if (response.success && response.data) {
         let results = response.data.results || [];
-        console.log('Results count before filtering:', results.length);
-        console.log('🔍 RESULTS BEFORE FILTER:', results[0]);
         
         // Apply filters if provided
         if (filterParams.make && filterParams.make !== 'Any') {
           results = results.filter(car => car.make === filterParams.make);
-          console.log('Results after make filter:', results.length);
         }
         if (filterParams.model && filterParams.model !== 'Any') {
           results = results.filter(car => car.model === filterParams.model);
-          console.log('Results after model filter:', results.length);
         }
         if (filterParams.submodel) {
           results = results.filter(car => car.variant === filterParams.submodel);
-          console.log('Results after submodel/variant filter:', results.length);
         }
         if (filterParams.colour) {
           results = results.filter(car => car.color === filterParams.colour);
-          console.log('Results after colour filter:', results.length);
         }
         if (filterParams.bodyType) {
           results = results.filter(car => car.bodyType === filterParams.bodyType);
-          console.log('Results after bodyType filter:', results.length);
         }
         if (filterParams.doors) {
           results = results.filter(car => car.doors === parseInt(filterParams.doors));
-          console.log('Results after doors filter:', results.length);
         }
         if (filterParams.seats) {
           results = results.filter(car => car.seats === parseInt(filterParams.seats));
-          console.log('Results after seats filter:', results.length);
         }
         if (filterParams.gearbox) {
           results = results.filter(car => car.transmission === filterParams.gearbox);
-          console.log('Results after gearbox filter:', results.length);
         }
         if (filterParams.fuelType) {
           results = results.filter(car => car.fuelType === filterParams.fuelType);
-          console.log('Results after fuelType filter:', results.length);
         }
         if (filterParams.priceFrom) {
           results = results.filter(car => car.price >= parseFloat(filterParams.priceFrom));
-          console.log('Results after priceFrom filter:', results.length);
         }
         if (filterParams.priceTo) {
           results = results.filter(car => car.price <= parseFloat(filterParams.priceTo));
-          console.log('Results after priceTo filter:', results.length);
         }
         if (filterParams.yearFrom) {
           results = results.filter(car => car.year >= parseInt(filterParams.yearFrom));
-          console.log('Results after yearFrom filter:', results.length);
         }
         if (filterParams.yearTo) {
           results = results.filter(car => car.year <= parseInt(filterParams.yearTo));
-          console.log('Results after yearTo filter:', results.length);
         }
         if (filterParams.mileageFrom) {
           results = results.filter(car => car.mileage >= parseInt(filterParams.mileageFrom));
-          console.log('Results after mileageFrom filter:', results.length);
         }
         if (filterParams.mileageTo) {
           results = results.filter(car => car.mileage <= parseInt(filterParams.mileageTo));
-          console.log('Results after mileageTo filter:', results.length);
         }
         
         // Engine size filter - client-side
@@ -275,7 +246,6 @@ function SearchResultsPage() {
             return true;
           });
           
-          console.log('Results after engine size filter:', results.length);
         }
         
         // Seller type filter - client-side
@@ -287,7 +257,6 @@ function SearchResultsPage() {
               !car.isDealerListing && 
               car.sellerContact?.type !== 'trade'
             );
-            console.log('Results after sellerType=private filter:', results.length);
           } else if (filterParams.sellerType === 'trade') {
             // Trade sellers: has dealerId OR isDealerListing=true OR sellerContact.type='trade'
             results = results.filter(car => 
@@ -295,7 +264,6 @@ function SearchResultsPage() {
               car.isDealerListing === true || 
               car.sellerContact?.type === 'trade'
             );
-            console.log('Results after sellerType=trade filter:', results.length);
           }
         }
         
@@ -313,7 +281,6 @@ function SearchResultsPage() {
                      writeOffCategory === 'none' || 
                      writeOffCategory === 'unknown';
             });
-            console.log('Results after writeOffStatus=exclude filter:', results.length);
           } else if (filterParams.writeOffStatus === 'only') {
             // Show only written off vehicles
             results = results.filter(car => {
@@ -325,20 +292,15 @@ function SearchResultsPage() {
                      writeOffCategory !== 'none' && 
                      writeOffCategory !== 'unknown';
             });
-            console.log('Results after writeOffStatus=only filter:', results.length);
           }
         }
         
         // If no results found, load all cars from database
         if (results.length === 0) {
-          console.log(`⚠️ No results in ${searchRadius} miles radius`);
-          console.log(`⚠️ Calling fallback to show all available cars`);
           await loadAllCarsAsFallback(filterParams, searchPostcode, searchRadius);
           return;
         }
         
-        console.log(`✅ Found ${results.length} results in ${searchRadius} miles radius`);
-        console.log('✅ Results found in radius, NOT calling fallback');
         
         const filteredData = {
           postcode: response.data.postcode,
@@ -348,13 +310,9 @@ function SearchResultsPage() {
           count: results.length
         };
         
-        console.log('Setting search results:', filteredData);
-        console.log('First car distance:', results[0]?.distance);
-        console.log('First car full data:', results[0]);
         setSearchResults(filteredData);
         setFilteredResults(filteredData);
       } else {
-        console.log('Response not successful:', response);
         setError(response.error || 'Search failed');
       }
     } catch (err) {
@@ -367,7 +325,6 @@ function SearchResultsPage() {
   };
 
   const loadAllCars = async (filterParams = {}) => {
-    console.log('🟢 loadAllCars called with filterParams:', filterParams);
     setLoading(true);
     setError('');
 
@@ -392,7 +349,6 @@ function SearchResultsPage() {
       if (filterParams.mileageFrom) apiFilterParams.mileageFrom = filterParams.mileageFrom;
       if (filterParams.mileageTo) apiFilterParams.mileageTo = filterParams.mileageTo;
       
-      console.log('🟢 Calling carService.searchCars with:', apiFilterParams);
       const response = await carService.searchCars(apiFilterParams);
       
       // Backend returns: { success: true, cars: [...], total: X }
@@ -411,7 +367,6 @@ function SearchResultsPage() {
         showingAllCars: false
       };
       
-      console.log('Loaded cars:', total);
       setSearchResults(transformedData);
       setFilteredResults(transformedData);
     } catch (err) {
@@ -453,7 +408,6 @@ function SearchResultsPage() {
       const cars = response.cars || [];
       const total = response.total || cars.length;
       
-      console.log('⚠️ Fallback: Calculating distance for all cars');
       
       // Calculate distance for each car if we have user's postcode
       let carsWithDistance = cars;
@@ -488,7 +442,6 @@ function SearchResultsPage() {
         showingAllCars: true // Flag to indicate we're showing all cars as fallback
       };
       
-      console.log('Loaded all cars as fallback:', total);
       setSearchResults(transformedData);
       setFilteredResults(transformedData);
     } catch (err) {
@@ -817,8 +770,6 @@ function SearchResultsPage() {
         ) : (
           <div className="results-grid-autotrader">
             {filteredResults?.results.map((car, index) => {
-              console.log(`SearchResults - Car ${index} distance:`, car.distance);
-              console.log(`SearchResults - Car ${index} full:`, car);
               return <CarCard key={car._id} car={car} />;
             })}
           </div>

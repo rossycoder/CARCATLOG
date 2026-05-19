@@ -46,7 +46,6 @@ const HomePage = () => {
       setLoading(true);
       const count = await carService.getCarCount();
       setTotalCars(count);
-      console.log('Total cars from database:', count);
     } catch (err) {
       console.error('Error fetching car count:', err);
       setTotalCars(0);
@@ -60,7 +59,6 @@ const HomePage = () => {
       setLoadingMakes(true);
       const makesData = await filterService.getMakes();
       setMakes(makesData);
-      console.log('Fetched makes from database:', makesData.length);
     } catch (err) {
       console.error('Error fetching makes:', err);
       setMakes([]);
@@ -74,7 +72,6 @@ const HomePage = () => {
       setLoadingModels(true);
       const modelsData = await filterService.getModelsForMake(selectedMake);
       setModels(modelsData);
-      console.log(`Fetched models for ${selectedMake}:`, modelsData.length);
     } catch (err) {
       console.error('Error fetching models:', err);
       setModels([]);
@@ -123,7 +120,6 @@ const HomePage = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           // In a real app, you would reverse geocode the coordinates to get a postcode
-          console.log('Location detected:', position.coords);
           // For demo purposes, set a sample postcode
           setPostcode('SW1A 1AA');
         },

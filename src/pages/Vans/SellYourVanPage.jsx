@@ -126,7 +126,6 @@ const SellYourVanPage = () => {
     setIsLoading(true);
     
     try {
-      console.log('🔍 Looking up van:', registration, 'with mileage:', mileage);
       
       // Import van service
       const { lookupVanByRegistration } = await import('../../services/vanService');
@@ -134,7 +133,6 @@ const SellYourVanPage = () => {
       // Call API to lookup van details
       const response = await lookupVanByRegistration(registration, mileage);
       
-      console.log('✅ Van lookup response:', response);
       
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Failed to lookup van details');
@@ -181,10 +179,8 @@ const SellYourVanPage = () => {
       updatedAt: new Date().toISOString()
     };
     
-    console.log('💾 Saving van advert data to localStorage:', vanAdvertData);
     localStorage.setItem(`vanAdvert_${advertId}`, JSON.stringify(vanAdvertData));
     
-    console.log('🚀 Navigating to van advert edit page');
     navigate(`/vans/selling/advert/edit/${advertId}`);
   };
 

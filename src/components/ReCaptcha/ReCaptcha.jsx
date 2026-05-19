@@ -43,7 +43,6 @@ const ReCaptcha = forwardRef(({ onChange, onExpired, onError, theme = 'light', s
   };
 
   const handleExpired = () => {
-    console.log('⚠️ reCAPTCHA expired');
     if (onExpired) {
       onExpired();
     }

@@ -8,7 +8,6 @@ const Newsletter = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (email) {
-      console.log('Newsletter signup:', email);
       setSubmitted(true);
       setTimeout(() => {
         setSubmitted(false);

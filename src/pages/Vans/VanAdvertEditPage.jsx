@@ -101,15 +101,6 @@ const VanAdvertEditPage = () => {
         const businessWebsite = parsed.advertData?.businessWebsite || 
                                (isTradeDealer ? dealer?.website : '') || '';
         
-        console.log('🏢 Trade Dealer Auto-Population:', {
-          isTradeDealer,
-          dealerBusinessName: dealer?.businessName,
-          dealerLogo: dealer?.logo,
-          dealerWebsite: dealer?.website,
-          finalBusinessName: businessName,
-          finalBusinessLogo: businessLogo,
-          finalBusinessWebsite: businessWebsite
-        });
         
         // AUTO-POPULATE RUNNING COSTS FROM API DATA
         // Check if runningCosts object exists in vehicleData (new structure)
@@ -125,11 +116,6 @@ const VanAdvertEditPage = () => {
           co2Emissions: parsed.vehicleData?.co2Emissions || ''
         };
         
-        console.log('💰 Running Costs Auto-Population:', {
-          fromAPI: runningCostsFromAPI,
-          fromStored: parsed.advertData?.runningCosts,
-          vehicleDataHasRunningCosts: !!parsed.vehicleData?.runningCosts
-        });
         
         setAdvertData({
           price: parsed.advertData?.price || '',
@@ -629,7 +615,6 @@ const VanAdvertEditPage = () => {
                   type="button"
                   className="price-adjust-btn decrement"
                   onClick={() => {
-                    console.log('➖ Decrement button clicked');
                     decrementPrice();
                   }}
                   disabled={!advertData.price || parseInt(advertData.price) < 100}
@@ -654,7 +639,6 @@ const VanAdvertEditPage = () => {
                   type="button"
                   className="price-adjust-btn increment"
                   onClick={() => {
-                    console.log('➕ Increment button clicked');
                     incrementPrice();
                   }}
                   style={{ 
@@ -684,8 +668,6 @@ const VanAdvertEditPage = () => {
                       type="button"
                       className={`vat-option-button ${advertData.vatStatus === key ? 'selected' : ''}`}
                       onClick={() => {
-                        console.log('🔘 VAT Status button clicked:', key);
-                        console.log('Current vatStatus:', advertData.vatStatus);
                         handleInputChange('vatStatus', key);
                       }}
                       style={{ 
@@ -706,7 +688,6 @@ const VanAdvertEditPage = () => {
                   type="button"
                   className="learn-more-link"
                   onClick={() => {
-                    console.log('Learn more clicked');
                     setShowVatInfo(true);
                   }}
                 >

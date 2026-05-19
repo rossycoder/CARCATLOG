@@ -123,7 +123,6 @@ const SignInPage = () => {
       // Redirect to backend Facebook OAuth
       window.location.href = `${import.meta.env.VITE_API_URL.replace('/api', '')}/api/auth/facebook`;
     } else {
-      console.log(`Login with ${provider} - Coming soon`);
     }
   };
 

@@ -13,8 +13,6 @@ const formatVehicleDetailsFromBasic = (basicData, registration, mileage) => {
     return value !== null && value !== undefined && value !== 'Unknown' && value !== '';
   };
 
-  console.log('=== FORMATTING BASIC VEHICLE DATA FOR CARFINDER ===');
-  console.log('Basic Data:', basicData);
   
   // Basic data is already unwrapped from the API, so we can use it directly
   
@@ -28,7 +26,6 @@ const formatVehicleDetailsFromBasic = (basicData, registration, mileage) => {
     // CRITICAL FIX: Don't create fake models from fuel type
     // If no model is available, return null and let the backend handle it
     // The old logic was creating "ELECTRICITY" models for electric vehicles
-    console.log('⚠️ No model available from API - returning null instead of creating fake model');
     return null;
   };
 
@@ -69,7 +66,6 @@ const formatVehicleDetailsFromBasic = (basicData, registration, mileage) => {
   };
 
   // Log the result to debug any remaining issues
-  console.log('Final formatted vehicle data for CarFinder:', result);
   
   return result;
 };
@@ -81,15 +77,11 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
     return value !== null && value !== undefined && value !== 'Unknown' && value !== '';
   };
 
-  console.log('=== FORMATTING ENHANCED VEHICLE DATA ===');
-  console.log('Enhanced Data:', enhancedData);
   
   // Enhanced data is already unwrapped by the backend, so we can use it directly
   
   // Enhanced valuation extraction - prefer PRIVATE price for private sellers
   const getEstimatedValue = () => {
-    console.log('=== EXTRACTING VALUATION (PRIVATE PREFERRED) ===');
-    console.log('Enhanced Data Valuation:', enhancedData.valuation);
     
     // Check multiple possible locations for valuation
     const valuation = enhancedData.valuation || 
@@ -97,7 +89,6 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
                      enhancedData.valuationData;
     
     if (!valuation) {
-      console.log('❌ No valuation object found');
       return null;
     }
     
@@ -108,11 +99,9 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
                           valuation.Value;
     
     if (!estimatedValue) {
-      console.log('❌ No estimatedValue found in valuation');
       return null;
     }
     
-    console.log('Estimated Value Object:', estimatedValue);
     
     // If it's an object with retail/trade/private
     if (typeof estimatedValue === 'object' && estimatedValue !== null) {
@@ -127,21 +116,17 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
                         estimatedValue.Trade || 
                         estimatedValue.tradePrice;
       
-      console.log('Valuation breakdown:', { private: privateValue, retail: retailValue, trade: tradeValue });
       
       // Prefer PRIVATE for private sellers, then retail, then trade
       const finalValue = privateValue || retailValue || tradeValue || estimatedValue.value;
-      console.log('✅ Selected valuation (PRIVATE preferred):', finalValue);
       return finalValue;
     }
     
     // If it's a direct number
     if (typeof estimatedValue === 'number') {
-      console.log('✅ Direct number valuation:', estimatedValue);
       return estimatedValue;
     }
     
-    console.log('❌ Could not extract valuation value');
     return null;
   };
 
@@ -227,7 +212,6 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
   };
 
   // Log the result to debug any remaining object issues
-  console.log('Final formatted vehicle data:', result);
   
   return result;
 };
@@ -403,15 +387,12 @@ const CarFinderFormPage = () => {
     
     try {
       // Call basic vehicle service for CarFinder (cheap API - no expensive history/MOT)
-      console.log('Looking up vehicle from basic service for CarFinder...');
       const response = await carService.basicLookup(
         formData.registrationNumber,
         formData.mileage
       );
       
       if (response.success && response.data) {
-        console.log('Basic API response:', response.data);
-        console.log('From cache:', response.fromCache, 'API calls:', response.apiCalls, 'Cost: £' + response.cost);
         
         // Format the basic response (data is already unwrapped)
         const vehicleData = formatVehicleDetailsFromBasic(
@@ -420,7 +401,6 @@ const CarFinderFormPage = () => {
           formData.mileage
         );
         
-        console.log('Formatted vehicle data:', vehicleData);
         setVehicleDetails(vehicleData);
         
         // Scroll to vehicle details
@@ -797,7 +777,6 @@ const CarFinderFormPage = () => {
                           setIsLoading(true);
                           
                           // Trade dealer - create advert and go to advert edit page
-                          console.log('Creating advert for trade dealer');
                           const response = await advertService.createAdvert(vehicleDetails);
                           
                           if (response.success && response.data) {
@@ -839,7 +818,6 @@ const CarFinderFormPage = () => {
                           setIsLoading(true);
                           
                           // Regular user - create advert and go to advert edit page
-                          console.log('Creating advert for user');
                           const response = await advertService.createAdvert(vehicleDetails);
                           
                           if (response.success && response.data) {

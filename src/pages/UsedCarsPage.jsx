@@ -32,7 +32,6 @@ const UsedCarsPage = () => {
       setLoading(true);
       const count = await carService.getCarCount();
       setCarCount(count);
-      console.log('Real car count from database:', count);
     } catch (err) {
       console.error('Error fetching car count:', err);
       // Keep the default count from statistics if fetch fails

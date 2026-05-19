@@ -13,13 +13,23 @@ export default defineConfig({
     }
   },
   build: {
-    minify: 'esbuild',
+    minify: 'terser',
     target: 'es2015',
+    sourcemap: false,
     rollupOptions: {
-      external: [],
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          stripe: ['@stripe/stripe-js'],
+          icons: ['react-icons'],
+        }
+      }
+    },
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      }
     }
-  },
-  esbuild: {
-    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
   }
 })

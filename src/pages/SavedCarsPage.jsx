@@ -33,15 +33,12 @@ function SavedCarsPage() {
     
     try {
       const saved = localStorage.getItem('savedCarsData');
-      console.log('Saved cars data from localStorage:', saved);
       
       if (saved) {
         const cars = JSON.parse(saved);
-        console.log('Loaded cars:', cars);
         setSavedCars(cars);
         setFilteredCars(cars);
       } else {
-        console.log('No saved cars found');
         setSavedCars([]);
         setFilteredCars([]);
       }

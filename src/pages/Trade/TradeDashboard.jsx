@@ -17,29 +17,22 @@ const TradeDashboard = () => {
 
   // Debug: Log subscription data
   useEffect(() => {
-    console.log('🔍 Dashboard Subscription Data:', subscription);
-    console.log('   isTrialing:', subscription?.isTrialing);
-    console.log('   status:', subscription?.status);
-    console.log('   daysRemaining:', subscription?.daysRemaining);
   }, [subscription]);
 
   // Fetch stats on mount and set up auto-refresh
   useEffect(() => {
-    console.log('🔵 TradeDashboard mounted - Starting live analytics');
     
     // Initial fetch
     fetchStats();
     
     // Set up auto-refresh every 30 seconds
     refreshIntervalRef.current = setInterval(() => {
-      console.log('🔄 Auto-refreshing stats...');
       fetchStats(true); // Pass true to indicate it's a background refresh
     }, 30000); // 30 seconds
     
     // Cleanup on unmount
     return () => {
       if (refreshIntervalRef.current) {
-        console.log('🛑 Stopping auto-refresh');
         clearInterval(refreshIntervalRef.current);
       }
     };
@@ -66,7 +59,6 @@ const TradeDashboard = () => {
       
       const data = await tradeInventoryService.getStats();
       if (data.success) {
-        console.log('✅ Stats data received:', data.stats);
         setStats(data.stats);
         setLastUpdated(new Date());
       }
@@ -80,7 +72,6 @@ const TradeDashboard = () => {
 
   // Manual refresh function
   const handleManualRefresh = () => {
-    console.log('🔄 Manual refresh triggered');
     fetchStats();
   };
 

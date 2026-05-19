@@ -102,7 +102,6 @@ const FilterSidebar = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        console.log('[FilterSidebar] 🎯 Fetching filter options with ALL filters:', filters);
         
         // Add cache-busting timestamp to force fresh data
         // This ensures we get the latest variants after editing
@@ -137,17 +136,9 @@ const FilterSidebar = ({ isOpen, onClose }) => {
         const queryString = params.toString();
         const url = queryString ? `/vehicles/filter-options?${queryString}` : '/vehicles/filter-options';
         
-        console.log('[FilterSidebar] API URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000');
-        console.log('[FilterSidebar] Fetching from:', url);
         
         const options = await carService.getFilterOptions(queryString);
         
-        console.log('[FilterSidebar] ✅ Successfully received filter options!');
-        console.log('[FilterSidebar] Full response:', options);
-        console.log('[FilterSidebar] Colours:', options?.colours);
-        console.log('[FilterSidebar] Counts:', options?.counts);
-        console.log('[FilterSidebar] Fuel Type Counts:', options?.counts?.fuelTypes);
-        console.log('[FilterSidebar] 🚗 Mileage Ranges from API:', options?.counts?.mileageRanges);
         
         if (options) {
           // Ensure counts object exists with defaults, but preserve individual filter counts
@@ -175,13 +166,6 @@ const FilterSidebar = ({ isOpen, onClose }) => {
             }
           };
           setFilterOptions(optionsWithDefaults);
-          console.log('[FilterSidebar] ✅ Filter options set successfully with counts:', optionsWithDefaults.counts);
-          console.log('[FilterSidebar] ✅ Fuel Type Counts after setting:', optionsWithDefaults.counts.fuelTypes);
-          console.log('[FilterSidebar] ✅ Make Counts after setting:', optionsWithDefaults.counts.makes);
-          console.log('[FilterSidebar] ✅ Model Counts after setting:', optionsWithDefaults.counts.models);
-          console.log('[FilterSidebar] ✅ Engine Size Counts after setting:', optionsWithDefaults.counts.engineSizes);
-          console.log('[FilterSidebar] ✅ Mileage Range Counts after setting:', optionsWithDefaults.counts.mileageRanges);
-          console.log('[FilterSidebar] 🔍 Mileage Ranges keys:', Object.keys(optionsWithDefaults.counts.mileageRanges || {}));
         } else {
           console.error('[FilterSidebar] ❌ Invalid options structure:', options);
         }
@@ -246,10 +230,6 @@ const FilterSidebar = ({ isOpen, onClose }) => {
     : [];
 
   // Debug logging
-  console.log('[FilterSidebar] Current filters:', filters);
-  console.log('[FilterSidebar] Available models for', filters.make, ':', availableModels);
-  console.log('[FilterSidebar] Available submodels for', filters.make, filters.model, ':', availableSubmodels);
-  console.log('[FilterSidebar] Available variants for', filters.make, filters.model, ':', availableVariants);
 
   const validateFilters = () => {
     const errors = {};
@@ -317,7 +297,6 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       return;
     }
     
-    console.log('[FilterSidebar] Applying filters:', filters);
     
     // Build query params from filters
     const params = new URLSearchParams();
@@ -326,22 +305,18 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       // Always include sortBy, even if it's 'relevance'
       if (key === 'sortBy' && value) {
         params.append(key, value);
-        console.log(`[FilterSidebar] Adding param: ${key} = ${value}`);
       }
       // Convert 'distance' to 'radius' for backend compatibility
       // Only add radius if postcode is also provided
       else if (key === 'distance' && value && value !== 'national' && filters.postcode) {
         params.append('radius', value);
-        console.log(`[FilterSidebar] Adding param: radius = ${value}`);
       }
       // For other fields, skip empty values and defaults
       else if (value && value !== 'national' && key !== 'distance') {
         params.append(key, value);
-        console.log(`[FilterSidebar] Adding param: ${key} = ${value}`);
       }
     });
 
-    console.log('[FilterSidebar] Final URL params:', params.toString());
 
     // Navigate to search results page
     navigate(`/search-results?${params.toString()}`);

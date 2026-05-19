@@ -14,10 +14,8 @@ const getAuthHeaders = () => ({
 
 // Get all subscription plans (public)
 export const getPlans = async () => {
-  console.log('🔵 getPlans called');
   try {
     const response = await api.get(`${API_URL}/plans`);
-    console.log('✅ getPlans response:', response.data);
     return response.data.plans || response.data; // Handle both formats
   } catch (error) {
     console.error('❌ getPlans error:', error);
@@ -27,10 +25,8 @@ export const getPlans = async () => {
 
 // Get current subscription
 export const getCurrentSubscription = async () => {
-  console.log('🔵 getCurrentSubscription called');
   try {
     const response = await api.get(`${API_URL}/current`, getAuthHeaders());
-    console.log('✅ getCurrentSubscription response:', response.data);
     return response.data.subscription || response.data;
   } catch (error) {
     console.error('❌ getCurrentSubscription error:', error);
@@ -70,8 +66,6 @@ export const reactivateSubscription = async () => {
 
 // Create Stripe checkout session
 export const createCheckoutSession = async (planSlug) => {
-  console.log('🔵 createCheckoutSession called with planSlug:', planSlug);
-  console.log('🔵 Auth token:', getToken() ? 'Present' : 'Missing');
   
   try {
     const response = await api.post(
@@ -79,7 +73,6 @@ export const createCheckoutSession = async (planSlug) => {
       { planSlug },
       getAuthHeaders()
     );
-    console.log('✅ createCheckoutSession response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ createCheckoutSession error:', error);

@@ -61,7 +61,6 @@ const CarDetailPage = () => {
     // Set initial value
     const checkMobile = () => {
       const newIsMobile = window.innerWidth <= 768;
-      console.log('🔍 Checking mobile - Width:', window.innerWidth, 'isMobile:', newIsMobile);
       setIsMobile(newIsMobile);
     };
     
@@ -90,7 +89,6 @@ const CarDetailPage = () => {
         url += `?postcode=${encodeURIComponent(userPostcode)}`;
       }
       
-      console.log('Fetching car details from:', url);
       
       // CRITICAL: Add cache-busting headers to prevent stale data
       const response = await fetch(url, {
@@ -106,12 +104,6 @@ const CarDetailPage = () => {
       }
       
       const data = await response.json();
-      console.log('✅ Car data loaded successfully');
-      console.log('🖼️ Images:', data.data.images?.length || 0, 'found');
-      console.log('⛽ Fuel Type:', data.data.fuelType); // Log fuel type for debugging
-      console.log('👤 Seller Contact:', JSON.stringify(data.data.sellerContact, null, 2));
-      console.log('🏢 Business Logo:', data.data.sellerContact?.businessLogo);
-      console.log('🌐 Business Website:', data.data.sellerContact?.businessWebsite);
       setCar(data.data);
     } catch (err) {
       console.error('Error fetching car details:', err);
@@ -132,7 +124,6 @@ const CarDetailPage = () => {
         },
         body: JSON.stringify({ type }) // 'phone' or 'email'
       });
-      console.log(`✅ Inquiry tracked: ${type}`);
     } catch (error) {
       console.error('Failed to track inquiry:', error);
       // Don't show error to user, just log it
@@ -928,7 +919,6 @@ const CarDetailPage = () => {
 
             {/* Electric Vehicle Sections - Show for both Mobile and Desktop (after Running Costs) */}
             <div className="electric-vehicle-sections">
-              {console.log('🔋 Rendering EV sections - isMobile:', isMobile)}
               <ElectricVehicleCharging vehicle={car} />
               <ElectricVehicleRunningCosts vehicle={car} />
             </div>

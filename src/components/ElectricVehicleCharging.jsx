@@ -14,7 +14,6 @@ const ElectricVehicleCharging = ({ vehicle }) => {
 
   // Check if this is an electric vehicle or plug-in hybrid
   if (!isElectricOrPluginHybrid(vehicle.fuelType)) {
-    console.log('🔌 ElectricVehicleCharging: Not showing - fuel type is:', vehicle.fuelType);
     return null;
   }
 
@@ -31,11 +30,9 @@ const ElectricVehicleCharging = ({ vehicle }) => {
     fastChargingCapability: vehicle.fastChargingCapability || vehicle.runningCosts?.fastChargingCapability || 'Fast Charging Compatible'
   };
 
-  console.log('🔌 ElectricVehicleCharging data:', chargingData);
 
   // CRITICAL: Don't show charging info if range is 0 or missing (prevents Infinity errors)
   if (!chargingData.electricRange || chargingData.electricRange === 0 || !chargingData.batteryCapacity || chargingData.batteryCapacity === 0) {
-    console.log('🔌 ElectricVehicleCharging: Not showing - missing range or battery data');
     return null;
   }
 

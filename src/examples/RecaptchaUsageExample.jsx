@@ -38,7 +38,6 @@ export const SignInFormExample = () => {
       const data = await response.json();
       
       if (data.success) {
-        console.log('Login successful!');
       } else {
         // Reset reCAPTCHA on error
         recaptchaRef.current?.reset();
@@ -117,7 +116,6 @@ export const SignUpFormExample = () => {
       const data = await response.json();
       
       if (data.success) {
-        console.log('Registration successful!');
       } else {
         recaptchaRef.current?.reset();
         setRecaptchaToken(null);
@@ -204,7 +202,6 @@ export const ForgotPasswordFormExample = () => {
       const data = await response.json();
       
       if (data.success) {
-        console.log('Password reset email sent!');
       } else {
         recaptchaRef.current?.reset();
         setRecaptchaToken(null);

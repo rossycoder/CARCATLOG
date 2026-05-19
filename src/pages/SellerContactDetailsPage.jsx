@@ -17,7 +17,6 @@ const SellerContactDetailsPage = () => {
 
   // Debug logging
   useEffect(() => {
-    console.log('🔍 Trade Dealer Detection Debug:', {
       isAuthenticated,
       dealer: dealer ? { id: dealer._id, name: dealer.businessName } : null,
       subscription: subscription ? { status: subscription.status, plan: subscription.plan?.name } : null,
@@ -99,7 +98,6 @@ const SellerContactDetailsPage = () => {
       newErrors.postcode = 'Please enter a valid UK postcode';
     }
 
-    console.log('📋 Form validation:', {
       formData,
       newErrors,
       isValid: Object.keys(newErrors).length === 0
@@ -132,7 +130,6 @@ const SellerContactDetailsPage = () => {
     setIsSubmitting(true);
 
     try {
-      console.log('🚀 Publishing vehicle as trade dealer:', {
         advertId,
         dealerId: dealer.id,
         hasVehicleData: !!vehicleData,
@@ -149,19 +146,15 @@ const SellerContactDetailsPage = () => {
         dealerId: dealer.id
       });
 
-      console.log('✅ Publish response:', response);
 
       if (response.success) {
         // Check if dealer is in trial period and charge £2.50
         if (dealer.subscription?.isTrialing) {
           try {
-            console.log('🎉 Dealer in trial - charging £2.50 for listing');
             const chargeResult = await tradeInventoryService.chargeTrialListing(response.data.vehicleId);
             
             if (chargeResult.charged) {
-              console.log('✅ Trial charge successful:', chargeResult.amount);
             } else {
-              console.log('ℹ️ No trial charge needed:', chargeResult.message);
             }
           } catch (chargeError) {
             console.error('⚠️ Trial charge failed (non-blocking):', chargeError);

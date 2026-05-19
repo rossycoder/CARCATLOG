@@ -28,7 +28,6 @@ const BikeAdvertPaymentSuccessPage = () => {
 
   const activateBikeFromPayment = async () => {
     try {
-      console.log('🔄 Attempting to activate bike from payment success page...');
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const response = await fetch(`${API_BASE_URL}/bikes/activate-from-payment`, {
         method: 'POST',
@@ -44,7 +43,6 @@ const BikeAdvertPaymentSuccessPage = () => {
       const data = await response.json();
       
       if (data.success) {
-        console.log('✅ Bike activated successfully:', data.data);
       } else {
         console.warn('⚠️  Bike activation failed:', data.error);
       }
@@ -62,7 +60,6 @@ const BikeAdvertPaymentSuccessPage = () => {
       
       if (data.success) {
         setPurchaseData(data.data);
-        console.log('Purchase details loaded:', data.data);
       } else {
         console.error('Failed to load purchase details:', data.error);
       }

@@ -23,13 +23,11 @@ const BikeCheckPage = () => {
     setShowBikeFound(false);
     
     try {
-      console.log('Fetching comprehensive bike data for:', registrationNumber);
       
       // Use bike lookup service
       const response = await bikeService.lookupBikeByRegistration(registrationNumber, 0);
       
       if (response.success && response.data) {
-        console.log('Enhanced bike data received:', response.data);
         
         // Helper function to safely extract value
         const getValue = (field) => {
@@ -79,7 +77,6 @@ const BikeCheckPage = () => {
           fullData: enhancedData
         };
         
-        console.log('Merged bike data:', mergedData);
         setBikeData(mergedData);
         setShowBikeFound(true);
       } else {

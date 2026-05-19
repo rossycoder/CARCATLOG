@@ -52,14 +52,12 @@ const HeroSection = ({ stockCount }) => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log('Search data:', searchData);
   };
 
   const useCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log('Location:', position.coords);
         },
         (error) => {
           console.error('Location error:', error);

@@ -59,9 +59,7 @@ const BikeFilterSidebar = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        console.log('[BikeFilterSidebar] Fetching filter options...');
         const options = await bikeService.getFilterOptions();
-        console.log('[BikeFilterSidebar] Received filter options:', options);
         setFilterOptions(options);
       } catch (error) {
         console.error('[BikeFilterSidebar] Error fetching filter options:', error);
@@ -134,18 +132,15 @@ const BikeFilterSidebar = ({ isOpen, onClose }) => {
       return;
     }
     
-    console.log('[BikeFilterSidebar] Applying filters:', filters);
     
     const params = new URLSearchParams();
     
     Object.entries(filters).forEach(([key, value]) => {
       if (value && value !== 'relevance' && value !== 'national') {
         params.append(key, value);
-        console.log(`[BikeFilterSidebar] Adding param: ${key} = ${value}`);
       }
     });
 
-    console.log('[BikeFilterSidebar] Final URL params:', params.toString());
 
     navigate(`/bikes/search-results?${params.toString()}`);
     onClose();

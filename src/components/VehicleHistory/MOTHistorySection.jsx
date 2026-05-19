@@ -26,7 +26,6 @@ const MOTHistorySection = ({ vrm, carData }) => {
       if (carData) {
         // Check if MOT history array exists in car document
         if (carData.motHistory && Array.isArray(carData.motHistory) && carData.motHistory.length > 0) {
-          console.log('[MOTHistory] ✅ Using MOT history from database:', carData.motHistory.length, 'tests');
           setMotHistory({
             tests: carData.motHistory,
             currentStatus: carData.motStatus || 'Unknown',
@@ -41,7 +40,6 @@ const MOTHistorySection = ({ vrm, carData }) => {
         // Check if MOT history is in the populated vehicle history
         if (carData.historyCheckId && carData.historyCheckId.motHistory && 
             Array.isArray(carData.historyCheckId.motHistory) && carData.historyCheckId.motHistory.length > 0) {
-          console.log('[MOTHistory] Using MOT history from vehicle history document:', carData.historyCheckId.motHistory.length, 'tests');
           setMotHistory({
             tests: carData.historyCheckId.motHistory,
             currentStatus: carData.historyCheckId.motStatus || carData.motStatus || 'Unknown',
@@ -54,15 +52,8 @@ const MOTHistorySection = ({ vrm, carData }) => {
         }
         
         // Check for basic MOT status fields (fallback)
-        console.log('[MOTHistory] MOT fields check:', {
-          motStatus: carData.motStatus,
-          motExpiryDate: carData.motExpiryDate,
-          motDue: carData.motDue,
-          motExpiry: carData.motExpiry
-        });
         
         if (carData.motStatus || carData.motExpiryDate || carData.motDue || carData.motExpiry) {
-          console.log('[MOTHistory] Using basic MOT data from car document');
           const motStatus = carData.motStatus || 'Unknown';
           const expiryDate = carData.motExpiryDate || carData.motDue || carData.motExpiry;
           
@@ -77,11 +68,9 @@ const MOTHistorySection = ({ vrm, carData }) => {
           return;
         }
         
-        console.log('[MOTHistory] Car data structure:', JSON.stringify(carData, null, 2));
       }
       
       // If no MOT data found in car document, show informative message
-      console.log('[MOTHistory] No MOT data found in car document');
       setMotHistory({
         tests: [],
         currentStatus: 'Information not available',

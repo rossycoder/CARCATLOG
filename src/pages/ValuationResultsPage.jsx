@@ -147,10 +147,8 @@ const ValuationResultsPage = () => {
   };
 
   useEffect(() => {
-    console.log('ValuationResultsPage received state:', location.state);
     
     if (!valuationData && !vehicleDetails && !formData) {
-      console.log('No valuation data found, redirecting to /valuation');
       navigate('/valuation');
       return;
     }

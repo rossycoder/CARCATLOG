@@ -49,7 +49,6 @@ function MyListingsPage() {
     try {
       setLoading(true);
       setError('');
-      console.log('[MyListings] Fetching listings for user:', user);
       
       // Check if user is admin
       const isAdmin = user?.isAdmin || user?.role === 'admin';
@@ -57,28 +56,21 @@ function MyListingsPage() {
       if (isAdmin) {
         // Admin: Fetch based on view mode
         if (adminViewMode === 'cars') {
-          console.log('[MyListings] Admin detected - fetching all listings');
           const response = await api.get('/admin/listings', {
             params: {
               sortBy: 'createdAt',
               sortOrder: 'desc'
             }
           });
-          console.log('[MyListings] Admin Response:', response.data);
-          console.log('[MyListings] Sample listing data:', response.data.listings?.[0]);
           setListings(response.data.listings || []);
         } else {
-          console.log('[MyListings] Admin detected - fetching users list');
           const response = await api.get('/admin/users');
-          console.log('[MyListings] Admin Response:', response.data);
-          console.log('[MyListings] Sample user data:', response.data.users?.[0]);
           setListings(response.data.users || []);
         }
         setIsAdminView(true);
       } else {
         // Normal user: Fetch their listings
         const response = await api.get('/vehicles/my-listings');
-        console.log('[MyListings] Response:', response.data);
         setListings(response.data.listings || []);
         setIsAdminView(false);
       }
@@ -98,22 +90,14 @@ function MyListingsPage() {
   };
 
   const handleEditListing = (listingId, vehicleType = 'car') => {
-    console.log('[MyListings] Edit clicked:', { listingId, vehicleType });
-    const basePath = vehicleType === 'bike' ? '/bikes' : vehicleType === 'van' ? '/vans' : '';
-    const editPath = `${basePath}/selling/advert/edit/${listingId}`;
-    console.log('[MyListings] Navigating to:', editPath);
+    // Car-only deployment - bikes/vans disabled
+    const editPath = `/selling/advert/edit/${listingId}`;
     navigate(editPath);
   };
 
   const handleViewListing = (listingId, vehicleType = 'car') => {
-    // Navigate to public car detail page with return state
-    if (vehicleType === 'bike') {
-      navigate(`/bikes/${listingId}`, { state: { from: '/my-listings' } });
-    } else if (vehicleType === 'van') {
-      navigate(`/vans/${listingId}`, { state: { from: '/my-listings' } });
-    } else {
-      navigate(`/cars/${listingId}`, { state: { from: '/my-listings' } });
-    }
+    // Car-only deployment - bikes/vans disabled
+    navigate(`/cars/${listingId}`, { state: { from: '/my-listings' } });
   };
 
   const handleMarkAsSold = async (listingId) => {
@@ -156,14 +140,8 @@ function MyListingsPage() {
           }
         } : {};
 
-        // Redirect to appropriate advertising prices page
-        if (vehicleType === 'bike') {
-          navigate(`/bikes/advertising-prices?advertId=${advertId}&resumePayment=true`, navState);
-        } else if (vehicleType === 'van') {
-          navigate(`/vans/advertising-prices?advertId=${advertId}&resumePayment=true`, navState);
-        } else {
-          navigate(`/sell-my-car/advertising-prices?advertId=${advertId}&resumePayment=true`, navState);
-        }
+        // Car-only deployment - bikes/vans disabled
+        navigate(`/sell-my-car/advertising-prices?advertId=${advertId}&resumePayment=true`, navState);
       }
     } catch (err) {
       console.error('Error relisting vehicle:', err);
@@ -180,7 +158,6 @@ function MyListingsPage() {
     const isExpired = status === 'active' && expiryDate && expiryDate < now;
     const effectiveStatus = isExpired ? 'draft' : status;
     
-    console.log('[MyListings] Status Badge Debug:', {
       carId: listing._id,
       originalStatus: status,
       effectiveStatus: effectiveStatus,
@@ -200,7 +177,6 @@ function MyListingsPage() {
     const badgeClass = statusInfo.className;
     const label = statusInfo.label;
     
-    console.log('[MyListings] Badge Result:', { badgeClass, label });
     
     return <span className={`status-badge ${badgeClass}`}>{label}</span>;
   };
@@ -723,7 +699,6 @@ function MyListingsPage() {
                                 const userId = user._id?.toString() || user._id;
                                 const isTradeUser = user.type === 'trade';
                                 const queryParams = isTradeUser ? { params: { dealerId: userId } } : {};
-                                console.log('[Admin] Fetching vehicles for:', userId, 'type:', user.type, 'params:', queryParams);
                                 const res = await api.get(`/admin/users/${userId}/vehicles`, queryParams);
                                 setUserVehicles(res.data.vehicles || []);
                               } catch (e) {

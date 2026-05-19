@@ -111,7 +111,6 @@ const BikeAdvertEditPage = () => {
           updatedAt: new Date().toISOString()
         };
         localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
-        console.log('✅ Business info auto-saved');
       } catch (error) {
         console.error('❌ Failed to auto-save business info:', error);
       }
@@ -140,18 +139,9 @@ const BikeAdvertEditPage = () => {
     if (enhancedData && !apiLoading && !enhancedDataProcessed) {
       setEnhancedDataProcessed(true); // Prevent duplicate processing
       
-      console.log('🏍️ Auto-filling bike data from API:', enhancedData);
       
       // Auto-fill running costs ONLY if API has data
       if (enhancedData.combinedMpg || enhancedData.annualTax || enhancedData.insuranceGroup || enhancedData.co2Emissions) {
-        console.log('💰 Auto-filling running costs from API:', {
-          combinedMpg: enhancedData.combinedMpg,
-          urbanMpg: enhancedData.urbanMpg,
-          extraUrbanMpg: enhancedData.extraUrbanMpg,
-          annualTax: enhancedData.annualTax,
-          insuranceGroup: enhancedData.insuranceGroup,
-          co2Emissions: enhancedData.co2Emissions
-        });
         
         setAdvertData(prev => {
           const newRunningCosts = {
@@ -192,10 +182,8 @@ const BikeAdvertEditPage = () => {
             updatedAt: new Date().toISOString()
           };
           localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
-          console.log('✅ Running costs auto-saved from API data');
         }, 500);
       } else {
-        console.log('ℹ️ API has no running costs data - fields will remain empty (no frontend generation)');
       }
     }
   }, [enhancedData, apiLoading, enhancedDataProcessed, advertId]);
@@ -207,7 +195,6 @@ const BikeAdvertEditPage = () => {
       // STEP 1: Try to fetch bike from database first (if it exists after payment)
       let databaseBike = null;
       try {
-        console.log('🔍 Fetching bike from database with advertId:', advertId);
         const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes/advert/${advertId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -218,14 +205,9 @@ const BikeAdvertEditPage = () => {
           const result = await response.json();
           if (result.success && result.data) {
             databaseBike = result.data;
-            console.log('✅ Bike found in database:', databaseBike._id);
-            console.log('📊 MOT History:', databaseBike.motHistory?.length || 0, 'records');
-            console.log('📊 MOT Due Date:', databaseBike.motDue || databaseBike.motExpiry || 'Not available');
-            console.log('📊 Previous Owners:', databaseBike.historyCheckData?.previousKeepers || 'Not available');
           }
         }
       } catch (dbError) {
-        console.log('⚠️ Bike not yet in database (will be created after payment)');
       }
       
       // STEP 2: Fetch advert data from localStorage
@@ -255,12 +237,6 @@ const BikeAdvertEditPage = () => {
           })
         };
         
-        console.log('🔄 Merged vehicle data:', {
-          fromDatabase: !!databaseBike,
-          motDue: mergedVehicleData.motDue,
-          motHistoryCount: mergedVehicleData.motHistory?.length || 0,
-          previousOwners: mergedVehicleData.previousOwners
-        });
         
         setVehicleData(mergedVehicleData);
         
@@ -272,13 +248,6 @@ const BikeAdvertEditPage = () => {
           mergedVehicleData.estimatedValue || // Fallback to estimated value
           '';
         
-        console.log('💰 Price extraction:', {
-          savedPrice: parsed.advertData?.price,
-          valuationPrivate: mergedVehicleData.valuation?.private,
-          allValuationsPrivate: mergedVehicleData.allValuations?.private,
-          estimatedValue: mergedVehicleData.estimatedValue,
-          finalPrice: privatePrice
-        });
         
         setAdvertData({
           price: privatePrice,
@@ -301,19 +270,12 @@ const BikeAdvertEditPage = () => {
           businessWebsite: parsed.vehicleData?.sellerContact?.businessWebsite || parsed.advertData?.businessWebsite || ''
         });
         
-        console.log('🏢 Business info loaded:', {
-          businessName: parsed.vehicleData?.sellerContact?.businessName || parsed.advertData?.businessName,
-          businessLogo: parsed.vehicleData?.sellerContact?.businessLogo || parsed.advertData?.businessLogo,
-          businessWebsite: parsed.vehicleData?.sellerContact?.businessWebsite || parsed.advertData?.businessWebsite
-        });
         
         // CRITICAL: Fetch MOT + Valuation data immediately if not already available
         const needsMOTData = !mergedVehicleData.motDue || mergedVehicleData.motDue === 'Unknown';
         const needsValuationData = !mergedVehicleData.valuation?.private && !mergedVehicleData.estimatedValue;
         
         if ((needsMOTData || needsValuationData) && mergedVehicleData.registration) {
-          console.log('🔍 Fetching MOT + Valuation data for:', mergedVehicleData.registration);
-          console.log('   Needs MOT:', needsMOTData, '| Needs Valuation:', needsValuationData);
           
           try {
             const response = await fetch(
@@ -327,18 +289,6 @@ const BikeAdvertEditPage = () => {
             
             if (response.ok) {
               const result = await response.json();
-              console.log('✅ Complete bike data fetched:', {
-                motDue: result.data?.motDue,
-                motExpiry: result.data?.motExpiry,
-                motHistoryCount: result.data?.motHistory?.length || 0,
-                estimatedValue: result.data?.estimatedValue,
-                valuation: result.data?.valuation,
-                runningCosts: {
-                  combinedMpg: result.data?.combinedMpg,
-                  annualTax: result.data?.annualTax,
-                  co2Emissions: result.data?.co2Emissions
-                }
-              });
               
               // Update merged vehicle data with API response
               if (result.data) {
@@ -357,13 +307,7 @@ const BikeAdvertEditPage = () => {
                   mergedVehicleData.insuranceGroup = result.data.insuranceGroup || mergedVehicleData.insuranceGroup;
                   mergedVehicleData.co2Emissions = result.data.co2Emissions || mergedVehicleData.co2Emissions;
                   
-                  console.log('✅ Running costs updated from API:', {
-                    combinedMpg: mergedVehicleData.combinedMpg,
-                    annualTax: mergedVehicleData.annualTax,
-                    co2Emissions: mergedVehicleData.co2Emissions
-                  });
                 } else {
-                  console.log('ℹ️ API has no running costs data - fields will remain empty');
                 }
                 
                 // Update vehicleData state
@@ -392,7 +336,6 @@ const BikeAdvertEditPage = () => {
                   updatedAt: new Date().toISOString()
                 };
                 localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
-                console.log('✅ MOT + Valuation + Running Costs data saved to localStorage');
               }
             } else {
               console.warn('⚠️ Failed to fetch complete bike data:', response.status);
@@ -401,7 +344,6 @@ const BikeAdvertEditPage = () => {
             console.error('❌ Error fetching complete bike data:', error);
           }
         } else {
-          console.log('ℹ️ MOT and Valuation data already available');
         }
         
       } else {
@@ -464,7 +406,6 @@ const BikeAdvertEditPage = () => {
         updatedAt: new Date().toISOString()
       };
       localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
-      console.log('✅ Features auto-saved');
     } catch (error) {
       console.error('❌ Error auto-saving features:', error);
     }
@@ -487,7 +428,6 @@ const BikeAdvertEditPage = () => {
 
   // Handle price edit button click
   const handlePriceEdit = () => {
-    console.log('🖱️ Edit price button clicked!');
     setIsPriceEditing(true);
   };
 
@@ -510,7 +450,6 @@ const BikeAdvertEditPage = () => {
         price: priceValue // Ensure price is a number
       };
       
-      console.log('💰 Saving bike price:', priceValue);
       
       // Save to localStorage
       const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
@@ -520,7 +459,6 @@ const BikeAdvertEditPage = () => {
         updatedAt: new Date().toISOString()
       };
       localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
-      console.log('✅ Bike price saved successfully to localStorage');
       
       // Update local state with the saved price
       setAdvertData(prev => ({
@@ -547,7 +485,6 @@ const BikeAdvertEditPage = () => {
   // Handle vehicle details edit (make, model, variant only)
   const handleVehicleDetailsEdit = (e) => {
     e.preventDefault();
-    console.log('🖱️ Edit vehicle details button clicked!');
     
     // Initialize editable data with current values
     setEditableVehicleData({
@@ -562,7 +499,6 @@ const BikeAdvertEditPage = () => {
   // Handle vehicle details save
   const handleVehicleDetailsSave = async () => {
     try {
-      console.log('💾 Saving vehicle details:', editableVehicleData);
       
       // Validate make and model (required fields)
       if (!editableVehicleData.make || !editableVehicleData.make.trim()) {
@@ -590,7 +526,6 @@ const BikeAdvertEditPage = () => {
         }
       };
       
-      console.log('💾 Update data being sent:', updateData);
       
       // Save to backend via API
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -608,7 +543,6 @@ const BikeAdvertEditPage = () => {
       }
       
       const data = await response.json();
-      console.log('✅ Vehicle details saved successfully:', data);
       
       // Update local state
       setVehicleData(prev => ({
@@ -632,7 +566,6 @@ const BikeAdvertEditPage = () => {
       };
       localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
       
-      console.log('✅ Local state and localStorage updated');
       
       // Exit editing mode
       setIsEditingVehicleDetails(false);
@@ -660,7 +593,6 @@ const BikeAdvertEditPage = () => {
   // Handle overview edit (fuel type, bike type, color, etc.)
   const handleOverviewEdit = (e) => {
     e.preventDefault();
-    console.log('🖱️ Edit overview button clicked!');
     
     // Initialize editable data with current values
     setEditableOverviewData({
@@ -677,7 +609,6 @@ const BikeAdvertEditPage = () => {
   // Handle overview save
   const handleOverviewSave = async () => {
     try {
-      console.log('💾 Saving overview data:', editableOverviewData);
       
       // Validate required fields
       if (!editableOverviewData.fuelType || !editableOverviewData.fuelType.trim()) {
@@ -704,7 +635,6 @@ const BikeAdvertEditPage = () => {
         }
       };
       
-      console.log('💾 Update data being sent:', updateData);
       
       // Save to backend via API
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -722,7 +652,6 @@ const BikeAdvertEditPage = () => {
       }
       
       const data = await response.json();
-      console.log('✅ Overview data saved successfully:', data);
       
       // Update local state
       setVehicleData(prev => ({
@@ -750,7 +679,6 @@ const BikeAdvertEditPage = () => {
       };
       localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
       
-      console.log('✅ Local state and localStorage updated');
       
       // Exit editing mode
       setIsEditingOverview(false);
@@ -791,7 +719,6 @@ const BikeAdvertEditPage = () => {
         updatedAt: new Date().toISOString()
       };
       localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
-      console.log('✅ Running costs auto-saved');
     } catch (error) {
       console.error('❌ Error auto-saving running costs:', error);
     }
@@ -839,7 +766,6 @@ const BikeAdvertEditPage = () => {
         updatedAt: new Date().toISOString()
       };
       localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
-      console.log('✅ Video URL auto-saved');
     } catch (error) {
       console.error('❌ Error auto-saving video URL:', error);
     }
@@ -968,18 +894,14 @@ const BikeAdvertEditPage = () => {
     
     try {
       setIsUploading(true);
-      console.log('📤 Uploading business logo...');
       
       // Convert file to base64
       const base64Image = await uploadService.fileToBase64(file);
-      console.log('✅ File converted to base64, length:', base64Image.length);
       
       // Upload to Cloudinary
       const response = await uploadService.uploadImage(base64Image, advertId);
-      console.log('📡 Upload response:', response);
       
       const logoUrl = response.data?.url || response.url;
-      console.log('🔗 Logo URL extracted:', logoUrl);
       
       if (logoUrl) {
         // Update state with new logo URL
@@ -988,11 +910,9 @@ const BikeAdvertEditPage = () => {
           businessLogo: logoUrl
         }));
         
-        console.log('✅ Business logo uploaded successfully:', logoUrl);
         
         // CRITICAL: Auto-save business logo to localStorage
         try {
-          console.log('💾 Auto-saving business logo to localStorage...');
           const currentData = JSON.parse(localStorage.getItem(`bikeAdvert_${advertId}`) || '{}');
           const updatedData = {
             ...currentData,
@@ -1003,7 +923,6 @@ const BikeAdvertEditPage = () => {
             updatedAt: new Date().toISOString()
           };
           localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedData));
-          console.log('✅ Business logo saved to localStorage');
         } catch (saveError) {
           console.error('❌ Failed to save business logo:', saveError);
         }
@@ -1082,7 +1001,6 @@ const BikeAdvertEditPage = () => {
     // CRITICAL: Create bike in database with MOT History and Valuation
     // This will call Vehicle Specs, MOT History, and Valuation APIs
     try {
-      console.log('📡 Creating bike in database with complete data (MOT + Valuation)...');
       setIsSaving(true);
       
       const response = await fetch(`${import.meta.env.VITE_API_URL}/bikes`, {
@@ -1126,14 +1044,6 @@ const BikeAdvertEditPage = () => {
       
       if (response.ok) {
         const result = await response.json();
-        console.log('✅ Bike created in database with ID:', result.data?._id);
-        console.log('📊 Complete data saved:', {
-          motDue: result.data?.motDue,
-          motHistory: result.data?.motHistory?.length || 0,
-          previousOwners: result.data?.historyCheckData?.previousKeepers,
-          valuation: result.data?.valuation,
-          estimatedValue: result.data?.estimatedValue
-        });
         
         // CRITICAL: Update vehicleData with fetched MOT and Valuation data
         if (result.data) {
@@ -1160,7 +1070,6 @@ const BikeAdvertEditPage = () => {
           };
           localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(updatedAdvertData));
           
-          console.log('✅ Vehicle data updated with MOT and Valuation from API');
         }
       } else {
         const error = await response.json();

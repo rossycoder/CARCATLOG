@@ -138,13 +138,11 @@ const SellYourBikePage = () => {
     setShowBikeDetails(false);
     
     try {
-      console.log('🔍 Looking up bike:', registration, 'with mileage:', mileage);
       
       // Call real API to lookup bike
       const result = await lookupBike(registration, mileage);
       
       if (result) {
-        console.log('✅ Bike data received:', result);
         setFetchedBikeData(result);
         setShowBikeDetails(true);
       }
@@ -220,7 +218,6 @@ const SellYourBikePage = () => {
       updatedAt: new Date().toISOString()
     };
     
-    console.log('💾 Saving bike advert data to localStorage:', bikeAdvertData);
     localStorage.setItem(`bikeAdvert_${advertId}`, JSON.stringify(bikeAdvertData));
     
     // NOTE: Bike will be created in database on BikeAdvertEditPage

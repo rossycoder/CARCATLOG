@@ -27,11 +27,9 @@ const VanCheckPage = () => {
   const fetchVanData = async (registration, mileage) => {
     try {
       setLoading(true);
-      console.log('🔍 Fetching van data for:', registration, 'with mileage:', mileage);
       
       const response = await lookupVanByRegistration(registration, mileage);
       
-      console.log('✅ Van data received:', response);
       
       if (response.success && response.data) {
         setVanData(response.data);
@@ -67,10 +65,8 @@ const VanCheckPage = () => {
       updatedAt: new Date().toISOString()
     };
     
-    console.log('💾 Saving van advert data to localStorage:', vanAdvertData);
     localStorage.setItem(`vanAdvert_${advertId}`, JSON.stringify(vanAdvertData));
     
-    console.log('🚀 Navigating to van advert edit page');
     navigate(`/vans/selling/advert/edit/${advertId}`);
   };
 

@@ -30,10 +30,8 @@ const VehicleDetailPage = () => {
     setError(null);
     
     try {
-      console.log(`Fetching vehicle data for registration: ${reg}`);
       
       // Don't make API calls for detail page - use existing data
-      console.log('⚠️ Skipping API calls to avoid charges - detail page should use database data');
       
       // For detail page, we should fetch from our database instead of external APIs
       // This is just a placeholder - the actual car detail should come from database

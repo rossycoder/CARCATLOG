@@ -184,7 +184,6 @@ export const bikeService = {
   // Used in edit page to get complete information
   completeBikeLookup: async (registrationNumber, mileage) => {
     try {
-      console.log('🔍 Complete bike lookup:', registrationNumber, 'with mileage:', mileage);
       
       const response = await api.get(`/bikes/complete-lookup/${registrationNumber}?mileage=${mileage}`);
       

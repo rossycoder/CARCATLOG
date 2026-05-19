@@ -23,13 +23,11 @@ const VehicleCheckPage = () => {
     setShowVehicleFound(false);
     
     try {
-      console.log('Fetching comprehensive vehicle data for:', registrationNumber);
       
       // Use basic vehicle service for vehicle check (cheap API - no expensive history/MOT)
       const response = await carService.basicLookup(registrationNumber, 0);
       
       if (response.success && response.data) {
-        console.log('Enhanced vehicle data received:', response.data);
         
         // Helper function to safely extract value from {value, source} format or direct value
         const getValue = (field) => {
@@ -84,7 +82,6 @@ const VehicleCheckPage = () => {
           fullData: enhancedData
         };
         
-        console.log('Merged vehicle data:', mergedData);
         setVehicleData(mergedData);
         setShowVehicleFound(true);
       } else {
@@ -144,7 +141,6 @@ const VehicleCheckPage = () => {
       import('../utils/enhancedPdfGenerator').then(({ generateEnhancedVehicleReport }) => {
         try {
           generateEnhancedVehicleReport(sampleData, 'AB12CDE');
-          console.log('Enhanced sample report generated with registration: AB12CDE');
         } catch (err) {
           console.error('Error generating enhanced sample PDF:', err);
           alert('Unable to generate sample report: ' + err.message);

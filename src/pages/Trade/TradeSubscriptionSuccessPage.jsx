@@ -26,19 +26,15 @@ const TradeSubscriptionSuccessPage = () => {
         return;
       }
 
-      console.log('Verifying payment for session:', sessionId);
 
       // Verify payment with backend
       const response = await tradeSubscriptionService.verifyPayment(sessionId);
       
       if (response.success) {
         setSubscription(response.subscription);
-        console.log('Payment verified successfully:', response.subscription);
         
         // ✅ FIX: Refresh dealer data in context to update subscription state
-        console.log('🔄 Refreshing dealer data to update subscription...');
         await refreshDealer();
-        console.log('✅ Dealer data refreshed - subscription should now be active');
         
         // Redirect to dashboard after 3 seconds
         setTimeout(() => {

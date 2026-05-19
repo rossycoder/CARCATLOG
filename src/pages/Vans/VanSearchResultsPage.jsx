@@ -52,7 +52,6 @@ function VanSearchResultsPage() {
     // Check if we have any filter parameters
     const hasFilters = Array.from(params.keys()).length > 0;
     
-    console.log('VanSearchResultsPage mounted with params:', Object.fromEntries(params));
 
     if (hasFilters) {
       // Perform filtered search
@@ -76,16 +75,13 @@ function VanSearchResultsPage() {
         filterParams[key] = value;
       }
       
-      console.log('[VanSearchResultsPage] Performing filtered search with:', filterParams);
       const response = await vanService.searchVans(filterParams);
       
-      console.log('[VanSearchResultsPage] Search response:', response);
       
       if (response.success) {
         const vans = response.vans || [];
         const total = response.total || 0;
         
-        console.log('[VanSearchResultsPage] Found vans:', total);
         
         // Transform to match expected format
         const transformedData = {
@@ -96,7 +92,6 @@ function VanSearchResultsPage() {
           showingAllVans: false
         };
         
-        console.log('[VanSearchResultsPage] Setting filtered results:', transformedData);
         setSearchResults(transformedData);
         setFilteredResults(transformedData);
       } else {
@@ -165,7 +160,6 @@ function VanSearchResultsPage() {
         showingAllVans: false
       };
       
-      console.log('Loaded vans:', total);
       setSearchResults(transformedData);
       setFilteredResults(transformedData);
     } catch (err) {

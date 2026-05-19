@@ -21,14 +21,6 @@ const CarCard = ({ car }) => {
   });
 
   // Debug: Check if distance is coming
-  console.log('CarCard - car data:', {
-    reg: car.registrationNumber,
-    make: car.make,
-    model: car.model,
-    distance: car.distance,
-    locationName: car.locationName,
-    writeOff: car.historyCheckId?.writeOffCategory
-  });
 
   // Safety check: Ensure car has required data
   if (!car || !car.make || !car.model) {
@@ -75,7 +67,6 @@ const CarCard = ({ car }) => {
         localStorage.setItem('savedCars', JSON.stringify(updatedSavedCars));
         localStorage.setItem('savedCarsData', JSON.stringify(updatedSavedCarsData));
         setSaved(false);
-        console.log('✅ Car removed from saved');
       } else {
         // Add to saved
         const updatedSavedCars = [...savedCars, car._id];
@@ -84,7 +75,6 @@ const CarCard = ({ car }) => {
         localStorage.setItem('savedCars', JSON.stringify(updatedSavedCars));
         localStorage.setItem('savedCarsData', JSON.stringify(updatedSavedCarsData));
         setSaved(true);
-        console.log('✅ Car saved successfully');
       }
     } catch (error) {
       console.error('Error saving car:', error);

@@ -63,7 +63,6 @@ const VanDetailPage = () => {
         url += `?postcode=${encodeURIComponent(userPostcode)}`;
       }
       
-      console.log('Fetching van details from:', url);
       
       // Add cache-busting headers
       const response = await fetch(url, {
@@ -79,11 +78,6 @@ const VanDetailPage = () => {
       }
       
       const data = await response.json();
-      console.log('✅ Van data loaded successfully');
-      console.log('🖼️ Images:', data.data.images?.length || 0, 'found');
-      console.log('👤 Seller Contact:', JSON.stringify(data.data.sellerContact, null, 2));
-      console.log('✨ Features:', data.data.features?.length || 0, 'found:', data.data.features);
-      console.log('💰 Running Costs:', data.data.runningCosts);
       setVan(data.data);
     } catch (err) {
       console.error('Error fetching van details:', err);
