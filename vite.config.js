@@ -1,16 +1,25 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { copyFileSync } from 'fs'
-import { resolve } from 'path'
+import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 // Plugin to copy index.html as 200.html for Render SPA routing
 const renderSPAPlugin = {
   name: 'render-spa',
   closeBundle() {
-    copyFileSync(
-      resolve(__dirname, 'dist/index.html'),
-      resolve(__dirname, 'dist/200.html')
-    )
+    try {
+      copyFileSync(
+        resolve(__dirname, 'dist/index.html'),
+        resolve(__dirname, 'dist/200.html')
+      )
+      console.log('✅ Created dist/200.html for Render SPA routing')
+    } catch (e) {
+      console.warn('⚠️ Could not create 200.html:', e.message)
+    }
   }
 }
 
