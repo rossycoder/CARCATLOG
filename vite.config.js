@@ -1,8 +1,21 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { copyFileSync } from 'fs'
+import { resolve } from 'path'
+
+// Plugin to copy index.html as 200.html for Render SPA routing
+const renderSPAPlugin = {
+  name: 'render-spa',
+  closeBundle() {
+    copyFileSync(
+      resolve(__dirname, 'dist/index.html'),
+      resolve(__dirname, 'dist/200.html')
+    )
+  }
+}
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), renderSPAPlugin],
   server: {
     port: 3000,
     proxy: {
