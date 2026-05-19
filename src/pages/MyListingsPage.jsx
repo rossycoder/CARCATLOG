@@ -158,12 +158,6 @@ function MyListingsPage() {
     const isExpired = status === 'active' && expiryDate && expiryDate < now;
     const effectiveStatus = isExpired ? 'draft' : status;
     
-      carId: listing._id,
-      originalStatus: status,
-      effectiveStatus: effectiveStatus,
-      isExpired: isExpired
-    });
-    
     // Simple status mapping
     const statusMap = {
       active: { label: 'Active', className: 'status-active' },

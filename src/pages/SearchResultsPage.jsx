@@ -90,32 +90,6 @@ function SearchResultsPage() {
     const sortByParam = params.get('sortBy'); // Get sort parameter
     const openFilterParam = params.get('openFilter'); // Check if filter should auto-open
 
-      postcodeParam,
-      radiusParam,
-      makeParam,
-      modelParam,
-      submodelParam,
-      colourParam,
-      bodyTypeParam,
-      doorsParam,
-      seatsParam,
-      gearboxParam,
-      fuelTypeParam,
-      engineSizeParam,
-      sellerTypeParam,
-      writeOffStatusParam,
-      priceFromParam,
-      priceToParam,
-      yearFromParam,
-      yearToParam,
-      mileageFromParam,
-      mileageToParam,
-      sortByParam,
-      openFilterParam,
-      urlSearch: location.search,
-      locationState: location.state
-    });
-
     // Auto-open filter if explicitly requested via URL parameter
     if (openFilterParam === 'true') {
       setShowFilterModal(true);

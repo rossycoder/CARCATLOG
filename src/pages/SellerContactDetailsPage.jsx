@@ -15,16 +15,6 @@ const SellerContactDetailsPage = () => {
   // Check if user is a trade dealer (subscription not required for publishing)
   const isTradeDealer = isAuthenticated && dealer;
 
-  // Debug logging
-  useEffect(() => {
-      isAuthenticated,
-      dealer: dealer ? { id: dealer._id, name: dealer.businessName } : null,
-      subscription: subscription ? { status: subscription.status, plan: subscription.plan?.name } : null,
-      isTradeDealer,
-      token: localStorage.getItem('tradeDealerToken') ? 'EXISTS' : 'MISSING'
-    });
-  }, [isAuthenticated, dealer, subscription, isTradeDealer]);
-
   // Get advert data from navigation state
   const advertData = location.state?.advertData;
   const vehicleData = location.state?.vehicleData;
@@ -98,11 +88,6 @@ const SellerContactDetailsPage = () => {
       newErrors.postcode = 'Please enter a valid UK postcode';
     }
 
-      formData,
-      newErrors,
-      isValid: Object.keys(newErrors).length === 0
-    });
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -130,13 +115,6 @@ const SellerContactDetailsPage = () => {
     setIsSubmitting(true);
 
     try {
-        advertId,
-        dealerId: dealer.id,
-        hasVehicleData: !!vehicleData,
-        hasAdvertData: !!advertData,
-        contactDetails: formData
-      });
-
       // Publish vehicle directly for trade dealers
       const response = await tradeInventoryService.publishVehicle({
         advertId,
