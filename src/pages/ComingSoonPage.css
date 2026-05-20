@@ -1,0 +1,221 @@
+/* ============================================
+   COMING SOON PAGE
+   ============================================ */
+
+.cs-page {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Background video */
+.cs-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* Dark overlay */
+.cs-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1;
+}
+
+/* Main content */
+.cs-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 20px;
+  max-width: 600px;
+  width: 100%;
+}
+
+/* Logo */
+.cs-logo {
+  width: 180px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.4));
+}
+
+/* Tagline */
+.cs-tagline {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
+  font-weight: 400;
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+/* Headline */
+.cs-headline {
+  color: #ffffff;
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+/* Countdown */
+.cs-countdown {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.cs-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  min-width: 72px;
+}
+
+.cs-tile-num {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.cs-tile-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+/* Email form */
+.cs-form {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 24px;
+}
+
+.cs-input {
+  flex: 1;
+  padding: 13px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.cs-input::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.cs-input:focus {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.cs-btn {
+  padding: 13px 22px;
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.cs-btn:hover {
+  background: #0052a3;
+}
+
+/* Thanks message */
+.cs-thanks {
+  color: #4ade80;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+/* Instagram link */
+.cs-instagram {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+}
+
+.cs-instagram:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ============================================
+   MOBILE
+   ============================================ */
+@media (max-width: 480px) {
+  .cs-headline {
+    font-size: 2rem;
+  }
+
+  .cs-logo {
+    width: 140px;
+  }
+
+  .cs-countdown {
+    gap: 10px;
+  }
+
+  .cs-tile {
+    min-width: 60px;
+    padding: 10px 12px;
+  }
+
+  .cs-tile-num {
+    font-size: 1.6rem;
+  }
+
+  .cs-form {
+    flex-direction: column;
+  }
+
+  .cs-btn {
+    width: 100%;
+  }
+}
