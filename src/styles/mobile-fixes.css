@@ -24,9 +24,7 @@
     margin-right: 0 !important;
   }
   
-  /* Target the heart-shaped save button specifically */
-  .heart-save-button,
-  button.heart-save-button,
+  /* Target the heart-shaped save button specifically - scoped to car cards only */
   .car-image-container .heart-save-button,
   .car-image-container > .heart-save-button,
   .car-card .heart-save-button,
@@ -36,7 +34,7 @@
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    z-index: 99999 !important;
+    z-index: 10 !important;
     position: absolute !important;
     pointer-events: auto !important;
     background: white !important;
@@ -60,9 +58,7 @@
     transform: none !important;
   }
   
-  /* Force SVG to show */
-  .heart-save-button svg,
-  button.heart-save-button svg,
+  /* Force SVG to show - scoped to car cards only */
   .car-image-container .heart-save-button svg,
   .car-image-container > .heart-save-button svg,
   a.car-card .car-image-container > button.heart-save-button svg,
@@ -721,5 +717,112 @@ a.call-seller-btn:active {
   .contact-card a[href^="tel:"]:last-child,
   .contact-card a[href^="mailto:"]:last-child {
     margin-bottom: 0 !important;
+  }
+}
+
+
+/* ========================================
+   HEADER MOBILE - ICON LABELS VISIBLE
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* Show icon labels (Saved, Sign in, Trade, etc.) below icons on mobile */
+  .header-right .icon-btn {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2px !important;
+    padding: 6px 4px !important;
+  }
+
+  .header-right .icon-btn .icon-label {
+    display: block !important;
+    font-size: 0.6rem !important;
+    font-weight: 500 !important;
+    color: #333 !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+  }
+
+  /* Sign in button - show label, no background on mobile */
+  .header-right .signin-btn {
+    background: transparent !important;
+    color: #333 !important;
+    padding: 6px 4px !important;
+  }
+
+  .header-right .signin-btn .icon-label {
+    display: block !important;
+    color: #333 !important;
+    font-size: 0.6rem !important;
+  }
+
+  /* Trade login button - show on mobile too */
+  .header-right .trade-login-btn {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2px !important;
+  }
+
+  /* Adjust header-right grid column to fit 3 icons */
+  .main-header {
+    grid-template-columns: 45px 1fr 110px !important;
+  }
+
+  .header-right {
+    gap: 2px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-right .icon-btn .icon-label {
+    font-size: 0.55rem !important;
+  }
+
+  .main-header {
+    grid-template-columns: 40px 1fr 105px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .header-right .icon-btn .icon-label {
+    font-size: 0.5rem !important;
+  }
+
+  .main-header {
+    grid-template-columns: 38px 1fr 100px !important;
+  }
+}
+
+
+/* ========================================
+   HEADER MOBILE - MENU BUTTON LABEL
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* Menu button - icon + "Menu" text neeche */
+  .menu-btn {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2px !important;
+    padding: 4px 4px !important;
+  }
+
+  .menu-btn::after {
+    content: 'Menu' !important;
+    display: block !important;
+    font-size: 0.6rem !important;
+    font-weight: 500 !important;
+    color: #333 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .menu-btn::after {
+    font-size: 0.55rem !important;
   }
 }

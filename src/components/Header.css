@@ -96,10 +96,10 @@ body {
 }
 
 .logo-img {
-  height: 75px;
+  height: 130px;
   width: auto;
   object-fit: contain;
-  max-width: 240px;
+  max-width: 360px;
 }
 
 /* MAIN NAV - Desktop Only */
@@ -473,8 +473,8 @@ body {
   }
 
   .logo-img {
-    height: 80px;
-    max-width: 220px;
+    height: 110px;
+    max-width: 280px;
   }
 
   .main-nav {
@@ -575,8 +575,8 @@ body {
   }
 
   .logo-img {
-    height: 75px;
-    max-width: 200px;
+    height: 100px;
+    max-width: 260px;
   }
 
   .main-nav {
@@ -657,8 +657,8 @@ body {
   }
 
   .logo-img {
-    height: 75px;
-    max-width: 240px;
+    height: 100px;
+    max-width: 300px;
   }
 
   .main-nav {
@@ -757,8 +757,8 @@ body {
   }
 
   .logo-img {
-    height: 80px;
-    max-width: 260px;
+    height: 100px;
+    max-width: 300px;
     width: auto;
   }
 
@@ -810,11 +810,19 @@ body {
   .signin-btn {
     background: transparent !important;
     color: #333 !important;
-    padding: 8px !important;
+    padding: 6px 4px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2px !important;
   }
 
   .signin-btn .icon-label {
-    display: none;
+    display: block !important;
+    font-size: 0.6rem !important;
+    font-weight: 500 !important;
+    color: #333 !important;
+    white-space: nowrap !important;
   }
 
   /* Mobile menu should be visible */
@@ -844,8 +852,8 @@ body {
   }
 
   .logo-img {
-    height: 75px;
-    max-width: 210px;
+    height: 90px;
+    max-width: 260px;
     width: auto;
   }
 
@@ -859,6 +867,12 @@ body {
 
   .account-btn {
     padding: 6px;
+  }
+
+  .signin-btn .icon-label {
+    display: block !important;
+    font-size: 0.55rem !important;
+    color: #333 !important;
   }
 
   .channel-switcher {
@@ -889,8 +903,8 @@ body {
   }
 
   .logo-img {
-    height: 70px;
-    max-width: 200px;
+    height: 85px;
+    max-width: 240px;
   }
   
   .menu-btn,

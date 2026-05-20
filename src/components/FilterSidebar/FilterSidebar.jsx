@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { carService } from '../../services/carService';
 import './FilterSidebar.css';
 
-const FilterSidebar = ({ isOpen, onClose }) => {
+const FilterSidebar = ({ isOpen, onClose, scrollToSection }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [validationErrors, setValidationErrors] = useState({});
@@ -97,6 +97,29 @@ const FilterSidebar = ({ isOpen, onClose }) => {
       });
     }
   }, [isOpen, searchParams]);
+
+  // Scroll to the relevant section when sidebar opens with a specific section
+  useEffect(() => {
+    if (isOpen && scrollToSection) {
+      // Small delay to let the sidebar render/animate open first
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`filter-section-${scrollToSection}`);
+        if (el) {
+          // Find the scrollable .filter-content container
+          const scrollContainer = el.closest('.filter-content');
+          if (scrollContainer) {
+            const containerTop = scrollContainer.getBoundingClientRect().top;
+            const elTop = el.getBoundingClientRect().top;
+            const offset = elTop - containerTop + scrollContainer.scrollTop - 12;
+            scrollContainer.scrollTo({ top: offset, behavior: 'smooth' });
+          } else {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, scrollToSection]);
 
   // Fetch filter options from database on mount and when filters change
   useEffect(() => {
@@ -430,7 +453,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
           </div>
 
           {/* Make and Model - Collapsible Section */}
-          <div className="filter-section-collapsible">
+          <div id="filter-section-make" className="filter-section-collapsible">
             <div className="filter-section-header">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 17h14v-5H5v5zm0 0v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2M5 17V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10"/>
@@ -494,7 +517,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
           </div>
 
           {/* Price */}
-          <div className="filter-section">
+          <div id="filter-section-price" className="filter-section">
             <label className="filter-label">
               <span style={{ fontSize: '16px', fontWeight: 'bold' }}>£</span>
               Price
@@ -572,7 +595,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
           </div>
 
           {/* Year */}
-          <div className="filter-section">
+          <div id="filter-section-year" className="filter-section">
             <label className="filter-label">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -622,7 +645,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
           </div>
 
           {/* Mileage */}
-          <div className="filter-section">
+          <div id="filter-section-mileage" className="filter-section">
             <label className="filter-label">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/>
@@ -699,7 +722,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
           </div>
 
           {/* Gearbox */}
-          <div className="filter-section">
+          <div id="filter-section-gearbox" className="filter-section">
             <label className="filter-label">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 2v20M8 6h8M8 12h8M8 18h8"/>
@@ -724,7 +747,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
           </div>
 
           {/* Body type */}
-          <div className="filter-section">
+          <div id="filter-section-bodytype" className="filter-section">
             <label className="filter-label">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 17h14v-5H5v5zm0 0v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/>
@@ -824,7 +847,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
           </div>
 
           {/* Fuel type */}
-          <div className="filter-section">
+          <div id="filter-section-fueltype" className="filter-section">
             <label className="filter-label">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M3 6h18M3 12h18M3 18h18"/>
@@ -849,7 +872,7 @@ const FilterSidebar = ({ isOpen, onClose }) => {
           </div>
 
           {/* Engine size */}
-          <div className="filter-section">
+          <div id="filter-section-enginesize" className="filter-section">
             <label className="filter-label">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="4" y="4" width="16" height="16" rx="2"/>

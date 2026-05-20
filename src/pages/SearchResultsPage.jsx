@@ -17,6 +17,7 @@ function SearchResultsPage() {
   const [savedCars, setSavedCars] = useState(new Set());
   const [searchSaved, setSearchSaved] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [filterScrollTo, setFilterScrollTo] = useState(null);
   
   const [filters, setFilters] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -644,50 +645,59 @@ function SearchResultsPage() {
             >
               All
             </button>
-            {getUniqueMakes().slice(0, 3).map(make => (
-              <button 
-                key={make}
-                className={`filter-pill ${activeFilter === make ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveFilter(make);
-                  setFilters(prev => ({ ...prev, make }));
-                }}
-              >
-                {make}
-              </button>
-            ))}
+            <button 
+              className={`filter-pill ${activeFilter === 'Make' ? 'active' : ''}`}
+              onClick={() => { setActiveFilter('Make'); setFilterScrollTo('make'); setShowFilterModal(true); }}
+            >
+              Make and model
+            </button>
             <button 
               className={`filter-pill ${activeFilter === 'Price' ? 'active' : ''}`}
-              onClick={() => {
-                setActiveFilter('Price');
-                setShowFilterModal(true);
-              }}
+              onClick={() => { setActiveFilter('Price'); setFilterScrollTo('price'); setShowFilterModal(true); }}
             >
               Price
             </button>
             <button 
               className={`filter-pill ${activeFilter === 'Year' ? 'active' : ''}`}
-              onClick={() => {
-                setActiveFilter('Year');
-                setShowFilterModal(true);
-              }}
+              onClick={() => { setActiveFilter('Year'); setFilterScrollTo('year'); setShowFilterModal(true); }}
             >
               Year
             </button>
             <button 
               className={`filter-pill ${activeFilter === 'Mileage' ? 'active' : ''}`}
-              onClick={() => {
-                setActiveFilter('Mileage');
-                setShowFilterModal(true);
-              }}
+              onClick={() => { setActiveFilter('Mileage'); setFilterScrollTo('mileage'); setShowFilterModal(true); }}
             >
               Mileage
+            </button>
+            <button 
+              className={`filter-pill ${activeFilter === 'Gearbox' ? 'active' : ''}`}
+              onClick={() => { setActiveFilter('Gearbox'); setFilterScrollTo('gearbox'); setShowFilterModal(true); }}
+            >
+              Gearbox
+            </button>
+            <button 
+              className={`filter-pill ${activeFilter === 'BodyType' ? 'active' : ''}`}
+              onClick={() => { setActiveFilter('BodyType'); setFilterScrollTo('bodytype'); setShowFilterModal(true); }}
+            >
+              Body type
+            </button>
+            <button 
+              className={`filter-pill ${activeFilter === 'FuelType' ? 'active' : ''}`}
+              onClick={() => { setActiveFilter('FuelType'); setFilterScrollTo('fueltype'); setShowFilterModal(true); }}
+            >
+              Fuel type
+            </button>
+            <button 
+              className={`filter-pill ${activeFilter === 'EngineSize' ? 'active' : ''}`}
+              onClick={() => { setActiveFilter('EngineSize'); setFilterScrollTo('enginesize'); setShowFilterModal(true); }}
+            >
+              Engine size
             </button>
           </div>
           <div className="filter-actions">
             <button 
               className="filter-sort-btn"
-              onClick={() => setShowFilterModal(true)}
+              onClick={() => { setFilterScrollTo(null); setShowFilterModal(true); }}
             >
               ⚙️ More options
             </button>
@@ -752,7 +762,8 @@ function SearchResultsPage() {
       
       <FilterSidebar 
         isOpen={showFilterModal}
-        onClose={() => setShowFilterModal(false)}
+        onClose={() => { setShowFilterModal(false); setFilterScrollTo(null); }}
+        scrollToSection={filterScrollTo}
       />
     </div>
   );

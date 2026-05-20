@@ -179,122 +179,78 @@ const CarCard = ({ car }) => {
 
           {imageCount > 0 && (
             <div className="image-count">
-              <span>{currentImageIndex + 1}/{imageCount}</span>
+              {currentImageIndex + 1}/{imageCount}
             </div>
           )}
         </div>
         
         <div className="car-content">
           <h3 className="car-title">
-            {/* AutoTrader Style Line 1: Make + Model only */}
             {car.make} {car.model}
           </h3>
           <p className="car-subtitle">
-            {/* AutoTrader Style Line 2: Variant + Battery + BodyType + Transmission + Doors */}
             {(() => {
               const parts = [];
-              
-              // 1. Variant (main specs like "225XE M SPORT PREMIUM ACTIVE TOURER")
               if (car.variant && car.variant !== 'null' && car.variant !== 'undefined' && car.variant.trim() !== '') {
                 parts.push(car.variant.trim());
               }
-              
-              // 2. Battery capacity for PHEV/Electric vehicles
-              if (car.batteryCapacity) {
-                parts.push(`${car.batteryCapacity}kWh`);
-              }
-              
-              // 3. Body type
-              if (car.bodyType && car.bodyType !== 'null' && car.bodyType !== 'undefined') {
-                parts.push(car.bodyType);
-              }
-              
-              // 4. Transmission
+              if (car.batteryCapacity) parts.push(`${car.batteryCapacity}kWh`);
+              if (car.bodyType && car.bodyType !== 'null' && car.bodyType !== 'undefined') parts.push(car.bodyType);
               if (car.transmission) {
                 const trans = car.transmission.toLowerCase();
-                if (trans === 'automatic' || trans === 'auto') {
-                  parts.push('Auto');
-                } else if (trans === 'manual') {
-                  parts.push('Manual');
-                } else if (trans.includes('semi')) {
-                  parts.push('Semi-Auto');
-                } else {
-                  parts.push(car.transmission);
-                }
+                if (trans === 'automatic' || trans === 'auto') parts.push('Auto');
+                else if (trans === 'manual') parts.push('Manual');
+                else if (trans.includes('semi')) parts.push('Semi-Auto');
+                else parts.push(car.transmission);
               }
-              
-              // 5. Doors
-              if (car.doors) {
-                parts.push(`${car.doors}dr`);
-              }
-              
+              if (car.doors) parts.push(`${car.doors}dr`);
               return parts.join(' ');
             })()}
           </p>
-          
-          {/* Attention Grabber - like "COMFORT ACCESS - PARK SENSORS" */}
+
+          {/* Attention Grabber */}
           {car.attentionGrabber && (
             <p className="car-attention-grabber">{car.attentionGrabber}</p>
           )}
-          
-          <p className="car-specs">
-            {/* Line 3: Year • Mileage • Fuel */}
-            {(() => {
-              const specs = [];
-              
-              if (car.year) specs.push(car.year);
-              
-              if (car.mileage) {
-                const mileage = parseInt(car.mileage);
-                if (!isNaN(mileage)) {
-                  specs.push(`${mileage.toLocaleString()} miles`);
-                }
-              }
-              
-              if (car.fuelType && car.fuelType !== 'null' && car.fuelType !== 'undefined') {
-                specs.push(car.fuelType);
-              }
-              
-              return specs.join(' • ');
-            })()}
-          </p>
-          
+
           <div className="car-badges">
-            {/* Great Price Badge */}
+            {/* Price indicator */}
             {car.priceIndicator === 'great' && (
               <span className="badge great-price-badge">Great price</span>
             )}
-            
+            {car.priceIndicator === 'lower' && (
+              <span className="badge lower-price-badge">Lower price</span>
+            )}
+
             {/* Electric Vehicle Badge */}
             <ElectricVehicleBadge vehicle={car} size="small" />
-            
+
             {/* Mileage Badge */}
             {car.mileage && (
               <span className="badge mileage-badge">{parseInt(car.mileage).toLocaleString()} miles</span>
             )}
-            
-            {/* Year Badge */}
+
+            {/* Year + reg Badge */}
             {car.year && (
               <span className="badge year-badge">
                 {car.year} ({car.registrationNumber?.match(/\d{2}/)?.[0] || car.year.toString().slice(-2)} reg)
               </span>
             )}
-            
-            {/* Show insurance write-off category if exists */}
+
+            {/* Write-off category */}
             {car.historyCheckId?.writeOffCategory && car.historyCheckId.writeOffCategory !== 'none' && car.historyCheckId.writeOffCategory !== 'unknown' && (
               <span className="badge cat-badge">CAT {car.historyCheckId.writeOffCategory}</span>
             )}
           </div>
 
+          {/* Price */}
           {car.price && (
             <>
-              {car.priceLabel && (
-                <p className="price-label">{car.priceLabel}</p>
-              )}
+              {car.priceLabel && <p className="price-label">{car.priceLabel}</p>}
               <p className="car-price">{formatPrice(car.price)}</p>
             </>
           )}
-          
+
           <div className="car-footer">
             <span className="car-location">
               📍 {extractTownName(car.locationName) || car.sellerContact?.city || 'Location not available'}
