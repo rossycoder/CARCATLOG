@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider } from './context/AuthContext'
@@ -37,6 +37,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import AboutPage from './pages/AboutPage'
 import ElectricVehicleDemo from './pages/ElectricVehicleDemo'
+import ComingSoonPage from './pages/ComingSoonPage'
 
 // Terms and Conditions Pages
 import AdvertisingTermsPage from './pages/TermsAndConditions/AdvertisingTermsPage'
@@ -100,6 +101,34 @@ function ScrollToTop() {
   return null;
 }
 
+// ─── Preview bypass ──────────────────────────────────────────────────────────
+// Visitors see the Coming Soon page.
+// Team access the full site at: /?preview=carcatalog2026
+// Once unlocked, the key is saved in sessionStorage for the whole session.
+const PREVIEW_KEY = 'carcatalog2026';
+
+function usePreviewAccess() {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('preview') === PREVIEW_KEY) {
+    sessionStorage.setItem('preview', PREVIEW_KEY);
+  }
+  return sessionStorage.getItem('preview') === PREVIEW_KEY;
+}
+
+// Wrapper: redirects to coming-soon unless preview is unlocked
+function PreviewGate({ children }) {
+  const hasAccess = usePreviewAccess();
+  const { pathname } = useLocation();
+
+  // Always allow coming-soon and auth callback through
+  const alwaysAllow = ['/coming-soon', '/auth/callback'];
+  if (alwaysAllow.includes(pathname)) return children;
+
+  if (!hasAccess) return <Navigate to="/coming-soon" replace />;
+  return children;
+}
+
 function App() {
   return (
     <HelmetProvider>
@@ -107,10 +136,17 @@ function App() {
         <AuthProvider>
           <TradeDealerProvider>
             <ScrollToTop />
-            <div className="App">
-              <Header />
-              <main>
-              <Routes>
+            <Routes>
+              {/* Coming soon — always accessible, no header/footer */}
+              <Route path="/coming-soon" element={<ComingSoonPage />} />
+
+              {/* All other routes — gated behind preview key */}
+              <Route path="/*" element={
+                <PreviewGate>
+                  <div className="App">
+                    <Header />
+                    <main>
+                      <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/used-cars" element={<UsedCarsPage />} />
               <Route path="/new-cars" element={<NewCarsPage />} />
@@ -146,6 +182,7 @@ function App() {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/electric-vehicle-demo" element={<ElectricVehicleDemo />} />
+              <Route path="/coming-soon" element={<ComingSoonPage />} />
               
               {/* Terms and Conditions Routes */}
               <Route path="/terms-and-conditions/advertising" element={<AdvertisingTermsPage />} />
@@ -209,9 +246,12 @@ function App() {
                 }
               />
             </Routes>
-            </main>
-            <Footer />
-          </div>
+                    </main>
+                    <Footer />
+                  </div>
+                </PreviewGate>
+              } />
+            </Routes>
           </TradeDealerProvider>
         </AuthProvider>
       </Router>

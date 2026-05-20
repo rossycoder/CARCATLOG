@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import './ComingSoonPage.css';
 
-// Launch date — change this to your actual launch date
-const LAUNCH_DATE = new Date('2025-09-01T00:00:00');
+// Launch date — Tuesday 26 May 2026 at 1:00 PM
+const LAUNCH_DATE = new Date('2026-05-26T13:00:00');
 
 function getTimeLeft() {
   const diff = LAUNCH_DATE - new Date();
