@@ -32,9 +32,9 @@ export default function ComingSoonPage() {
 
   return (
     <div className="cs-page">
-      {/* Background video */}
+      {/* Background video — desktop: landscape, mobile: portrait reel */}
       <video
-        className="cs-video"
+        className="cs-video cs-video-desktop"
         autoPlay
         muted
         loop
@@ -42,6 +42,16 @@ export default function ComingSoonPage() {
         poster="/images/brands/background1.jpeg"
       >
         <source src="/videos/landingvideo.mp4" type="video/mp4" />
+      </video>
+      <video
+        className="cs-video cs-video-mobile"
+        autoPlay
+        muted
+        loop
+        playsInline
+        poster="/images/brands/backgroundmobile.png"
+      >
+        <source src="/videos/reel.mp4" type="video/mp4" />
       </video>
 
       {/* Dark overlay */}

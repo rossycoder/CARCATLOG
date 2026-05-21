@@ -22,6 +22,15 @@
   z-index: 0;
 }
 
+/* Desktop: show landscape, hide mobile reel */
+.cs-video-mobile {
+  display: none;
+}
+
+.cs-video-desktop {
+  display: block;
+}
+
 /* Dark overlay */
 .cs-overlay {
   position: absolute;
@@ -190,6 +199,15 @@
    MOBILE
    ============================================ */
 @media (max-width: 480px) {
+  /* Switch to portrait reel video on mobile */
+  .cs-video-desktop {
+    display: none;
+  }
+
+  .cs-video-mobile {
+    display: block;
+  }
+
   .cs-headline {
     font-size: 2rem;
   }
