@@ -308,14 +308,40 @@
   }
 
   .spec-item {
-    padding: 4px 6px !important;
-    min-height: 32px !important;
+    padding: 6px 8px !important;
+    min-height: 48px !important;
     display: flex !important;
-    flex-direction: row !important;
+    flex-direction: column !important;
     align-items: flex-start !important;
-    gap: 4px !important;
+    gap: 2px !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  /* Spec label — single line, truncate if needed */
+  .spec-item .spec-label,
+  .spec-item label,
+  .spec-item > span:first-child {
+    font-size: 0.65rem !important;
+    color: #666 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+    display: block !important;
+  }
+
+  /* Spec value — allow wrap but keep font readable */
+  .spec-item .spec-value,
+  .spec-item > span:last-child,
+  .spec-item strong {
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    color: #1a1a1a !important;
+    word-break: break-word !important;
+    width: 100% !important;
+    display: block !important;
   }
 
   .main-image {
@@ -742,6 +768,9 @@ a.call-seller-btn:active {
     color: #333 !important;
     white-space: nowrap !important;
     line-height: 1 !important;
+    max-width: 52px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   /* Sign in button - show label, no background on mobile */
@@ -767,7 +796,7 @@ a.call-seller-btn:active {
 
   /* Adjust header-right grid column to fit 3 icons */
   .main-header {
-    grid-template-columns: 45px 1fr 110px !important;
+    grid-template-columns: 45px 1fr 120px !important;
   }
 
   .header-right {
@@ -778,10 +807,11 @@ a.call-seller-btn:active {
 @media (max-width: 480px) {
   .header-right .icon-btn .icon-label {
     font-size: 0.55rem !important;
+    max-width: 46px !important;
   }
 
   .main-header {
-    grid-template-columns: 40px 1fr 105px !important;
+    grid-template-columns: 40px 1fr 115px !important;
   }
 }
 
