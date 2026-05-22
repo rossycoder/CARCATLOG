@@ -39,6 +39,85 @@
   text-decoration: underline;
 }
 
+/* Sticky Navigation Tabs */
+.sticky-nav-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sticky-nav-container {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.sticky-nav-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.nav-tab {
+  flex: 1;
+  min-width: fit-content;
+  padding: 16px 20px;
+  background: white;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.nav-tab:hover {
+  background: #f5f5f5;
+  color: #0066cc;
+}
+
+.nav-tab.active {
+  color: #0066cc;
+  border-bottom-color: #0066cc;
+  background: #f0f7ff;
+  font-weight: 600;
+}
+
+/* Mobile responsive for sticky nav */
+@media (max-width: 968px) {
+  .sticky-nav-tabs {
+    margin-left: -12px;
+    margin-right: -12px;
+    border-radius: 0;
+  }
+
+  .sticky-nav-container {
+    justify-content: flex-start;
+    padding: 0 8px;
+  }
+
+  .nav-tab {
+    flex: 0 0 auto;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .nav-tab {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+}
+
 /* Image Gallery */
 .image-gallery {
   background: white;

@@ -1433,8 +1433,13 @@ const CarAdvertEditPage = () => {
     <div className="car-advert-edit-page">
       {/* Popup Message */}
       {showPopup && (
-        <div className="popup-overlay">
-          <div className="popup-content">
+        <div className="popup-overlay" onClick={(e) => {
+          // Only close if clicking directly on overlay, not on popup content
+          if (e.target.className === 'popup-overlay') {
+            closePopup();
+          }
+        }}>
+          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
             <button className="popup-close" onClick={closePopup}>
               ✕ Close
             </button>

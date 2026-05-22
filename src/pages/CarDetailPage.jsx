@@ -23,6 +23,7 @@ const CarDetailPage = () => {
   const [showAllFeatures, setShowAllFeatures] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isMobile, setIsMobile] = useState(false); // Start with false, will be set in useEffect
+  const [activeTab, setActiveTab] = useState('contact');
 
   // Helper function to check if vehicle is electric or plug-in hybrid (has charging capability)
   const isElectricOrPluginHybrid = (fuelType) => {
@@ -74,6 +75,48 @@ const CarDetailPage = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Scroll spy for sticky nav
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = [
+        { id: 'cd-contact', name: 'contact' },
+        { id: 'cd-overview', name: 'overview' },
+        { id: 'cd-description', name: 'description' },
+        { id: 'cd-running-costs', name: 'running-costs' },
+        { id: 'cd-vehicle-history', name: 'vehicle-history' },
+        { id: 'cd-mot-history', name: 'mot-history' },
+        { id: 'cd-finance', name: 'finance' },
+        { id: 'cd-meet-seller', name: 'meet-seller' }
+      ];
+
+      const scrollPosition = window.scrollY + 200; // Offset for sticky nav height
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = document.getElementById(sections[i].id);
+        if (section && section.offsetTop <= scrollPosition) {
+          setActiveTab(sections[i].name);
+          break;
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Smooth scroll to section
+  const scrollToSection = (sectionId) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      const navHeight = 80; // Height of sticky nav
+      const targetPosition = section.offsetTop - navHeight;
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   const fetchCarDetails = async () => {
     try {
@@ -326,7 +369,7 @@ const CarDetailPage = () => {
           </button>
 
         {/* Image Gallery */}
-        <div className="image-gallery">
+        <div id="cd-gallery" className="image-gallery">
           <div className="main-image">
             <img 
               src={getCurrentImage()} 
@@ -380,6 +423,60 @@ const CarDetailPage = () => {
               )}
             </div>
           )}
+        </div>
+
+        {/* Sticky Navigation Tabs */}
+        <div className="sticky-nav-tabs">
+          <div className="sticky-nav-container">
+            <button 
+              className={`nav-tab ${activeTab === 'contact' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-contact')}
+            >
+              Contact Seller
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'overview' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-overview')}
+            >
+              Overview
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'description' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-description')}
+            >
+              Description
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'running-costs' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-running-costs')}
+            >
+              Running Costs
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'vehicle-history' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-vehicle-history')}
+            >
+              Vehicle History
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'mot-history' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-mot-history')}
+            >
+              MOT History
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'finance' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-finance')}
+            >
+              Finance Calculator
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'meet-seller' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-meet-seller')}
+            >
+              Meet Seller
+            </button>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -547,7 +644,7 @@ const CarDetailPage = () => {
             </div>
 
             {/* Contact Seller - Mobile Only (appears between header and overview) */}
-            <div className="contact-card mobile-contact-card">
+            <div id="cd-contact" className="contact-card mobile-contact-card">
               <h3>Contact seller</h3>
               
               <div className="seller-info">
@@ -588,7 +685,7 @@ const CarDetailPage = () => {
             </div>
 
             {/* Overview Section */}
-            <div className="overview-section">
+            <div id="cd-overview" className="overview-section">
               <h2>Overview</h2>
               
               <div className="spec-grid">
@@ -770,7 +867,7 @@ const CarDetailPage = () => {
 
             {/* Description */}
             {car.description && (
-              <div className="description-section">
+              <div id="cd-description" className="description-section">
                 <h2>Description</h2>
                 <p>{car.description}</p>
               </div>
@@ -796,7 +893,7 @@ const CarDetailPage = () => {
 
             {/* Running Costs Section - For ALL cars (Electric and Non-Electric) */}
             {car.runningCosts && (
-              <div className="running-costs-section-new">
+              <div id="cd-running-costs" className="running-costs-section-new">
                 <h2>Running costs</h2>
                 <div className="running-costs-horizontal">
                   <div className="running-cost-item">
@@ -948,19 +1045,23 @@ const CarDetailPage = () => {
 
 
             {/* Vehicle History Section - Always show, component handles missing VRM */}
+            <div id="cd-vehicle-history">
             <VehicleHistorySection 
               vrm={car.registrationNumber || car.vrm}
               carData={car}
             />
+            </div>
 
             {/* MOT History Section - Always show, component handles missing VRM */}
+            <div id="cd-mot-history">
             <MOTHistorySection 
               vrm={car.registrationNumber || car.vrm}
               carData={car}
             />
+            </div>
 
             {/* Meet the Seller Section */}
-            <div className="meet-seller-section">
+            <div id="cd-meet-seller" className="meet-seller-section">
               <h2>Meet the seller</h2>
               
               <div className="seller-details">
@@ -1062,7 +1163,7 @@ const CarDetailPage = () => {
 
           {/* Right Column - Contact Seller */}
           <div className="right-column">
-            <div className="contact-card">
+            <div id="cd-contact-desktop" className="contact-card">
               <h3>Contact seller</h3>
               
               <div className="seller-info">
@@ -1204,22 +1305,24 @@ const CarDetailPage = () => {
             })()}
 
             {/* Finance Calculator - Below Price Indicator */}
-            <FinanceCalculator 
-              price={car.price || car.estimatedValue || 10000}
-              apr={car.year ? (() => {
-                const age = new Date().getFullYear() - car.year;
-                if (age <= 2) return 6.9;
-                if (age <= 5) return 9.9;
-                if (age <= 9) return 12.9;
-                return 16.9;
-              })() : 9.9}
-              minDepositPercent={0}
-              maxDepositPercent={50}
-            />
+            <div id="cd-finance">
+              <FinanceCalculator 
+                price={car.price || car.estimatedValue || 10000}
+                apr={car.year ? (() => {
+                  const age = new Date().getFullYear() - car.year;
+                  if (age <= 2) return 6.9;
+                  if (age <= 5) return 9.9;
+                  if (age <= 9) return 12.9;
+                  return 16.9;
+                })() : 9.9}
+                minDepositPercent={0}
+                maxDepositPercent={50}
+              />
+            </div>
           </div>
         </div>
       </div>
-      </div>
+    </div>
     </>
   );
 };

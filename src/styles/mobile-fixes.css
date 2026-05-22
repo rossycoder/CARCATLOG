@@ -308,14 +308,30 @@
   }
 
   .spec-item {
-    padding: 6px 8px !important;
-    min-height: 48px !important;
+    padding: 8px 6px !important;
+    min-height: 60px !important;
     display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 2px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+  
+  .spec-item .spec-icon {
+    font-size: 1.1rem !important;
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .spec-item .spec-details {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
     overflow: hidden !important;
   }
 
@@ -330,18 +346,22 @@
     text-overflow: ellipsis !important;
     width: 100% !important;
     display: block !important;
+    line-height: 1.1 !important;
   }
 
-  /* Spec value — allow wrap but keep font readable */
+  /* Spec value — single line, truncate if needed */
   .spec-item .spec-value,
   .spec-item > span:last-child,
   .spec-item strong {
-    font-size: 0.8rem !important;
+    font-size: 0.75rem !important;
     font-weight: 600 !important;
     color: #1a1a1a !important;
-    word-break: break-word !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
     width: 100% !important;
     display: block !important;
+    line-height: 1.2 !important;
   }
 
   .main-image {
