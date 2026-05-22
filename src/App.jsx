@@ -101,9 +101,71 @@ function ScrollToTop() {
   return null;
 }
 
-// ─── Preview bypass ──────────────────────────────────────────────────────────
-// Coming soon page is available at /coming-soon
-// All other pages are fully accessible
+// ─── Route logic ─────────────────────────────────────────────────────────────
+// /          → Coming Soon (public sees this)
+// /testing/* → Full site (Shahzad's testing access)
+
+// Layout wrapper for the full site
+function SiteLayout() {
+  return (
+    <div className="App">
+      <Header />
+      <main>
+        <Routes>
+          <Route index element={<HomePage />} />
+          <Route path="used-cars" element={<UsedCarsPage />} />
+          <Route path="new-cars" element={<NewCarsPage />} />
+          <Route path="sell-your-car" element={<SellYourCarPage />} />
+          <Route path="sell-my-car/advertising-prices" element={<CarAdvertisingPricesPage />} />
+          <Route path="advertising-prices" element={<CarAdvertisingPricesPage />} />
+          <Route path="sell-my-car/advert-payment-success" element={<AdvertPaymentSuccessPage />} />
+          <Route path="find-your-car" element={<CarFinderFormPage />} />
+          <Route path="vehicle-lookup" element={<VehicleLookupPage />} />
+          <Route path="vehicle-check" element={<VehicleCheckPage />} />
+          <Route path="vehicle-detail/:registration" element={<VehicleDetailPage />} />
+          <Route path="vehicle-check/payment/:sessionId" element={<VehiclePaymentPage />} />
+          <Route path="vehicle-check/payment/success" element={<PaymentSuccessPage />} />
+          <Route path="search-results" element={<SearchResultsPage />} />
+          <Route path="saved-cars" element={<SavedCarsPage />} />
+          <Route path="my-listings" element={<MyListingsPage />} />
+          <Route path="admin/dashboard" element={<AdminDashboardPage />} />
+          <Route path="valuation" element={<ValuationPage />} />
+          <Route path="valuation/identification" element={<VehicleIdentificationPage />} />
+          <Route path="valuation/results" element={<ValuationResultsPage />} />
+          <Route path="valuation/vehicle" element={<VehicleValuationPage />} />
+          <Route path="selling/advert/edit/:advertId" element={<CarAdvertEditPage />} />
+          <Route path="selling/advert/contact/:advertId" element={<SellerContactDetailsPage />} />
+          <Route path="cars/:id" element={<CarDetailPage />} />
+          <Route path="signin" element={<SignInPage />} />
+          <Route path="signup" element={<SignInPage />} />
+          <Route path="auth/callback" element={<AuthCallbackPage />} />
+          <Route path="check-email" element={<CheckEmailPage />} />
+          <Route path="verify-email" element={<VerifyEmailPage />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="reset-password" element={<ResetPasswordPage />} />
+          <Route path="contact" element={<ContactPage />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="electric-vehicle-demo" element={<ElectricVehicleDemo />} />
+          <Route path="terms-and-conditions/advertising" element={<AdvertisingTermsPage />} />
+          <Route path="terms-of-use" element={<TermsOfUsePage />} />
+          <Route path="privacy-notice" element={<PrivacyNoticePage />} />
+          <Route path="accessibility-statement" element={<AccessibilityStatementPage />} />
+          <Route path="cookies-policy" element={<CookiesPolicyPage />} />
+          <Route path="trade/login" element={<TradeLoginPage />} />
+          <Route path="trade/register" element={<TradeRegisterPage />} />
+          <Route path="trade/verify-email" element={<TradeVerifyEmailPage />} />
+          <Route path="trade/dashboard" element={<ProtectedTradeRoute><TradeDashboard /></ProtectedTradeRoute>} />
+          <Route path="trade/inventory" element={<ProtectedTradeRoute requireSubscription={true}><TradeInventoryPage /></ProtectedTradeRoute>} />
+          <Route path="trade/analytics" element={<ProtectedTradeRoute requireSubscription={true}><TradeAnalyticsPage /></ProtectedTradeRoute>} />
+          <Route path="trade/subscription" element={<ProtectedTradeRoute><TradeSubscriptionPage /></ProtectedTradeRoute>} />
+          <Route path="trade/subscription/checkout/:planSlug" element={<ProtectedTradeRoute><TradeSubscriptionCheckoutPage /></ProtectedTradeRoute>} />
+          <Route path="trade/subscription/success" element={<ProtectedTradeRoute><TradeSubscriptionSuccessPage /></ProtectedTradeRoute>} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -113,118 +175,15 @@ function App() {
           <TradeDealerProvider>
             <ScrollToTop />
             <Routes>
-              {/* Coming soon — standalone, no header/footer */}
+              {/* Public: coming soon */}
+              <Route path="/" element={<ComingSoonPage />} />
               <Route path="/coming-soon" element={<ComingSoonPage />} />
 
-              {/* All other routes — fully accessible */}
-              <Route path="/*" element={
-                <div className="App">
-                  <Header />
-                  <main>
-                    <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/used-cars" element={<UsedCarsPage />} />
-              <Route path="/new-cars" element={<NewCarsPage />} />
-              <Route path="/sell-your-car" element={<SellYourCarPage />} />
-              <Route path="/sell-my-car/advertising-prices" element={<CarAdvertisingPricesPage />} />
-              <Route path="/advertising-prices" element={<CarAdvertisingPricesPage />} />
-              <Route path="/sell-my-car/advert-payment-success" element={<AdvertPaymentSuccessPage />} />
-              <Route path="/find-your-car" element={<CarFinderFormPage />} />
+              {/* Testing: full site under /testing */}
+              <Route path="/testing/*" element={<SiteLayout />} />
 
-              <Route path="/vehicle-lookup" element={<VehicleLookupPage />} />
-              <Route path="/vehicle-check" element={<VehicleCheckPage />} />
-              <Route path="/vehicle-detail/:registration" element={<VehicleDetailPage />} />
-              <Route path="/vehicle-check/payment/:sessionId" element={<VehiclePaymentPage />} />
-              <Route path="/vehicle-check/payment/success" element={<PaymentSuccessPage />} />
-              <Route path="/search-results" element={<SearchResultsPage />} />
-              <Route path="/saved-cars" element={<SavedCarsPage />} />
-              <Route path="/my-listings" element={<MyListingsPage />} />
-              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-              <Route path="/valuation" element={<ValuationPage />} />
-              <Route path="/valuation/identification" element={<VehicleIdentificationPage />} />
-              <Route path="/valuation/results" element={<ValuationResultsPage />} />
-              <Route path="/valuation/vehicle" element={<VehicleValuationPage />} />
-              <Route path="/selling/advert/edit/:advertId" element={<CarAdvertEditPage />} />
-              <Route path="/selling/advert/contact/:advertId" element={<SellerContactDetailsPage />} />
-              <Route path="/cars/:id" element={<CarDetailPage />} />
-              <Route path="/signin" element={<SignInPage />} />
-              <Route path="/signup" element={<SignInPage />} />
-              <Route path="/auth/callback" element={<AuthCallbackPage />} />
-              <Route path="/check-email" element={<CheckEmailPage />} />
-              <Route path="/verify-email" element={<VerifyEmailPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/electric-vehicle-demo" element={<ElectricVehicleDemo />} />
-              <Route path="/coming-soon" element={<ComingSoonPage />} />
-              
-              {/* Terms and Conditions Routes */}
-              <Route path="/terms-and-conditions/advertising" element={<AdvertisingTermsPage />} />
-              <Route path="/terms-of-use" element={<TermsOfUsePage />} />
-              <Route path="/privacy-notice" element={<PrivacyNoticePage />} />
-              <Route path="/accessibility-statement" element={<AccessibilityStatementPage />} />
-              <Route path="/cookies-policy" element={<CookiesPolicyPage />} />
-              
-              {/* BIKES & VANS ROUTES DISABLED - Car-only deployment */}
-              
-              {/* Trade Dealer Routes */}
-              <Route path="/trade/login" element={<TradeLoginPage />} />
-              <Route path="/trade/register" element={<TradeRegisterPage />} />
-              <Route path="/trade/verify-email" element={<TradeVerifyEmailPage />} />
-              <Route 
-                path="/trade/dashboard" 
-                element={
-                  <ProtectedTradeRoute>
-                    <TradeDashboard />
-                  </ProtectedTradeRoute>
-                } 
-              />
-              <Route 
-                path="/trade/inventory" 
-                element={
-                  <ProtectedTradeRoute requireSubscription={true}>
-                    <TradeInventoryPage />
-                  </ProtectedTradeRoute>
-                } 
-              />
-              <Route 
-                path="/trade/analytics" 
-                element={
-                  <ProtectedTradeRoute requireSubscription={true}>
-                    <TradeAnalyticsPage />
-                  </ProtectedTradeRoute>
-                } 
-              />
-              <Route 
-                path="/trade/subscription" 
-                element={
-                  <ProtectedTradeRoute>
-                    <TradeSubscriptionPage />
-                  </ProtectedTradeRoute>
-                } 
-              />
-              <Route 
-                path="/trade/subscription/checkout/:planSlug" 
-                element={
-                  <ProtectedTradeRoute>
-                    <TradeSubscriptionCheckoutPage />
-                  </ProtectedTradeRoute>
-                } 
-              />
-              <Route 
-                path="/trade/subscription/success" 
-                element={
-                  <ProtectedTradeRoute>
-                    <TradeSubscriptionSuccessPage />
-                  </ProtectedTradeRoute>
-                }
-              />
-            </Routes>
-                  </main>
-                  <Footer />
-                </div>
-              } />
+              {/* Catch-all → coming soon */}
+              <Route path="*" element={<ComingSoonPage />} />
             </Routes>
           </TradeDealerProvider>
         </AuthProvider>

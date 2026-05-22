@@ -41,7 +41,7 @@ export default function ComingSoonPage() {
         playsInline
         poster="/images/brands/background1.jpeg"
       >
-        <source src="/videos/landingvideo.mp4" type="video/mp4" />
+        <source src="https://res.cloudinary.com/dexgkptpg/video/upload/v1779441928/carcatalog/landingvideo.mp4" type="video/mp4" />
       </video>
       <video
         className="cs-video cs-video-mobile"
@@ -51,7 +51,7 @@ export default function ComingSoonPage() {
         playsInline
         poster="/images/brands/backgroundmobile.png"
       >
-        <source src="/videos/reel.mp4" type="video/mp4" />
+        <source src="https://res.cloudinary.com/dexgkptpg/video/upload/v1779441950/carcatalog/reel.mp4" type="video/mp4" />
       </video>
 
       {/* Dark overlay */}
