@@ -12,17 +12,22 @@ import './CarAdvertEditPage.css';
 const CarAdvertEditPage = () => {
   const { advertId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { dealer, isAuthenticated: isTradeAuthenticated } = useTradeDealerContext();
   const isTradeDealer = isTradeAuthenticated && dealer;
   
-  // CRITICAL: Check authentication on mount
+  // CRITICAL: Check authentication on mount - but wait for auth to load first
   useEffect(() => {
+    // Don't redirect while auth is still loading
+    if (authLoading) {
+      return;
+    }
+    
     if (!user && !isTradeAuthenticated) {
       // Redirect to signin with return URL
       navigate(`/signin?redirect=/selling/advert/edit/${advertId}`);
     }
-  }, [user, isTradeAuthenticated, navigate, advertId]);
+  }, [user, isTradeAuthenticated, authLoading, navigate, advertId]);
   
   // Enhanced vehicle lookup hook
   const {
@@ -273,7 +278,7 @@ const CarAdvertEditPage = () => {
           };
           
           setVehicleData(enhancedVehicleData);
-          setCarStatus(vehicleData.advertStatus); // Store car status
+          setCarStatus(vehicleData.advertStatus || enhancedVehicleData.advertStatus); // Store car status
           setIsDealerCar(vehicleData.isDealerListing || false); // Store if it's a dealer car
           
           // CRITICAL: Authorization check - verify user owns this car (skip for admin)
@@ -1010,16 +1015,23 @@ const CarAdvertEditPage = () => {
     }
   };
   
-  // Handle vehicle details cancel
-  const handleVehicleDetailsCancel = () => {
+  // Handle vehicle details cancel - auto-saves changes
+  const handleVehicleDetailsCancel = async () => {
+    // Auto-save if make and model are valid
+    if (editableVehicleData.make?.trim() && editableVehicleData.model?.trim()) {
+      try {
+        const updateData = {
+          make: editableVehicleData.make.trim(),
+          model: editableVehicleData.model.trim(),
+          variant: editableVehicleData.variant ? editableVehicleData.variant.trim() : ''
+        };
+        await advertService.updateAdvert(advertId, {}, { ...vehicleData, ...updateData });
+        setVehicleData(prev => ({ ...prev, ...updateData }));
+      } catch (error) {
+        console.error('❌ Error auto-saving vehicle details:', error);
+      }
+    }
     setIsVehicleDetailsEditing(false);
-    // Reset editable data
-    const resetData = {
-      make: vehicleData.make || '',
-      model: vehicleData.model || '',
-      variant: vehicleData.variant || ''
-    };
-    setEditableVehicleData(resetData);
   };
   
   // Handle Overview section edit (model, variant, motDue, engineSize, doors, transmission, seats, fuelType, color)
@@ -1094,20 +1106,30 @@ const CarAdvertEditPage = () => {
     }
   };
   
-  // Handle Overview cancel
-  const handleOverviewCancel = () => {
+  // Handle Overview cancel - auto-saves changes
+  const handleOverviewCancel = async () => {
+    // Auto-save if model is valid
+    if (editableOverviewData.model?.trim()) {
+      try {
+        const updateData = {
+          model: editableOverviewData.model.trim(),
+          variant: editableOverviewData.variant ? editableOverviewData.variant.trim() : '',
+          motDue: editableOverviewData.motDue || null,
+          motExpiry: editableOverviewData.motDue || null,
+          engineSize: editableOverviewData.engineSize ? parseFloat(editableOverviewData.engineSize) : null,
+          doors: editableOverviewData.doors ? parseInt(editableOverviewData.doors) : null,
+          transmission: editableOverviewData.transmission || null,
+          seats: editableOverviewData.seats ? parseInt(editableOverviewData.seats) : null,
+          fuelType: editableOverviewData.fuelType || null,
+          color: editableOverviewData.color ? editableOverviewData.color.trim() : null
+        };
+        await advertService.updateAdvert(advertId, {}, { ...vehicleData, ...updateData });
+        setVehicleData(prev => ({ ...prev, ...updateData }));
+      } catch (error) {
+        console.error('❌ Error auto-saving overview:', error);
+      }
+    }
     setIsOverviewEditing(false);
-    setEditableOverviewData({
-      model: vehicleData.model || '',
-      variant: vehicleData.variant || '',
-      motDue: vehicleData.motDue || vehicleData.motExpiry || '',
-      engineSize: vehicleData.engineSize || '',
-      doors: vehicleData.doors || '',
-      transmission: vehicleData.transmission || '',
-      seats: vehicleData.seats || '',
-      fuelType: vehicleData.fuelType || '',
-      color: vehicleData.color || ''
-    });
   };
   
   // Handle feature toggle with debounced save
@@ -1490,6 +1512,31 @@ const CarAdvertEditPage = () => {
       </div>
 
       <div className="container">
+        {/* Save All Changes Button - Only show in edit mode (payment complete or dealer car) */}
+        {/* Hide for draft/pending_payment cars (new car being added) */}
+        {((carStatus === 'active' || isDealerCar || (user?.isAdmin || user?.role === 'admin')) && 
+          carStatus !== 'draft' && carStatus !== 'pending_payment') && (
+          <div className="sticky-save-bar">
+            <div className="sticky-save-container">
+              <div className="save-info">
+                <span className="save-icon">💾</span>
+                <span className="save-text">
+                  {advertData.photos.length === 0 || !advertData.description.trim()
+                    ? 'Add photos and description to save'
+                    : 'Click to save all your changes'}
+                </span>
+              </div>
+              <button
+                onClick={handleSave}
+                disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}
+                className="sticky-save-button"
+              >
+                {isSaving ? '⏳ Saving...' : '✓ Save All Changes'}
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="advert-content">
           {/* Photo Upload Section */}
           <section className="photo-section">
@@ -1683,39 +1730,21 @@ const CarAdvertEditPage = () => {
                     onClick={handleVehicleDetailsCancel}
                     style={{
                       padding: '10px 24px',
-                      marginRight: '12px',
                       borderRadius: '6px',
                       fontSize: '14px',
                       fontWeight: '500',
                       cursor: 'pointer',
                       border: 'none',
-                      backgroundColor: '#f0f0f0',
-                      color: '#333'
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={handleVehicleDetailsSave}
-                    style={{
-                      padding: '10px 24px',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      border: 'none',
-                      backgroundColor: '#f59e0b',
+                      backgroundColor: '#1a4ba0',
                       color: 'white'
                     }}
                   >
-                    Save Changes
+                    ✓ Done
                   </button>
                 </div>
               </div>
             )}
             
-            {carStatus !== 'active' && (
             <div className="price-section">
               <div className="price-display-wrapper">
                 {!isPriceEditing ? (
@@ -1767,9 +1796,17 @@ const CarAdvertEditPage = () => {
                         })()}
                       </span>
                     </div>
-                    <button type="button" onClick={handlePriceEdit} className="edit-price-button">
-                      Edit price
-                    </button>
+                    {/* Price edit only allowed for draft/pending cars, not active */}
+                    {(carStatus || vehicleData?.advertStatus) !== 'active' && (
+                      <button 
+                        type="button" 
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePriceEdit(); }} 
+                        className="edit-price-button"
+                        style={{ position: 'relative', zIndex: 20 }}
+                      >
+                        ✏️ Edit Price
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div className="price-edit">
@@ -1788,14 +1825,14 @@ const CarAdvertEditPage = () => {
                         onClick={handlePriceSave} 
                         className="save-price-button"
                       >
-                        Save
+                        ✓ Save Price
                       </button>
                       <button 
                         type="button"
                         onClick={handlePriceCancel} 
                         className="cancel-price-button"
                       >
-                        Cancel
+                        Discard
                       </button>
                     </div>
                   </div>
@@ -1827,13 +1864,13 @@ const CarAdvertEditPage = () => {
                 )}
               </p>
             </div>
-            )}
           </section>
 
           {/* Vehicle Specifications */}
           <section className="specifications-section">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ margin: 0 }}>Overview</h3>
+              {/* Edit Overview button - always show (price edit restricted for active cars) */}
               {!isOverviewEditing && (
                 <button 
                   type="button" 
@@ -1841,18 +1878,19 @@ const CarAdvertEditPage = () => {
                     e.preventDefault();
                     handleOverviewEdit();
                   }} 
-                  className="edit-link"
+                  className="edit-overview-button"
                   style={{
-                    background: 'none',
+                    background: '#1a4ba0',
                     border: 'none',
-                    color: '#007bff',
+                    color: 'white',
                     cursor: 'pointer',
                     fontSize: '14px',
-                    textDecoration: 'underline',
-                    padding: '4px 8px'
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    fontWeight: '500'
                   }}
                 >
-                  Edit
+                  ✏️ Edit Overview
                 </button>
               )}
             </div>
@@ -2128,40 +2166,25 @@ const CarAdvertEditPage = () => {
               )}
             </div>
             
-            {/* Save/Cancel buttons for Overview editing */}
+            {/* Done button for Overview editing - auto-saves on click */}
             {isOverviewEditing && (
-              <div style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
+              <div style={{ marginTop: '16px' }}>
                 <button
-                  key="overview-save"
-                  type="button"
-                  onClick={handleOverviewSave}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#f59e0b',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                  }}
-                >
-                  Save Changes
-                </button>
-                <button
-                  key="overview-cancel"
+                  key="overview-done"
                   type="button"
                   onClick={handleOverviewCancel}
                   style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#6c757d',
+                    padding: '8px 20px',
+                    backgroundColor: '#1a4ba0',
                     color: 'white',
                     border: 'none',
                     borderRadius: '4px',
                     cursor: 'pointer',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    fontWeight: '500'
                   }}
                 >
-                  Cancel
+                  ✓ Done
                 </button>
               </div>
             )}
@@ -2191,9 +2214,9 @@ const CarAdvertEditPage = () => {
             )}
           </section>
 
-          {/* Business Information Section - HIDE when Save Changes mode (active car) */}
-          {!isOverviewEditing && !isVehicleDetailsEditing && carStatus !== 'active' && (
-            <section className="business-info-section">
+          {/* Business Information Section - Only show for draft/pending cars */}
+          {(carStatus || vehicleData?.advertStatus) !== 'active' && (
+          <section className="business-info-section">
               <h3>Business Information (Optional)</h3>
               
               {/* Red Alert for Trade Users */}
@@ -2301,8 +2324,8 @@ const CarAdvertEditPage = () => {
             </section>
           )}
 
-          {/* Additional Sections - Show but hide Video and Features when editing */}
-          {!isOverviewEditing && !isVehicleDetailsEditing && (
+          {/* Additional Sections - Only show for draft/pending cars */}
+          {(carStatus || vehicleData?.advertStatus) !== 'active' && (
           <section className="additional-sections">
             {/* Vehicle Features Section */}
             <div className="section-item expandable">
@@ -2499,31 +2522,14 @@ const CarAdvertEditPage = () => {
               </p>
             )}
             
-            {/* Show different button based on payment completion or dealer listing */}
-            {/* 
-              Show "Save Changes" if:
-              1. Car is a dealer listing (isDealerCar = true), OR
-              2. Car has completed payment (has advertisingPackage with packageId)
-              
-              Show "I'm happy with my ad" if:
-              1. New user car without payment completed
-            */}
-            {(isDealerCar || vehicleData?.advertisingPackage?.packageId || (carStatus === 'active' && vehicleData?.advertisingPackage?.packageId) || (user?.isAdmin || user?.role === 'admin')) ? (
-              <button
-                onClick={handleSave}
-                disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}
-                className="publish-button"
-                style={{ backgroundColor: '#f59e0b' }}
-              >
-                {isSaving ? 'Saving...' : '✓ Save Changes'}
-              </button>
-            ) : (
+            {/* Show "I'm happy with my ad" button for draft/pending_payment cars */}
+            {(carStatus === 'draft' || carStatus === 'pending_payment') && (
               <button
                 onClick={handlePublish}
-                disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}
+                disabled={advertData.photos.length === 0 || !advertData.description.trim()}
                 className="publish-button"
               >
-                {isSaving ? 'Publishing...' : "I'm happy with my ad"}
+                I'm happy with my ad - Continue
               </button>
             )}
           </section>

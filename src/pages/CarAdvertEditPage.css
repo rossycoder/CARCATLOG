@@ -1035,9 +1035,10 @@
 .price-display {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .price-value {
@@ -1056,19 +1057,19 @@
 }
 
 .edit-price-button {
-  background: none;
+  background: #1a4ba0;
   border: none;
-  color: #1a4ba0;
+  color: white;
   font-size: 14px;
   cursor: pointer;
-  text-decoration: underline;
-  padding: 8px 12px;
-  position: relative;
-  z-index: 1;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .edit-price-button:hover {
-  color: #153d85;
+  background: #153d85;
 }
 
 .price-edit {
@@ -1859,4 +1860,144 @@ select.edit-input {
     padding: 14px 20px;
     font-size: 15px;
   }
+}
+
+/* Sticky Save Bar - Make it non-sticky, move to top */
+.sticky-save-bar {
+  position: relative; /* Changed from fixed to relative */
+  bottom: auto;
+  left: auto;
+  right: auto;
+  background: white;
+  border: 2px solid #1a4ba0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  padding: 16px 20px;
+  margin-bottom: 20px; /* Add spacing below */
+}
+
+.sticky-save-container {
+  max-width: 100%;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.save-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.save-icon {
+  font-size: 1.5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.save-text {
+  font-size: 0.95rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.sticky-save-button {
+  background: linear-gradient(135deg, #1a4ba0 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(26, 75, 160, 0.3);
+  white-space: nowrap;
+}
+
+.sticky-save-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #153a7a 0%, #1d4ed8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(26, 75, 160, 0.4);
+}
+
+.sticky-save-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .sticky-save-bar {
+    padding: 12px 16px;
+  }
+
+  .sticky-save-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .save-info {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .save-icon {
+    font-size: 1.2rem;
+  }
+
+  .save-text {
+    font-size: 0.85rem;
+  }
+
+  .sticky-save-button {
+    width: 100%;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Remove extra padding since button is not sticky anymore */
+.car-advert-edit-page {
+  padding-bottom: 20px; /* Reduced from 100px */
+}
+
+@media (max-width: 768px) {
+  .car-advert-edit-page {
+    padding-bottom: 20px; /* Reduced from 140px */
+  }
+}
+
+/* Hide individual Save Changes buttons in sections - use sticky button instead */
+.save-price-button {
+  display: none !important;
+}
+
+/* Hide yellow/orange Save Changes buttons in edit sections only */
+section button[style*="background"][style*="f59e0b"]:not(.sticky-save-button):not(.publish-button) {
+  display: none !important;
+}
+
+/* Keep sticky save button visible */
+.sticky-save-button {
+  display: inline-block !important;
+}
+
+/* Keep edit buttons visible */
+.edit-price-button,
+.edit-overview-button {
+  display: inline-block !important;
 }

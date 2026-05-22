@@ -9,8 +9,8 @@ const SellerContactDetailsPage = () => {
   const { advertId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
-  const { dealer, subscription, isAuthenticated, loading } = useTradeDealerContext();
+  const { user, loading: authLoading } = useAuth();
+  const { dealer, subscription, isAuthenticated, loading: dealerLoading } = useTradeDealerContext();
 
   // Check if user is a trade dealer (subscription not required for publishing)
   const isTradeDealer = isAuthenticated && dealer;
@@ -410,12 +410,12 @@ const SellerContactDetailsPage = () => {
           <button
             className={`submit-button ${isTradeDealer ? 'publish-button' : ''}`}
             onClick={isTradeDealer ? handleTradePublish : handleSubmit}
-            disabled={isSubmitting || loading || Object.values(errors).filter(Boolean).length > 0}
+            disabled={isSubmitting || Object.values(errors).filter(Boolean).length > 0}
           >
-            {loading || isSubmitting ? (
+            {isSubmitting ? (
               <span className="button-content">
                 <span className="loading-spinner"></span>
-                <span>{loading ? 'Loading...' : 'Processing...'}</span>
+                <span>Processing...</span>
               </span>
             ) : (
               isTradeDealer ? 'Publish Vehicle' : 'Continue to package selection'

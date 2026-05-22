@@ -478,13 +478,17 @@
 
 .spec-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   padding: 16px;
   background: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
   min-height: 80px;
+  min-width: 0;
+  overflow: hidden;
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
 }
 
 .spec-icon {
@@ -509,6 +513,9 @@
   flex-direction: column;
   gap: 4px;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  writing-mode: horizontal-tb;
 }
 
 .spec-label {
@@ -516,6 +523,9 @@
   color: #6c757d;
   font-weight: 500;
   line-height: 1.2;
+  white-space: normal;
+  word-wrap: break-word;
+  writing-mode: horizontal-tb;
 }
 
 .spec-value {
@@ -525,6 +535,7 @@
   line-height: 1.2;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .view-all-specs {
