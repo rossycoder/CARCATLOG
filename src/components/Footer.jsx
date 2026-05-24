@@ -1,19 +1,27 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaFacebookF, FaYoutube, FaInstagram, FaTiktok } from 'react-icons/fa';
 import './Footer.css';
 
 const Footer = () => {
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <footer className="footer">
+    <>
+      <footer className="footer">
       <div className="container">
-        <button onClick={scrollToTop} className="back-to-top-link">
-          Back to top
-        </button>
-
         <div className="footer-content">
           {/* Column 1 - Logo & Navigation Links */}
           <div className="footer-column footer-column-1">
@@ -93,6 +101,16 @@ const Footer = () => {
         </div>
       </div>
     </footer>
+
+      {/* Floating Back to Top Button */}
+      {showScrollTop && (
+        <button className="floating-back-to-top" onClick={scrollToTop} aria-label="Back to top">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="18 15 12 9 6 15" />
+          </svg>
+        </button>
+      )}
+    </>
   );
 };
 

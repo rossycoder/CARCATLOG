@@ -46,7 +46,7 @@ const formatVehicleDetailsFromBasic = (basicData, registration, mileage) => {
     model: getModelDisplay() ? String(getModelDisplay()) : null,
     variant: isValidValue(basicData.variant) ? String(basicData.variant) : null,
     year: isValidValue(basicData.year) ? Number(basicData.year) : null,
-    color: isValidValue(basicData.color) ? String(basicData.color) : null,
+    color: isValidValue(basicData.color) ? String(basicData.color) : (isValidValue(basicData.colour) ? String(basicData.colour) : null),
     fuelType: isValidValue(basicData.fuelType) ? String(basicData.fuelType) : null,
     transmission: isValidValue(basicData.transmission) ? String(basicData.transmission) : 'Manual',
     engineSize: isValidValue(basicData.engineSize) ? String(basicData.engineSize) : null,
@@ -174,7 +174,7 @@ const formatVehicleDetails = (enhancedData, registration, mileage) => {
   const model = getModelDisplay();
   const variant = enhancedData.variant || enhancedData.modelVariant;
   const year = enhancedData.year;
-  const color = enhancedData.color;
+  const color = enhancedData.color || enhancedData.colour;
   const fuelType = enhancedData.fuelType;
   const transmission = enhancedData.transmission;
   const engineSize = getEngineSize();

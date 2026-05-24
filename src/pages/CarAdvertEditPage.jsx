@@ -102,7 +102,8 @@ const CarAdvertEditPage = () => {
     doors: '',
     transmission: '',
     seats: '',
-    fuelType: ''
+    fuelType: '',
+    color: ''
   });
   
   // Enhanced data processing state
@@ -1796,8 +1797,8 @@ const CarAdvertEditPage = () => {
                         })()}
                       </span>
                     </div>
-                    {/* Price edit only allowed for draft/pending cars, not active */}
-                    {(carStatus || vehicleData?.advertStatus) !== 'active' && (
+                    {/* Price edit allowed for all cars including active */}
+                    {true && (
                       <button 
                         type="button" 
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); handlePriceEdit(); }} 

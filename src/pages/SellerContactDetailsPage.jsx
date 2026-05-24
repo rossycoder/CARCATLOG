@@ -98,7 +98,7 @@ const SellerContactDetailsPage = () => {
     }
 
     // Wait for dealer context to load
-    if (loading) {
+    if (dealerLoading) {
       alert('Loading dealer information. Please wait a moment and try again.');
       return;
     }

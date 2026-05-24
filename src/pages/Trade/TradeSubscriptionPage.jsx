@@ -49,11 +49,12 @@ const TradeSubscriptionPage = () => {
       const response = await tradeSubscriptionService.createCheckoutSession(planSlug);
       if (response.success) {
         if (response.url) {
+          // Stripe checkout redirect
           window.location.href = response.url;
         } else if (response.subscription) {
-          alert(`${response.message}\n\nYou can now access your dashboard and start listing vehicles!`);
+          // Direct activation (dev mode) - redirect to dashboard
           await fetchPlansAndSubscription();
-          navigate('/trade/dashboard');
+          navigate('/trade/dashboard', { state: { message: response.message || 'Subscription activated! You can now start listing vehicles.' } });
         } else {
           setError('Unexpected response from server. Please try again.');
           setLoading(false);
@@ -227,7 +228,7 @@ const TradeSubscriptionPage = () => {
 
                     {!currentSubscription?.hasUsedTrial && (
                       <div className="trial-pricing">
-                        {getTrialLabel(plan)}
+                        {getTrialLabel(plan)} (one-off fee, paid today)
                       </div>
                     )}
                   </div>

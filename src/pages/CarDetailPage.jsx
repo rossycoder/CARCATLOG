@@ -368,6 +368,60 @@ const CarDetailPage = () => {
             ← Back to results
           </button>
 
+        {/* Sticky Navigation Tabs */}
+        <div className="sticky-nav-tabs">
+          <div className="sticky-nav-container">
+            <button 
+              className={`nav-tab ${activeTab === 'contact' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-contact')}
+            >
+              Contact Seller
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'overview' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-overview')}
+            >
+              Overview
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'description' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-description')}
+            >
+              Description
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'running-costs' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-running-costs')}
+            >
+              Running Costs
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'vehicle-history' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-vehicle-history')}
+            >
+              Vehicle History
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'mot-history' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-mot-history')}
+            >
+              MOT History
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'finance' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-finance')}
+            >
+              Finance Calculator
+            </button>
+            <button 
+              className={`nav-tab ${activeTab === 'meet-seller' ? 'active' : ''}`}
+              onClick={() => scrollToSection('cd-meet-seller')}
+            >
+              Meet Seller
+            </button>
+          </div>
+        </div>
+
         {/* Image Gallery */}
         <div id="cd-gallery" className="image-gallery">
           <div className="main-image">
@@ -423,60 +477,6 @@ const CarDetailPage = () => {
               )}
             </div>
           )}
-        </div>
-
-        {/* Sticky Navigation Tabs */}
-        <div className="sticky-nav-tabs">
-          <div className="sticky-nav-container">
-            <button 
-              className={`nav-tab ${activeTab === 'contact' ? 'active' : ''}`}
-              onClick={() => scrollToSection('cd-contact')}
-            >
-              Contact Seller
-            </button>
-            <button 
-              className={`nav-tab ${activeTab === 'overview' ? 'active' : ''}`}
-              onClick={() => scrollToSection('cd-overview')}
-            >
-              Overview
-            </button>
-            <button 
-              className={`nav-tab ${activeTab === 'description' ? 'active' : ''}`}
-              onClick={() => scrollToSection('cd-description')}
-            >
-              Description
-            </button>
-            <button 
-              className={`nav-tab ${activeTab === 'running-costs' ? 'active' : ''}`}
-              onClick={() => scrollToSection('cd-running-costs')}
-            >
-              Running Costs
-            </button>
-            <button 
-              className={`nav-tab ${activeTab === 'vehicle-history' ? 'active' : ''}`}
-              onClick={() => scrollToSection('cd-vehicle-history')}
-            >
-              Vehicle History
-            </button>
-            <button 
-              className={`nav-tab ${activeTab === 'mot-history' ? 'active' : ''}`}
-              onClick={() => scrollToSection('cd-mot-history')}
-            >
-              MOT History
-            </button>
-            <button 
-              className={`nav-tab ${activeTab === 'finance' ? 'active' : ''}`}
-              onClick={() => scrollToSection('cd-finance')}
-            >
-              Finance Calculator
-            </button>
-            <button 
-              className={`nav-tab ${activeTab === 'meet-seller' ? 'active' : ''}`}
-              onClick={() => scrollToSection('cd-meet-seller')}
-            >
-              Meet Seller
-            </button>
-          </div>
         </div>
 
         {/* Main Content */}
