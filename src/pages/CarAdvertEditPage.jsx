@@ -80,6 +80,8 @@ const CarAdvertEditPage = () => {
   
   // Price editing state
   const [isPriceEditing, setIsPriceEditing] = useState(false);
+  const [priceBeforeEdit, setPriceBeforeEdit] = useState(null);
+  const [rawPriceInput, setRawPriceInput] = useState('');
   const [videoUrlTimeout, setVideoUrlTimeout] = useState(null);
   const [runningCostsTimeout, setRunningCostsTimeout] = useState(null);
   const [featureSaveTimeout, setFeatureSaveTimeout] = useState(null);
@@ -188,6 +190,8 @@ const CarAdvertEditPage = () => {
       setShowPopup(true);
     }
   }, [vehicleData, isLoading]);
+
+  
 
   // Auto-fill data when enhanced data is received from API
   useEffect(() => {
@@ -316,10 +320,10 @@ const CarAdvertEditPage = () => {
           
           
           // Populate form fields with existing data
-          // Prefer private sale price if available
-          const preferredPrice = enhancedVehicleData.valuation?.privatePrice || 
-                                enhancedVehicleData.allValuations?.private || 
-                                enhancedVehicleData.price || 0;
+          // Use actual saved price first, fall back to valuation only if no price set
+          const preferredPrice = enhancedVehicleData.price || 
+                                enhancedVehicleData.valuation?.privatePrice || 
+                                enhancedVehicleData.allValuations?.private || 0;
           
           
           // Ensure price is a valid number
@@ -818,29 +822,25 @@ const CarAdvertEditPage = () => {
   };
 
   // Auto-fix price if it's not set but we have valuation data
-  useEffect(() => {
-    if (vehicleData && (!advertData.price || advertData.price <= 0 || typeof advertData.price !== 'number')) {
-      // Try multiple sources for price in order of preference
-      const availablePrice = vehicleData.valuation?.estimatedValue?.private || 
-                           vehicleData.valuation?.estimatedValue?.retail ||
-                           vehicleData.valuation?.privatePrice || 
-                           vehicleData.allValuations?.private || 
-                           vehicleData.estimatedValue || 
-                           vehicleData.price;
-      
-      if (availablePrice && availablePrice > 0) {
-        const numericPrice = parseFloat(availablePrice);
-        if (!isNaN(numericPrice) && numericPrice > 0) {
-          setAdvertData(prev => ({
-            ...prev,
-            price: numericPrice
-          }));
-        }
-      } else {
+useEffect(() => {
+  // ✅ YEH LINE ADD KARO — editing ke waqt price mat badlo
+  if (isPriceEditing) return;
+  
+  if (vehicleData && (!advertData.price || advertData.price <= 0 || typeof advertData.price !== 'number')) {
+    const availablePrice = vehicleData.valuation?.estimatedValue?.private || 
+                         vehicleData.valuation?.estimatedValue?.retail ||
+                         vehicleData.valuation?.privatePrice || 
+                         vehicleData.allValuations?.private || 
+                         vehicleData.estimatedValue || 
+                         vehicleData.price;
+    if (availablePrice && availablePrice > 0) {
+      const numericPrice = parseFloat(availablePrice);
+      if (!isNaN(numericPrice) && numericPrice > 0) {
+        setAdvertData(prev => ({ ...prev, price: numericPrice }));
       }
     }
-  }, [vehicleData, advertData.price]);
-
+  }
+}, [vehicleData, advertData.price, isPriceEditing]); // ✅ isPriceEditing add karo dependency mein
   // Load advert data on mount - only once
   useEffect(() => {
     loadAdvertData();
@@ -858,20 +858,18 @@ const CarAdvertEditPage = () => {
   const handleInputChange = (field, value) => {
     // Special handling for price field to ensure it's always a valid number
     if (field === 'price') {
-      const numericValue = parseFloat(value);
-      if (!isNaN(numericValue) && numericValue >= 0) {
-        setAdvertData(prev => ({
-          ...prev,
-          [field]: numericValue
-        }));
-      } else if (value === '' || value === null || value === undefined) {
-        // Allow empty values for editing
-        setAdvertData(prev => ({
-          ...prev,
-          [field]: ''
-        }));
+      // Allow typing freely - only validate on save
+      if (value === '' || value === null || value === undefined) {
+        setAdvertData(prev => ({ ...prev, [field]: '' }));
+      } else {
+        const numericValue = parseFloat(value);
+        if (!isNaN(numericValue) && numericValue >= 0) {
+          setAdvertData(prev => ({ ...prev, [field]: numericValue }));
+        } else if (/^\d*$/.test(value)) {
+          // Allow partial numeric input while typing
+          setAdvertData(prev => ({ ...prev, [field]: value }));
+        }
       }
-      // Ignore invalid values (don't update state)
     } else {
       setAdvertData(prev => ({
         ...prev,
@@ -897,53 +895,60 @@ const CarAdvertEditPage = () => {
   };
   
   // Handle price editing
-  const handlePriceEdit = () => {
-    setIsPriceEditing(true);
-  };
-  
+ const handlePriceEdit = () => {
+  // Save current price for Discard
+  setPriceBeforeEdit(advertData.price);
+  // Raw input string mein convert karo — yahi input field dikhayega
+  setRawPriceInput(
+    advertData.price !== '' && advertData.price !== null && advertData.price !== undefined
+      ? String(Math.round(Number(advertData.price)))
+      : ''
+  );
+  setIsPriceEditing(true);
+};
+ 
   // Handle price save
-  const handlePriceSave = async () => {
-    const priceValue = parseFloat(advertData.price);
-    
-    if (!advertData.price || isNaN(priceValue) || priceValue <= 0) {
-      setErrors(prev => ({ ...prev, price: 'Please enter a valid price' }));
-      return;
-    }
-    
-    // Clear any price errors
-    setErrors(prev => ({ ...prev, price: null }));
-    
-    // Auto-save price to database
-    try {
-      const updatedAdvertData = {
-        ...advertData,
-        price: priceValue // Ensure price is a number
-      };
-      
-      const response = await advertService.updateAdvert(advertId, updatedAdvertData, vehicleData);
-      
-      // Update local state with the saved price
-      setAdvertData(prev => ({
-        ...prev,
-        price: priceValue
-      }));
-      
-      // Exit editing mode after successful save
-      setIsPriceEditing(false);
-    } catch (error) {
-      console.error('❌ Error saving price:', error);
-      setErrors(prev => ({ ...prev, price: 'Failed to save price. Please try again.' }));
-      // Don't exit editing mode if save failed
-    }
-  };
-  
-  // Handle price cancel
-  const handlePriceCancel = () => {
+ const handlePriceSave = async () => {
+  const trimmed = rawPriceInput.trim();
+  const priceValue = parseFloat(trimmed);
+ 
+  if (!trimmed || isNaN(priceValue) || priceValue <= 0) {
+    setErrors(prev => ({ ...prev, price: 'Please enter a valid price' }));
+    return;
+  }
+ 
+  setErrors(prev => ({ ...prev, price: null }));
+ 
+  try {
+    const updatedAdvertData = {
+      ...advertData,
+      price: priceValue,
+    };
+ 
+    await advertService.updateAdvert(advertId, updatedAdvertData, vehicleData);
+ 
+    // State update: ab advertData.price ek clean number hai
+    setAdvertData(prev => ({ ...prev, price: priceValue }));
     setIsPriceEditing(false);
-    // Revert to original price
-    handleInputChange('price', vehicleData.estimatedValue || '');
-  };
+    setRawPriceInput('');
+    setPriceBeforeEdit(null);
+  } catch (error) {
+    console.error('Error saving price:', error);
+    setErrors(prev => ({ ...prev, price: 'Failed to save price. Please try again.' }));
+  }
+};
   
+  // Handle price cancel - restore price before edit
+ const handlePriceCancel = () => {
+  // Restore exactly what was there before editing
+  if (priceBeforeEdit !== null && priceBeforeEdit !== undefined) {
+    setAdvertData(prev => ({ ...prev, price: priceBeforeEdit }));
+  }
+  setRawPriceInput('');
+  setPriceBeforeEdit(null);
+  setErrors(prev => ({ ...prev, price: null }));
+  setIsPriceEditing(false);
+};
   // Handle vehicle details edit (make, model, variant only)
   const handleVehicleDetailsEdit = () => {
     
@@ -1813,7 +1818,8 @@ const CarAdvertEditPage = () => {
                   <div className="price-edit">
                     <span className="currency">£</span>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       value={advertData.price}
                       onChange={(e) => handleInputChange('price', e.target.value)}
                       placeholder="Enter price"
