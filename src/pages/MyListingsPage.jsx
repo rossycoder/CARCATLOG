@@ -656,9 +656,14 @@ function MyListingsPage() {
                       </td>
                     </tr>
                   ) : (
-                    paginatedUsers.map((user) => (
-                      <tr key={user._id}>
-                        <td className="account-name">{user.name || 'Unknown'}</td>
+                    paginatedUsers.map((user) => {
+                      const isExpiredDealer = user.type === 'trade' && user.subscription?.status === 'expired';
+                      return (
+                      <tr key={user._id} style={isExpiredDealer ? { background: '#fff5f5', borderLeft: '3px solid #ef4444' } : {}}>
+                        <td className="account-name">
+                          {user.name || 'Unknown'}
+                          {isExpiredDealer && <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', background: '#ef4444', color: 'white', padding: '0.15rem 0.4rem', borderRadius: '3px', fontWeight: 700 }}>EXPIRED</span>}
+                        </td>
                         <td className="email">{user.email || 'N/A'}</td>
                         <td className="phone">{user.phone || 'N/A'}</td>
                         <td className="vehicle-count">
@@ -675,11 +680,17 @@ function MyListingsPage() {
                                 <span className={`status-dot ${user.subscription.status}`}></span>
                                 {user.subscription.status}
                               </div>
+                              {user.subscription.currentPeriodEnd && (
+                                <div className="sub-expiry" style={isExpiredDealer ? { color: '#ef4444', fontWeight: 600 } : {}}>
+                                  {isExpiredDealer ? '⚠️ Expired: ' : 'Renews: '}
+                                  {new Date(user.subscription.currentPeriodEnd).toLocaleDateString()}
+                                </div>
+                              )}
                             </div>
-                          ) : user.type === 'private' ? (
-                            <span style={{color: '#999', fontSize: '0.875rem'}}>PAYG</span>
+                          ) : user.type === 'trade' ? (
+                            <span style={{color: '#ef4444', fontSize: '0.875rem', fontWeight: 600}}>⚠️ No subscription</span>
                           ) : (
-                            <span style={{color: '#999', fontSize: '0.875rem'}}>No subscription</span>
+                            <span style={{color: '#999', fontSize: '0.875rem'}}>PAYG</span>
                           )}
                         </td>
                         <td className="actions">
@@ -708,7 +719,8 @@ function MyListingsPage() {
                           </button>
                         </td>
                       </tr>
-                    ))
+                      );
+                    })
                   )}
                 </tbody>
               </table>
