@@ -29,14 +29,24 @@ const TradeSubscriptionPage = () => {
   const fetchPlansAndSubscription = async () => {
     try {
       setLoading(true);
-      const [plansData, subscriptionData] = await Promise.all([
+      // Fetch plans and subscription independently so a failed subscription
+      // fetch doesn't block the plans from rendering
+      const [plansResult, subscriptionResult] = await Promise.allSettled([
         tradeSubscriptionService.getPlans(),
         tradeSubscriptionService.getCurrentSubscription()
       ]);
-      setPlans(plansData);
-      setCurrentSubscription(subscriptionData);
-    } catch (err) {
-      setError('Failed to load subscription information');
+
+      if (plansResult.status === 'fulfilled') {
+        setPlans(plansResult.value || []);
+      } else {
+        console.error('Failed to load plans:', plansResult.reason);
+        setError('Failed to load subscription plans');
+      }
+
+      if (subscriptionResult.status === 'fulfilled') {
+        setCurrentSubscription(subscriptionResult.value);
+      }
+      // subscription fetch failing is non-fatal — just means no active sub
     } finally {
       setLoading(false);
     }

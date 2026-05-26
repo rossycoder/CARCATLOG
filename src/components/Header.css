@@ -640,13 +640,44 @@ body {
     max-width: 100%;
     padding: 10px 16px;
     display: grid;
-    grid-template-columns: 60px 1fr 120px;
+    grid-template-columns: 90px 1fr 120px;
     align-items: center;
     gap: 12px;
   }
 
   .menu-btn {
-    padding: 8px;
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .sell-icon-btn {
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: #333;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .sell-icon-btn:hover {
+    color: #0066cc;
+    background: #f5f5f5;
+  }
+
+  .sell-icon-btn .icon-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: inherit;
   }
 
   .logo {
@@ -730,7 +761,7 @@ body {
     padding: 10px 12px;
     gap: 8px;
     display: grid;
-    grid-template-columns: 50px 1fr 100px;
+    grid-template-columns: 90px 1fr 100px;
     align-items: center;
     position: relative;
   }
@@ -745,7 +776,38 @@ body {
   }
 
   .menu-btn {
-    padding: 8px;
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .sell-icon-btn {
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: #333;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .sell-icon-btn:hover {
+    color: #0066cc;
+    background: #f5f5f5;
+  }
+
+  .sell-icon-btn .icon-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: inherit;
   }
 
   .logo {
@@ -943,4 +1005,89 @@ body {
 .mobile-menu-user-email {
   font-size: 0.8rem;
   color: #666;
+}
+
+/* Sell icon button in mobile header */
+@media (max-width: 980px) {
+  .menu-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .menu-btn .icon-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .sell-icon-btn {
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: #333;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .sell-icon-btn:hover {
+    color: #0066cc;
+    background: #f5f5f5;
+  }
+
+  .sell-icon-btn .icon-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: inherit;
+  }
+}
+
+/* Fix: Menu + Sell side by side in mobile header */
+@media (max-width: 980px) {
+  .header-left {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 2px !important;
+  }
+
+  .menu-btn,
+  .sell-icon-btn {
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 4px 6px !important;
+    min-width: 40px;
+  }
+
+  .menu-btn .icon-label,
+  .sell-icon-btn .icon-label {
+    display: block !important;
+    font-size: 0.65rem !important;
+    font-weight: 500;
+    color: #333;
+    margin-top: 1px;
+  }
+}
+
+/* Sell label - only show on mobile, not affected by global icon-label */
+.sell-label {
+  display: none;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #333;
+  margin-top: 1px;
+}
+
+@media (max-width: 980px) {
+  .sell-label {
+    display: block;
+  }
 }

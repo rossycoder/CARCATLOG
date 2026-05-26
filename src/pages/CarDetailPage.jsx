@@ -25,6 +25,42 @@ const CarDetailPage = () => {
   const [isMobile, setIsMobile] = useState(false); // Start with false, will be set in useEffect
   const [activeTab, setActiveTab] = useState('contact');
 
+  // Call masking state
+  const [callSession, setCallSession] = useState(null); // { proxyNumber, expiresIn }
+  const [callLoading, setCallLoading] = useState(false);
+
+  const handleMaskedCall = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please sign in to use the masked call feature.');
+      return;
+    }
+    setCallLoading(true);
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const res = await fetch(`${API_BASE_URL}/calls/create-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ listingId: id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCallSession(data);
+        trackInquiry('phone');
+        // On mobile, immediately open the dialler
+        if (/Mobi|Android/i.test(navigator.userAgent)) {
+          window.location.href = `tel:${data.proxyNumber}`;
+        }
+      } else {
+        alert(data.message || 'Could not get a proxy number. Please try again.');
+      }
+    } catch {
+      alert('Error connecting. Please try again.');
+    } finally {
+      setCallLoading(false);
+    }
+  };
+
   // Helper function to check if vehicle is electric or plug-in hybrid (has charging capability)
   const isElectricOrPluginHybrid = (fuelType) => {
     if (!fuelType) return false;
@@ -663,14 +699,22 @@ const CarDetailPage = () => {
               </div>
 
               {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
-                <a 
-                  href={`tel:${car.sellerContact?.phoneNumber || car.phoneNumber}`}
-                  className="phone-btn"
-                  onClick={() => trackInquiry('phone')}
-                  style={{ textDecoration: 'none', display: 'block' }}
-                >
-                  📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
-                </a>
+                <>
+                  {callSession ? (
+                    <a href={`tel:${callSession.proxyNumber}`} className="phone-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
+                      📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>(expires in {Math.floor(callSession.expiresIn / 60)}m)</span>
+                    </a>
+                  ) : (
+                    <button
+                      className="phone-btn"
+                      onClick={handleMaskedCall}
+                      disabled={callLoading}
+                      style={{ width: '100%', cursor: 'pointer', border: 'none' }}
+                    >
+                      {callLoading ? '⏳ Connecting...' : '📞 Call Seller'}
+                    </button>
+                  )}
+                </>
               )}
               {car.sellerContact?.allowEmailContact && car.sellerContact?.email && (
                 <a 
@@ -1137,14 +1181,22 @@ const CarDetailPage = () => {
                 {/* Contact Buttons */}
                 <div className="seller-contact-buttons">
                   {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
-                    <a 
-                      href={`tel:${car.sellerContact?.phoneNumber || car.phoneNumber}`}
-                      className="call-seller-btn"
-                      onClick={() => trackInquiry('phone')}
-                      style={{ textDecoration: 'none', display: 'block' }}
-                    >
-                      📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
-                    </a>
+                    <>
+                      {callSession ? (
+                        <a href={`tel:${callSession.proxyNumber}`} className="call-seller-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
+                          📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>(expires in {Math.floor(callSession.expiresIn / 60)}m)</span>
+                        </a>
+                      ) : (
+                        <button
+                          className="call-seller-btn"
+                          onClick={handleMaskedCall}
+                          disabled={callLoading}
+                          style={{ width: '100%', cursor: 'pointer', border: 'none' }}
+                        >
+                          {callLoading ? '⏳ Connecting...' : '📞 Call Seller'}
+                        </button>
+                      )}
+                    </>
                   )}
                   {car.sellerContact?.allowEmailContact && car.sellerContact?.email && (
                     <a 
@@ -1182,14 +1234,22 @@ const CarDetailPage = () => {
               </div>
 
               {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
-                <a 
-                  href={`tel:${car.sellerContact?.phoneNumber || car.phoneNumber}`}
-                  className="phone-btn"
-                  onClick={() => trackInquiry('phone')}
-                  style={{ textDecoration: 'none', display: 'block' }}
-                >
-                  📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
-                </a>
+                <>
+                  {callSession ? (
+                    <a href={`tel:${callSession.proxyNumber}`} className="phone-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
+                      📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>(expires in {Math.floor(callSession.expiresIn / 60)}m)</span>
+                    </a>
+                  ) : (
+                    <button
+                      className="phone-btn"
+                      onClick={handleMaskedCall}
+                      disabled={callLoading}
+                      style={{ width: '100%', cursor: 'pointer', border: 'none' }}
+                    >
+                      {callLoading ? '⏳ Connecting...' : '📞 Call Seller'}
+                    </button>
+                  )}
+                </>
               )}
               {car.sellerContact?.allowEmailContact && car.sellerContact?.email && (
                 <a 
