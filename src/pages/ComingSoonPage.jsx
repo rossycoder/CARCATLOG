@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import './ComingSoonPage.css';
 
-// Launch date — Tuesday 26 May 2026 at 1:00 PM
-const LAUNCH_DATE = new Date('2026-05-26T13:00:00');
+// Launch date — Friday 29 May 2026 at 1:00 PM (extended by 3 days)
+const LAUNCH_DATE = new Date('2026-05-29T13:00:00');
 
 function getTimeLeft() {
   const diff = LAUNCH_DATE - new Date();
@@ -17,40 +17,11 @@ function getTimeLeft() {
 
 export default function ComingSoonPage() {
   const [timeLeft, setTimeLeft] = useState(getTimeLeft());
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     const timer = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!email) return;
-    setLoading(true);
-    setError('');
-    try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const res = await fetch(`${API_BASE_URL}/notify/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setSubmitted(true);
-      } else {
-        setError(data.message || 'Something went wrong. Please try again.');
-      }
-    } catch {
-      setError('Could not connect. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="cs-page">
@@ -102,27 +73,6 @@ export default function ComingSoonPage() {
             </div>
           ))}
         </div>
-
-        {/* Email signup */}
-        {submitted ? (
-          <p className="cs-thanks">Thanks! We'll notify you when we launch. 🎉</p>
-        ) : (
-          <form className="cs-form" onSubmit={handleSubmit}>
-            <input
-              type="email"
-              className="cs-input"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={loading}
-            />
-            <button type="submit" className="cs-btn" disabled={loading}>
-              {loading ? '...' : 'Notify me'}
-            </button>
-            {error && <p style={{ color: '#ff6b6b', fontSize: '0.85rem', marginTop: '8px', textAlign: 'center' }}>{error}</p>}
-          </form>
-        )}
 
         {/* Instagram */}
         <a
