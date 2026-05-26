@@ -59,6 +59,11 @@ const ProtectedTradeRoute = ({ children, requireSubscription = false }) => {
     return <Navigate to="/trade/subscription" replace state={{ message: 'Please subscribe to access this feature' }} />;
   }
 
+  // Dashboard also requires subscription — redirect if no active subscription
+  if (location.pathname === '/trade/dashboard' && !isLoadingSubscription && !subscription) {
+    return <Navigate to="/trade/subscription" replace state={{ message: 'Please choose a subscription plan to access your dashboard' }} />;
+  }
+
   // If dealer has subscription but tries to access subscription selection page, redirect to dashboard
   if (subscription && location.pathname === '/trade/subscription') {
     return <Navigate to="/trade/dashboard" replace />;
