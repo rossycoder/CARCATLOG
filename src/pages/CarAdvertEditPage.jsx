@@ -2221,8 +2221,8 @@ useEffect(() => {
             )}
           </section>
 
-          {/* Business Information Section - Only show for draft/pending cars */}
-          {(carStatus || vehicleData?.advertStatus) !== 'active' && (
+          {/* Business Information Section - Only show for non-trade dealers on draft/pending cars */}
+          {!isTradeDealer && (carStatus || vehicleData?.advertStatus) !== 'active' && (
           <section className="business-info-section">
               <h3>Business Information (Optional)</h3>
               

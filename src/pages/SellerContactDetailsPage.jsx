@@ -29,6 +29,17 @@ const SellerContactDetailsPage = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Autofill contact details for trade dealers
+  useEffect(() => {
+    if (isTradeDealer && dealer) {
+      setFormData(prev => ({
+        ...prev,
+        email: dealer.email || prev.email,
+        phoneNumber: dealer.phone || prev.phoneNumber,
+      }));
+    }
+  }, [isTradeDealer, dealer]);
+
   useEffect(() => {
     // If no advert data, redirect back
     if (!advertId) {
