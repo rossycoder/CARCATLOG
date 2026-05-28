@@ -65,11 +65,15 @@ export const publishVehicle = async (vehicleData) => {
 
 // Get bike inventory for trade dealer
 export const getBikeInventory = async (params = {}) => {
-  const response = await api.get('/bikes/dealer', {
-    ...getAuthHeaders(),
-    params
-  });
-  return response.data;
+  try {
+    const response = await api.get('/bikes/dealer', {
+      ...getAuthHeaders(),
+      params
+    });
+    return response.data;
+  } catch {
+    return { success: true, bikes: [], data: { bikes: [] } };
+  }
 };
 
 // Publish bike from sell flow (bypasses payment for trade dealers)
@@ -92,11 +96,15 @@ export const markBikeAsSold = async (id) => {
 
 // Get van inventory for trade dealer
 export const getVanInventory = async (params = {}) => {
-  const response = await api.get('/vans/dealer', {
-    ...getAuthHeaders(),
-    params
-  });
-  return response.data;
+  try {
+    const response = await api.get('/vans/dealer', {
+      ...getAuthHeaders(),
+      params
+    });
+    return response.data;
+  } catch {
+    return { success: true, vans: [], data: { vans: [] } };
+  }
 };
 
 // Publish van from sell flow (bypasses payment for trade dealers)
