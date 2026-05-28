@@ -402,6 +402,11 @@
     gap: 1rem;
   }
 
+  .header-left .subtitle,
+  .header-left .subscription-usage {
+    display: none;
+  }
+
   .header-actions {
     width: 100%;
     flex-direction: column;

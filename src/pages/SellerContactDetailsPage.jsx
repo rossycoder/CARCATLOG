@@ -254,12 +254,21 @@ const SellerContactDetailsPage = () => {
           <div className="privacy-notice">
             <div className="notice-icon">i</div>
             <div className="notice-content">
-              <h3>We will keep your contact details private</h3>
-              <p>
-                You need to provide a phone number for your advert, and you can
-                add an email address if you want. We'll always hide these
-                details on your advert.
-              </p>
+              {isTradeDealer ? (
+                <>
+                  <h3>Your business number will be shown to buyers</h3>
+                  <p>
+                    As a trade dealer, your phone number will be displayed directly on your listing so buyers can contact you.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3>We will keep your contact details private</h3>
+                  <p>
+                    You need to provide a phone number for your advert. We'll show buyers a protected relay number — your real number is never revealed.
+                  </p>
+                </>
+              )}
             </div>
           </div>
 
@@ -336,7 +345,13 @@ const SellerContactDetailsPage = () => {
               {formData.phoneNumber && (
                 <div className="preview-item">
                   <span className="preview-icon">📞</span>
-                  <span className="preview-text">{formData.phoneNumber}</span>
+                  {isTradeDealer ? (
+                    <span className="preview-text">{formData.phoneNumber}</span>
+                  ) : (
+                    <span className="preview-text" style={{ color: '#666', fontStyle: 'italic' }}>
+                      🔒 Protected relay number (your real number stays private)
+                    </span>
+                  )}
                 </div>
               )}
               {formData.allowEmailContact && formData.email && (
@@ -349,6 +364,11 @@ const SellerContactDetailsPage = () => {
                 <p className="preview-empty">No contact details selected yet</p>
               )}
             </div>
+            {!isTradeDealer && formData.phoneNumber && (
+              <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '8px' }}>
+                Buyers will call a CarCatalog relay number — your real number is never revealed.
+              </p>
+            )}
           </div>
 
        

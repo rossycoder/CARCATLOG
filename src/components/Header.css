@@ -1091,3 +1091,9 @@ body {
     display: block;
   }
 }
+
+/* Ensure sell button is always clickable above logo */
+.sell-icon-btn {
+  position: relative;
+  z-index: 1001;
+}

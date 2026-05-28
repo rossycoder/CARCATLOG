@@ -618,7 +618,7 @@ const CarDetailPage = () => {
                                    car.estimatedValue;
                   
                   if (!marketValue || marketValue === car.price) {
-                    marketValue = car.price * 1.2;
+                    return null; // No real valuation data — hide indicator
                   }
                   
                   const priceRatio = car.price / marketValue;
@@ -702,7 +702,7 @@ const CarDetailPage = () => {
                 <>
                   {callSession ? (
                     <a href={`tel:${callSession.proxyNumber}`} className="phone-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
-                      📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>(expires in {Math.floor(callSession.expiresIn / 60)}m)</span>
+                      📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>{!callSession.isDirectNumber && callSession.expiresIn && `(expires in ${Math.floor(callSession.expiresIn / 60)}m)`}</span>
                     </a>
                   ) : (
                     <button
@@ -1184,7 +1184,7 @@ const CarDetailPage = () => {
                     <>
                       {callSession ? (
                         <a href={`tel:${callSession.proxyNumber}`} className="call-seller-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
-                          📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>(expires in {Math.floor(callSession.expiresIn / 60)}m)</span>
+                          📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>{!callSession.isDirectNumber && callSession.expiresIn && `(expires in ${Math.floor(callSession.expiresIn / 60)}m)`}</span>
                         </a>
                       ) : (
                         <button
@@ -1237,7 +1237,7 @@ const CarDetailPage = () => {
                 <>
                   {callSession ? (
                     <a href={`tel:${callSession.proxyNumber}`} className="phone-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
-                      📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>(expires in {Math.floor(callSession.expiresIn / 60)}m)</span>
+                      📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>{!callSession.isDirectNumber && callSession.expiresIn && `(expires in ${Math.floor(callSession.expiresIn / 60)}m)`}</span>
                     </a>
                   ) : (
                     <button
@@ -1276,10 +1276,9 @@ const CarDetailPage = () => {
                                car.valuation?.dealerPrice ||
                                car.estimatedValue;
               
-              // FALLBACK: If no market value, use price + 20% as estimated market value
-              // This ensures gauge always shows
+              // If no real market value data, hide the indicator
               if (!marketValue || marketValue === car.price) {
-                marketValue = car.price * 1.2; // Assume market value is 20% higher than asking price
+                return null;
               }
               
               const priceRatio = car.price / marketValue;
