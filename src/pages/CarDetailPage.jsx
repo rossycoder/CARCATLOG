@@ -30,9 +30,10 @@ const CarDetailPage = () => {
   const [callLoading, setCallLoading] = useState(false);
 
   const handleMaskedCall = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || localStorage.getItem('tradeToken');
     if (!token) {
-      alert('Please sign in to use the masked call feature.');
+      alert('Please sign in to call the seller.');
+      window.location.href = '/signin';
       return;
     }
     setCallLoading(true);
