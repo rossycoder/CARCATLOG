@@ -451,6 +451,12 @@ const CarDetailPage = () => {
               Finance Calculator
             </button>
             <button 
+              className={`nav-tab ${activeTab === 'price-indicator' ? 'active' : ''}`}
+              onClick={() => document.getElementById('price-indicator-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+            >
+              Price Indicator
+            </button>
+            <button 
               className={`nav-tab ${activeTab === 'meet-seller' ? 'active' : ''}`}
               onClick={() => scrollToSection('cd-meet-seller')}
             >
@@ -600,7 +606,12 @@ const CarDetailPage = () => {
                     return parts.join(' ');
                   })()}
                 </h2>
-                <div className="price-tag">
+                <div
+                  className="price-tag"
+                  onClick={() => document.getElementById('price-indicator-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                  style={{ cursor: 'pointer' }}
+                  title="Click to see price analysis"
+                >
                   {formatPrice(car.price)}
                 </div>
               </div>
@@ -1183,7 +1194,16 @@ const CarDetailPage = () => {
                 <div className="seller-contact-buttons">
                   {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
                     <>
-                      {callSession ? (
+                      {/* Trade seller — show real number directly */}
+                      {(car.isDealerListing || car.dealerId) ? (
+                        <a
+                          href={`tel:${car.sellerContact?.phoneNumber || car.phoneNumber}`}
+                          className="call-seller-btn"
+                          style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}
+                        >
+                          📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
+                        </a>
+                      ) : callSession ? (
                         <a href={`tel:${callSession.proxyNumber}`} className="call-seller-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
                           📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>{!callSession.isDirectNumber && callSession.expiresIn && `(expires in ${Math.floor(callSession.expiresIn / 60)}m)`}</span>
                         </a>
@@ -1277,9 +1297,21 @@ const CarDetailPage = () => {
                                car.valuation?.dealerPrice ||
                                car.estimatedValue;
               
-              // If no real market value data, hide the indicator
+              // If no real market value data, show a neutral indicator
               if (!marketValue || marketValue === car.price) {
-                return null;
+                return (
+                  <div className="good-price-indicator" id="price-indicator-section">
+                    <div style={{ textAlign: 'center', padding: '16px' }}>
+                      <svg viewBox="0 0 200 120" className="gauge-svg" style={{ width: '160px' }}>
+                        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e0e0e0" strokeWidth="18" strokeLinecap="round"/>
+                        <line x1="100" y1="100" x2="100" y2="35" stroke="#999" strokeWidth="3" strokeLinecap="round"/>
+                        <circle cx="100" cy="100" r="5" fill="#999"/>
+                      </svg>
+                      <div style={{ fontSize: '0.85rem', color: '#888', marginTop: '4px' }}>No valuation data available</div>
+                      <div style={{ fontWeight: '700', fontSize: '1.1rem', marginTop: '4px' }}>{car.price ? `£${car.price.toLocaleString()}` : ''}</div>
+                    </div>
+                  </div>
+                );
               }
               
               const priceRatio = car.price / marketValue;
@@ -1328,7 +1360,7 @@ const CarDetailPage = () => {
               const needleY = 100 - 70 * Math.sin(svgAngle * Math.PI / 180);
               
               return (
-                <div className="good-price-indicator">
+                <div className="good-price-indicator" id="price-indicator-section">
                   <div className="price-gauge">
                     <svg viewBox="0 0 200 120" className="gauge-svg">
                       {/* Gauge background arcs - 5 zones */}

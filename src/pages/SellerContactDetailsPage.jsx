@@ -200,13 +200,17 @@ const SellerContactDetailsPage = () => {
       }
       
       // Navigate to advertising prices page with all data
+      // CRITICAL: userEnteredPrice is the price the user set on the advert edit page
+      // This must take priority over API valuations on the advertising prices page
+      const userEnteredPrice = advertData?.price || vehicleData?.price;
       navigate('/sell-my-car/advertising-prices', {
         state: {
           advertId,
           advertData,
           vehicleData,
           contactDetails: formData,
-          vehicleValuation: vehicleData?.price || advertData?.price || vehicleData?.estimatedValue, // Prioritize vehicleData.price
+          vehicleValuation: userEnteredPrice || vehicleData?.estimatedValue,
+          userEnteredPrice: userEnteredPrice, // Explicit flag so advertising page uses this first
         },
       });
     } catch (error) {

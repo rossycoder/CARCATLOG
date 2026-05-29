@@ -27,6 +27,8 @@ const CarAdvertisingPricesPage = () => {
   const [vehicleData, setVehicleData] = useState(locationState.state?.vehicleData);
   const contactDetails = locationState.state?.contactDetails;
   const vehicleValuation = locationState.state?.vehicleValuation; // Get valuation from state
+  // userEnteredPrice: the price user explicitly set on the advert edit page — highest priority
+  const userEnteredPrice = locationState.state?.userEnteredPrice;
 
   // Check if viewOnly parameter is in URL - allows users to browse pricing without restrictions
   const searchParams = new URLSearchParams(locationState.search);
@@ -280,8 +282,15 @@ const CarAdvertisingPricesPage = () => {
     let valuation = null;
     let valuationSource = 'none';
     
-    // Try valuation fields FIRST (these are the actual vehicle worth, not asking price)
-    if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number' && vehicleData.allValuations.private > 0) {
+    // HIGHEST PRIORITY: User's explicitly entered price on the advert edit page
+    if (userEnteredPrice && typeof userEnteredPrice === 'number' && userEnteredPrice > 0) {
+      valuation = userEnteredPrice;
+      valuationSource = 'userEnteredPrice (explicit)';
+    } else if (userEnteredPrice && typeof userEnteredPrice === 'string' && parseFloat(userEnteredPrice) > 0) {
+      valuation = parseFloat(userEnteredPrice);
+      valuationSource = 'userEnteredPrice string (explicit)';
+    // Try valuation fields SECOND (these are the actual vehicle worth, not asking price)
+    } else if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number' && vehicleData.allValuations.private > 0) {
       valuation = vehicleData.allValuations.private;
       valuationSource = 'allValuations.private';
     } else if (vehicleData?.valuation?.estimatedValue?.private && typeof vehicleData.valuation.estimatedValue.private === 'number' && vehicleData.valuation.estimatedValue.private > 0) {
@@ -316,7 +325,7 @@ const CarAdvertisingPricesPage = () => {
       // No valuation data - allow manual selection
       setIsPriceRangeLocked(false);
     }
-  }, [vehicleValuation, advertData, vehicleData, sellerType]); // Removed priceRange from dependencies to prevent loops
+  }, [userEnteredPrice, vehicleValuation, advertData, vehicleData, sellerType]); // Removed priceRange from dependencies to prevent loops
 
   // Auto-detect seller type based on business info and lock if no business info
   useEffect(() => {
@@ -376,10 +385,12 @@ const CarAdvertisingPricesPage = () => {
     
     // If price range is locked (auto-selected), recalculate for new seller type
     if (isPriceRangeLocked) {
-      // Extract numeric valuation - CRITICAL FIX: Prioritize actual valuation over user price
+      // HIGHEST PRIORITY: User's explicitly entered price
       let valuation = null;
       
-      if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
+      if (userEnteredPrice && typeof userEnteredPrice === 'number' && userEnteredPrice > 0) {
+        valuation = userEnteredPrice;
+      } else if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
         valuation = vehicleData.allValuations.private;
       } else if (vehicleData?.valuation?.estimatedValue?.private && typeof vehicleData.valuation.estimatedValue.private === 'number') {
         valuation = vehicleData.valuation.estimatedValue.private;
@@ -465,8 +476,10 @@ const CarAdvertisingPricesPage = () => {
       // Extract the actual vehicle value for backend validation
       let actualVehicleValue = null;
       
-      // CRITICAL FIX: Prioritize actual valuation over user-entered price
-      if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
+      // HIGHEST PRIORITY: User's explicitly entered price
+      if (userEnteredPrice && typeof userEnteredPrice === 'number' && userEnteredPrice > 0) {
+        actualVehicleValue = userEnteredPrice;
+      } else if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number') {
         actualVehicleValue = vehicleData.allValuations.private;
       } else if (vehicleData?.valuation?.estimatedValue?.private && typeof vehicleData.valuation.estimatedValue.private === 'number') {
         actualVehicleValue = vehicleData.valuation.estimatedValue.private;
