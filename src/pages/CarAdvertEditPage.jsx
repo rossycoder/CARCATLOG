@@ -1414,11 +1414,19 @@ useEffect(() => {
 
   const handlePublish = () => {
     
+    // Determine seller type based on business info
+    const hasBusinessInfo = !!(
+      (advertData?.businessLogo && advertData.businessLogo.trim()) ||
+      (advertData?.businessWebsite && advertData.businessWebsite.trim()) ||
+      (advertData?.businessName && advertData.businessName.trim())
+    );
+
     // Navigate to seller contact details page
     navigate(`/selling/advert/contact/${advertId}`, {
       state: {
         advertData,
-        vehicleData
+        vehicleData,
+        sellerType: isTradeDealer ? 'trade' : (hasBusinessInfo ? 'trade' : 'private')
       }
     });
   };

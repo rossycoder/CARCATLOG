@@ -18,6 +18,10 @@ const SellerContactDetailsPage = () => {
   // Get advert data from navigation state
   const advertData = location.state?.advertData;
   const vehicleData = location.state?.vehicleData;
+  const passedSellerType = location.state?.sellerType;
+
+  // isTradeUser: true for trade dealers OR users who selected trade package
+  const isTradeUser = isTradeDealer || passedSellerType === 'trade';
 
   const [formData, setFormData] = useState({
     phoneNumber: '',
@@ -349,7 +353,7 @@ const SellerContactDetailsPage = () => {
               {formData.phoneNumber && (
                 <div className="preview-item">
                   <span className="preview-icon">📞</span>
-                  {isTradeDealer ? (
+                  {isTradeUser ? (
                     <span className="preview-text">{formData.phoneNumber}</span>
                   ) : (
                     <span className="preview-text" style={{ color: '#666', fontStyle: 'italic' }}>
@@ -368,7 +372,7 @@ const SellerContactDetailsPage = () => {
                 <p className="preview-empty">No contact details selected yet</p>
               )}
             </div>
-            {!isTradeDealer && formData.phoneNumber && (
+            {!isTradeUser && formData.phoneNumber && (
               <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '8px' }}>
                 Buyers will call a CarCatalog relay number — your real number is never revealed.
               </p>
