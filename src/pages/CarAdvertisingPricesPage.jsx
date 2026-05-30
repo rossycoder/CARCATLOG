@@ -276,68 +276,42 @@ const CarAdvertisingPricesPage = () => {
 
   // Auto-select price range on component mount if valuation is available
   useEffect(() => {
-    
-    // Extract numeric valuation from various possible sources
-    // CRITICAL FIX: Use user's entered price if no valuation available
+    // Step 1: Determine seller type from business info
+    const isTrade = hasBusinessInfo();
+    const detectedSellerType = isTrade ? 'trade' : 'private';
+    setSellerType(detectedSellerType);
+
+    // Step 2: Calculate price range using detected seller type (not stale state)
     let valuation = null;
-    let valuationSource = 'none';
-    
-    // HIGHEST PRIORITY: User's explicitly entered price on the advert edit page
+
     if (userEnteredPrice && typeof userEnteredPrice === 'number' && userEnteredPrice > 0) {
       valuation = userEnteredPrice;
-      valuationSource = 'userEnteredPrice (explicit)';
     } else if (userEnteredPrice && typeof userEnteredPrice === 'string' && parseFloat(userEnteredPrice) > 0) {
       valuation = parseFloat(userEnteredPrice);
-      valuationSource = 'userEnteredPrice string (explicit)';
-    // Try valuation fields SECOND (these are the actual vehicle worth, not asking price)
     } else if (vehicleData?.allValuations?.private && typeof vehicleData.allValuations.private === 'number' && vehicleData.allValuations.private > 0) {
       valuation = vehicleData.allValuations.private;
-      valuationSource = 'allValuations.private';
     } else if (vehicleData?.valuation?.estimatedValue?.private && typeof vehicleData.valuation.estimatedValue.private === 'number' && vehicleData.valuation.estimatedValue.private > 0) {
       valuation = vehicleData.valuation.estimatedValue.private;
-      valuationSource = 'valuation.estimatedValue.private';
     } else if (vehicleData?.estimatedValue && typeof vehicleData.estimatedValue === 'number' && vehicleData.estimatedValue > 0) {
       valuation = vehicleData.estimatedValue;
-      valuationSource = 'estimatedValue';
     } else if (vehicleValuation && typeof vehicleValuation === 'number' && vehicleValuation > 0) {
       valuation = vehicleValuation;
-      valuationSource = 'vehicleValuation prop';
     } else if (vehicleData?.price && typeof vehicleData.price === 'number' && vehicleData.price > 0) {
-      // Use user-entered price if no valuation available
       valuation = vehicleData.price;
-      valuationSource = 'vehicleData.price (user-entered)';
     } else if (advertData?.price && typeof advertData.price === 'number' && advertData.price > 0) {
       valuation = advertData.price;
-      valuationSource = 'advertData.price (user-entered)';
     }
-    
-    
+
     if (valuation && !isNaN(valuation) && valuation > 0) {
-      const calculatedRange = calculatePriceRange(valuation, sellerType === 'trade');
+      const calculatedRange = calculatePriceRange(valuation, detectedSellerType === 'trade');
       if (calculatedRange) {
-        
-        // FORCE UPDATE: Always set the calculated range regardless of current state
         setPriceRange(calculatedRange);
         setIsPriceRangeLocked(true);
-        
       }
     } else {
-      // No valuation data - allow manual selection
       setIsPriceRangeLocked(false);
     }
-  }, [userEnteredPrice, vehicleValuation, advertData, vehicleData, sellerType]); // Removed priceRange from dependencies to prevent loops
-
-  // Auto-detect seller type based on business info and lock if no business info
-  useEffect(() => {
-    
-    // If business info exists, force trade seller type
-    if (hasBusinessInfo()) {
-      setSellerType('trade');
-    } else if (advertData || vehicleData) {
-      // No business info - force private seller type
-      setSellerType('private');
-    }
-  }, [advertData, vehicleData]);
+  }, [userEnteredPrice, vehicleValuation, advertData, vehicleData]);
 
   // CRITICAL FIX: Check if business info exists to determine if trade option should be available
   const hasBusinessInfo = () => {
@@ -359,25 +333,29 @@ const CarAdvertisingPricesPage = () => {
 
   // Separate effect to handle initial price range setting when vehicleData becomes available
   useEffect(() => {
-    if (vehicleData?.price && typeof vehicleData.price === 'number' && priceRange === 'under-1000') {
-      const calculatedRange = calculatePriceRange(vehicleData.price, sellerType === 'trade');
+    const price = userEnteredPrice || vehicleData?.price;
+    if (price && typeof price === 'number' && priceRange === 'under-1000') {
+      const isTrade = hasBusinessInfo();
+      const calculatedRange = calculatePriceRange(price, isTrade);
       if (calculatedRange && calculatedRange !== 'under-1000') {
         setPriceRange(calculatedRange);
         setIsPriceRangeLocked(true);
       }
     }
-  }, [vehicleData?.price, sellerType]);
+  }, [userEnteredPrice, vehicleData?.price, sellerType]);
 
   // EMERGENCY FALLBACK: Force correct price range if we detect the wrong one is being used
   useEffect(() => {
-    if (priceRange === 'under-1000' && vehicleData?.price && vehicleData.price > 1000) {
-      const correctRange = calculatePriceRange(vehicleData.price, sellerType === 'trade');
+    const price = userEnteredPrice || vehicleData?.price;
+    if (priceRange === 'under-1000' && price && price > 1000) {
+      const isTrade = hasBusinessInfo();
+      const correctRange = calculatePriceRange(price, isTrade);
       if (correctRange) {
         setPriceRange(correctRange);
         setIsPriceRangeLocked(true);
       }
     }
-  }, [priceRange, vehicleData?.price, sellerType]);
+  }, [priceRange, userEnteredPrice, vehicleData?.price, sellerType]);
 
   // Reset price range when seller type changes
   const handleSellerTypeChange = (type) => {

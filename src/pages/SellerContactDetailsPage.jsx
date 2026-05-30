@@ -206,7 +206,8 @@ const SellerContactDetailsPage = () => {
       // Navigate to advertising prices page with all data
       // CRITICAL: userEnteredPrice is the price the user set on the advert edit page
       // This must take priority over API valuations on the advertising prices page
-      const userEnteredPrice = advertData?.price || vehicleData?.price;
+      const rawPrice = advertData?.price || vehicleData?.price;
+      const userEnteredPrice = rawPrice ? parseFloat(String(rawPrice)) : null;
       navigate('/sell-my-car/advertising-prices', {
         state: {
           advertId,

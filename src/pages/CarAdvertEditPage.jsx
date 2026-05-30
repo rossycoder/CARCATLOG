@@ -909,10 +909,10 @@ useEffect(() => {
  
   // Handle price save
  const handlePriceSave = async () => {
-  const trimmed = rawPriceInput.trim();
-  const priceValue = parseFloat(trimmed);
+  // Use advertData.price (updated by handleInputChange) as the source of truth
+  const priceValue = parseFloat(String(advertData.price).trim());
  
-  if (!trimmed || isNaN(priceValue) || priceValue <= 0) {
+  if (!advertData.price || isNaN(priceValue) || priceValue <= 0) {
     setErrors(prev => ({ ...prev, price: 'Please enter a valid price' }));
     return;
   }
