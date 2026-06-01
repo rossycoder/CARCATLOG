@@ -221,6 +221,36 @@ body {
   color: #6b7280;
 }
 
+.email-verification-warning {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #fef3cd;
+  border: 1px solid #fbbf24;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+
+.verification-icon {
+  margin-right: 6px;
+}
+
+.verification-text {
+  color: #92400e;
+  font-weight: 500;
+}
+
+.verify-link {
+  display: inline-block;
+  margin-left: 8px;
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.verify-link:hover {
+  text-decoration: underline;
+}
+
 .account-dropdown-divider {
   height: 1px;
   background: #e5e7eb;

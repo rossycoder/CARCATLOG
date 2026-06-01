@@ -33,9 +33,13 @@ const VerifyEmailPage = () => {
             localStorage.setItem('token', response.data.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.data.user));
             
-            // Redirect to home after 2 seconds
+            // Check if there's a redirect path stored
+            const redirectPath = localStorage.getItem('redirectAfterVerification');
+            localStorage.removeItem('redirectAfterVerification');
+            
+            // Redirect to stored path or home after 2 seconds
             setTimeout(() => {
-              window.location.href = '/';
+              window.location.href = redirectPath || '/';
             }, 2000);
           }
         }

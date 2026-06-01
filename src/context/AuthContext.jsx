@@ -129,6 +129,7 @@ export const AuthProvider = ({ children }) => {
     setAuthToken,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
+    isEmailVerified: user?.isEmailVerified || false,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

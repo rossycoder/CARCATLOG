@@ -10,15 +10,90 @@ const SignInPage = () => {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [staySignedIn, setStaySignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordText, setShowPasswordText] = useState(false);
+  const [showConfirmPasswordText, setShowConfirmPasswordText] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({ score: 0, feedback: [] });
+  const [showPasswordGenerator, setShowPasswordGenerator] = useState(false);
 
   const from = location.state?.from?.pathname || location.state?.from || '/';
+
+  // Password strength checker
+  const checkPasswordStrength = (password) => {
+    const feedback = [];
+    let score = 0;
+
+    if (password.length >= 8) {
+      score += 1;
+    } else {
+      feedback.push('At least 8 characters');
+    }
+
+    if (/[a-z]/.test(password)) {
+      score += 1;
+    } else {
+      feedback.push('Include lowercase letters');
+    }
+
+    if (/[A-Z]/.test(password)) {
+      score += 1;
+    } else {
+      feedback.push('Include uppercase letters');
+    }
+
+    if (/\d/.test(password)) {
+      score += 1;
+    } else {
+      feedback.push('Include numbers');
+    }
+
+    if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      score += 1;
+    } else {
+      feedback.push('Include special characters');
+    }
+
+    return { score, feedback };
+  };
+
+  // Generate strong password
+  const generateStrongPassword = () => {
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    
+    let password = '';
+    
+    // Ensure at least one character from each category
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+    password += symbols[Math.floor(Math.random() * symbols.length)];
+    
+    // Fill the rest randomly
+    const allChars = lowercase + uppercase + numbers + symbols;
+    for (let i = 4; i < 16; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+    
+    // Shuffle the password
+    return password.split('').sort(() => Math.random() - 0.5).join('');
+  };
+
+  // Handle password change
+  const handlePasswordChange = (value) => {
+    setPassword(value);
+    if (isNewUser) {
+      setPasswordStrength(checkPasswordStrength(value));
+    }
+  };
 
   const handleEmailContinue = async (e) => {
     e.preventDefault();
@@ -62,6 +137,21 @@ const SignInPage = () => {
 
     if (isNewUser && !name) {
       setError('Please enter your name');
+      return;
+    }
+
+    if (isNewUser && !confirmPassword) {
+      setError('Please confirm your password');
+      return;
+    }
+
+    if (isNewUser && password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (isNewUser && passwordStrength.score < 3) {
+      setError('Please choose a stronger password');
       return;
     }
 
@@ -109,6 +199,11 @@ const SignInPage = () => {
         }
       }
     } catch (err) {
+      // Handle email verification required error
+      if (err.requiresVerification) {
+        navigate('/verify-email-required');
+        return;
+      }
       setError(err.message || (isNewUser ? 'Failed to create account' : 'Invalid email or password'));
     } finally {
       setIsLoading(false);
@@ -129,6 +224,8 @@ const SignInPage = () => {
   const handleBack = () => {
     setShowPassword(false);
     setPassword('');
+    setConfirmPassword('');
+    setPasswordStrength({ score: 0, feedback: [] });
     setError('');
   };
 
@@ -254,7 +351,7 @@ const SignInPage = () => {
                     className="form-input"
                     placeholder={isNewUser ? "Create a password" : "Enter your password"}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => handlePasswordChange(e.target.value)}
                     autoFocus={!isNewUser}
                   />
                   <button
@@ -280,7 +377,81 @@ const SignInPage = () => {
                     )}
                   </button>
                 </div>
+                
+                {isNewUser && (
+                  <>
+                    {/* Password Strength Indicator */}
+                    {password && (
+                      <div className="password-strength">
+                        <div className="strength-bar">
+                          <div 
+                            className={`strength-fill strength-${passwordStrength.score}`}
+                            style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
+                          ></div>
+                        </div>
+                        <div className="strength-text">
+                          {passwordStrength.score === 0 && 'Very Weak'}
+                          {passwordStrength.score === 1 && 'Weak'}
+                          {passwordStrength.score === 2 && 'Fair'}
+                          {passwordStrength.score === 3 && 'Good'}
+                          {passwordStrength.score === 4 && 'Strong'}
+                          {passwordStrength.score === 5 && 'Very Strong'}
+                        </div>
+                        {passwordStrength.feedback.length > 0 && (
+                          <div className="strength-feedback">
+                            {passwordStrength.feedback.map((tip, index) => (
+                              <div key={index} className="feedback-tip">• {tip}</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
+
+              {isNewUser && (
+                <div className="form-group">
+                  <label htmlFor="confirmPassword" className="form-label">
+                    Confirm Password<span className="required">*</span>
+                  </label>
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showConfirmPasswordText ? "text" : "password"}
+                      id="confirmPassword"
+                      className="form-input"
+                      placeholder="Confirm your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle-btn"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowConfirmPasswordText(!showConfirmPasswordText);
+                      }}
+                      aria-label={showConfirmPasswordText ? "Hide password" : "Show password"}
+                    >
+                      {showConfirmPasswordText ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                          <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  {confirmPassword && password !== confirmPassword && (
+                    <div className="password-mismatch">Passwords do not match</div>
+                  )}
+                </div>
+              )}
 
               {!isNewUser && (
                 <a href="/forgot-password" className="forgot-link">

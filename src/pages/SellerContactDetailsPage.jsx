@@ -328,7 +328,7 @@ const SellerContactDetailsPage = () => {
             <p className="field-label">
               Do you want to let buyers contact you by email?
             </p>
-            <p className="field-hint">Your email will be protected</p>
+           
             <div className="toggle-buttons">
               <button
                 type="button"

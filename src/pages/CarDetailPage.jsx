@@ -452,7 +452,7 @@ const CarDetailPage = () => {
             </button>
             <button 
               className={`nav-tab ${activeTab === 'price-indicator' ? 'active' : ''}`}
-              onClick={() => document.getElementById('price-indicator-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              onClick={() => scrollToSection('price-indicator-section')}
             >
               Price Indicator
             </button>
@@ -530,9 +530,6 @@ const CarDetailPage = () => {
             <div className="location-info">
               <span className="location-label">From</span>
               <span className="location-value">
-                {(car.sellerContact?.businessName || car.dealerName) && (
-                  <span className="dealer-name">{car.sellerContact?.businessName || car.dealerName} </span>
-                )}
                 {extractTownName(car.locationName) || 'Location available'}
                 {car.distance && car.distance > 0 && (
                   <> • <span className="distance-info">{Math.round(car.distance)} miles away</span></>
@@ -608,7 +605,7 @@ const CarDetailPage = () => {
                 </h2>
                 <div
                   className="price-tag"
-                  onClick={() => document.getElementById('price-indicator-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                  onClick={() => scrollToSection('price-indicator-section')}
                   style={{ cursor: 'pointer' }}
                   title="Click to see price analysis"
                 >

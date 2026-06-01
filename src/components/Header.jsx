@@ -161,6 +161,19 @@ const Header = () => {
                   <div className="account-dropdown-header">
                     <span className="account-name">{user.name || user.email}</span>
                     <span className="account-email">{user.email}</span>
+                    {!user.isEmailVerified && (
+                      <div className="email-verification-warning">
+                        <span className="verification-icon">⚠️</span>
+                        <span className="verification-text">Email not verified</span>
+                        <Link 
+                          to="/verify-email-required" 
+                          className="verify-link"
+                          onClick={() => setShowAccountDropdown(false)}
+                        >
+                          Verify now
+                        </Link>
+                      </div>
+                    )}
                   </div>
                   <div className="account-dropdown-divider" />
                   <Link to="/my-listings" className="account-dropdown-link" onClick={() => setShowAccountDropdown(false)}>

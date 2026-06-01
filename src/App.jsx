@@ -31,6 +31,7 @@ import SignInPage from './pages/SignInPage'
 import AuthCallbackPage from './pages/AuthCallbackPage'
 import CheckEmailPage from './pages/CheckEmailPage'
 import VerifyEmailPage from './pages/VerifyEmailPage'
+import EmailVerificationRequiredPage from './pages/EmailVerificationRequiredPage'
 import ContactPage from './pages/ContactPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
@@ -52,6 +53,7 @@ import TradeAnalyticsPage from './pages/Trade/TradeAnalyticsPage'
 import TradeSubscriptionPage from './pages/Trade/TradeSubscriptionPage'
 import TradeSubscriptionCheckoutPage from './pages/Trade/TradeSubscriptionCheckoutPage'
 import TradeSubscriptionSuccessPage from './pages/Trade/TradeSubscriptionSuccessPage'
+import ProtectedRoute from './components/ProtectedRoute'
 import ProtectedTradeRoute from './components/Trade/ProtectedTradeRoute'
 import './App.css'
 
@@ -113,7 +115,11 @@ function App() {
                     <Route path="/sell-my-car/advertising-prices" element={<CarAdvertisingPricesPage />} />
                     <Route path="/advertising-prices" element={<CarAdvertisingPricesPage />} />
                     <Route path="/sell-my-car/advert-payment-success" element={<AdvertPaymentSuccessPage />} />
-                    <Route path="/find-your-car" element={<CarFinderFormPage />} />
+                    <Route path="/find-your-car" element={
+                      <ProtectedRoute requireEmailVerification={true}>
+                        <CarFinderFormPage />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/vehicle-lookup" element={<VehicleLookupPage />} />
                     <Route path="/vehicle-check" element={<VehicleCheckPage />} />
                     <Route path="/vehicle-detail/:registration" element={<VehicleDetailPage />} />
@@ -121,20 +127,33 @@ function App() {
                     <Route path="/vehicle-check/payment/success" element={<PaymentSuccessPage />} />
                     <Route path="/search-results" element={<SearchResultsPage />} />
                     <Route path="/saved-cars" element={<SavedCarsPage />} />
-                    <Route path="/my-listings" element={<MyListingsPage />} />
+                    <Route path="/my-listings" element={
+                      <ProtectedRoute requireEmailVerification={true}>
+                        <MyListingsPage />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
                     <Route path="/valuation" element={<ValuationPage />} />
                     <Route path="/valuation/identification" element={<VehicleIdentificationPage />} />
                     <Route path="/valuation/results" element={<ValuationResultsPage />} />
                     <Route path="/valuation/vehicle" element={<VehicleValuationPage />} />
-                    <Route path="/selling/advert/edit/:advertId" element={<CarAdvertEditPage />} />
-                    <Route path="/selling/advert/contact/:advertId" element={<SellerContactDetailsPage />} />
+                    <Route path="/selling/advert/edit/:advertId" element={
+                      <ProtectedRoute requireEmailVerification={true}>
+                        <CarAdvertEditPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/selling/advert/contact/:advertId" element={
+                      <ProtectedRoute requireEmailVerification={true}>
+                        <SellerContactDetailsPage />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/cars/:id" element={<CarDetailPage />} />
                     <Route path="/signin" element={<SignInPage />} />
                     <Route path="/signup" element={<SignInPage />} />
                     <Route path="/auth/callback" element={<AuthCallbackPage />} />
                     <Route path="/check-email" element={<CheckEmailPage />} />
                     <Route path="/verify-email" element={<VerifyEmailPage />} />
+                    <Route path="/verify-email-required" element={<EmailVerificationRequiredPage />} />
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/contact" element={<ContactPage />} />

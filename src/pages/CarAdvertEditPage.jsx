@@ -1336,7 +1336,11 @@ useEffect(() => {
 
   const removePhoto = async (photoId) => {
     // Try to delete from Cloudinary
-    const photo = advertData.photos.find(p => p.id === photoId);
+    const photo = advertData.photos.find(p => {
+      if (typeof p === 'string') return p === photoId;
+      return p.id === photoId || p.url === photoId;
+    });
+
     if (photo?.publicId) {
       try {
         await uploadService.deleteImage(photo.publicId);
@@ -1344,11 +1348,25 @@ useEffect(() => {
         console.error('Failed to delete from Cloudinary:', error);
       }
     }
-    
+
+    const updatedPhotos = advertData.photos.filter(p => {
+      if (typeof p === 'string') return p !== photoId;
+      return p.id !== photoId && p.url !== photoId;
+    });
+
     setAdvertData(prev => ({
       ...prev,
-      photos: prev.photos.filter(photo => photo.id !== photoId)
+      photos: updatedPhotos
     }));
+
+    // Auto-save the updated photo list to the backend immediately
+    try {
+      await api.patch(`/vehicles/${advertId}`, {
+        images: updatedPhotos.map(p => (typeof p === 'string' ? p : p.url))
+      });
+    } catch (saveError) {
+      console.error('Failed to save photo deletion to database:', saveError);
+    }
   };
 
   const validateForm = () => {
@@ -1584,7 +1602,8 @@ useEffect(() => {
                   {advertData.photos.map((photo, index) => {
                     // Handle both string URLs and object format
                     const photoUrl = typeof photo === 'string' ? photo : photo.url;
-                    const photoId = typeof photo === 'string' ? `photo-${index}` : photo.id;
+                    // Use id if available, otherwise fall back to URL as the unique key
+                    const photoId = typeof photo === 'string' ? photo : (photo.id || photo.url || `photo-${index}`);
                     
                     
                     return (
@@ -1841,13 +1860,6 @@ useEffect(() => {
                         className="save-price-button"
                       >
                         ✓ Save Price
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={handlePriceCancel} 
-                        className="cancel-price-button"
-                      >
-                        Discard
                       </button>
                     </div>
                   </div>

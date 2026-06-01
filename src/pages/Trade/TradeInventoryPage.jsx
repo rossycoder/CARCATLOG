@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTradeDealerContext } from '../../context/TradeDealerContext';
 import TradeSidebar from '../../components/Trade/TradeSidebar';
 import * as tradeInventoryService from '../../services/tradeInventoryService';
@@ -7,6 +7,8 @@ import './TradeInventoryPage.css';
 
 const TradeInventoryPage = () => {
   const { dealer } = useTradeDealerContext();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [vehicles, setVehicles] = useState([]);
   const [bikes, setBikes] = useState([]);
   const [vans, setVans] = useState([]);
@@ -20,6 +22,17 @@ const TradeInventoryPage = () => {
   const [showLimitWarning, setShowLimitWarning] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [limitModalMessage, setLimitModalMessage] = useState('');
+
+  // Sync filter state with URL query parameter
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const filterParam = params.get('filter');
+    if (filterParam && ['all', 'active', 'sold', 'draft'].includes(filterParam)) {
+      setFilter(filterParam);
+    } else {
+      setFilter('all');
+    }
+  }, [location.search]);
 
   useEffect(() => {
     fetchAllInventory();
@@ -166,7 +179,12 @@ const TradeInventoryPage = () => {
         {/* Header Section */}
         <div className="inventory-header">
           <div className="header-left">
-            <h1>My Inventory</h1>
+            <h1>
+              {filter === 'active' && 'Active Listings'}
+              {filter === 'sold' && 'Sold Listings'}
+              {filter === 'draft' && 'Draft Listings'}
+              {filter === 'all' && 'My Inventory'}
+            </h1>
             <p className="subtitle">{allVehicles.length} vehicle{allVehicles.length !== 1 ? 's' : ''} in total ({stats.cars} cars, {stats.bikes} bikes, {stats.vans} vans)</p>
             {subscription && subscription.listingsLimit && (
               <div className="subscription-usage">
@@ -266,25 +284,25 @@ const TradeInventoryPage = () => {
               <span className="filter-label">Status:</span>
               <button 
                 className={filter === 'all' ? 'active' : ''} 
-                onClick={() => setFilter('all')}
+                onClick={() => navigate('/trade/inventory?filter=all')}
               >
                 All <span className="count">{stats.all}</span>
               </button>
               <button 
                 className={filter === 'active' ? 'active' : ''} 
-                onClick={() => setFilter('active')}
+                onClick={() => navigate('/trade/inventory?filter=active')}
               >
                 Active <span className="count">{stats.active}</span>
               </button>
               <button 
                 className={filter === 'sold' ? 'active' : ''} 
-                onClick={() => setFilter('sold')}
+                onClick={() => navigate('/trade/inventory?filter=sold')}
               >
                 Sold <span className="count">{stats.sold}</span>
               </button>
               <button 
                 className={filter === 'draft' ? 'active' : ''} 
-                onClick={() => setFilter('draft')}
+                onClick={() => navigate('/trade/inventory?filter=draft')}
               >
                 Drafts <span className="count">{stats.draft}</span>
               </button>

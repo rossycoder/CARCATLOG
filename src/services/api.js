@@ -79,6 +79,25 @@ api.interceptors.response.use(
       // Silently handle these errors in production
       return Promise.reject(error);
     }
+
+    // Handle email verification required (403 with requiresVerification flag)
+    if (error.response?.status === 403 && error.response?.data?.requiresVerification) {
+      const currentPath = window.location.pathname;
+      
+      // Don't redirect if already on verification pages
+      if (!currentPath.includes('/verify-email') && 
+          !currentPath.includes('/signin') && 
+          !currentPath.includes('/signup')) {
+        
+        // Store the current path to redirect back after verification
+        localStorage.setItem('redirectAfterVerification', currentPath);
+        
+        // Redirect to email verification required page
+        window.location.href = '/verify-email-required';
+      }
+      
+      return Promise.reject(error);
+    }
     
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
