@@ -123,6 +123,7 @@ const CarDetailPage = () => {
         { id: 'cd-running-costs', name: 'running-costs' },
         { id: 'cd-vehicle-history', name: 'vehicle-history' },
         { id: 'cd-mot-history', name: 'mot-history' },
+        { id: 'price-indicator-section', name: 'price-indicator' },
         { id: 'cd-finance', name: 'finance' },
         { id: 'cd-meet-seller', name: 'meet-seller' }
       ];
@@ -666,7 +667,12 @@ const CarDetailPage = () => {
                   const needleY = 100 - 70 * Math.sin(svgAngle * Math.PI / 180);
                   
                   return (
-                    <div className="good-price-indicator mobile-header-indicator">
+                    <div 
+                      className="good-price-indicator mobile-header-indicator"
+                      onClick={() => scrollToSection('price-indicator-section')}
+                      style={{ cursor: 'pointer' }}
+                      title="Tap to see full price analysis"
+                    >
                       <div className="price-gauge">
                         <svg viewBox="0 0 200 120" className="gauge-svg">
                           <path d="M 20 100 A 80 80 0 0 1 38 48" fill="none" stroke="#BDBDBD" strokeWidth="16" strokeLinecap="round"/>
@@ -754,7 +760,12 @@ const CarDetailPage = () => {
                   <span className="spec-icon">📅</span>
                   <div className="spec-details">
                     <span className="spec-label">Registration</span>
-                    <span className="spec-value">{car.year} ({car.registrationNumber || 'N/A'})</span>
+                    <span className="spec-value">
+                      {car.year}
+                      {car.registrationNumber && (
+                        <span className="spec-reg-plate"> {car.registrationNumber}</span>
+                      )}
+                    </span>
                   </div>
                 </div>
 

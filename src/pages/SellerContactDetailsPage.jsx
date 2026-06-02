@@ -375,7 +375,7 @@ const SellerContactDetailsPage = () => {
             </div>
             {!isTradeUser && formData.phoneNumber && (
               <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '8px' }}>
-                Buyers will call a CarCatalog relay number — your real number is never revealed.
+                Buyers will call a CarCatalog relay number — your real number is kept private.
               </p>
             )}
           </div>
