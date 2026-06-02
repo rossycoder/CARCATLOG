@@ -6,28 +6,28 @@ import api from '../services/api';
 const CheckEmailPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const email = location.state?.email || '';
+  // Get email from navigation state or sessionStorage fallback (survives page refresh)
+  const email = location.state?.email || sessionStorage.getItem('verificationEmail') || '';
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
 
   const handleResendEmail = async () => {
     if (!email) {
-      setError('Email address not found');
+      setError('Email address not found. Please go back and sign up again.');
       return;
     }
 
     setLoading(true);
     setError('');
-    setMessage('');
 
     try {
       const response = await api.post('/auth/resend-verification', { email });
-      setMessage('Verification email sent successfully!');
-      setError('');
+      if (response.data.success) {
+        setSent(true);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to resend email. Please try again.');
-      setMessage('');
     } finally {
       setLoading(false);
     }
@@ -60,41 +60,43 @@ const CheckEmailPage = () => {
             <div className="error-message">
               <span className="error-icon">⚠</span>
               <div>
-                <strong>We can't send another link</strong>
+                <strong>Couldn't send email</strong>
                 <p>{error}</p>
               </div>
             </div>
           )}
 
-          {message && (
+          {sent ? (
             <div className="success-message">
               <span className="success-icon">✓</span>
-              <p>{message}</p>
+              <p>New verification link sent! Please check your inbox (and spam folder).</p>
             </div>
+          ) : (
+            <>
+              <p className="email-sent-text">
+                A link to verify your email address has been sent to
+              </p>
+
+              <div className="email-display">
+                <span>{email || 'your email address'}</span>
+                <button className="edit-email-button" onClick={handleBack}>
+                  ✎
+                </button>
+              </div>
+
+              <p className="spam-notice">
+                Can't find the email? Check your junk/spam folder just in case!
+              </p>
+
+              <button
+                className="resend-button"
+                onClick={handleResendEmail}
+                disabled={loading}
+              >
+                {loading ? 'Sending...' : 'Send another link'}
+              </button>
+            </>
           )}
-
-          <p className="email-sent-text">
-            A link to verify your email address has been sent to
-          </p>
-
-          <div className="email-display">
-            <span>{email}</span>
-            <button className="edit-email-button" onClick={handleBack}>
-              ✎
-            </button>
-          </div>
-
-          <p className="spam-notice">
-            Can't find the email? Check your junk/spam folder just in case!
-          </p>
-
-          <button 
-            className="resend-button" 
-            onClick={handleResendEmail}
-            disabled={loading}
-          >
-            {loading ? 'Sending...' : 'Send another link'}
-          </button>
         </div>
       </div>
     </div>

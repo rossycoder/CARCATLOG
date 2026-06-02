@@ -166,7 +166,8 @@ const SignInPage = () => {
         if (result.success) {
           // Check if email verification is required
           if (result.data.requiresVerification) {
-            // Redirect to check email page
+            // Redirect to check email page - also save to sessionStorage so page refresh still works
+            sessionStorage.setItem('verificationEmail', email);
             navigate('/check-email', { state: { email } });
           } else {
             // Check if there are pending vehicle details
