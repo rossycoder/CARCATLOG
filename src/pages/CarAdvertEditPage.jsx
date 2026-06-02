@@ -2545,7 +2545,7 @@ useEffect(() => {
 
           {/* Action Button */}
           <section className="actions-section">
-            {(advertData.photos.length === 0 || !advertData.description.trim()) && (
+            {!isTradeDealer && (advertData.photos.length === 0 || !advertData.description.trim()) && (
               <p className="validation-message">
                 {advertData.photos.length === 0 && !advertData.description.trim() 
                   ? 'Please add photos and a description to continue'
@@ -2555,11 +2555,11 @@ useEffect(() => {
               </p>
             )}
             
-            {/* Trade dealers: always show Save button (no payment flow) */}
+            {/* Trade dealers: show button without photo/description requirement */}
             {isTradeDealer && (carStatus === 'draft' || carStatus === 'pending_payment' || !carStatus) && (
               <button
-                onClick={handleSave}
-                disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}
+                onClick={handlePublish}
+                disabled={isSaving}
                 className="publish-button"
               >
                 {isSaving ? '⏳ Saving...' : "I'm happy with my ad - Continue"}
