@@ -104,7 +104,12 @@ function MyListingsPage() {
     if (!window.confirm('Mark this vehicle as sold?')) return;
 
     try {
-      await api.patch(`/vehicles/${listingId}/status`, { advertStatus: 'sold' });
+      if (isAdminView) {
+        // Admin uses admin update route
+        await api.patch(`/admin/listings/${listingId}`, { advertStatus: 'sold' });
+      } else {
+        await api.patch(`/vehicles/${listingId}/status`, { advertStatus: 'sold' });
+      }
       fetchMyListings();
     } catch (err) {
       console.error('Error marking as sold:', err);
@@ -116,7 +121,12 @@ function MyListingsPage() {
     if (!window.confirm('Are you sure you want to delete this listing? This cannot be undone.')) return;
 
     try {
-      await api.delete(`/vehicles/${listingId}`);
+      // Admin uses admin route which bypasses ownership check
+      if (isAdminView) {
+        await api.delete(`/admin/listings/${listingId}`);
+      } else {
+        await api.delete(`/vehicles/${listingId}`);
+      }
       fetchMyListings();
     } catch (err) {
       console.error('Error deleting listing:', err);
