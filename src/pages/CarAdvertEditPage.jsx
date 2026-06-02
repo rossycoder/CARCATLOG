@@ -1437,24 +1437,22 @@ useEffect(() => {
   };
 
   const handlePublish = () => {
-    
-    // Determine seller type based on business info
-    const hasBusinessInfo = !!(
-      (advertData?.businessLogo && advertData.businessLogo.trim()) ||
-      (advertData?.businessWebsite && advertData.businessWebsite.trim()) ||
-      (advertData?.businessName && advertData.businessName.trim())
-    );
+  console.log('handlePublish called:', { isTradeDealer, dealer, carStatus, advertId });
 
-    // Navigate to seller contact details page
-    navigate(`/selling/advert/contact/${advertId}`, {
-      state: {
-        advertData,
-        vehicleData,
-        sellerType: isTradeDealer ? 'trade' : (hasBusinessInfo ? 'trade' : 'private')
-      }
-    });
-  };
+  const hasBusinessInfo = !!(
+    (advertData?.businessLogo && advertData.businessLogo.trim()) ||
+    (advertData?.businessWebsite && advertData.businessWebsite.trim()) ||
+    (advertData?.businessName && advertData.businessName.trim())
+  );
 
+  navigate(`/selling/advert/contact/${advertId}`, {
+    state: {
+      advertData,
+      vehicleData,
+      sellerType: isTradeDealer ? 'trade' : (hasBusinessInfo ? 'trade' : 'private')
+    }
+  });
+};
   const closePopup = () => {
     setShowPopup(false);
   };
@@ -2567,13 +2565,13 @@ useEffect(() => {
             )}
 
             {/* Regular users: Show "I'm happy with my ad" button for draft/pending_payment cars */}
-            {!isTradeDealer && (carStatus === 'draft' || carStatus === 'pending_payment' || !carStatus) && (
+           {isTradeDealer && (carStatus === 'draft' || carStatus === 'pending_payment' || !carStatus) && (
               <button
                 onClick={handlePublish}
-                disabled={advertData.photos.length === 0 || !advertData.description.trim()}
+                disabled={isSaving}
                 className="publish-button"
               >
-                I'm happy with my ad - Continue
+                {isSaving ? '⏳ Saving...' : "I'm happy with my ad - Continue"}
               </button>
             )}
           </section>
