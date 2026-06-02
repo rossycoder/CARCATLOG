@@ -83,6 +83,7 @@ export const AuthProvider = ({ children }) => {
       return data;
     } catch (error) {
       console.error('Login error in context:', error);
+      // Preserve requiresVerification flag so SignInPage can handle redirect
       throw error;
     }
   };

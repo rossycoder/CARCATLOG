@@ -91,6 +91,18 @@ api.interceptors.response.use(
         
         // Store the current path to redirect back after verification
         localStorage.setItem('redirectAfterVerification', currentPath);
+
+        // Save email to sessionStorage so verify-email-required page can use it
+        const userData = error.response?.data?.data?.user;
+        if (userData?.email) {
+          sessionStorage.setItem('verificationEmail', userData.email);
+        } else {
+          // Try to get from localStorage user object
+          try {
+            const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+            if (localUser?.email) sessionStorage.setItem('verificationEmail', localUser.email);
+          } catch (e) {}
+        }
         
         // Redirect to email verification required page
         window.location.href = '/verify-email-required';

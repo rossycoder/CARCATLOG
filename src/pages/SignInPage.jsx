@@ -202,6 +202,8 @@ const SignInPage = () => {
     } catch (err) {
       // Handle email verification required error
       if (err.requiresVerification) {
+        // Save email to sessionStorage so verify-email-required page can use it
+        sessionStorage.setItem('verificationEmail', email);
         navigate('/verify-email-required');
         return;
       }

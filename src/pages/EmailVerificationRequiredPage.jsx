@@ -7,14 +7,19 @@ import './EmailVerificationRequiredPage.css';
 const EmailVerificationRequiredPage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  // Get email from user context OR sessionStorage fallback (set during signup/login)
+  const userEmail = user?.email || sessionStorage.getItem('verificationEmail') || '';
+
   const [isResending, setIsResending] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
-  const [resendStatus, setResendStatus] = useState(''); // success, error
+  const [resendStatus, setResendStatus] = useState('');
 
   const handleResendVerification = async () => {
-    if (!user?.email) {
+    if (!userEmail) {
       setResendStatus('error');
-      setResendMessage('No email address found. Please sign in again.');
+      setResendMessage('Session expired. Please sign in again to resend the email.');
+      setTimeout(() => navigate('/signin'), 2000);
       return;
     }
 
@@ -24,7 +29,7 @@ const EmailVerificationRequiredPage = () => {
 
     try {
       const response = await api.post('/auth/resend-verification', {
-        email: user.email
+        email: userEmail
       });
 
       if (response.data.success) {
@@ -45,6 +50,7 @@ const EmailVerificationRequiredPage = () => {
 
   const handleSignOut = () => {
     logout();
+    sessionStorage.removeItem('verificationEmail');
     navigate('/signin');
   };
 
@@ -65,10 +71,10 @@ const EmailVerificationRequiredPage = () => {
             To access this feature and protect your account, please verify your email address first.
           </p>
 
-          {user?.email && (
+          {userEmail && (
             <div className="email-info">
               <p>We sent a verification email to:</p>
-              <strong>{user.email}</strong>
+              <strong>{userEmail}</strong>
             </div>
           )}
 
@@ -108,7 +114,7 @@ const EmailVerificationRequiredPage = () => {
             <h4>Didn't receive the email?</h4>
             <ul>
               <li>Check your spam or junk folder</li>
-              <li>Make sure {user?.email} is correct</li>
+              {userEmail && <li>Make sure {userEmail} is correct</li>}
               <li>Try clicking "Resend Verification Email" above</li>
               <li>Contact support if you continue having issues</li>
             </ul>

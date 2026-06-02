@@ -35,7 +35,12 @@ export const authService = {
       }
       return response.data;
     } catch (error) {
-      throw error.response?.data || error;
+      const errData = error.response?.data || error;
+      // If email not verified, save email to sessionStorage so resend page works
+      if (errData?.requiresVerification) {
+        sessionStorage.setItem('verificationEmail', email);
+      }
+      throw errData;
     }
   },
 
