@@ -87,6 +87,23 @@ function PreviewGate({ children }) {
     return <ComingSoonPage />
   }
 
+  // Auth routes must ALWAYS work — never block these with ComingSoon
+  const authRoutes = [
+    '/verify-email',
+    '/check-email',
+    '/verify-email-required',
+    '/signin',
+    '/signup',
+    '/forgot-password',
+    '/reset-password',
+    '/auth/callback',
+    '/trade/verify-email',
+  ]
+  const isAuthRoute = authRoutes.some(r => pathname.startsWith(r))
+  if (isAuthRoute) {
+    return children
+  }
+
   // Block everything else unless unlocked
   if (!hasAccess) {
     return <ComingSoonPage />
