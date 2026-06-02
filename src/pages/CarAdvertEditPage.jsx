@@ -1414,8 +1414,14 @@ useEffect(() => {
       if (response.success) {
         alert('Advert saved successfully!');
         
-        // If car is already active (payment completed), redirect to My Listings
-        if (carStatus === 'active') {
+        // Trade dealer: redirect to trade inventory after save
+        if (isTradeDealer) {
+          setTimeout(() => {
+            navigate('/trade/inventory');
+          }, 1000);
+        }
+        // Regular user: if car is already active (payment completed), redirect to My Listings
+        else if (carStatus === 'active') {
           setTimeout(() => {
             navigate('/my-listings');
           }, 1000);
@@ -1547,8 +1553,8 @@ useEffect(() => {
 
       <div className="container">
         {/* Save All Changes Button - Only show in edit mode (payment complete or dealer car) */}
-        {/* Hide for draft/pending_payment cars (new car being added) */}
-        {((carStatus === 'active' || isDealerCar || (user?.isAdmin || user?.role === 'admin')) && 
+        {/* Hide for draft/pending_payment cars (new car being added) — EXCEPT for trade dealers who always save directly */}
+        {((carStatus === 'active' || isDealerCar || isTradeDealer || (user?.isAdmin || user?.role === 'admin')) && 
           carStatus !== 'draft' && carStatus !== 'pending_payment') && (
           <div className="sticky-save-bar">
             <div className="sticky-save-container">
@@ -2551,8 +2557,19 @@ useEffect(() => {
               </p>
             )}
             
-            {/* Show "I'm happy with my ad" button for draft/pending_payment cars */}
-            {(carStatus === 'draft' || carStatus === 'pending_payment') && (
+            {/* Trade dealers: always show Save button (no payment flow) */}
+            {isTradeDealer && (carStatus === 'draft' || carStatus === 'pending_payment') && (
+              <button
+                onClick={handleSave}
+                disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}
+                className="publish-button"
+              >
+                {isSaving ? '⏳ Saving...' : "I'm happy with my ad - Continue"}
+              </button>
+            )}
+
+            {/* Regular users: Show "I'm happy with my ad" button for draft/pending_payment cars */}
+            {!isTradeDealer && (carStatus === 'draft' || carStatus === 'pending_payment') && (
               <button
                 onClick={handlePublish}
                 disabled={advertData.photos.length === 0 || !advertData.description.trim()}
