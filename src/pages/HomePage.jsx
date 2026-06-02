@@ -417,9 +417,10 @@ const HomePage = () => {
 
      {/* Partners Section */}
       <section className="partners-section">
-        <div className="container">
-          <h2>Please visit our partners for your vehicle essentials</h2>
-          <div className="partners-grid">
+        <h2>Please visit our partners for your vehicle essentials</h2>
+        <div className="partners-marquee-wrapper">
+          <div className="partners-marquee-track">
+            {/* First set */}
             <div className="partner-card">
               <div className="partner-image">
                 <img src="/images/dummy/3.jpeg" alt="Plates For Cars" />
@@ -436,12 +437,69 @@ const HomePage = () => {
                 www.eurocarparts.com
               </a>
             </div>
-            <div className="partner-card partner-card-extended">
+            <div className="partner-card">
               <div className="partner-image">
                 <img src="/images/dummy/2.jpeg" alt="Kwik Fit" />
               </div>
               <a href="https://www.kwik-fit.com" target="_blank" rel="noopener noreferrer" className="partner-link">
                 www.kwik-fit.com
+              </a>
+            </div>
+            <div className="partner-card">
+              <div className="partner-image">
+                <img src="/images/dummy/thea.jpeg" alt="The AA" />
+              </div>
+              <a href="https://www.theaa.com" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.theaa.com
+              </a>
+            </div>
+            <div className="partner-card">
+              <div className="partner-image">
+                <img src="/images/dummy/carverticle.jpeg" alt="CarVertical" />
+              </div>
+              <a href="https://www.carvertical.com" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.carvertical.com
+              </a>
+            </div>
+            {/* Duplicate set for seamless loop */}
+            <div className="partner-card">
+              <div className="partner-image">
+                <img src="/images/dummy/3.jpeg" alt="Plates For Cars" />
+              </div>
+              <a href="https://www.platesforcars.co.uk" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.platesforcars.co.uk
+              </a>
+            </div>
+            <div className="partner-card">
+              <div className="partner-image">
+                <img src="/images/dummy/1.jpeg" alt="Euro Car Parts" />
+              </div>
+              <a href="https://www.eurocarparts.com" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.eurocarparts.com
+              </a>
+            </div>
+            <div className="partner-card">
+              <div className="partner-image">
+                <img src="/images/dummy/2.jpeg" alt="Kwik Fit" />
+              </div>
+              <a href="https://www.kwik-fit.com" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.kwik-fit.com
+              </a>
+            </div>
+            <div className="partner-card">
+              <div className="partner-image">
+                <img src="/images/dummy/thea.jpeg" alt="The AA" />
+              </div>
+              <a href="https://www.theaa.com" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.theaa.com
+              </a>
+            </div>
+            <div className="partner-card">
+              <div className="partner-image">
+                <img src="/images/dummy/carverticle.jpeg" alt="CarVertical" />
+              </div>
+              <a href="https://www.carvertical.com" target="_blank" rel="noopener noreferrer" className="partner-link">
+                www.carvertical.com
               </a>
             </div>
           </div>
