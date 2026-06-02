@@ -1553,8 +1553,8 @@ useEffect(() => {
 
       <div className="container">
         {/* Save All Changes Button - Only show in edit mode (payment complete or dealer car) */}
-        {/* Hide for draft/pending_payment cars (new car being added) — EXCEPT for trade dealers who always save directly */}
-        {((carStatus === 'active' || isDealerCar || isTradeDealer || (user?.isAdmin || user?.role === 'admin')) && 
+        {/* Hide for draft/pending_payment cars (new car being added) */}
+        {((carStatus === 'active' || isDealerCar || (user?.isAdmin || user?.role === 'admin')) && 
           carStatus !== 'draft' && carStatus !== 'pending_payment') && (
           <div className="sticky-save-bar">
             <div className="sticky-save-container">
