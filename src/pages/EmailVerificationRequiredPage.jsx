@@ -8,20 +8,23 @@ const EmailVerificationRequiredPage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  // Get email from user context OR sessionStorage fallback (set during signup/login)
-  const userEmail = user?.email || sessionStorage.getItem('verificationEmail') || '';
+  // Get email from user context OR sessionStorage fallback
+  const savedEmail = user?.email || sessionStorage.getItem('verificationEmail') || '';
 
+  const [userEmail, setUserEmail] = useState(savedEmail);
   const [isResending, setIsResending] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
   const [resendStatus, setResendStatus] = useState('');
 
   const handleResendVerification = async () => {
-    if (!userEmail) {
+    if (!userEmail || !userEmail.includes('@')) {
       setResendStatus('error');
-      setResendMessage('Session expired. Please sign in again to resend the email.');
-      setTimeout(() => navigate('/signin'), 2000);
+      setResendMessage('Please enter a valid email address.');
       return;
     }
+
+    // Save it for future use
+    sessionStorage.setItem('verificationEmail', userEmail);
 
     setIsResending(true);
     setResendMessage('');
@@ -40,7 +43,7 @@ const EmailVerificationRequiredPage = () => {
       console.error('Resend verification error:', error);
       setResendStatus('error');
       setResendMessage(
-        error.response?.data?.message || 
+        error.response?.data?.message ||
         'Failed to send verification email. Please try again.'
       );
     } finally {
@@ -66,29 +69,46 @@ const EmailVerificationRequiredPage = () => {
           </div>
 
           <h1>Email Verification Required</h1>
-          
+
           <p className="verification-message">
             To access this feature and protect your account, please verify your email address first.
           </p>
 
-          {userEmail && (
-            <div className="email-info">
-              <p>We sent a verification email to:</p>
-              <strong>{userEmail}</strong>
-            </div>
-          )}
+          {/* Always show email input — pre-filled if we have it, editable if not */}
+          <div className="email-input-section">
+            <label htmlFor="verif-email" style={{ display: 'block', marginBottom: '6px', color: '#555', fontSize: '14px', fontWeight: '600' }}>
+              Your email address:
+            </label>
+            <input
+              id="verif-email"
+              type="email"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              placeholder="Enter your email address"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e0e0e0',
+                borderRadius: '8px',
+                fontSize: '15px',
+                boxSizing: 'border-box',
+                outline: 'none',
+                marginBottom: '8px'
+              }}
+            />
+          </div>
 
           <div className="verification-steps">
             <h3>What to do next:</h3>
             <ol>
-              <li>Check your email inbox for a message from CarCatalog</li>
+              <li>Click "Resend Verification Email" below</li>
+              <li>Check your inbox for a message from CarCatalog</li>
               <li>Click the verification link in the email</li>
-              <li>Return here to access all features</li>
             </ol>
           </div>
 
           <div className="verification-actions">
-            <button 
+            <button
               className="btn-primary"
               onClick={handleResendVerification}
               disabled={isResending}
@@ -96,7 +116,7 @@ const EmailVerificationRequiredPage = () => {
               {isResending ? 'Sending...' : 'Resend Verification Email'}
             </button>
 
-            <button 
+            <button
               className="btn-secondary"
               onClick={handleSignOut}
             >
@@ -114,8 +134,8 @@ const EmailVerificationRequiredPage = () => {
             <h4>Didn't receive the email?</h4>
             <ul>
               <li>Check your spam or junk folder</li>
-              {userEmail && <li>Make sure {userEmail} is correct</li>}
-              <li>Try clicking "Resend Verification Email" above</li>
+              <li>Make sure the email address above is correct</li>
+              <li>Try clicking "Resend Verification Email" again</li>
               <li>Contact support if you continue having issues</li>
             </ul>
           </div>

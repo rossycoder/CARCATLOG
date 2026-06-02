@@ -51,14 +51,31 @@ const ForgotPasswordPage = () => {
       <div className="forgot-password-page">
         <div className="forgot-password-container">
           <div className="forgot-password-card">
-            <div className="success-icon">✉️</div>
-            <h1 className="forgot-password-title">Check your email</h1>
+
+            {/* Green circle icon */}
+            <div className="success-illustration">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </div>
+
+            <h1 className="success-title">Check your email</h1>
+
+            <div className="success-email-box">
+              <p>Password reset link sent to</p>
+              <strong>{email}</strong>
+            </div>
+
             <p className="success-message">
-              If an account exists with <strong>{email}</strong>, you will receive a password reset link shortly.
+              If an account exists with this email, you'll receive a reset link shortly.
             </p>
             <p className="success-note">
-              The link will expire in 1 hour. Check your spam folder if you don't see the email.
+              ⏱ The link expires in <strong>1 hour</strong>. Check your spam folder if you don't see the email.
             </p>
+
+            <div className="divider" />
+
             <Link to="/signin" className="btn-primary">
               Back to Sign In
             </Link>
