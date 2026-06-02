@@ -823,10 +823,12 @@ const CarAdvertEditPage = () => {
 
   // Auto-fix price if it's not set but we have valuation data
 useEffect(() => {
-  // ✅ YEH LINE ADD KARO — editing ke waqt price mat badlo
+  // Don't touch price while user is editing
   if (isPriceEditing) return;
   
-  if (vehicleData && (!advertData.price || advertData.price <= 0 || typeof advertData.price !== 'number')) {
+  // Only set price if it's genuinely missing (0 or not set)
+  const currentPrice = typeof advertData.price === 'number' ? advertData.price : parseFloat(advertData.price);
+  if (vehicleData && (!currentPrice || isNaN(currentPrice) || currentPrice <= 0)) {
     const availablePrice = vehicleData.valuation?.estimatedValue?.private || 
                          vehicleData.valuation?.estimatedValue?.retail ||
                          vehicleData.valuation?.privatePrice || 
@@ -840,7 +842,8 @@ useEffect(() => {
       }
     }
   }
-}, [vehicleData, advertData.price, isPriceEditing]); // ✅ isPriceEditing add karo dependency mein
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [vehicleData, isPriceEditing]); // removed advertData.price to avoid re-triggering after save
   // Load advert data on mount - only once
   useEffect(() => {
     loadAdvertData();
@@ -918,20 +921,19 @@ useEffect(() => {
   }
  
   setErrors(prev => ({ ...prev, price: null }));
+
+  // Exit editing mode immediately so the Edit Price button reappears
+  setIsPriceEditing(false);
+  setRawPriceInput('');
+  setPriceBeforeEdit(null);
+  setAdvertData(prev => ({ ...prev, price: priceValue }));
  
   try {
     const updatedAdvertData = {
       ...advertData,
       price: priceValue,
     };
- 
     await advertService.updateAdvert(advertId, updatedAdvertData, vehicleData);
- 
-    // State update: ab advertData.price ek clean number hai
-    setAdvertData(prev => ({ ...prev, price: priceValue }));
-    setIsPriceEditing(false);
-    setRawPriceInput('');
-    setPriceBeforeEdit(null);
   } catch (error) {
     console.error('Error saving price:', error);
     setErrors(prev => ({ ...prev, price: 'Failed to save price. Please try again.' }));

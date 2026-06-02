@@ -1,9 +1,13 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTradeDealerContext } from '../context/TradeDealerContext';
 
 const ProtectedRoute = ({ children, requireEmailVerification = false }) => {
   const { user, loading, isAuthenticated } = useAuth();
+  const { dealer, isAuthenticated: isTradeAuthenticated } = useTradeDealerContext();
   const location = useLocation();
+
+  const isTradeDealer = isTradeAuthenticated && !!dealer;
 
   if (loading) {
     return (
@@ -16,6 +20,11 @@ const ProtectedRoute = ({ children, requireEmailVerification = false }) => {
         <div className="spinner"></div>
       </div>
     );
+  }
+
+  // Allow trade dealers through without requiring regular user auth
+  if (isTradeDealer) {
+    return children;
   }
 
   if (!isAuthenticated) {
