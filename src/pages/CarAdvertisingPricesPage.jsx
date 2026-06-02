@@ -500,9 +500,14 @@ const CarAdvertisingPricesPage = () => {
       };
       
       
+      const token = localStorage.getItem('token');
+      
       const response = await fetch(`${API_BASE_URL}/payments/create-car-checkout-session`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(requestBody),
       });
       
