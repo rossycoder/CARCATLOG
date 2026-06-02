@@ -286,35 +286,33 @@ const CarAdvertEditPage = () => {
           setCarStatus(vehicleData.advertStatus || enhancedVehicleData.advertStatus); // Store car status
           setIsDealerCar(vehicleData.isDealerListing || false); // Store if it's a dealer car
           
-          // CRITICAL: Authorization check - verify user owns this car (skip for admin)
+          // CRITICAL: Authorization check - verify user owns this car (skip for admin and trade dealers)
           const isAdmin = user?.isAdmin || user?.role === 'admin';
           
           // Convert ObjectIds to strings for comparison
           const vehicleUserId = vehicleData.userId?._id?.toString() || vehicleData.userId?.toString();
           const currentUserId = user?._id?.toString() || user?.id?.toString();
           
-          
-          if (user && vehicleUserId && vehicleUserId !== currentUserId && !isAdmin) {
+          // Only block regular users who don't own the car
+          // Skip check for: admins, trade dealers, or if car has no userId (new unassigned car)
+          if (user && !isTradeDealer && vehicleUserId && vehicleUserId !== currentUserId && !isAdmin) {
             console.error('❌ Authorization failed: User does not own this car');
             setLoadError('You do not have permission to edit this advert');
             setIsLoading(false);
-            setTimeout(() => navigate('/'), 3000); // Redirect after 3 seconds
+            setTimeout(() => navigate('/'), 3000);
             return;
           }
           
-          // Log if admin is editing someone else's car
-          if (isAdmin && vehicleUserId && vehicleUserId !== currentUserId) {
-          }
-          
-          // CRITICAL: Authorization check for trade dealers
+          // Authorization check for trade dealers - only block if car belongs to a DIFFERENT dealer
           const vehicleDealerId = vehicleData.dealerId?._id?.toString() || vehicleData.dealerId?.toString();
           const currentDealerId = dealer?._id?.toString() || dealer?.id?.toString();
           
-          if (isTradeDealer && vehicleDealerId && vehicleDealerId !== currentDealerId) {
+          // Allow if: no dealerId on car (new car), or dealerId matches current dealer
+          if (isTradeDealer && vehicleDealerId && currentDealerId && vehicleDealerId !== currentDealerId) {
             console.error('❌ Authorization failed: Dealer does not own this car');
             setLoadError('You do not have permission to edit this advert');
             setIsLoading(false);
-            setTimeout(() => navigate('/trade/dashboard'), 3000); // Redirect after 3 seconds
+            setTimeout(() => navigate('/trade/dashboard'), 3000);
             return;
           }
           
@@ -2558,7 +2556,7 @@ useEffect(() => {
             )}
             
             {/* Trade dealers: always show Save button (no payment flow) */}
-            {isTradeDealer && (carStatus === 'draft' || carStatus === 'pending_payment') && (
+            {isTradeDealer && (carStatus === 'draft' || carStatus === 'pending_payment' || !carStatus) && (
               <button
                 onClick={handleSave}
                 disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}
@@ -2569,7 +2567,7 @@ useEffect(() => {
             )}
 
             {/* Regular users: Show "I'm happy with my ad" button for draft/pending_payment cars */}
-            {!isTradeDealer && (carStatus === 'draft' || carStatus === 'pending_payment') && (
+            {!isTradeDealer && (carStatus === 'draft' || carStatus === 'pending_payment' || !carStatus) && (
               <button
                 onClick={handlePublish}
                 disabled={advertData.photos.length === 0 || !advertData.description.trim()}
