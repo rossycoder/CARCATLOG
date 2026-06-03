@@ -100,7 +100,7 @@
   }
 
   .page-header h1 {
-    font-size: 22px;
+    display: none !important;
   }
 
   .header-left {
