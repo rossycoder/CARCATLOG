@@ -376,9 +376,9 @@ const CarAdvertEditPage = () => {
           
           
           // 🔒 PROTECTED: Only fetch for NEW cars OR if critical data is missing
-          // NEVER fetch for existing cars with payment completed
+          // MOT fetch: allow for ANY car status if motDue is missing (not just new cars)
           const shouldFetchEnhancedData = isNewUserCar && needsEnhancedData;
-          const shouldFetchMOT = isNewUserCar && needsMOTData && !hasMOTHistory;
+          const shouldFetchMOT = needsMOTData && !hasMOTHistory; // removed isNewUserCar restriction
           
           if (!shouldFetchEnhancedData && !shouldFetchMOT) {
           }
@@ -526,30 +526,51 @@ const CarAdvertEditPage = () => {
                   motExpiry: motDueDate
                 };
                 
-                // CRITICAL: Update frontend state while preserving valuation
                 setVehicleData(prev => ({
                   ...prev,
                   ...newCarMotData,
-                  // Explicitly preserve valuation data
                   valuation: prev.valuation,
                   estimatedValue: prev.estimatedValue,
                   allValuations: prev.allValuations,
                   price: prev.price
                 }));
                 
-                // CRITICAL: Save calculated MOT data to database
                 try {
                   await api.patch(`/vehicles/${advertId}`, newCarMotData);
                 } catch (saveError) {
                   console.error('❌ Failed to save calculated MOT data:', saveError.message);
                 }
               } else {
-                setVehicleData(prev => ({
-                  ...prev,
-                  motStatus: 'Contact seller',
-                  motDue: null,
-                  motExpiry: null
-                }));
+                // CRITICAL FIX: Don't set motDue to null - try DVLA as final fallback
+                try {
+                  const dvlaFallback = await api.post('/vehicles/dvla-lookup', {
+                    registrationNumber: vehicleData.registrationNumber
+                  });
+                  if (dvlaFallback.data?.data?.motExpiryDate) {
+                    const dvlaMotDue = dvlaFallback.data.data.motExpiryDate;
+                    const dvlaMotStatus = dvlaFallback.data.data.motStatus || 'Valid';
+                    setVehicleData(prev => ({
+                      ...prev,
+                      motDue: dvlaMotDue,
+                      motExpiry: dvlaMotDue,
+                      motStatus: dvlaMotStatus,
+                      valuation: prev.valuation,
+                      estimatedValue: prev.estimatedValue,
+                      allValuations: prev.allValuations,
+                      price: prev.price
+                    }));
+                    // Save to database
+                    await api.patch(`/vehicles/${advertId}`, {
+                      motDue: dvlaMotDue,
+                      motExpiry: dvlaMotDue,
+                      motStatus: dvlaMotStatus
+                    });
+                  }
+                  // If DVLA also has no MOT data, leave existing value unchanged
+                } catch (dvlaFallbackError) {
+                  console.warn('⚠️ DVLA MOT fallback also failed:', dvlaFallbackError.message);
+                  // Leave existing motDue value unchanged - don't set to null
+                }
               }
             } catch (enhancedError) {
               console.warn('⚠️ Failed to fetch enhanced data:', enhancedError.message);
