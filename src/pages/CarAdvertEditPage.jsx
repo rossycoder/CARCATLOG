@@ -2565,10 +2565,10 @@ useEffect(() => {
             )}
 
             {/* Regular users: Show "I'm happy with my ad" button for draft/pending_payment cars */}
-           {isTradeDealer && (carStatus === 'draft' || carStatus === 'pending_payment' || !carStatus) && (
+            {!isTradeDealer && (carStatus === 'draft' || carStatus === 'pending_payment' || !carStatus) && (
               <button
                 onClick={handlePublish}
-                disabled={isSaving}
+                disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}
                 className="publish-button"
               >
                 {isSaving ? '⏳ Saving...' : "I'm happy with my ad - Continue"}

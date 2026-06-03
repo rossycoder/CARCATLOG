@@ -93,8 +93,10 @@
     gap: 8px;
   }
 
-  .header-right {
-    display: none;
+  .seller-contact-page .header-right,
+  .seller-contact-page .user-email,
+  .seller-contact-page .advert-id {
+    display: none !important;
   }
 
   .page-header h1 {
