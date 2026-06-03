@@ -1717,7 +1717,6 @@ useEffect(() => {
                 
                 <div className="vehicle-actions">
                   <a href="#" onClick={(e) => { e.preventDefault(); handleVehicleDetailsEdit(); }} className="edit-link">Edit vehicle details</a>
-                  <a href="#" onClick={(e) => e.preventDefault()} className="attention-link">Add attention grabber</a>
                 </div>
               </>
             ) : (

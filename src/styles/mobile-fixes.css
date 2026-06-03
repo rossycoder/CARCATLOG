@@ -3,6 +3,25 @@
    ======================================== */
 
 /* ========================================
+   DESKTOP: Force right column to show
+   ======================================== */
+@media (min-width: 969px) {
+  .content-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 350px !important;
+    gap: 20px !important;
+    align-items: start !important;
+  }
+
+  .right-column {
+    display: block !important;
+    position: sticky !important;
+    top: 80px !important;
+    height: fit-content !important;
+  }
+}
+
+/* ========================================
    CRITICAL: FORCE HEART SAVE BUTTON ON MOBILE
    ======================================== */
 @media (max-width: 968px) {

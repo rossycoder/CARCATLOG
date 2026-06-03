@@ -794,7 +794,7 @@ const CarFinderFormPage = () => {
                       }}
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Loading...' : '🚗 Continue to Publish'}
+                      {isLoading ? 'Loading...' : '🚗 Continue Ad Population'}
                     </button>
                   ) : (
                     <button 

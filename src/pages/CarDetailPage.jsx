@@ -451,12 +451,7 @@ const CarDetailPage = () => {
             >
               Finance Calculator
             </button>
-            <button 
-              className={`nav-tab ${activeTab === 'price-indicator' ? 'active' : ''}`}
-              onClick={() => scrollToSection('price-indicator-section')}
-            >
-              Price Indicator
-            </button>
+            
             <button 
               className={`nav-tab ${activeTab === 'meet-seller' ? 'active' : ''}`}
               onClick={() => scrollToSection('cd-meet-seller')}
@@ -618,12 +613,13 @@ const CarDetailPage = () => {
               <div className="car-header-right">
                 {car.price && (() => {
                   // Get market value from different sources
+                  // car.valuation structure: { privatePrice, dealerPrice, partExchangePrice }
+                  // car.allValuations structure: { private, retail, trade } (set by controller)
                   let marketValue = car.allValuations?.private || 
                                    car.allValuations?.Private ||
-                                   car.valuation?.estimatedValue?.private ||
+                                   car.valuation?.privatePrice ||
                                    car.allValuations?.retail || 
                                    car.allValuations?.Retail ||
-                                   car.valuation?.estimatedValue?.retail ||
                                    car.valuation?.dealerPrice ||
                                    car.estimatedValue;
                   
@@ -1296,12 +1292,13 @@ const CarDetailPage = () => {
             {car.price && (() => {
               // Get market value from different sources
               // Priority: private price > retail price > dealer price > estimated value
+              // car.valuation structure: { privatePrice, dealerPrice, partExchangePrice }
+              // car.allValuations structure: { private, retail, trade } (set by controller)
               let marketValue = car.allValuations?.private || 
                                car.allValuations?.Private ||
-                               car.valuation?.estimatedValue?.private ||
+                               car.valuation?.privatePrice ||
                                car.allValuations?.retail || 
                                car.allValuations?.Retail ||
-                               car.valuation?.estimatedValue?.retail ||
                                car.valuation?.dealerPrice ||
                                car.estimatedValue;
               
