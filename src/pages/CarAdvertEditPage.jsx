@@ -37,7 +37,8 @@ const CarAdvertEditPage = () => {
     dataSources,
     sources: fieldSources,
     lookupVehicle,
-    reset: resetLookup
+    reset: resetLookup,
+    clearCache
   } = useEnhancedVehicleLookup();
   
   const [isLoading, setIsLoading] = useState(true);
@@ -409,9 +410,15 @@ const CarAdvertEditPage = () => {
           const needsMOTData = !vehicleData.motDue && !vehicleData.motExpiry;
           const hasMOTHistory = vehicleData.motHistory && vehicleData.motHistory.length > 0;
           
-          // 🚨 PRIORITY FIX: Fetch MOT from CheckCarDetails API if missing (more accurate than DVLA)
+          // 🚨 PRIORITY FIX: Fetch MOT if missing
+          // First: clear session cache so enhanced-lookup returns fresh MOT data
+          // Then: call mot-lookup directly as backup
           if ((needsMOTData || !hasMOTHistory) && vehicleData.registrationNumber) {
-            console.log('🔍 MOT data missing - fetching from CheckCarDetails API...');
+            console.log('🔍 MOT data missing - clearing cache and fetching fresh data...');
+            
+            // Clear stale session cache so next lookupVehicle gets fresh MOT data
+            clearCache(vehicleData.registrationNumber);
+
             try {
               const motResponse = await api.post('/vehicles/mot-lookup', {
                 registrationNumber: vehicleData.registrationNumber,
@@ -617,6 +624,8 @@ const CarAdvertEditPage = () => {
         
         // 🚨 Fetch MOT from CheckCarDetails if missing (accurate source)
         if ((needsMOTData || !hasMOTHistory) && response.data.vehicleData?.registrationNumber) {
+          // Clear stale session cache so future lookups get fresh MOT data
+          clearCache(response.data.vehicleData.registrationNumber);
           try {
             const motResp = await api.post('/vehicles/mot-lookup', {
               registrationNumber: response.data.vehicleData.registrationNumber,
