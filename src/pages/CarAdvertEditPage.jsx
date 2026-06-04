@@ -409,46 +409,41 @@ const CarAdvertEditPage = () => {
           const needsMOTData = !vehicleData.motDue && !vehicleData.motExpiry;
           const hasMOTHistory = vehicleData.motHistory && vehicleData.motHistory.length > 0;
           
-          // 🚨 PRIORITY FIX: Always fetch MOT from DVLA if missing (regardless of other data)
-          if (needsMOTData && !hasMOTHistory && vehicleData.registrationNumber) {
-            console.log('🔍 MOT data missing - fetching from DVLA...');
+          // 🚨 PRIORITY FIX: Fetch MOT from CheckCarDetails API if missing (more accurate than DVLA)
+          if ((needsMOTData || !hasMOTHistory) && vehicleData.registrationNumber) {
+            console.log('🔍 MOT data missing - fetching from CheckCarDetails API...');
             try {
-              const dvlaResponse = await api.post('/vehicles/dvla-lookup', {
-                registrationNumber: vehicleData.registrationNumber
+              const motResponse = await api.post('/vehicles/mot-lookup', {
+                registrationNumber: vehicleData.registrationNumber,
+                vehicleId: advertId   // save directly to DB in one shot
               });
               
-              if (dvlaResponse.data?.data?.motExpiryDate) {
-                const dvlaMotData = {
-                  motStatus: dvlaResponse.data.data.motStatus || 'Valid',
-                  motDue: dvlaResponse.data.data.motExpiryDate,
-                  motExpiry: dvlaResponse.data.data.motExpiryDate
+              if (motResponse.data?.success && motResponse.data?.data?.motDueDate) {
+                const { motDueDate, motStatus, motHistory: fetchedMotHistory } = motResponse.data.data;
+                const motStateUpdate = {
+                  motStatus: motStatus || 'Valid',
+                  motDue:    motDueDate,
+                  motExpiry: motDueDate,
+                  motHistory: fetchedMotHistory || []
                 };
                 
-                console.log('✅ MOT data fetched from DVLA:', dvlaMotData);
+                console.log('✅ MOT data fetched from CheckCarDetails:', motDueDate);
                 
                 // Update frontend state
                 setVehicleData(prev => ({
                   ...prev,
-                  ...dvlaMotData,
-                  // Preserve existing data
-                  valuation: prev.valuation,
+                  ...motStateUpdate,
+                  valuation:      prev.valuation,
                   estimatedValue: prev.estimatedValue,
-                  allValuations: prev.allValuations,
-                  price: prev.price
+                  allValuations:  prev.allValuations,
+                  price:          prev.price
                 }));
-                
-                // Save to database immediately
-                try {
-                  await api.patch(`/vehicles/${advertId}`, dvlaMotData);
-                  console.log('✅ MOT data saved to database');
-                } catch (saveError) {
-                  console.error('❌ Failed to save MOT data:', saveError.message);
-                }
+                // DB already saved by backend (vehicleId passed above)
               } else {
-                console.log('❌ No MOT data found in DVLA response');
+                console.log('❌ No MOT data found in CheckCarDetails response');
               }
-            } catch (dvlaError) {
-              console.error('❌ DVLA MOT lookup failed:', dvlaError.message);
+            } catch (motError) {
+              console.error('❌ CheckCarDetails MOT lookup failed:', motError.message);
             }
           }
           
@@ -559,107 +554,12 @@ const CarAdvertEditPage = () => {
                 }
               } else if (hasMOTDataInDB) {
               } else {
-                // FALLBACK: Try fetching MOT from DVLA if CheckCarDetails didn't have it
-                try {
-                  const dvlaResponse = await api.post('/vehicles/dvla-lookup', {
-                    registrationNumber: vehicleData.registrationNumber
-                  });
-                  
-                  if (dvlaResponse.data?.data?.motExpiryDate) {
-                    const dvlaMotData = {
-                      motStatus: dvlaResponse.data.data.motStatus || 'Valid',
-                      motDue: dvlaResponse.data.data.motExpiryDate,
-                      motExpiry: dvlaResponse.data.data.motExpiryDate
-                    };
-                    
-                    
-                    // CRITICAL: Update frontend state while preserving valuation
-                    setVehicleData(prev => ({
-                      ...prev,
-                      ...dvlaMotData,
-                      // Explicitly preserve valuation data
-                      valuation: prev.valuation,
-                      estimatedValue: prev.estimatedValue,
-                      allValuations: prev.allValuations,
-                      price: prev.price
-                    }));
-                    
-                    // Save to database
-                    await api.patch(`/vehicles/${advertId}`, dvlaMotData);
-                  } else {
-                  }
-                } catch (dvlaError) {
-                  console.error('❌ Failed to fetch MOT from DVLA:', dvlaError.message);
-                }
+                // FALLBACK: CheckCarDetails MOT API (already fetched above, skip duplicate call)
+                console.log('ℹ️ MOT from enhanced data not available — already handled by mot-lookup above');
               }
               
-              if (enhancedVehicleData.year >= 2020) {
-                // For 2020+ cars: ONLY use real MOT data from DVLA or API
-                // NEVER calculate/estimate MOT dates — they are always wrong
-                // If no MOT data found from any source, leave it blank for user to fill manually
-                if (!enhancedVehicleData.motDue && !enhancedVehicleData.motExpiry) {
-                  // Try DVLA as final source for real MOT date
-                  try {
-                    const dvlaFinal = await api.post('/vehicles/dvla-lookup', {
-                      registrationNumber: vehicleData.registrationNumber
-                    });
-                    if (dvlaFinal.data?.data?.motExpiryDate) {
-                      const realMotDue = dvlaFinal.data.data.motExpiryDate;
-                      const realMotStatus = dvlaFinal.data.data.motStatus || 'Valid';
-                      setVehicleData(prev => ({
-                        ...prev,
-                        motDue: realMotDue,
-                        motExpiry: realMotDue,
-                        motStatus: realMotStatus,
-                        valuation: prev.valuation,
-                        estimatedValue: prev.estimatedValue,
-                        allValuations: prev.allValuations,
-                        price: prev.price
-                      }));
-                      await api.patch(`/vehicles/${advertId}`, {
-                        motDue: realMotDue,
-                        motExpiry: realMotDue,
-                        motStatus: realMotStatus
-                      });
-                      console.log('✅ Real MOT date fetched from DVLA for 2020+ car:', realMotDue);
-                    }
-                    // If DVLA has no MOT date either, leave blank — do NOT calculate
-                  } catch (dvlaFinalError) {
-                    console.warn('⚠️ DVLA MOT fetch failed for 2020+ car:', dvlaFinalError.message);
-                  }
-                }
-              } else {
-                // CRITICAL FIX: Don't set motDue to null - try DVLA as final fallback
-                try {
-                  const dvlaFallback = await api.post('/vehicles/dvla-lookup', {
-                    registrationNumber: vehicleData.registrationNumber
-                  });
-                  if (dvlaFallback.data?.data?.motExpiryDate) {
-                    const dvlaMotDue = dvlaFallback.data.data.motExpiryDate;
-                    const dvlaMotStatus = dvlaFallback.data.data.motStatus || 'Valid';
-                    setVehicleData(prev => ({
-                      ...prev,
-                      motDue: dvlaMotDue,
-                      motExpiry: dvlaMotDue,
-                      motStatus: dvlaMotStatus,
-                      valuation: prev.valuation,
-                      estimatedValue: prev.estimatedValue,
-                      allValuations: prev.allValuations,
-                      price: prev.price
-                    }));
-                    // Save to database
-                    await api.patch(`/vehicles/${advertId}`, {
-                      motDue: dvlaMotDue,
-                      motExpiry: dvlaMotDue,
-                      motStatus: dvlaMotStatus
-                    });
-                  }
-                  // If DVLA also has no MOT data, leave existing value unchanged
-                } catch (dvlaFallbackError) {
-                  console.warn('⚠️ DVLA MOT fallback also failed:', dvlaFallbackError.message);
-                  // Leave existing motDue value unchanged - don't set to null
-                }
-              }
+              // For all cars: if motDue still missing after enhanced lookup, mot-lookup already handled it above
+              // No need for extra DVLA calls here — they return wrong dates
             } catch (enhancedError) {
               console.warn('⚠️ Failed to fetch enhanced data:', enhancedError.message);
             }
@@ -715,10 +615,36 @@ const CarAdvertEditPage = () => {
         const needsMOTData = !response.data.vehicleData?.motDue && !response.data.vehicleData?.motExpiry;
         const hasMOTHistory = response.data.vehicleData?.motHistory && response.data.vehicleData.motHistory.length > 0;
         
+        // 🚨 Fetch MOT from CheckCarDetails if missing (accurate source)
+        if ((needsMOTData || !hasMOTHistory) && response.data.vehicleData?.registrationNumber) {
+          try {
+            const motResp = await api.post('/vehicles/mot-lookup', {
+              registrationNumber: response.data.vehicleData.registrationNumber,
+              vehicleId: advertId
+            });
+            if (motResp.data?.success && motResp.data?.data?.motDueDate) {
+              const { motDueDate, motStatus: ms, motHistory: mh } = motResp.data.data;
+              setVehicleData(prev => ({
+                ...prev,
+                motDue:    motDueDate,
+                motExpiry: motDueDate,
+                motStatus: ms || 'Valid',
+                motHistory: mh || [],
+                valuation:      prev.valuation,
+                estimatedValue: prev.estimatedValue,
+                allValuations:  prev.allValuations,
+                price:          prev.price
+              }));
+              console.log('✅ MOT fetched from CheckCarDetails (fallback path):', motDueDate);
+            }
+          } catch (motErr) {
+            console.warn('⚠️ MOT lookup failed (fallback path):', motErr.message);
+          }
+        }
         
         // 🔒 PROTECTED: Only fetch for NEW cars OR if critical data is missing
         const shouldFetchEnhancedData = isNewUserCar && needsEnhancedData;
-        const shouldFetchMOT = isNewUserCar && needsMOTData && !hasMOTHistory;
+        const shouldFetchMOT = false; // MOT now handled by mot-lookup above
         
         if (!shouldFetchEnhancedData && !shouldFetchMOT) {
         }
@@ -803,33 +729,8 @@ const CarAdvertEditPage = () => {
               }
             } else if (hasMOTDataInDB) {
             } else {
-              // DVLA Fallback in advert service path
-              try {
-                const dvlaResponse = await api.post('/vehicles/dvla-lookup', {
-                  registrationNumber: response.data.vehicleData.registrationNumber
-                });
-                
-                if (dvlaResponse.data?.data?.motExpiryDate) {
-                  const dvlaMotData = {
-                    motStatus: dvlaResponse.data.data.motStatus || 'Valid',
-                    motDue: dvlaResponse.data.data.motExpiryDate,
-                    motExpiry: dvlaResponse.data.data.motExpiryDate
-                  };
-                  
-                  setVehicleData(prev => ({ 
-                    ...prev, 
-                    ...dvlaMotData,
-                    // Explicitly preserve valuation data
-                    valuation: prev.valuation,
-                    estimatedValue: prev.estimatedValue,
-                    allValuations: prev.allValuations,
-                    price: prev.price
-                  }));
-                  await api.patch(`/vehicles/${advertId}`, dvlaMotData);
-                }
-              } catch (dvlaError) {
-                console.error('❌ DVLA MOT fetch failed (fallback):', dvlaError.message);
-              }
+              // MOT already handled by mot-lookup above — skip duplicate call
+              console.log('ℹ️ MOT fallback skipped — already handled by mot-lookup');
             }
           } catch (enhancedError) {
             console.warn('⚠️ Failed to fetch enhanced data:', enhancedError.message);
