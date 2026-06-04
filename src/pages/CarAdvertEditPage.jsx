@@ -370,9 +370,87 @@ const CarAdvertEditPage = () => {
           // Check if this is a new user car (no payment completed yet)
           const isNewUserCar = vehicleData.advertStatus === 'draft' || vehicleData.advertStatus === 'pending_payment';
           
+          // 🚨 PRIORITY FIX: Always fetch valuation if missing (regardless of car status)
+          if (needsValuation && vehicleData.registrationNumber) {
+            console.log('🔍 Valuation data missing - fetching...');
+            try {
+              const valuationResponse = await lookupVehicle(vehicleData.registrationNumber, vehicleData.mileage);
+              
+              if (valuationResponse.valuation) {
+                console.log('✅ Valuation data fetched:', valuationResponse.valuation);
+                
+                // Update frontend state
+                setVehicleData(prev => ({
+                  ...prev,
+                  valuation: valuationResponse.valuation,
+                  estimatedValue: valuationResponse.valuation.privatePrice || prev.estimatedValue,
+                  allValuations: valuationResponse.allValuations || prev.allValuations
+                }));
+                
+                // Save to database immediately
+                try {
+                  await api.patch(`/vehicles/${advertId}`, {
+                    valuation: valuationResponse.valuation,
+                    estimatedValue: valuationResponse.valuation.privatePrice
+                  });
+                  console.log('✅ Valuation data saved to database');
+                } catch (saveError) {
+                  console.error('❌ Failed to save valuation data:', saveError.message);
+                }
+              } else {
+                console.log('❌ No valuation data found in API response');
+              }
+            } catch (valuationError) {
+              console.error('❌ Valuation lookup failed:', valuationError.message);
+            }
+          }
+          
           // 🔒 CRITICAL: Check if MOT data is missing
           const needsMOTData = !vehicleData.motDue && !vehicleData.motExpiry;
           const hasMOTHistory = vehicleData.motHistory && vehicleData.motHistory.length > 0;
+          
+          // 🚨 PRIORITY FIX: Always fetch MOT from DVLA if missing (regardless of other data)
+          if (needsMOTData && !hasMOTHistory && vehicleData.registrationNumber) {
+            console.log('🔍 MOT data missing - fetching from DVLA...');
+            try {
+              const dvlaResponse = await api.post('/vehicles/dvla-lookup', {
+                registrationNumber: vehicleData.registrationNumber
+              });
+              
+              if (dvlaResponse.data?.data?.motExpiryDate) {
+                const dvlaMotData = {
+                  motStatus: dvlaResponse.data.data.motStatus || 'Valid',
+                  motDue: dvlaResponse.data.data.motExpiryDate,
+                  motExpiry: dvlaResponse.data.data.motExpiryDate
+                };
+                
+                console.log('✅ MOT data fetched from DVLA:', dvlaMotData);
+                
+                // Update frontend state
+                setVehicleData(prev => ({
+                  ...prev,
+                  ...dvlaMotData,
+                  // Preserve existing data
+                  valuation: prev.valuation,
+                  estimatedValue: prev.estimatedValue,
+                  allValuations: prev.allValuations,
+                  price: prev.price
+                }));
+                
+                // Save to database immediately
+                try {
+                  await api.patch(`/vehicles/${advertId}`, dvlaMotData);
+                  console.log('✅ MOT data saved to database');
+                } catch (saveError) {
+                  console.error('❌ Failed to save MOT data:', saveError.message);
+                }
+              } else {
+                console.log('❌ No MOT data found in DVLA response');
+              }
+            } catch (dvlaError) {
+              console.error('❌ DVLA MOT lookup failed:', dvlaError.message);
+            }
+          }
           
           
           // 🔒 PROTECTED: Only fetch for NEW cars OR if critical data is missing
@@ -517,28 +595,36 @@ const CarAdvertEditPage = () => {
               
               if (enhancedVehicleData.year >= 2020) {
                 // For new cars (2020+), calculate MOT due date (3 years from first registration)
-                const motDueYear = enhancedVehicleData.year + 3;
-                const motDueDate = `${motDueYear}-10-31`; // Approximate date
-                
-                const newCarMotData = {
-                  motStatus: 'Not due',
-                  motDue: motDueDate,
-                  motExpiry: motDueDate
-                };
-                
-                setVehicleData(prev => ({
-                  ...prev,
-                  ...newCarMotData,
-                  valuation: prev.valuation,
-                  estimatedValue: prev.estimatedValue,
-                  allValuations: prev.allValuations,
-                  price: prev.price
-                }));
-                
-                try {
-                  await api.patch(`/vehicles/${advertId}`, newCarMotData);
-                } catch (saveError) {
-                  console.error('❌ Failed to save calculated MOT data:', saveError.message);
+                // CRITICAL: Only set calculated MOT if NO real MOT data found from APIs
+                if (!enhancedVehicleData.motDue && !enhancedVehicleData.motExpiry && !vehicleData.motDue) {
+                  const motDueYear = enhancedVehicleData.year + 3;
+                  const motDueDate = `${motDueYear}-10-31`; // Approximate date
+                  
+                  console.log('ℹ️ Calculating MOT for new car:', vehicleData.registrationNumber, 'Year:', enhancedVehicleData.year, 'MOT Due:', motDueDate);
+                  
+                  const newCarMotData = {
+                    motStatus: 'Not due',
+                    motDue: motDueDate,
+                    motExpiry: motDueDate
+                  };
+                  
+                  setVehicleData(prev => ({
+                    ...prev,
+                    ...newCarMotData,
+                    valuation: prev.valuation,
+                    estimatedValue: prev.estimatedValue,
+                    allValuations: prev.allValuations,
+                    price: prev.price
+                  }));
+                  
+                  try {
+                    await api.patch(`/vehicles/${advertId}`, newCarMotData);
+                    console.log('✅ Calculated MOT data saved for new car');
+                  } catch (saveError) {
+                    console.error('❌ Failed to save calculated MOT data:', saveError.message);
+                  }
+                } else {
+                  console.log('ℹ️ Real MOT data found for', vehicleData.registrationNumber, '- skipping calculation');
                 }
               } else {
                 // CRITICAL FIX: Don't set motDue to null - try DVLA as final fallback
