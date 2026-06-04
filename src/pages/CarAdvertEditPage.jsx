@@ -594,37 +594,39 @@ const CarAdvertEditPage = () => {
               }
               
               if (enhancedVehicleData.year >= 2020) {
-                // For new cars (2020+), calculate MOT due date (3 years from first registration)
-                // CRITICAL: Only set calculated MOT if NO real MOT data found from APIs
-                if (!enhancedVehicleData.motDue && !enhancedVehicleData.motExpiry && !vehicleData.motDue) {
-                  const motDueYear = enhancedVehicleData.year + 3;
-                  const motDueDate = `${motDueYear}-10-31`; // Approximate date
-                  
-                  console.log('ℹ️ Calculating MOT for new car:', vehicleData.registrationNumber, 'Year:', enhancedVehicleData.year, 'MOT Due:', motDueDate);
-                  
-                  const newCarMotData = {
-                    motStatus: 'Not due',
-                    motDue: motDueDate,
-                    motExpiry: motDueDate
-                  };
-                  
-                  setVehicleData(prev => ({
-                    ...prev,
-                    ...newCarMotData,
-                    valuation: prev.valuation,
-                    estimatedValue: prev.estimatedValue,
-                    allValuations: prev.allValuations,
-                    price: prev.price
-                  }));
-                  
+                // For 2020+ cars: ONLY use real MOT data from DVLA or API
+                // NEVER calculate/estimate MOT dates — they are always wrong
+                // If no MOT data found from any source, leave it blank for user to fill manually
+                if (!enhancedVehicleData.motDue && !enhancedVehicleData.motExpiry) {
+                  // Try DVLA as final source for real MOT date
                   try {
-                    await api.patch(`/vehicles/${advertId}`, newCarMotData);
-                    console.log('✅ Calculated MOT data saved for new car');
-                  } catch (saveError) {
-                    console.error('❌ Failed to save calculated MOT data:', saveError.message);
+                    const dvlaFinal = await api.post('/vehicles/dvla-lookup', {
+                      registrationNumber: vehicleData.registrationNumber
+                    });
+                    if (dvlaFinal.data?.data?.motExpiryDate) {
+                      const realMotDue = dvlaFinal.data.data.motExpiryDate;
+                      const realMotStatus = dvlaFinal.data.data.motStatus || 'Valid';
+                      setVehicleData(prev => ({
+                        ...prev,
+                        motDue: realMotDue,
+                        motExpiry: realMotDue,
+                        motStatus: realMotStatus,
+                        valuation: prev.valuation,
+                        estimatedValue: prev.estimatedValue,
+                        allValuations: prev.allValuations,
+                        price: prev.price
+                      }));
+                      await api.patch(`/vehicles/${advertId}`, {
+                        motDue: realMotDue,
+                        motExpiry: realMotDue,
+                        motStatus: realMotStatus
+                      });
+                      console.log('✅ Real MOT date fetched from DVLA for 2020+ car:', realMotDue);
+                    }
+                    // If DVLA has no MOT date either, leave blank — do NOT calculate
+                  } catch (dvlaFinalError) {
+                    console.warn('⚠️ DVLA MOT fetch failed for 2020+ car:', dvlaFinalError.message);
                   }
-                } else {
-                  console.log('ℹ️ Real MOT data found for', vehicleData.registrationNumber, '- skipping calculation');
                 }
               } else {
                 // CRITICAL FIX: Don't set motDue to null - try DVLA as final fallback
