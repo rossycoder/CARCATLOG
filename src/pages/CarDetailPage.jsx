@@ -623,8 +623,10 @@ const CarDetailPage = () => {
                                    car.valuation?.dealerPrice ||
                                    car.estimatedValue;
                   
-                  if (!marketValue || marketValue === car.price) {
-                    return null; // No real valuation data — hide indicator
+                  // Only hide if no valuation data at all
+                  // price === marketValue is valid (Fair price) — still show indicator
+                  if (!marketValue) {
+                    return null;
                   }
                   
                   const priceRatio = car.price / marketValue;
@@ -1303,8 +1305,9 @@ const CarDetailPage = () => {
                                car.valuation?.dealerPrice ||
                                car.estimatedValue;
               
-              // If no real market value data, show a neutral indicator
-              if (!marketValue || marketValue === car.price) {
+              // Only show neutral gauge if no valuation data at all
+              // price === marketValue is valid (Fair price) — still show indicator
+              if (!marketValue) {
                 return (
                   <div className="good-price-indicator" id="price-indicator-section">
                     <div style={{ textAlign: 'center', padding: '16px' }}>
