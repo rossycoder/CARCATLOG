@@ -870,27 +870,28 @@ const CarDetailPage = () => {
                   <div className="spec-details">
                     <span className="spec-label">MOT Due</span>
                     <span className="spec-value">
-                      {car.motDue || car.motExpiry ? (
-                        new Date(car.motDue || car.motExpiry).toLocaleDateString('en-GB', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric'
-                        })
-                      ) : car.motHistory && car.motHistory.length > 0 && car.motHistory[0].expiryDate ? (
-                        // BONUS TIP: Fallback to motHistory array if motDue not set
-                        new Date(car.motHistory[0].expiryDate).toLocaleDateString('en-GB', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric'
-                        })
-                      ) : (() => {
+                      {(() => {
+                        // Use UTC parts to avoid BST/timezone shift on date-only values stored as UTC midnight
+                        const formatMotDate = (val, short = false) => {
+                          const d = new Date(val);
+                          if (isNaN(d.getTime())) return null;
+                          const months = short
+                            ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+                            : ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                          const day = String(d.getUTCDate()).padStart(2, '0');
+                          return `${day} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+                        };
+
+                        if (car.motDue || car.motExpiry) {
+                          return formatMotDate(car.motDue || car.motExpiry, true);
+                        }
+                        if (car.motHistory && car.motHistory.length > 0 && car.motHistory[0].expiryDate) {
+                          return formatMotDate(car.motHistory[0].expiryDate, true);
+                        }
                         // Check if vehicle is new (less than 3 years old)
                         const currentYear = new Date().getFullYear();
                         const vehicleAge = currentYear - car.year;
-                        
-                        if (vehicleAge < 3) {
-                          return 'Not required (new vehicle)';
-                        }
+                        if (vehicleAge < 3) return 'Not required (new vehicle)';
                         return 'Contact seller for MOT details';
                       })()}
                     </span>

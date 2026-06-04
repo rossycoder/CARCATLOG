@@ -2093,36 +2093,34 @@ useEffect(() => {
                 ) : (
                   <span>
                     {(() => {
+                      // Helper: format date using UTC parts to avoid BST/timezone shift
+                      // e.g. "2025-07-31T00:00:00.000Z" stored as UTC midnight — 
+                      // toLocaleDateString in BST (UTC+1) would shift it to 30 Jul, so we use UTC parts directly
+                      const formatMotDate = (val) => {
+                        const d = new Date(val);
+                        if (isNaN(d.getTime())) return null;
+                        const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                        return `${d.getUTCDate()} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+                      };
+
                       // Priority 1: Check vehicleData.motDue (from database)
                       if (vehicleData?.motDue) {
-                        const dateStr = vehicleData.motDue;
-                        if (typeof dateStr === 'string' || dateStr instanceof Date) {
-                          const date = new Date(dateStr);
-                          if (!isNaN(date.getTime())) {
-                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                          }
-                        }
+                        const formatted = formatMotDate(vehicleData.motDue);
+                        if (formatted) return formatted;
                       }
                       
                       // Priority 2: Check vehicleData.motExpiry (from database)
                       if (vehicleData?.motExpiry) {
-                        const dateValue = vehicleData.motExpiry;
-                        if (typeof dateValue === 'string' || dateValue instanceof Date) {
-                          const date = new Date(dateValue);
-                          if (!isNaN(date.getTime())) {
-                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                          }
-                        }
+                        const formatted = formatMotDate(vehicleData.motExpiry);
+                        if (formatted) return formatted;
                       }
                       
                       // Priority 3: Check motHistory array (from database)
                       if (vehicleData?.motHistory && vehicleData.motHistory.length > 0) {
                         const latestTest = vehicleData.motHistory[0];
-                        if (latestTest && latestTest.expiryDate) {
-                          const date = new Date(latestTest.expiryDate);
-                          if (!isNaN(date.getTime())) {
-                            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                          }
+                        if (latestTest?.expiryDate) {
+                          const formatted = formatMotDate(latestTest.expiryDate);
+                          if (formatted) return formatted;
                         }
                       }
                       
