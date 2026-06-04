@@ -147,7 +147,7 @@ const AdvertPaymentSuccessPage = () => {
           
           <h1>Payment Successful!</h1>
           <p className="success-message">
-            Your {packageName || 'advertising package'} has been purchased successfully.
+            Your {packageName || 'Advertising'} Package has been purchased successfully.
           </p>
           
           <div className="payment-details">
