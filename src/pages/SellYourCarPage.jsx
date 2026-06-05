@@ -203,7 +203,21 @@ const SellYourCarPage = () => {
         <div className="advertising-card-container">
           <div className="advertising-card">
             <h2 className="advertising-card-title">
-              Advertise on <span className="logo-car">Car</span><span className="logo-cat">Cat</span><span className="logo-alog">ALog</span>
+              Advertise on
+              <div className="advertising-card-logo">
+                <img 
+                  src="/images/brands/logo.jpeg" 
+                  alt="CarCatALog" 
+                  style={{ height: '100px', marginTop: '8px' }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'inline';
+                  }}
+                />
+                <span style={{ display: 'none' }}>
+                  <span className="logo-car">Car</span><span className="logo-cat">Cat</span><span className="logo-alog">ALog</span>
+                </span>
+              </div>
             </h2>
             <ul className="advertising-card-benefits">
               <li><span className="checkmark">✓</span> Maximise your selling price</li>

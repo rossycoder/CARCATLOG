@@ -120,6 +120,13 @@
   line-height: 1.3;
 }
 
+.advertising-card-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 6px;
+}
+
 .advertising-card-title .logo-car {
   color: #ff0000;
   font-weight: 700;
