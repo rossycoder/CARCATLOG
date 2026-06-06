@@ -1,0 +1,140 @@
+.account-deletion-page {
+  min-height: 100vh;
+  background: #f9fafb;
+  padding: 40px 16px;
+}
+
+.account-deletion-container {
+  max-width: 760px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.account-deletion-header {
+  background: #1a1a2e;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+}
+
+.account-deletion-logo img {
+  height: 50px;
+}
+
+.account-deletion-content {
+  padding: 40px 40px 48px;
+}
+
+.account-deletion-content h1 {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 6px;
+}
+
+.account-deletion-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 24px;
+  font-style: italic;
+}
+
+.account-deletion-intro {
+  font-size: 1rem;
+  color: #374151;
+  margin-bottom: 32px;
+  line-height: 1.7;
+}
+
+.deletion-section {
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.deletion-section:last-of-type {
+  border-bottom: none;
+}
+
+.deletion-section h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 12px;
+}
+
+.deletion-section p {
+  font-size: 0.95rem;
+  color: #374151;
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+.deletion-section ul {
+  margin: 10px 0 10px 20px;
+  padding: 0;
+}
+
+.deletion-section ul li {
+  font-size: 0.95rem;
+  color: #374151;
+  line-height: 1.7;
+  margin-bottom: 6px;
+  list-style: disc;
+}
+
+.deletion-note {
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 0.9rem !important;
+  color: #92400e !important;
+}
+
+.deletion-email {
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+  margin: 8px 0 16px;
+  padding: 8px 16px;
+  background: #eff6ff;
+  border-radius: 6px;
+  border: 1px solid #bfdbfe;
+}
+
+.deletion-email:hover {
+  background: #dbeafe;
+}
+
+.deletion-footer-links {
+  margin-top: 32px;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.deletion-footer-links a {
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.deletion-footer-links a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .account-deletion-content {
+    padding: 24px 20px 32px;
+  }
+
+  .account-deletion-content h1 {
+    font-size: 1.5rem;
+  }
+}

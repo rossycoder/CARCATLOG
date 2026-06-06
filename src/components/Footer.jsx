@@ -37,6 +37,7 @@ const Footer = () => {
               <Link to="/privacy-notice">Privacy notice</Link>
               <Link to="/accessibility-statement">Accessibility statement</Link>
               <Link to="/cookies-policy">Cookies policy</Link>
+              <Link to="/account-deletion">Account deletion policy</Link>
             </nav>
             <Link to="/cookies-policy" className="manage-cookies">Manage cookies</Link>
           </div>

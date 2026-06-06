@@ -43,6 +43,8 @@ import PrivacyNoticePage from './pages/TermsAndConditions/PrivacyNoticePage'
 import AccessibilityStatementPage from './pages/TermsAndConditions/AccessibilityStatementPage'
 import CookiesPolicyPage from './pages/TermsAndConditions/CookiesPolicyPage'
 import TermsOfUsePage from './pages/TermsAndConditions/TermsOfUsePage'
+import AccountDeletionPage from './pages/AccountDeletionPage'
+import AccountDeletionTradePage from './pages/AccountDeletionTradePage'
 import AdminDashboardPage from './pages/Admin/AdminDashboardPage'
 import TradeLoginPage from './pages/Trade/TradeLoginPage'
 import TradeRegisterPage from './pages/Trade/TradeRegisterPage'
@@ -181,6 +183,8 @@ function App() {
                     <Route path="/privacy-notice" element={<PrivacyNoticePage />} />
                     <Route path="/accessibility-statement" element={<AccessibilityStatementPage />} />
                     <Route path="/cookies-policy" element={<CookiesPolicyPage />} />
+                    <Route path="/account-deletion" element={<AccountDeletionPage />} />
+                    <Route path="/account-deletion-trade" element={<AccountDeletionTradePage />} />
                     <Route path="/trade/login" element={<TradeLoginPage />} />
                     <Route path="/trade/register" element={<TradeRegisterPage />} />
                     <Route path="/trade/verify-email" element={<TradeVerifyEmailPage />} />

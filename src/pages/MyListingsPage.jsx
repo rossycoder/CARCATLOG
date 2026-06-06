@@ -727,6 +727,28 @@ function MyListingsPage() {
                           >
                             View Vehicles
                           </button>
+                          <button
+                            className="action-link delete"
+                            style={{ marginLeft: '8px', color: '#dc2626', background: 'none', border: '1px solid #dc2626', borderRadius: '4px', padding: '4px 10px', cursor: 'pointer', fontSize: '0.8rem' }}
+                            onClick={async () => {
+                              const userName = user.businessName || user.name || user.email;
+                              const userType = user.type === 'trade' ? 'trade' : 'normal';
+                              const vehicleWarning = user.vehicleCount > 0
+                                ? `\n\nThis will also DELETE ${user.vehicleCount} vehicle listing(s).`
+                                : '';
+                              if (!window.confirm(`⚠️ DELETE ACCOUNT\n\nAre you sure you want to permanently delete:\n${userName} (${user.email})${vehicleWarning}\n\nThis cannot be undone.`)) return;
+                              try {
+                                const userId = user._id?.toString() || user._id;
+                                await api.delete(`/admin/users/${userId}?userType=${userType}`);
+                                alert(`✅ Account deleted successfully.`);
+                                fetchMyListings();
+                              } catch (e) {
+                                alert('Failed to delete account: ' + (e.response?.data?.message || e.message));
+                              }
+                            }}
+                          >
+                            🗑 Delete Account
+                          </button>
                         </td>
                       </tr>
                       );
