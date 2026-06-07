@@ -195,15 +195,15 @@ const TermsOfUsePage = () => {
             <h2>Correspondence</h2>
             <p>All inquiries regarding the Website or these terms should be sent to:</p>
             <div className="contact-details">
-              <p><strong>CarCataLog Limited</strong></p>
-              <p>1 Innovation Way</p>
-              <p>Manchester, M15 4FN</p>
-              <p>Email: <a href="mailto:enquiries@carcatalog.co.uk">enquiries@carcatalog.co.uk</a></p>
-              <p>Telephone: <a href="tel:03451110003">0345 111 0003</a></p>
-              <p>Opening hours: Monday – Friday, 9:00am – 5:30pm</p>
+              <p><strong>CCAL Group Ltd</strong></p>
+              <p>Saxon House</p>
+              <p>27 Duke Street</p>
+              <p>Chelmsford</p>
+              <p>CM1 1HT</p>
+              <p>Email: <a href="mailto:admin@carcatalog.co.uk">admin@carcatalog.co.uk</a></p>
+              <p>Telephone: <a href="tel:03301337818">0330 1337 818</a></p>
               <p className="company-info">
-                Registered in England, Company Number: 12345678<br />
-                VAT Number: 987654321
+                Registered in England &amp; Wales, Company Number: 16997035
               </p>
             </div>
           </section>
