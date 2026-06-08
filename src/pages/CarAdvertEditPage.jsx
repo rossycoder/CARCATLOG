@@ -57,6 +57,7 @@ const CarAdvertEditPage = () => {
     location: '',
     features: [],
     serviceHistory: 'Contact seller', // Default service history
+    condition: 'used', // Default condition — trade dealers can set to 'new'
     runningCosts: {
       fuelEconomy: { urban: '', extraUrban: '', combined: '' },
       annualTax: '',
@@ -351,7 +352,8 @@ const CarAdvertEditPage = () => {
               insuranceGroup: String(vehicleData.runningCosts?.insuranceGroup || ''),
               co2Emissions: String(vehicleData.runningCosts?.co2Emissions || '')
             },
-            videoUrl: vehicleData.videoUrl || ''
+            videoUrl: vehicleData.videoUrl || '',
+            condition: vehicleData.condition || 'used'
           }));
           
           // Add a timeout to log the state after it's been set

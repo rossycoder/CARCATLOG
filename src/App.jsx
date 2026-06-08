@@ -37,7 +37,6 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import AboutPage from './pages/AboutPage'
 import ElectricVehicleDemo from './pages/ElectricVehicleDemo'
-import ComingSoonPage from './pages/ComingSoonPage'
 import AdvertisingTermsPage from './pages/TermsAndConditions/AdvertisingTermsPage'
 import PrivacyNoticePage from './pages/TermsAndConditions/PrivacyNoticePage'
 import AccessibilityStatementPage from './pages/TermsAndConditions/AccessibilityStatementPage'
@@ -70,47 +69,8 @@ function ScrollToTop() {
 }
 
 // ─── Preview Gate ─────────────────────────────────────────────────────────────
-// Public visits / → sees Coming Soon
-// You visit /testing → unlocks full site for the session (stored in sessionStorage)
-// After unlocking, all normal routes work as usual
 
 function PreviewGate({ children }) {
-  const { pathname } = useLocation()
-
-  // /testing unlocks the session
-  if (pathname === '/testing') {
-    sessionStorage.setItem('siteAccess', 'granted')
-  }
-
-  const hasAccess = sessionStorage.getItem('siteAccess') === 'granted'
-
-  // Always show coming soon at root and /coming-soon
-  if (pathname === '/' || pathname === '/coming-soon') {
-    return <ComingSoonPage />
-  }
-
-  // Auth routes must ALWAYS work — never block these with ComingSoon
-  const authRoutes = [
-    '/verify-email',
-    '/check-email',
-    '/verify-email-required',
-    '/signin',
-    '/signup',
-    '/forgot-password',
-    '/reset-password',
-    '/auth/callback',
-    '/trade/verify-email',
-  ]
-  const isAuthRoute = authRoutes.some(r => pathname.startsWith(r))
-  if (isAuthRoute) {
-    return children
-  }
-
-  // Block everything else unless unlocked
-  if (!hasAccess) {
-    return <ComingSoonPage />
-  }
-
   return children
 }
 
