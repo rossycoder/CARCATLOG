@@ -27,7 +27,8 @@ export const getPlans = async () => {
 export const getCurrentSubscription = async () => {
   try {
     const response = await api.get(`${API_URL}/current`, getAuthHeaders());
-    return response.data.subscription || response.data;
+    // Return full response data so caller can access hasUsedTrial
+    return response.data;
   } catch (error) {
     console.error('❌ getCurrentSubscription error:', error);
     // Return null if no subscription found (not an error)

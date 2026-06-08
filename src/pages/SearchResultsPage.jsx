@@ -270,8 +270,16 @@ function SearchResultsPage() {
           }
         }
         
-        // If no results found, load all cars from database
+        // If no results found, only fall back to all cars if using national/wide search
+        // For specific small radius (e.g. 1, 5 miles), respect the filter and show no-results
         if (results.length === 0) {
+          const isSpecificRadius = searchRadius && searchRadius <= 100;
+          if (isSpecificRadius) {
+            // Show proper no-results state — don't override with nationwide data
+            setSearchResults({ postcode: searchPostcode, radius: searchRadius, results: [], count: 0 });
+            setFilteredResults({ postcode: searchPostcode, radius: searchRadius, results: [], count: 0 });
+            return;
+          }
           await loadAllCarsAsFallback(filterParams, searchPostcode, searchRadius);
           return;
         }
@@ -734,16 +742,32 @@ function SearchResultsPage() {
             <h2>No Cars Found</h2>
             <p>
               {postcode 
-                ? `We couldn't find any cars within ${radius} miles of ${postcode}`
+                ? `No cars found within ${radius} mile${radius === 1 ? '' : 's'} of ${postcode}`
                 : 'No cars match your search criteria'}
             </p>
             <div className="no-results-actions">
-              {postcode && (
+              {postcode && radius <= 5 && (
                 <button 
-                  onClick={() => handleRadiusChange(radius + 25)} 
+                  onClick={() => handleRadiusChange(10)} 
                   className="btn-primary"
                 >
-                  Increase Radius to {radius + 25} miles
+                  Search within 10 miles
+                </button>
+              )}
+              {postcode && radius > 5 && radius <= 100 && (
+                <button 
+                  onClick={() => handleRadiusChange(Math.min(radius + 25, 200))} 
+                  className="btn-primary"
+                >
+                  Increase Radius to {Math.min(radius + 25, 200)} miles
+                </button>
+              )}
+              {postcode && (
+                <button 
+                  onClick={() => handleRadiusChange(1000)} 
+                  className="btn-secondary"
+                >
+                  Search Nationwide
                 </button>
               )}
               <button onClick={handleNewSearch} className="btn-secondary">

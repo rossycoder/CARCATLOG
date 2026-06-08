@@ -325,6 +325,43 @@
   line-height: 1;
 }
 
+/* ── Trial pricing in plan cards ── */
+.trial-today-label {
+  font-size: 11px;
+  color: #34a853;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.price-amount.trial-price-amount {
+  color: #34a853;
+}
+
+.trial-one-off-note {
+  font-size: 10px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.trial-then-full-price {
+  display: block;
+  font-size: 11px;
+  color: #555;
+  background: #f0faf0;
+  border: 1px solid #c3e6cb;
+  margin: 8px 0 0 0;
+  padding: 6px 10px;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+.trial-then-full-price strong {
+  color: #1a1a1a;
+}
+
+/* Legacy class — keep for safety */
 .trial-pricing {
   display: block;
   font-size: 11px;
@@ -336,6 +373,8 @@
   border-radius: 4px;
   line-height: 1.4;
 }
+
+/* ── Trial pricing summary table in info box — removed ── */
 
 .plan-features {
   margin-bottom: 20px;
@@ -642,4 +681,8 @@
   .trade-subscription-page .trial-warning p {
     font-size: 12px;
   }
+
+  .trial-then-full-price { font-size: 10px; }
+  .trial-today-label { font-size: 10px; }
+  .trial-one-off-note { font-size: 9px; }
 }

@@ -25,6 +25,10 @@ const CarDetailPage = () => {
   const [isMobile, setIsMobile] = useState(false); // Start with false, will be set in useEffect
   const [activeTab, setActiveTab] = useState('contact');
 
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
   // Call masking state
   const [callSession, setCallSession] = useState(null); // { proxyNumber, expiresIn }
   const [callLoading, setCallLoading] = useState(false);
@@ -143,12 +147,27 @@ const CarDetailPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Lightbox keyboard navigation
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handleKey = (e) => {
+      if (e.key === 'Escape') setLightboxOpen(false);
+      if (e.key === 'ArrowRight') setLightboxIndex(i => (i + 1) % (car?.images?.length || 1));
+      if (e.key === 'ArrowLeft') setLightboxIndex(i => (i - 1 + (car?.images?.length || 1)) % (car?.images?.length || 1));
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [lightboxOpen, car]);
+
   // Smooth scroll to section
   const scrollToSection = (sectionId) => {
     const section = document.getElementById(sectionId);
     if (section) {
       const navHeight = 80; // Height of sticky nav
-      const targetPosition = section.offsetTop - navHeight;
+      // getBoundingClientRect gives position relative to viewport — works correctly
+      // even for elements inside sticky/fixed containers
+      const rect = section.getBoundingClientRect();
+      const targetPosition = window.scrollY + rect.top - navHeight;
       window.scrollTo({
         top: targetPosition,
         behavior: 'smooth'
@@ -463,7 +482,7 @@ const CarDetailPage = () => {
 
         {/* Image Gallery */}
         <div id="cd-gallery" className="image-gallery">
-          <div className="main-image">
+          <div className="main-image" style={{ cursor: 'zoom-in' }} onClick={() => { setLightboxIndex(currentImageIndex); setLightboxOpen(true); }}>
             <img 
               src={getCurrentImage()} 
               alt={`${car.make} ${car.model}${car.submodel ? ` ${car.submodel}` : ''}`}
@@ -476,7 +495,7 @@ const CarDetailPage = () => {
                 background: '#f5f5f5'
               }}
             />
-            <button className="gallery-btn" onClick={() => {}}>
+            <button className="gallery-btn" onClick={(e) => { e.stopPropagation(); setLightboxIndex(currentImageIndex); setLightboxOpen(true); }}>
               📷 Gallery
             </button>
             <span className="image-counter">
@@ -517,6 +536,30 @@ const CarDetailPage = () => {
             </div>
           )}
         </div>
+
+        {/* Lightbox Modal */}
+        {lightboxOpen && (
+          <div
+            className="lightbox-overlay"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <button className="lightbox-close" onClick={() => setLightboxOpen(false)}>✕</button>
+            {images.length > 1 && (
+              <button className="lightbox-prev" onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => (i - 1 + images.length) % images.length); }}>‹</button>
+            )}
+            <img
+              src={images[lightboxIndex] || '/images/dummy/red-car.png'}
+              alt={`Photo ${lightboxIndex + 1}`}
+              className="lightbox-img"
+              onClick={(e) => e.stopPropagation()}
+              onError={(e) => { e.target.src = '/images/dummy/red-car.png'; }}
+            />
+            {images.length > 1 && (
+              <button className="lightbox-next" onClick={(e) => { e.stopPropagation(); setLightboxIndex(i => (i + 1) % images.length); }}>›</button>
+            )}
+            <div className="lightbox-counter">{lightboxIndex + 1} / {images.length}</div>
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="content-grid">

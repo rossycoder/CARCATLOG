@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTradeDealerContext } from '../context/TradeDealerContext';
@@ -113,6 +113,10 @@ const CarAdvertEditPage = () => {
   const [enhancedDataProcessed, setEnhancedDataProcessed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Drag-and-drop reorder state for photos
+  const dragIndex = useRef(null);
+  const dragOverIndex = useRef(null);
 
   // Logo upload handler
   const handleLogoUpload = async (e) => {
@@ -1388,6 +1392,38 @@ useEffect(() => {
     }
   };
 
+  // Drag-and-drop handlers for photo reordering
+  const handleDragStart = (index) => {
+    dragIndex.current = index;
+  };
+
+  const handleDragEnter = (index) => {
+    dragOverIndex.current = index;
+  };
+
+  const handleDragEnd = async () => {
+    const from = dragIndex.current;
+    const to = dragOverIndex.current;
+    if (from === null || to === null || from === to) {
+      dragIndex.current = null;
+      dragOverIndex.current = null;
+      return;
+    }
+    const reordered = [...advertData.photos];
+    const [moved] = reordered.splice(from, 1);
+    reordered.splice(to, 0, moved);
+    dragIndex.current = null;
+    dragOverIndex.current = null;
+    setAdvertData(prev => ({ ...prev, photos: reordered }));
+    try {
+      await api.patch(`/vehicles/${advertId}`, {
+        images: reordered.map(p => (typeof p === 'string' ? p : p.url))
+      });
+    } catch (saveError) {
+      console.error('Failed to save photo order to database:', saveError);
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -1630,7 +1666,21 @@ useEffect(() => {
                     
                     
                     return (
-                      <div key={photoId} className="photo-item">
+                      <div
+                        key={photoId}
+                        className="photo-item"
+                        draggable
+                        onDragStart={() => handleDragStart(index)}
+                        onDragEnter={() => handleDragEnter(index)}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={(e) => e.preventDefault()}
+                        title="Drag to reorder"
+                        style={{ cursor: 'grab' }}
+                      >
+                        {index === 0 && (
+                          <span className="photo-cover-badge">Cover</span>
+                        )}
+                        <span className="photo-drag-handle">⠿</span>
                         <img 
                           src={photoUrl} 
                           alt={`Car photo ${index + 1}`}

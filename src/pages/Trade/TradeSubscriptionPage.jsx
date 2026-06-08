@@ -10,6 +10,7 @@ const TradeSubscriptionPage = () => {
   const { dealer } = useTradeDealerContext();
   const [plans, setPlans] = useState([]);
   const [currentSubscription, setCurrentSubscription] = useState(null);
+  const [hasUsedTrial, setHasUsedTrial] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [welcomeMessage, setWelcomeMessage] = useState('');
@@ -44,7 +45,18 @@ const TradeSubscriptionPage = () => {
       }
 
       if (subscriptionResult.status === 'fulfilled') {
-        setCurrentSubscription(subscriptionResult.value);
+        const subData = subscriptionResult.value;
+        // API returns { subscription, hasUsedTrial } or just the subscription object
+        if (subData && typeof subData === 'object' && 'hasUsedTrial' in subData) {
+          setCurrentSubscription(subData.subscription);
+          setHasUsedTrial(subData.hasUsedTrial || false);
+        } else {
+          setCurrentSubscription(subData);
+          // If subscription exists with trial data, mark hasUsedTrial
+          if (subData?.isTrialing || subData?.trialEnd) {
+            setHasUsedTrial(true);
+          }
+        }
       }
       // subscription fetch failing is non-fatal — just means no active sub
     } finally {
@@ -81,12 +93,17 @@ const TradeSubscriptionPage = () => {
 
   const formatPrice = (priceInPence) => `£${(priceInPence / 100).toFixed(0)}`;
 
-  // Trial button label per plan
-  const getTrialLabel = (plan) => {
-    const trialMap = { bronze: '£50', silver: '£87.50', gold: '£150' };
-    const amount = trialMap[plan.slug] || '—';
-    return `Start today for just ${amount} + VAT`;
+  // Correct pricing table — source of truth for display
+  // Trial = one-off fee paid today; Actual = recurring monthly after trial
+  const PRICING = {
+    bronze: { trial: 50,    actual: 1000, cars: 10  },
+    silver: { trial: 87.50, actual: 1500, cars: 25  },
+    gold:   { trial: 125,   actual: 2000, cars: 50  },
   };
+
+  const getTrialPrice  = (plan) => `£${PRICING[plan.slug]?.trial  ?? (plan.trialPrice ? plan.trialPrice / 100 : '—')}`;
+  const getActualPrice = (plan) => `£${PRICING[plan.slug]?.actual ?? (plan.price / 100)}`;
+  const getCarLimit    = (plan) => PRICING[plan.slug]?.cars ?? plan.listingLimit ?? '—';
 
   const getButtonLabel = (plan) => {
     const labelMap = { bronze: 'Get Started', silver: 'Start Selling Faster', gold: 'Go Premium' };
@@ -168,21 +185,22 @@ const TradeSubscriptionPage = () => {
 
             {/* Trial Information Box - Always Visible */}
             <div className="trial-info-box-permanent">
-              <h2>30-Day Trial on All Packages!</h2>
+              <h2>🎉 30-Day Trial on All Packages!</h2>
               <h3>How it works:</h3>
               <ul>
                 <li>✓ Choose your package below (Bronze, Silver, or Gold)</li>
-                <li>✓ Enter your card details (you won't be charged the full amount yet)</li>
-                <li>✓ Pay only the first month trial price to start listing immediately</li>
-                <li>✓ After 30 days, your chosen package activates at full price</li>
+                <li>✓ Pay a small one-off trial fee today to start listing immediately</li>
+                <li>✓ Your card is saved — no monthly charge for 30 days</li>
+                <li>✓ After 30 days, your full monthly subscription begins automatically</li>
+                <li>✓ Cancel anytime before trial ends to avoid the monthly charge</li>
               </ul>
+
               <div className="trial-warning">
                 <span className="warning-icon">⚠️</span>
                 <p>
-                  <strong>Important:</strong> Please note there will be a one off £2.50 admin fee for every car per your 
-                  selected package. This fee is to cover the API costs involved for each vehicle's 5 point HPI 
-                  check, MOT Status Check & Vehicle Information Check which are used to populate each 
-                  vehicle listing.
+                  <strong>Important:</strong> There will be a one-off £2.50 admin fee per car per your 
+                  selected package. This covers the API costs for each vehicle's 5-point HPI 
+                  check, MOT Status Check &amp; Vehicle Information Check used to populate each listing.
                 </p>
               </div>
             </div>
@@ -224,22 +242,35 @@ const TradeSubscriptionPage = () => {
                   {/* Summary Line */}
                   <div className="plan-summary">
                     <strong>Summary:</strong> Our {plan.name} Subscription lets you list up to{' '}
-                    {plan.slug === 'bronze' && '20 cars'}
-                    {plan.slug === 'silver' && '35 cars'}
-                    {plan.slug === 'gold' && '50 cars'}
+                    <strong>{getCarLimit(plan)} cars</strong>
                   </div>
 
                   <div className="plan-price">
-                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
-                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#555' }}>£</span>
-                      <span className="price-amount">{(plan.price / 100).toFixed(0)}</span>
-                      <span style={{ fontSize: '13px', color: '#888', marginLeft: '4px' }}>+ VAT</span>
-                    </div>
-
-                    {!currentSubscription?.hasUsedTrial && (
-                      <div className="trial-pricing">
-                        {getTrialLabel(plan)} (one-off fee, paid today)
-                      </div>
+                    {!hasUsedTrial ? (
+                      /* ── New user: show trial price + what comes after ── */
+                      <>
+                        <div className="trial-today-label">Start today for just</div>
+                        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
+                          <span style={{ fontSize: '18px', fontWeight: 700, color: '#34a853' }}>£</span>
+                          <span className="price-amount trial-price-amount">
+                            {PRICING[plan.slug]?.trial ?? '—'}
+                          </span>
+                          <span style={{ fontSize: '13px', color: '#888', marginLeft: '4px' }}>+ VAT</span>
+                        </div>
+                        <div className="trial-one-off-note">one-off fee, paid today</div>
+                        <div className="trial-then-full-price">
+                          Then <strong>{getActualPrice(plan)}/month + VAT</strong> after 30-day trial
+                        </div>
+                      </>
+                    ) : (
+                      /* ── Returning user: show actual monthly price only ── */
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
+                          <span style={{ fontSize: '18px', fontWeight: 700, color: '#555' }}>£</span>
+                          <span className="price-amount">{PRICING[plan.slug]?.actual ?? (plan.price / 100)}</span>
+                          <span style={{ fontSize: '13px', color: '#888', marginLeft: '4px' }}>/month + VAT</span>
+                        </div>
+                      </>
                     )}
                   </div>
 
