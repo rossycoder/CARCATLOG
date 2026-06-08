@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
+import { useTradeDealerContext } from '../context/TradeDealerContext';
 import './AdvertisingPromotionSection.css';
 
 const AdvertisingPromotionSection = () => {
   const navigate = useNavigate();
+  const { isAuthenticated: isTradeDealer } = useTradeDealerContext();
   const advertisingBenefits = [
     {
       id: 'boost-amount',
@@ -38,7 +40,10 @@ const AdvertisingPromotionSection = () => {
   };
 
   const handleAdvertisingPrices = () => {
-    navigate('/sell-my-car/advertising-prices');
+    const url = isTradeDealer
+      ? '/sell-my-car/advertising-prices?viewOnly=true&sellerType=trade'
+      : '/sell-my-car/advertising-prices?viewOnly=true';
+    navigate(url);
   };
 
   return (

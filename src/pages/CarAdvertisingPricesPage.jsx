@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTradeDealerContext } from '../context/TradeDealerContext';
 import advertService from '../services/advertService';
 import './CarAdvertisingPricesPage.css';
 
@@ -10,13 +11,23 @@ const CarAdvertisingPricesPage = () => {
   const navigate = useNavigate();
   const locationState = useLocation();
   const { user } = useAuth();
+  const { isAuthenticated: isTradeDealerLoggedIn } = useTradeDealerContext();
+
+  // Check if viewOnly parameter is in URL - allows users to browse pricing without restrictions
+  const searchParams = new URLSearchParams(locationState.search);
+  const isViewOnly = searchParams.get('viewOnly') === 'true';
+  const sellerTypeParam = searchParams.get('sellerType'); // 'trade' or 'private' from URL
+
   const [processingPackageId, setProcessingPackageId] = useState(null);
   const [error, setError] = useState(null);
   const [registration, setRegistration] = useState('');
   const [mileage, setMileage] = useState('');
-  const [sellerType, setSellerType] = useState('private');
+  // Initialise: URL param wins, then trade dealer session, then default private
+  const [sellerType, setSellerType] = useState(
+    sellerTypeParam === 'trade' || isTradeDealerLoggedIn ? 'trade' : 'private'
+  );
   const [priceRange, setPriceRange] = useState('under-1000');
-  const [isPriceRangeLocked, setIsPriceRangeLocked] = useState(false); // Track if price range is auto-selected
+  const [isPriceRangeLocked, setIsPriceRangeLocked] = useState(false);
   const [quickFormErrors, setQuickFormErrors] = useState({
     registration: '',
     mileage: ''
@@ -26,17 +37,8 @@ const CarAdvertisingPricesPage = () => {
   const [advertData, setAdvertData] = useState(locationState.state?.advertData);
   const [vehicleData, setVehicleData] = useState(locationState.state?.vehicleData);
   const contactDetails = locationState.state?.contactDetails;
-  const vehicleValuation = locationState.state?.vehicleValuation; // Get valuation from state
-  // userEnteredPrice: the price user explicitly set on the advert edit page — highest priority
+  const vehicleValuation = locationState.state?.vehicleValuation;
   const userEnteredPrice = locationState.state?.userEnteredPrice;
-
-  // Check if viewOnly parameter is in URL - allows users to browse pricing without restrictions
-  const searchParams = new URLSearchParams(locationState.search);
-  const isViewOnly = searchParams.get('viewOnly') === 'true';
-  
-  // Debug logging
-
-  // Debug logging for received data
 
   // Fetch advert data ONLY if not passed via state AND no vehicleData exists
   // CRITICAL FIX: Prevent duplicate API calls by checking both advertData AND vehicleData
