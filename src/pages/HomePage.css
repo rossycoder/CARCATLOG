@@ -932,7 +932,7 @@
 @media (max-width: 1366px) and (min-width: 769px) {
   .hero-section-with-search .container {
     min-height: 750px !important;
-    padding: var(--spacing-4) var(--spacing-4) var(--spacing-4) !important;
+    padding: var(--spacing-4) var(--spacing-4) var(--spacing-10) !important;
     background-image: url('/images/brands/background1.jpeg') !important;
     background-size: cover !important;
     background-position: center 30% !important;
@@ -961,12 +961,12 @@
     padding: var(--spacing-4) !important;
     margin: 0 auto !important;
     box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15) !important;
-    backdrop-filter: blur(10px) !important;
+    transform: translateY(0) !important;
     overflow: visible !important;
   }
   
   .search-field-group {
-    grid-template-columns: 1fr 1fr !important;
+    grid-template-columns: 1fr 1fr 1fr !important;
     gap: var(--spacing-3) !important;
   }
   
@@ -977,23 +977,17 @@
   }
   
   .search-button-group {
-    flex-direction: column !important;
-    align-items: stretch !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     gap: var(--spacing-3) !important;
   }
 
   .search-button {
-    width: 100% !important;
+    min-width: 200px !important;
     justify-content: center !important;
   }
 
-  .more-options-link {
-    width: 100% !important;
-    justify-content: center !important;
-    text-align: center !important;
-  }
-}
-  
   .welcome-content-wrapper {
     gap: var(--spacing-10);
   }
@@ -1013,6 +1007,7 @@
   .leasing-deals-grid-bottom {
     grid-template-columns: repeat(2, 1fr);
   }
+}
 
 @media (max-width: 968px) {
   .hero-section-with-search {
