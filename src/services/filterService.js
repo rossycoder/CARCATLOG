@@ -19,14 +19,21 @@ class FilterService {
 
   /**
    * Get list of all available makes
+   * Uses a fast dedicated endpoint instead of fetching all filter options
    * @returns {Promise<Array<string>>} Array of make names
    */
   async getMakes() {
     try {
-      const filterOptions = await this.getFilterOptions();
-      return filterOptions.makes || [];
+      const response = await api.get('/vehicles/makes');
+      return response.data.data || [];
     } catch (error) {
-      return [];
+      // Fallback to full filter-options
+      try {
+        const filterOptions = await this.getFilterOptions();
+        return filterOptions.makes || [];
+      } catch {
+        return [];
+      }
     }
   }
 

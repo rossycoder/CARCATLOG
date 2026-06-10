@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HeroSection.css';
 import { carService } from '../../services/carService';
@@ -20,22 +20,25 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
   const [loadingMakes, setLoadingMakes] = useState(true);
   const [loadingModels, setLoadingModels] = useState(false);
 
+  // Fetch car count — re-runs whenever make or model changes
+  const fetchCarCount = useCallback(async (make, model) => {
+    try {
+      setLoadingCount(true);
+      const params = {};
+      if (make) params.make = make;
+      if (model) params.model = model;
+      const count = await carService.getCarCount(params);
+      setCarCount(count || 0);
+    } catch (error) {
+      console.error('Error fetching car count:', error);
+      setCarCount(0);
+    } finally {
+      setLoadingCount(false);
+    }
+  }, []);
+
   // Fetch car count and makes on component mount
   useEffect(() => {
-    const fetchCarCount = async () => {
-      try {
-        setLoadingCount(true);
-        const count = await carService.getCarCount();
-        setCarCount(count || 0);
-      } catch (error) {
-        console.error('Error fetching car count:', error);
-        console.error('Error details:', error.message, error.response?.data);
-        setCarCount(0);
-      } finally {
-        setLoadingCount(false);
-      }
-    };
-
     const fetchMakes = async () => {
       try {
         setLoadingMakes(true);
@@ -49,9 +52,14 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
       }
     };
 
-    fetchCarCount();
+    fetchCarCount('', '');
     fetchMakes();
-  }, []);
+  }, [fetchCarCount]);
+
+  // Re-fetch count when make or model changes
+  useEffect(() => {
+    fetchCarCount(searchParams.make, searchParams.model);
+  }, [searchParams.make, searchParams.model, fetchCarCount]);
 
   // Fetch models when make changes
   useEffect(() => {

@@ -62,9 +62,9 @@ export const carService = {
     return response.data;
   },
 
-  // Get total count of available cars
-  getCarCount: async () => {
-    const response = await api.get('/vehicles/count');
+  // Get total count of available cars — optionally filtered by make/model
+  getCarCount: async (params = {}) => {
+    const response = await api.get('/vehicles/count', { params });
     return response.data.count;
   },
 

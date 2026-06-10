@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaFacebookF, FaYoutube, FaInstagram, FaTiktok } from 'react-icons/fa';
 import SEOHelmet from '../components/SEO/SEOHelmet';
@@ -15,7 +15,7 @@ const HomePage = () => {
   const [postcode, setPostcode] = useState('');
   const [make, setMake] = useState('Any');
   const [model, setModel] = useState('Any');
-  const [radius, setRadius] = useState(1000); // National search by default
+  const [radius, setRadius] = useState(1000);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [error, setError] = useState('');
   const [totalCars, setTotalCars] = useState(0);
@@ -25,11 +25,33 @@ const HomePage = () => {
   const [loadingMakes, setLoadingMakes] = useState(true);
   const [loadingModels, setLoadingModels] = useState(false);
 
-  // Fetch total car count and makes on initial load
-  useEffect(() => {
-    fetchCarCount();
-    fetchMakes();
+  // Fetch count — re-runs when make or model changes
+  const fetchCarCount = useCallback(async (selectedMake, selectedModel) => {
+    try {
+      setLoading(true);
+      const params = {};
+      if (selectedMake && selectedMake !== 'Any') params.make = selectedMake;
+      if (selectedModel && selectedModel !== 'Any') params.model = selectedModel;
+      const count = await carService.getCarCount(params);
+      setTotalCars(count || 0);
+    } catch (err) {
+      console.error('Error fetching car count:', err);
+      setTotalCars(0);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Initial load — fetch total count and makes
+  useEffect(() => {
+    fetchCarCount('Any', 'Any');
+    fetchMakes();
+  }, [fetchCarCount]);
+
+  // Re-fetch count whenever make or model changes
+  useEffect(() => {
+    fetchCarCount(make, model);
+  }, [make, model, fetchCarCount]);
 
   // Fetch models when make changes
   useEffect(() => {
@@ -40,19 +62,6 @@ const HomePage = () => {
       setModel('Any');
     }
   }, [make]);
-
-  const fetchCarCount = async () => {
-    try {
-      setLoading(true);
-      const count = await carService.getCarCount();
-      setTotalCars(count);
-    } catch (err) {
-      console.error('Error fetching car count:', err);
-      setTotalCars(0);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchMakes = async () => {
     try {

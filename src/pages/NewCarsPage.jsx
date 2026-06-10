@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SEOHelmet from '../components/SEO/SEOHelmet';
 import { breadcrumbSchema } from '../utils/seoSchemas';
 import { filterService } from '../services/filterService';
+import { carService } from '../services/carService';
 import './NewCarsPage.css';
 
 const NewCarsPage = () => {
@@ -14,6 +15,8 @@ const NewCarsPage = () => {
   const [models, setModels] = useState([]);
   const [loadingMakes, setLoadingMakes] = useState(true);
   const [loadingModels, setLoadingModels] = useState(false);
+  const [carCount, setCarCount] = useState(0);
+  const [loadingCount, setLoadingCount] = useState(true);
   const [searchFilters, setSearchFilters] = useState({
     make: '',
     model: '',
@@ -22,12 +25,34 @@ const NewCarsPage = () => {
   });
   const [postcodeError, setPostcodeError] = useState('');
 
+  // Fetch count — updates when make/model changes
+  const fetchCarCount = useCallback(async (make, model) => {
+    try {
+      setLoadingCount(true);
+      const params = { condition: 'new' };
+      if (make) params.make = make;
+      if (model) params.model = model;
+      const count = await carService.getCarCount(params);
+      setCarCount(count || 0);
+    } catch {
+      setCarCount(0);
+    } finally {
+      setLoadingCount(false);
+    }
+  }, []);
+
   useEffect(() => {
     document.title = 'New Cars for Sale | CarCatalog';
     window.scrollTo(0, 0);
     fetchNewCars();
     fetchMakes();
-  }, []);
+    fetchCarCount('', '');
+  }, [fetchCarCount]);
+
+  // Re-fetch count when make or model changes
+  useEffect(() => {
+    fetchCarCount(searchFilters.make, searchFilters.model);
+  }, [searchFilters.make, searchFilters.model, fetchCarCount]);
 
   const fetchMakes = async () => {
     try {
@@ -210,7 +235,7 @@ const NewCarsPage = () => {
                           <circle cx="11" cy="11" r="8"/>
                           <path d="m21 21-4.35-4.35"/>
                         </svg>
-                        Search new cars
+                        {loadingCount ? 'Loading...' : `Search ${carCount.toLocaleString()} cars`}
                       </button>
                     </div>
                   </div>
