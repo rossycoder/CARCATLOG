@@ -9,13 +9,16 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
   const [searchParams, setSearchParams] = useState({
     postcode: '',
     make: '',
+    model: '',
     maxPrice: ''
   });
   const [carCount, setCarCount] = useState(0);
   const [loadingCount, setLoadingCount] = useState(true);
   const [postcodeError, setPostcodeError] = useState('');
   const [makes, setMakes] = useState([]);
+  const [models, setModels] = useState([]);
   const [loadingMakes, setLoadingMakes] = useState(true);
+  const [loadingModels, setLoadingModels] = useState(false);
 
   // Fetch car count and makes on component mount
   useEffect(() => {
@@ -50,13 +53,35 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
     fetchMakes();
   }, []);
 
+  // Fetch models when make changes
+  useEffect(() => {
+    if (searchParams.make) {
+      const fetchModels = async () => {
+        try {
+          setLoadingModels(true);
+          const modelsData = await filterService.getModelsForMake(searchParams.make);
+          setModels(modelsData);
+        } catch (err) {
+          console.error('Error fetching models:', err);
+          setModels([]);
+        } finally {
+          setLoadingModels(false);
+        }
+      };
+      fetchModels();
+    } else {
+      setModels([]);
+    }
+  }, [searchParams.make]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setSearchParams(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
+      // Reset model when make changes
+      ...(name === 'make' ? { model: '' } : {})
     }));
-    // Clear error when user starts typing in postcode
     if (name === 'postcode' && postcodeError) {
       setPostcodeError('');
     }
@@ -146,13 +171,21 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
                 
                 <div className="redesign-search-field">
                   <label>Model</label>
-                  <input 
-                    type="text" 
+                  <select
                     name="model"
-                    placeholder="Any" 
                     value={searchParams.model}
                     onChange={handleInputChange}
-                  />
+                    disabled={!searchParams.make || loadingModels}
+                  >
+                    <option value="">Any</option>
+                    {loadingModels ? (
+                      <option disabled>Loading...</option>
+                    ) : (
+                      models.map((modelName) => (
+                        <option key={modelName} value={modelName}>{modelName}</option>
+                      ))
+                    )}
+                  </select>
                 </div>
                 
                 <div className="redesign-search-actions">
@@ -181,8 +214,11 @@ const HeroSection = ({ headline, subheadline, onFilterClick }) => {
                     type="submit" 
                     className="redesign-search-btn"
                   >
-                    <span className="search-icon">🔍</span>
-                    Search {loadingCount ? '...' : carCount.toLocaleString()} cars
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <circle cx="11" cy="11" r="8"/>
+                      <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    {loadingCount ? 'Loading...' : `Search ${carCount.toLocaleString()} cars`}
                   </button>
                 </div>
               </div>

@@ -293,10 +293,11 @@
    ============================================ */
 .car-card .car-badges {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 5px;
   margin: 4px 0 10px 0;
   align-items: center;
+  overflow: hidden;
 }
 
 .car-card .car-badges .badge {
@@ -309,6 +310,9 @@
   white-space: nowrap;
   border: none;
   line-height: 1.3;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
 }
 
 .car-card .car-badges .badge.great-price-badge {
@@ -326,6 +330,14 @@
 .car-card .car-badges .badge.electric-badge {
   background: #dbeafe;
   color: #1e40af;
+  /* Override any global .electric-badge styles */
+  padding: 4px 9px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 0;
+  gap: 4px;
 }
 
 .car-card .car-badges .badge.mileage-badge,

@@ -32,15 +32,22 @@ class FilterService {
 
   /**
    * Get list of models for a specific make
+   * Uses a fast dedicated endpoint instead of fetching all filter options
    * @param {string} make - The make to get models for
    * @returns {Promise<Array<string>>} Array of model names
    */
   async getModelsForMake(make) {
     try {
-      const filterOptions = await this.getFilterOptions();
-      return filterOptions.modelsByMake?.[make] || [];
+      const response = await api.get(`/vehicles/models-for-make?make=${encodeURIComponent(make)}`);
+      return response.data.data || [];
     } catch (error) {
-      return [];
+      // Fallback: try the full filter-options endpoint
+      try {
+        const filterOptions = await this.getFilterOptions();
+        return filterOptions.modelsByMake?.[make] || [];
+      } catch {
+        return [];
+      }
     }
   }
 }

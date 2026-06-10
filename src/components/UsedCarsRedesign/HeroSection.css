@@ -25,6 +25,7 @@
   background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="80" cy="20" r="30" fill="rgba(255,255,255,0.03)"/></svg>');
   background-size: 200px;
   opacity: 0.5;
+  pointer-events: none;
 }
 
 .redesign-hero-container {
@@ -62,6 +63,8 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   max-width: 900px;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .redesign-search-row {
@@ -121,10 +124,16 @@
 .redesign-search-field select {
   cursor: pointer;
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path fill="%23666" d="M1 1l5 5 5-5"/></svg>');
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 36px;
+  /* Fix: ensure the select itself catches the click, not the background arrow */
+  background-color: white;
+  position: relative;
+  z-index: 1;
 }
 
 .redesign-search-actions {

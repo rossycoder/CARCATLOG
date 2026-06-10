@@ -11,7 +11,9 @@ const NewCarsPage = () => {
   const [newCars, setNewCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [makes, setMakes] = useState([]);
+  const [models, setModels] = useState([]);
   const [loadingMakes, setLoadingMakes] = useState(true);
+  const [loadingModels, setLoadingModels] = useState(false);
   const [searchFilters, setSearchFilters] = useState({
     make: '',
     model: '',
@@ -78,12 +80,29 @@ const NewCarsPage = () => {
   };
 
   const handleFilterChange = (field, value) => {
-    setSearchFilters(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing in postcode field
+    setSearchFilters(prev => ({
+      ...prev,
+      [field]: value,
+      // Reset model when make changes
+      ...(field === 'make' ? { model: '' } : {})
+    }));
     if (field === 'postcode' && postcodeError) {
       setPostcodeError('');
     }
   };
+
+  // Fetch models when make changes
+  useEffect(() => {
+    if (searchFilters.make) {
+      setLoadingModels(true);
+      filterService.getModelsForMake(searchFilters.make)
+        .then(data => setModels(data))
+        .catch(() => setModels([]))
+        .finally(() => setLoadingModels(false));
+    } else {
+      setModels([]);
+    }
+  }, [searchFilters.make]);
 
   return (
     <>
@@ -144,12 +163,20 @@ const NewCarsPage = () => {
                     
                     <div className="redesign-search-field">
                       <label>Model</label>
-                      <input 
-                        type="text" 
-                        placeholder="Any"
+                      <select
                         value={searchFilters.model}
                         onChange={(e) => handleFilterChange('model', e.target.value)}
-                      />
+                        disabled={!searchFilters.make || loadingModels}
+                      >
+                        <option value="">Any</option>
+                        {loadingModels ? (
+                          <option disabled>Loading...</option>
+                        ) : (
+                          models.map(modelName => (
+                            <option key={modelName} value={modelName}>{modelName}</option>
+                          ))
+                        )}
+                      </select>
                     </div>
                     
                     <div className="redesign-search-actions">
@@ -179,8 +206,11 @@ const NewCarsPage = () => {
                         type="submit" 
                         className="redesign-search-btn"
                       >
-                        <span className="search-icon">🔍</span>
-                        Search new
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <circle cx="11" cy="11" r="8"/>
+                          <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        Search new cars
                       </button>
                     </div>
                   </div>
