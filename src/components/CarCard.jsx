@@ -187,6 +187,10 @@ const CarCard = ({ car }) => {
         <div className="car-content">
           <h3 className="car-title">
             {car.make} {car.model}
+            {/* Electric badge inline with title */}
+            {car.fuelType === 'Electric' && (
+              <span className="badge electric-badge title-electric-badge">⚡ Electric</span>
+            )}
           </h3>
           <p className="car-subtitle">
             {(() => {
@@ -221,9 +225,6 @@ const CarCard = ({ car }) => {
             {car.priceIndicator === 'lower' && (
               <span className="badge lower-price-badge">Lower price</span>
             )}
-
-            {/* Electric Vehicle Badge */}
-            <ElectricVehicleBadge vehicle={car} size="small" />
 
             {/* Mileage Badge */}
             {car.mileage && (
