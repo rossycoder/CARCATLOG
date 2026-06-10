@@ -345,8 +345,24 @@ function SearchResultsPage() {
       const response = await carService.searchCars(apiFilterParams);
       
       // Backend returns: { success: true, cars: [...], total: X }
-      const cars = response.cars || [];
-      const total = response.total || cars.length;
+      let cars = response.cars || [];
+
+      // Client-side engine size filter — guards against deployed backend not having the fix
+      if (filterParams.engineSizeFrom || filterParams.engineSizeTo) {
+        const from = filterParams.engineSizeFrom ? parseFloat(filterParams.engineSizeFrom) : null;
+        const to   = filterParams.engineSizeTo   ? parseFloat(filterParams.engineSizeTo)   : null;
+        cars = cars.filter(car => {
+          if (car.fuelType === 'Electric') return false;
+          if (!car.engineSize) return false;
+          const e = parseFloat(car.engineSize);
+          if (isNaN(e)) return false;
+          if (from !== null && e < from) return false;
+          if (to   !== null && e > to)   return false;
+          return true;
+        });
+      }
+
+      const total = cars.length;
       
       // Transform to match search results format
       const transformedData = {
@@ -400,8 +416,24 @@ function SearchResultsPage() {
       const response = await carService.searchCars(apiFilterParams);
       
       // Backend returns: { success: true, cars: [...], total: X }
-      const cars = response.cars || [];
-      const total = response.total || cars.length;
+      let cars = response.cars || [];
+
+      // Client-side engine size filter — guards against deployed backend not having the fix
+      if (filterParams.engineSizeFrom || filterParams.engineSizeTo) {
+        const from = filterParams.engineSizeFrom ? parseFloat(filterParams.engineSizeFrom) : null;
+        const to   = filterParams.engineSizeTo   ? parseFloat(filterParams.engineSizeTo)   : null;
+        cars = cars.filter(car => {
+          if (car.fuelType === 'Electric') return false;
+          if (!car.engineSize) return false;
+          const e = parseFloat(car.engineSize);
+          if (isNaN(e)) return false;
+          if (from !== null && e < from) return false;
+          if (to   !== null && e > to)   return false;
+          return true;
+        });
+      }
+
+      const total = cars.length;
       
       
       // Calculate distance for each car if we have user's postcode
