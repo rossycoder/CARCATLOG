@@ -239,21 +239,6 @@ const TradeDashboard = () => {
                   {subscription.listingsUsed} of {subscription.listingsLimit || '∞'} listings used
                   {subscription.daysRemaining > 0 && ` • ${subscription.daysRemaining} days remaining`}
                 </p>
-                {subscription.isTrialing && subscription.plan?.price && (
-                  <p style={{
-                    marginTop: '8px',
-                    fontSize: '13px',
-                    color: '#1f2937',
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    display: 'inline-block',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    fontWeight: '500'
-                  }}>
-                    💡 After trial: £{(subscription.plan.price / 100).toFixed(0)} + VAT per month
-                  </p>
-                )}
               </div>
             </div>
             <div className="usage-progress">

@@ -80,6 +80,8 @@ function SearchResultsPage() {
     const gearboxParam = params.get('gearbox');
     const fuelTypeParam = params.get('fuelType');
     const engineSizeParam = params.get('engineSize');
+    const engineSizeFromParam = params.get('engineSizeFrom');
+    const engineSizeToParam = params.get('engineSizeTo');
     const sellerTypeParam = params.get('sellerType');
     const writeOffStatusParam = params.get('writeOffStatus');
     const priceFromParam = params.get('priceFrom');
@@ -113,6 +115,8 @@ function SearchResultsPage() {
       gearbox: gearboxParam,
       fuelType: fuelTypeParam,
       engineSize: engineSizeParam,
+      engineSizeFrom: engineSizeFromParam,
+      engineSizeTo: engineSizeToParam,
       sellerType: sellerTypeParam,
       writeOffStatus: writeOffStatusParam,
       priceFrom: priceFromParam,
@@ -196,31 +200,35 @@ function SearchResultsPage() {
         }
         
         // Engine size filter - client-side
-        if (filterParams.engineSize) {
-          const engineSizeValue = filterParams.engineSize;
-          
+        if (filterParams.engineSizeFrom || filterParams.engineSizeTo || filterParams.engineSize) {
+          const from = filterParams.engineSizeFrom ? parseFloat(filterParams.engineSizeFrom) : null;
+          const to   = filterParams.engineSizeTo   ? parseFloat(filterParams.engineSizeTo)   : null;
+
           results = results.filter(car => {
+            // Always exclude pure electric vehicles from engine size filter
+            if (car.fuelType === 'Electric') return false;
+
             if (!car.engineSize) return false;
-            
-            const carEngineSize = parseFloat(car.engineSize);
-            
-            if (engineSizeValue === '1.0') {
-              return carEngineSize <= 1.0;
-            } else if (engineSizeValue === '1.5') {
-              return carEngineSize > 1.0 && carEngineSize <= 1.5;
-            } else if (engineSizeValue === '2.0') {
-              return carEngineSize > 1.5 && carEngineSize <= 2.0;
-            } else if (engineSizeValue === '2.5') {
-              return carEngineSize > 2.0 && carEngineSize <= 2.5;
-            } else if (engineSizeValue === '3.0') {
-              return carEngineSize > 2.5 && carEngineSize <= 3.0;
-            } else if (engineSizeValue === '3.0+') {
-              return carEngineSize > 3.0;
+            const carEngine = parseFloat(car.engineSize);
+            if (isNaN(carEngine)) return false;
+
+            // New range-based filter (from FilterSidebar)
+            if (from !== null || to !== null) {
+              if (from !== null && carEngine < from) return false;
+              if (to   !== null && carEngine > to)   return false;
+              return true;
             }
-            
+
+            // Legacy bracket filter
+            const engineSizeValue = filterParams.engineSize;
+            if (engineSizeValue === '1.0')  return carEngine <= 1.0;
+            if (engineSizeValue === '1.5')  return carEngine > 1.0 && carEngine <= 1.5;
+            if (engineSizeValue === '2.0')  return carEngine > 1.5 && carEngine <= 2.0;
+            if (engineSizeValue === '2.5')  return carEngine > 2.0 && carEngine <= 2.5;
+            if (engineSizeValue === '3.0')  return carEngine > 2.5 && carEngine <= 3.0;
+            if (engineSizeValue === '3.0+') return carEngine > 3.0;
             return true;
           });
-          
         }
         
         // Seller type filter - client-side
@@ -323,6 +331,8 @@ function SearchResultsPage() {
       if (filterParams.gearbox) apiFilterParams.gearbox = filterParams.gearbox;
       if (filterParams.fuelType) apiFilterParams.fuelType = filterParams.fuelType;
       if (filterParams.engineSize) apiFilterParams.engineSize = filterParams.engineSize;
+      if (filterParams.engineSizeFrom) apiFilterParams.engineSizeFrom = filterParams.engineSizeFrom;
+      if (filterParams.engineSizeTo) apiFilterParams.engineSizeTo = filterParams.engineSizeTo;
       if (filterParams.sellerType) apiFilterParams.sellerType = filterParams.sellerType;
       if (filterParams.writeOffStatus) apiFilterParams.writeOffStatus = filterParams.writeOffStatus;
       if (filterParams.priceFrom) apiFilterParams.priceFrom = filterParams.priceFrom;
@@ -376,6 +386,8 @@ function SearchResultsPage() {
       if (filterParams.gearbox) apiFilterParams.gearbox = filterParams.gearbox;
       if (filterParams.fuelType) apiFilterParams.fuelType = filterParams.fuelType;
       if (filterParams.engineSize) apiFilterParams.engineSize = filterParams.engineSize;
+      if (filterParams.engineSizeFrom) apiFilterParams.engineSizeFrom = filterParams.engineSizeFrom;
+      if (filterParams.engineSizeTo) apiFilterParams.engineSizeTo = filterParams.engineSizeTo;
       if (filterParams.sellerType) apiFilterParams.sellerType = filterParams.sellerType;
       if (filterParams.writeOffStatus) apiFilterParams.writeOffStatus = filterParams.writeOffStatus;
       if (filterParams.priceFrom) apiFilterParams.priceFrom = filterParams.priceFrom;

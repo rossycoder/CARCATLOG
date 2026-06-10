@@ -107,7 +107,8 @@ const CarAdvertEditPage = () => {
     transmission: '',
     seats: '',
     fuelType: '',
-    color: ''
+    color: '',
+    bodyType: ''
   });
   
   // Enhanced data processing state
@@ -1076,7 +1077,8 @@ useEffect(() => {
       transmission: vehicleData.transmission || '',
       seats: vehicleData.seats || '',
       fuelType: vehicleData.fuelType || '',
-      color: vehicleData.color || ''
+      color: vehicleData.color || '',
+      bodyType: vehicleData.bodyType || ''
     });
     setIsOverviewEditing(true);
   };
@@ -1098,13 +1100,14 @@ useEffect(() => {
         model: editableOverviewData.model.trim(),
         variant: editableOverviewData.variant ? editableOverviewData.variant.trim() : '',
         motDue: editableOverviewData.motDue || null,
-        motExpiry: editableOverviewData.motDue || null, // Save to both fields
+        motExpiry: editableOverviewData.motDue || null,
         engineSize: editableOverviewData.engineSize ? parseFloat(editableOverviewData.engineSize) : null,
         doors: editableOverviewData.doors ? parseInt(editableOverviewData.doors) : null,
         transmission: editableOverviewData.transmission || null,
         seats: editableOverviewData.seats ? parseInt(editableOverviewData.seats) : null,
         fuelType: editableOverviewData.fuelType || null,
-        color: editableOverviewData.color ? editableOverviewData.color.trim() : null
+        color: editableOverviewData.color ? editableOverviewData.color.trim() : null,
+        bodyType: editableOverviewData.bodyType || null
       };
       
       
@@ -1152,7 +1155,8 @@ useEffect(() => {
           transmission: editableOverviewData.transmission || null,
           seats: editableOverviewData.seats ? parseInt(editableOverviewData.seats) : null,
           fuelType: editableOverviewData.fuelType || null,
-          color: editableOverviewData.color ? editableOverviewData.color.trim() : null
+          color: editableOverviewData.color ? editableOverviewData.color.trim() : null,
+          bodyType: editableOverviewData.bodyType || null
         };
         await advertService.updateAdvert(advertId, {}, { ...vehicleData, ...updateData });
         setVehicleData(prev => ({ ...prev, ...updateData }));
@@ -2126,7 +2130,26 @@ useEffect(() => {
               </div>
               <div className="spec-item">
                 <label>Body type</label>
-                <span>{vehicleData.bodyType || 'Saloon'}</span>
+                {isOverviewEditing ? (
+                  <select
+                    value={editableOverviewData.bodyType || ''}
+                    onChange={(e) => setEditableOverviewData(prev => ({ ...prev, bodyType: e.target.value }))}
+                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px' }}
+                  >
+                    <option value="">Select...</option>
+                    <option value="Saloon">Saloon</option>
+                    <option value="Hatchback">Hatchback</option>
+                    <option value="Estate">Estate</option>
+                    <option value="SUV">SUV</option>
+                    <option value="Coupe">Coupe</option>
+                    <option value="Convertible">Convertible</option>
+                    <option value="MPV">MPV</option>
+                    <option value="Pickup">Pickup</option>
+                    <option value="Van">Van</option>
+                  </select>
+                ) : (
+                  <span>{vehicleData.bodyType || 'Not specified'}</span>
+                )}
               </div>
               <div className="spec-item">
                 <label>{vehicleData.fuelType === 'Electric' ? 'Electric Range' : 'Engine'}</label>

@@ -435,16 +435,7 @@ const SellerContactDetailsPage = () => {
             </div>
           )}
 
-          {/* Trial Pricing Info for Trade Dealers */}
-          {isTradeDealer && subscription?.isTrialing && (
-            <div className="trial-pricing-info">
-              <div className="trial-pricing-icon">💰</div>
-              <div className="trial-pricing-text">
-                <strong>Trial Period Active</strong>
-                <p>Only £2.50 will be charged for this listing • {subscription.trialDaysLeft || 0} days remaining</p>
-              </div>
-            </div>
-          )}
+          {/* Trial Pricing Info for Trade Dealers — removed */}
 
           {/* Submit Button - Conditional based on user type */}
           <button

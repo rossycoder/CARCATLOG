@@ -16,6 +16,7 @@ const TradeRegisterPage = () => {
     businessAddress: '',
     businessRegistrationNumber: '',
     vatNumber: '',
+    website: '',
     logo: null
   });
   
@@ -75,6 +76,12 @@ const TradeRegisterPage = () => {
         
       case 'vatNumber':
         if (value && !/^[A-Za-z]{2}[0-9]{9,12}$/.test(value)) error = 'Invalid VAT number format (e.g., GB123456789)';
+        break;
+        
+      case 'website':
+        if (value && !/^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/\S*)?$/.test(value)) {
+          error = 'Please enter a valid website URL (e.g., www.mydealer.co.uk)';
+        }
         break;
         
       default:
@@ -177,6 +184,9 @@ const TradeRegisterPage = () => {
       submitData.append('businessAddress', formData.businessAddress);
       submitData.append('businessRegistrationNumber', formData.businessRegistrationNumber);
       submitData.append('vatNumber', formData.vatNumber);
+      if (formData.website) {
+        submitData.append('website', formData.website);
+      }
       
       if (formData.logo) {
         submitData.append('logo', formData.logo);
@@ -389,6 +399,24 @@ const TradeRegisterPage = () => {
                   rows="3"
                   placeholder="123 High Street, London"
                 />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="website">Website <span className="optional">(optional)</span></label>
+                <input
+                  type="text"
+                  id="website"
+                  name="website"
+                  value={formData.website}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="e.g., www.mydealer.co.uk"
+                  className={touched.website && errors.website ? 'error' : ''}
+                />
+                {touched.website && errors.website && (
+                  <div className="field-error">{errors.website}</div>
+                )}
+                <div className="field-hint">This will be shown to buyers on your car listings</div>
               </div>
             </div>
           </div>
