@@ -13,7 +13,8 @@
   background: transparent !important;
 }
 
-.hero-section-with-search .container {
+/* Default background — overridden by .hero-worldcup class when World Cup is active */
+.hero-section-with-search .container:not(.hero-worldcup) {
   background-image: url('/images/brands/background1.jpeg') !important;
   background-size: cover !important;
   background-position: center center !important;

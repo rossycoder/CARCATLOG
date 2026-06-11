@@ -10,6 +10,7 @@
   max-width: var(--container-xl) !important;
   width: 100% !important;
   min-height: 850px !important;
+  /* DEFAULT IMAGE - restored automatically after World Cup */
   background-image: url('/images/brands/background1.jpeg') !important;
   background-size: cover !important;
   background-position: center center !important;
@@ -20,6 +21,11 @@
   align-items: flex-end !important;
   padding: var(--spacing-5) var(--spacing-5) var(--spacing-12) !important;
   box-shadow: var(--shadow-xl) !important;
+}
+
+/* FIFA World Cup 2026 - Active until July 19 2026, switches automatically via JS */
+.hero-section-with-search .container.hero-worldcup {
+  background-image: url('/images/brands/football landscaper.jfif') !important;
 }
 
 .hero-background-overlay {
@@ -933,6 +939,7 @@
   .hero-section-with-search .container {
     min-height: 750px !important;
     padding: var(--spacing-4) var(--spacing-4) var(--spacing-10) !important;
+    /* DEFAULT IMAGE */
     background-image: url('/images/brands/background1.jpeg') !important;
     background-size: cover !important;
     background-position: center 30% !important;
@@ -940,6 +947,11 @@
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-end !important;
+  }
+
+  /* FIFA World Cup 2026 override */
+  .hero-section-with-search .container.hero-worldcup {
+    background-image: url('/images/brands/football landscaper.jfif') !important;
   }
   
   .hero-background-overlay {
@@ -1018,9 +1030,15 @@
     min-height: 500px !important;
     padding: var(--spacing-4) var(--spacing-4) var(--spacing-10) !important;
     background-position: center 35% !important;
+    /* DEFAULT IMAGE */
     background-image: url('/images/brands/background1.jpeg') !important;
     background-size: cover !important;
     background-repeat: no-repeat !important;
+  }
+
+  /* FIFA World Cup 2026 override */
+  .hero-section-with-search .container.hero-worldcup {
+    background-image: url('/images/brands/football landscaper.jfif') !important;
   }
   
   .hero-background-overlay {
@@ -1202,6 +1220,7 @@
     min-height: 900px !important;
     padding: var(--spacing-2) var(--spacing-2) var(--spacing-3) !important;
     border-radius: var(--radius-lg) !important;
+    /* DEFAULT MOBILE IMAGE */
     background-image: url('/images/brands/mobile image.jpeg') !important;
     background-size: cover !important;
     background-position: top center !important;
@@ -1212,16 +1231,21 @@
     display: flex !important;
     justify-content: center !important;
   }
+
+  /* FIFA World Cup 2026 override */
+  .hero-section-with-search .container.hero-worldcup {
+    background-image: url('/images/brands/mobile view.jfif') !important;
+  }
   
   .hero-background-overlay {
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      transparent 60%,
-      rgba(255,255,255,0.05) 70%,
-      rgba(255,255,255,0.3) 80%,
-      rgba(255,255,255,0.75) 90%,
-      rgba(255,255,255,0.95) 100%
+      transparent 55%,
+      rgba(255,255,255,0.05) 65%,
+      rgba(255,255,255,0.25) 78%,
+      rgba(255,255,255,0.70) 90%,
+      rgba(255,255,255,0.92) 100%
     ) !important;
   }
 
@@ -1520,6 +1544,7 @@
     border-radius: var(--radius-lg) !important;
     background-position: top center !important;
     padding: var(--spacing-2) var(--spacing-2) var(--spacing-3) !important;
+    /* DEFAULT MOBILE IMAGE */
     background-image: url('/images/brands/mobile image.jpeg') !important;
     background-size: cover !important;
     background-repeat: no-repeat !important;
@@ -1528,16 +1553,21 @@
     align-items: flex-end !important;
     justify-content: center !important;
   }
+
+  /* FIFA World Cup 2026 override */
+  .hero-section-with-search .container.hero-worldcup {
+    background-image: url('/images/brands/mobile view.jfif') !important;
+  }
   
   .hero-background-overlay {
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      transparent 60%,
-      rgba(255,255,255,0.05) 70%,
-      rgba(255,255,255,0.3) 80%,
-      rgba(255,255,255,0.75) 90%,
-      rgba(255,255,255,0.95) 100%
+      transparent 55%,
+      rgba(255,255,255,0.05) 65%,
+      rgba(255,255,255,0.25) 78%,
+      rgba(255,255,255,0.70) 90%,
+      rgba(255,255,255,0.92) 100%
     ) !important;
   }
   

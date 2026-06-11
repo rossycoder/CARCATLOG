@@ -10,6 +10,12 @@ import { filterService } from '../services/filterService';
 import './HomePage.css';
 
 
+// FIFA World Cup 2026 ends July 19, 2026 (final at MetLife Stadium)
+// After this date, hero images automatically revert to originals — no manual change needed
+const WORLD_CUP_END_DATE = new Date('2026-07-20T00:00:00'); // day after final
+
+const isWorldCupActive = () => new Date() < WORLD_CUP_END_DATE;
+
 const HomePage = () => {
   const navigate = useNavigate();
   const [postcode, setPostcode] = useState('');
@@ -199,14 +205,14 @@ const HomePage = () => {
         {/* Hero Section with Background Image and Search Bar */}
         <section className="hero-section-with-search">
         <div className="hero-background-overlay"></div>
-        <div className="container">
-          {/* Mobile App Text Overlay - only "App" stays top-left */}
+        <div className={`container${isWorldCupActive() ? ' hero-worldcup' : ''}`}>
+          {/* Mobile App Text Overlay - only shown when World Cup is NOT active */}
           <div className="mobile-hero-overlay">
-            <span className="mobile-hero-app-text">App</span>
+            {!isWorldCupActive() && <span className="mobile-hero-app-text">App</span>}
           </div>
           <div className="hero-content">
-            {/* Coming Soon badge - above search bar, mobile only */}
-            <div className="mobile-coming-soon-badge">Coming Soon</div>
+            {/* Coming Soon badge - above search bar, mobile only, hidden during World Cup */}
+            {!isWorldCupActive() && <div className="mobile-coming-soon-badge">Coming Soon</div>}
             {/* Search Bar */}
             <div className="search-container-hero">
               <div className="search-field-group">
