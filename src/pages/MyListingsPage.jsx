@@ -727,10 +727,18 @@ function MyListingsPage() {
                           >
                             View Vehicles
                           </button>
+                          {/* Hide delete button for protected accounts */}
+                          {!['shahzad872@live.com', 'jjwilliamss180304@gmail.com'].includes(user.email?.toLowerCase()) && (
                           <button
                             className="action-link delete"
                             style={{ marginLeft: '8px', color: '#dc2626', background: 'none', border: '1px solid #dc2626', borderRadius: '4px', padding: '4px 10px', cursor: 'pointer', fontSize: '0.8rem' }}
                             onClick={async () => {
+                              // Protected accounts — cannot be deleted
+                              const PROTECTED_EMAILS = ['shahzad872@live.com', 'jjwilliamss180304@gmail.com'];
+                              if (PROTECTED_EMAILS.includes(user.email?.toLowerCase())) {
+                                alert('This account is protected and cannot be deleted.');
+                                return;
+                              }
                               const userName = user.businessName || user.name || user.email;
                               const userType = user.type === 'trade' ? 'trade' : 'normal';
                               const vehicleWarning = user.vehicleCount > 0
@@ -749,6 +757,7 @@ function MyListingsPage() {
                           >
                             🗑 Delete Account
                           </button>
+                          )}
                         </td>
                       </tr>
                       );

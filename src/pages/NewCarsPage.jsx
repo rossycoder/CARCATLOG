@@ -235,7 +235,12 @@ const NewCarsPage = () => {
                           <circle cx="11" cy="11" r="8"/>
                           <path d="m21 21-4.35-4.35"/>
                         </svg>
-                        {loadingCount ? 'Loading...' : `Search ${carCount.toLocaleString()} cars`}
+                        {loadingCount
+                          ? 'Search new cars'
+                          : carCount > 0
+                            ? `Search ${carCount.toLocaleString()} cars`
+                            : 'Search new cars'
+                        }
                       </button>
                     </div>
                   </div>

@@ -200,7 +200,9 @@ const TradeAnalyticsPage = () => {
           </div>
           {inquiriesBySource.length > 0 ? (
             <div className="sources-list">
-              {inquiriesBySource.map((source) => (
+              {inquiriesBySource
+                .filter((source) => source.source !== 'Social')
+                .map((source) => (
                 <div key={source.source} className="source-item">
                   <div className="source-info">
                     <span className="source-name">{source.source}</span>
