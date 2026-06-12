@@ -404,6 +404,12 @@
     justify-content: flex-end !important;
   }
 
+  .hero-section-with-search .hero-content {
+    position: relative !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
   .hero-image-wrap {
     min-height: 320px !important;
   }
@@ -484,6 +490,12 @@
     padding: 0 0 24px 0 !important;
     border-radius: 14px !important;
     overflow: hidden !important;
+  }
+
+  .hero-section-with-search .hero-content {
+    position: relative !important;
+    bottom: auto !important;
+    transform: none !important;
   }
 
   .hero-image-wrap {
