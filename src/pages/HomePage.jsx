@@ -204,8 +204,16 @@ const HomePage = () => {
       <div className="home-page">
         {/* Hero Section with Background Image and Search Bar */}
         <section className="hero-section-with-search">
-        <div className="hero-background-overlay"></div>
         <div className={`container${isWorldCupActive() ? ' hero-worldcup' : ''}`}>
+          <div className="hero-image-wrap">
+            {/* Full hero image — shows completely without cropping */}
+            <img
+              src={isWorldCupActive() ? '/images/brands/football landscaper.jfif' : '/images/brands/background1.jpeg'}
+              alt="Hero background"
+              className="hero-bg-img"
+            />
+            <div className="hero-background-overlay"></div>
+          </div>
           {/* Mobile App Text Overlay - only shown when World Cup is NOT active */}
           <div className="mobile-hero-overlay">
             {!isWorldCupActive() && <span className="mobile-hero-app-text">App</span>}
