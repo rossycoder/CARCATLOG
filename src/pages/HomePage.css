@@ -9,7 +9,7 @@
   display: block !important;
   position: relative !important;
   background: #ffffff !important;
-  margin-bottom: 60px !important;
+  margin-bottom: 30px !important;
 }
 
 .hero-section-with-search .container {
@@ -30,7 +30,8 @@
   overflow: hidden !important;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
   line-height: 0 !important;
-  min-height: 500px !important;
+  min-height: 600px !important;
+  background: #000 !important;
 }
 
 .hero-section-with-search .container > div {
@@ -49,10 +50,22 @@
 .hero-bg-img {
   width: 100% !important;
   height: auto !important;
+  min-height: 600px !important;
   display: block !important;
   position: relative !important;
   z-index: 0 !important;
   border-radius: 16px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+/* Desktop image - hide on mobile */
+.hero-bg-img-desktop {
+  display: block !important;
+}
+
+.hero-bg-img-mobile {
+  display: none !important;
 }
 
 /* Gradient overlay */
@@ -94,7 +107,7 @@
 /* Search card sits below image centered — desktop */
 .hero-section-with-search .hero-content {
   position: absolute !important;
-  bottom: 100px !important;
+  bottom: 160px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   z-index: 2 !important;
@@ -611,7 +624,7 @@
   /* Reset hero section — no padding, full bleed */
   .hero-section-with-search {
     padding: 0 !important;
-    margin-bottom: 40px !important;
+    margin-bottom: 5px !important;
     background: transparent !important;
   }
 
@@ -647,8 +660,19 @@
     width: 100% !important;
     height: auto !important;
     min-height: 500px !important;
+    max-height: 600px !important;
     object-fit: cover !important;
     object-position: center center !important;
+  }
+  
+  /* Hide desktop image on mobile */
+  .hero-bg-img-desktop {
+    display: none !important;
+  }
+  
+  /* Show mobile image on mobile */
+  .hero-bg-img-mobile {
+    display: block !important;
   }
 
   /* Remove gradient overlay on mobile — image should read clean */
@@ -868,8 +892,8 @@
    WELCOME SECTION
    ===================================================== */
 .welcome-hero-section {
-  padding: var(--section-padding-lg) var(--spacing-5);
-  margin-top: 0;
+  padding: 10px var(--spacing-5) var(--section-padding-lg);
+  margin-top: -80px;
   background: white;
   overflow: hidden;
 }

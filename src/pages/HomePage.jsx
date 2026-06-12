@@ -206,11 +206,17 @@ const HomePage = () => {
         <section className="hero-section-with-search">
         <div className={`container${isWorldCupActive() ? ' hero-worldcup' : ''}`}>
           <div className="hero-image-wrap">
-            {/* Full hero image — shows completely without cropping */}
+            {/* Desktop landscape image */}
             <img
               src={isWorldCupActive() ? '/images/brands/football landscaper.jfif' : '/images/brands/background1.jpeg'}
               alt="Hero background"
-              className="hero-bg-img"
+              className="hero-bg-img hero-bg-img-desktop"
+            />
+            {/* Mobile portrait image */}
+            <img
+              src={isWorldCupActive() ? '/images/brands/mobile view.jfif' : '/images/brands/mobile image.jpeg'}
+              alt="Hero background mobile"
+              className="hero-bg-img hero-bg-img-mobile"
             />
             <div className="hero-background-overlay"></div>
           </div>
