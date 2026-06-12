@@ -692,7 +692,7 @@
   /* Hero content: overlapping search bar like desktop */
   .hero-section-with-search .hero-content {
     position: absolute !important;
-    bottom: 140px !important;
+    bottom: 90px !important;
     left: 0 !important;
     right: 0 !important;
     margin: 0 !important;
@@ -874,7 +874,7 @@
   }
 
   .hero-section-with-search .hero-content {
-    bottom: 110px !important;
+    bottom: 60px !important;
     padding: 0 8px !important;
     width: calc(100% - 16px) !important;
     max-width: calc(100% - 16px) !important;
@@ -940,7 +940,7 @@
   }
 
   .hero-section-with-search .hero-content {
-    bottom: 140px !important;
+    bottom: 55px !important;
     padding: 0 6px !important;
     width: calc(100% - 12px) !important;
   }
@@ -987,7 +987,7 @@
   }
 
   .hero-section-with-search .hero-content {
-    bottom: 100px !important;
+    bottom: 58px !important;
     padding: 0 8px !important;
   }
 
@@ -1023,7 +1023,7 @@
   }
 
   .hero-section-with-search .hero-content {
-    bottom: 105px !important;
+    bottom: 60px !important;
   }
 
   .search-button {
@@ -1041,7 +1041,7 @@
    ===================================================== */
 @media (min-width: 396px) and (max-width: 420px) {
   .hero-section-with-search .hero-content {
-    bottom: 110px !important;
+    bottom: 62px !important;
   }
 
   .hero-bg-img {
@@ -1089,7 +1089,7 @@
   }
 
   .hero-section-with-search .hero-content {
-    bottom: 115px !important;
+    bottom: 65px !important;
   }
 
   .search-button {
@@ -1116,7 +1116,7 @@
   }
 
   .hero-section-with-search .hero-content {
-    bottom: 120px !important;
+    bottom: 68px !important;
   }
 
   .search-container-hero {
