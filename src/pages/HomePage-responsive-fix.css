@@ -4,7 +4,9 @@
    ======================================== */
 
 /* Box-sizing reset */
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -12,6 +14,36 @@
 html, body {
   overflow-x: hidden;
   max-width: 100vw;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  position: relative;
+  width: 100%;
+}
+
+/* Ensure all containers don't overflow */
+.container,
+.welcome-content-wrapper,
+.value-car-content,
+.essentials-grid,
+.partners-section,
+.social-media-section,
+.hero-section-with-search,
+.welcome-hero-section,
+.value-car-section,
+.buying-essentials,
+.advertising-section {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ensure all images are responsive and don't overflow */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* Hero section — no overflow:hidden so the overlapping search card shows */
@@ -19,10 +51,37 @@ html, body {
   width: 100%;
   max-width: 100vw;
   background: transparent !important;
+  overflow: visible;
+}
+
+.home-page {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Ensure all text doesn't overflow */
+h1, h2, h3, h4, h5, h6, p, span, a, div {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 /* Prevent zoom on input focus for iOS */
 @media (max-width: 768px) {
+  /* Ensure no duplicate hero images */
+  .hero-image-wrap {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Only one image should be visible at a time */
+  .hero-bg-img-desktop,
+  .hero-bg-img-mobile {
+    position: relative;
+    display: block;
+  }
+
   .search-field input,
   .search-field select {
     font-size: 16px !important;
@@ -41,11 +100,43 @@ html, body {
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
   }
+
+  /* Better text rendering */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Prevent text overflow */
+  h1, h2, h3, h4, h5, h6, p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 100%;
+  }
+
+  /* Fix all sections overflow */
+  section {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  /* Fix container padding on mobile */
+  .container {
+    padding-left: 15px;
+    padding-right: 15px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
 }
 
 /* Landscape mobile */
 @media (max-height: 500px) and (orientation: landscape) {
   .hero-section-with-search .container {
+    min-height: 320px !important;
+  }
+  
+  .hero-bg-img {
     min-height: 320px !important;
   }
 }
