@@ -62,6 +62,9 @@ function TradeFeedImportPage() {
   // Import settings
   const [removeSoldVehicles, setRemoveSoldVehicles] = useState(true);
   const [importImages, setImportImages] = useState(true);
+  const [useUnsplashFallback, setUseUnsplashFallback] = useState(true);
+  const [limitVehicles, setLimitVehicles] = useState(true);
+  const [selectionMode, setSelectionMode] = useState('first');
 
   useEffect(() => {
     fetchFeeds();
@@ -153,7 +156,10 @@ function TradeFeedImportPage() {
         { 
           feedUrl, 
           removeSoldVehicles,
-          importImages
+          importImages,
+          useUnsplashFallback,
+          limitVehicles,
+          selectionMode
         },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -161,7 +167,17 @@ function TradeFeedImportPage() {
       );
 
       if (response.data.success) {
-        alert(response.data.message);
+        let message = response.data.message;
+        
+        // Add additional info about the import
+        if (response.data.limitApplied) {
+          message += `\nSubscription limit was applied.`;
+        }
+        if (response.data.unsplashImagesUsed > 0) {
+          message += `\n${response.data.unsplashImagesUsed} high-quality images were added automatically.`;
+        }
+        
+        alert(message);
         setTestResult(null);
         setFeedUrl('');
         fetchFeeds();
@@ -377,6 +393,51 @@ function TradeFeedImportPage() {
                       <div className="checkbox-description">Download and store images from your feed for better listings</div>
                     </div>
                   </label>
+
+                  <label className="checkbox-label enhanced">
+                    <input
+                      type="checkbox"
+                      checked={useUnsplashFallback}
+                      onChange={(e) => setUseUnsplashFallback(e.target.checked)}
+                    />
+                    <span className="checkmark"></span>
+                    <div className="checkbox-content">
+                      <div className="checkbox-title">Smart image enhancement</div>
+                      <div className="checkbox-description">Add high-quality professional car photos when feed images are missing or broken</div>
+                    </div>
+                  </label>
+
+                  <label className="checkbox-label enhanced">
+                    <input
+                      type="checkbox"
+                      checked={limitVehicles}
+                      onChange={(e) => setLimitVehicles(e.target.checked)}
+                    />
+                    <span className="checkmark"></span>
+                    <div className="checkbox-content">
+                      <div className="checkbox-title">Respect subscription limits</div>
+                      <div className="checkbox-description">Only import vehicles up to your subscription allowance</div>
+                    </div>
+                  </label>
+
+                  {limitVehicles && (
+                    <div className="sub-options">
+                      <div className="sub-option-label">Vehicle Selection Priority:</div>
+                      <select 
+                        value={selectionMode} 
+                        onChange={(e) => setSelectionMode(e.target.value)}
+                        className="selection-dropdown"
+                      >
+                        <option value="first">First vehicles in feed (default order)</option>
+                        <option value="highest-price">Highest priced vehicles first</option>
+                        <option value="newest">Newest vehicles first</option>
+                        <option value="lowest-mileage">Lowest mileage vehicles first</option>
+                      </select>
+                      <div className="sub-option-help">
+                        Choose which vehicles to prioritize if your feed has more cars than your subscription allows
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="button-group">
