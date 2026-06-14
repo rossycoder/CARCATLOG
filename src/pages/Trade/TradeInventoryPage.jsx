@@ -22,6 +22,7 @@ const TradeInventoryPage = () => {
   const [showLimitWarning, setShowLimitWarning] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [limitModalMessage, setLimitModalMessage] = useState('');
+  const [statsData, setStatsData] = useState(null); // Stats from API
 
   // Sync filter state with URL query parameter
   useEffect(() => {
@@ -37,6 +38,7 @@ const TradeInventoryPage = () => {
   useEffect(() => {
     fetchAllInventory();
     fetchSubscription();
+    fetchStats(); // Fetch accurate stats from API
   }, [filter]);
 
   const fetchSubscription = async () => {
@@ -59,27 +61,69 @@ const TradeInventoryPage = () => {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/trade/inventory/stats`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('tradeToken')}`
+        }
+      });
+      const data = await response.json();
+      if (data.success && data.stats) {
+        setStatsData(data.stats);
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    }
+  };
+
   const fetchAllInventory = async () => {
     setLoading(true);
     try {
-      // Fetch cars, bikes, and vans
+      // Fetch ALL cars, bikes, and vans (no pagination limit for dealer inventory)
       const [carsData, bikesData, vansData] = await Promise.all([
-        tradeInventoryService.getInventory({ status: filter === 'all' ? undefined : filter }),
-        tradeInventoryService.getBikeInventory({ status: filter === 'all' ? undefined : filter }),
-        tradeInventoryService.getVanInventory({ status: filter === 'all' ? undefined : filter })
+        tradeInventoryService.getInventory({ 
+          status: filter === 'all' ? undefined : filter,
+          limit: 1000 // Fetch all vehicles (increased limit)
+        }),
+        tradeInventoryService.getBikeInventory({ 
+          status: filter === 'all' ? undefined : filter,
+          limit: 1000
+        }),
+        tradeInventoryService.getVanInventory({ 
+          status: filter === 'all' ? undefined : filter,
+          limit: 1000
+        })
       ]);
       
-      if (carsData.success) {
+      if (carsData.success && carsData.vehicles) {
         setVehicles(carsData.vehicles.map(v => ({ ...v, vehicleType: 'car' })));
+      } else {
+        setVehicles([]);
+        console.warn('Cars data not loaded:', carsData);
       }
+      
       if (bikesData.success) {
-        setBikes((bikesData.data?.bikes || bikesData.bikes || []).map(b => ({ ...b, vehicleType: 'bike' })));
+        const bikes = bikesData.data?.bikes || bikesData.bikes || [];
+        setBikes(bikes.map(b => ({ ...b, vehicleType: 'bike' })));
+      } else {
+        setBikes([]);
+        console.warn('Bikes data not loaded:', bikesData);
       }
+      
       if (vansData.success) {
-        setVans((vansData.data?.vans || vansData.vans || []).map(v => ({ ...v, vehicleType: 'van' })));
+        const vans = vansData.data?.vans || vansData.vans || [];
+        setVans(vans.map(v => ({ ...v, vehicleType: 'van' })));
+      } else {
+        setVans([]);
+        console.warn('Vans data not loaded:', vansData);
       }
     } catch (error) {
       console.error('Failed to fetch inventory:', error);
+      // Set empty arrays to prevent undefined errors
+      setVehicles([]);
+      setBikes([]);
+      setVans([]);
     } finally {
       setLoading(false);
     }
@@ -150,12 +194,13 @@ const TradeInventoryPage = () => {
   const filteredVehicles = allVehicles
     .filter(v => {
       const searchLower = searchTerm.toLowerCase();
-      return `${v.make} ${v.model} ${v.year}`.toLowerCase().includes(searchLower);
+      const vehicleText = `${v.make || ''} ${v.model || ''} ${v.year || ''}`.toLowerCase();
+      return vehicleText.includes(searchLower);
     })
     .sort((a, b) => {
       switch(sortBy) {
-        case 'newest': return new Date(b.createdAt) - new Date(a.createdAt);
-        case 'oldest': return new Date(a.createdAt) - new Date(b.createdAt);
+        case 'newest': return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        case 'oldest': return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
         case 'price-high': return (b.price || 0) - (a.price || 0);
         case 'price-low': return (a.price || 0) - (b.price || 0);
         case 'views': return (b.viewCount || 0) - (a.viewCount || 0);
@@ -164,13 +209,15 @@ const TradeInventoryPage = () => {
     });
 
   const stats = {
-    all: allVehicles.length,
-    active: allVehicles.filter(v => (v.advertStatus || v.status) === 'active').length,
-    sold: allVehicles.filter(v => (v.advertStatus || v.status) === 'sold').length,
-    draft: allVehicles.filter(v => (v.advertStatus || v.status) === 'draft').length,
-    cars: vehicles.length,
-    bikes: bikes.length,
-    vans: vans.length,
+    // Use API stats if available (accurate totals), fallback to loaded vehicles count
+    all: statsData ? statsData.total : allVehicles.length,
+    active: statsData ? statsData.active : allVehicles.filter(v => (v.advertStatus || v.status) === 'active').length,
+    sold: statsData ? statsData.sold : allVehicles.filter(v => (v.advertStatus || v.status) === 'sold').length,
+    draft: statsData ? statsData.draft : allVehicles.filter(v => (v.advertStatus || v.status) === 'draft').length,
+    // Use API stats for vehicle types too
+    cars: statsData ? statsData.cars : vehicles.length,
+    bikes: statsData ? statsData.bikes : bikes.length,
+    vans: statsData ? statsData.vans : vans.length,
   };
 
   return (
@@ -254,26 +301,24 @@ const TradeInventoryPage = () => {
 
         {/* Limit Warning */}
         {showLimitWarning && subscription && subscription.listingsLimit && (
-          <div className={`limit-warning ${subscription.usagePercentage >= 100 ? 'error' : 'warning'}`}>
-            <div className="warning-icon">
-              {subscription.usagePercentage >= 100 ? '🚫' : '⚠️'}
-            </div>
-            <div className="warning-content">
-              <h3>
+          <div className="warning-alert">
+            <span className="warning-icon">⚠️</span>
+            <div className="warning-alert-content">
+              <h3 className="warning-alert-title">
                 {subscription.usagePercentage >= 100 
-                  ? 'Listing Limit Reached' 
+                  ? '🚫 Listing Limit Reached' 
                   : 'Approaching Listing Limit'}
               </h3>
-              <p>
+              <p className="warning-alert-message">
                 {subscription.usagePercentage >= 100 
-                  ? `Your ${subscription.plan?.name || 'current'} plan allows ${subscription.listingsLimit} listings. You have reached your limit. Please upgrade your plan to add more vehicles.`
+                  ? `Your ${subscription.plan?.name || 'current'} plan allows ${subscription.listingsLimit} listings. You have reached your limit.`
                   : `You're using ${subscription.listingsUsed} of ${subscription.listingsLimit} listings (${subscription.usagePercentage}%). Consider upgrading to add more vehicles.`}
+                <Link to="/trade/subscription" className="warning-alert-link">
+                  Upgrade Plan →
+                </Link>
               </p>
-              <Link to="/trade/subscription" className="btn-upgrade">
-                {subscription.usagePercentage >= 100 ? 'Upgrade Plan' : 'View Plans'}
-              </Link>
             </div>
-            <button className="close-warning" onClick={() => setShowLimitWarning(false)}>×</button>
+            <button className="warning-alert-close" onClick={() => setShowLimitWarning(false)}>×</button>
           </div>
         )}
 
@@ -336,11 +381,11 @@ const TradeInventoryPage = () => {
             </div>
           </div>
 
-          <div className="inventory-tools">
+          <div className="inventory-search-row">
             <div className="search-box">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z" stroke="#666" strokeWidth="2"/>
-                <path d="M12.5 12.5L16 16" stroke="#666" strokeWidth="2" strokeLinecap="round"/>
+              <svg className="search-icon" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z" stroke="currentColor" strokeWidth="2"/>
+                <path d="M12.5 12.5L16 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
               <input 
                 type="text" 
@@ -350,7 +395,8 @@ const TradeInventoryPage = () => {
               />
             </div>
 
-            <select className="sort-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <div className="controls-right">
+              <select className="sort-dropdown" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
               <option value="price-high">Price: High to Low</option>
@@ -358,30 +404,31 @@ const TradeInventoryPage = () => {
               <option value="views">Most Viewed</option>
             </select>
 
-            <div className="view-toggle">
-              <button 
-                className={viewMode === 'grid' ? 'active' : ''} 
-                onClick={() => setViewMode('grid')}
-                title="Grid view"
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                  <rect x="2" y="2" width="7" height="7" rx="1"/>
-                  <rect x="11" y="2" width="7" height="7" rx="1"/>
-                  <rect x="2" y="11" width="7" height="7" rx="1"/>
-                  <rect x="11" y="11" width="7" height="7" rx="1"/>
-                </svg>
-              </button>
-              <button 
-                className={viewMode === 'list' ? 'active' : ''} 
-                onClick={() => setViewMode('list')}
-                title="List view"
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                  <rect x="2" y="3" width="16" height="3" rx="1"/>
-                  <rect x="2" y="8" width="16" height="3" rx="1"/>
-                  <rect x="2" y="13" width="16" height="3" rx="1"/>
-                </svg>
-              </button>
+              <div className="view-toggle">
+                <button 
+                  className={viewMode === 'grid' ? 'active' : ''} 
+                  onClick={() => setViewMode('grid')}
+                  title="Grid view"
+                >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <rect x="2" y="2" width="7" height="7" rx="1"/>
+                    <rect x="11" y="2" width="7" height="7" rx="1"/>
+                    <rect x="2" y="11" width="7" height="7" rx="1"/>
+                    <rect x="11" y="11" width="7" height="7" rx="1"/>
+                  </svg>
+                </button>
+                <button 
+                  className={viewMode === 'list' ? 'active' : ''} 
+                  onClick={() => setViewMode('list')}
+                  title="List view"
+                >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <rect x="2" y="3" width="16" height="3" rx="1"/>
+                    <rect x="2" y="9" width="16" height="3" rx="1"/>
+                    <rect x="2" y="15" width="16" height="3" rx="1"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -412,16 +459,19 @@ const TradeInventoryPage = () => {
               <div key={vehicle._id} className="vehicle-card">
                 <div className="vehicle-image-container">
                   <img 
-                    src={vehicle.images?.[0] || '/placeholder-car.jpg'} 
+                    src={vehicle.images?.[0] || '/images/dummy/placeholder.svg'} 
                     alt={`${vehicle.make} ${vehicle.model}`} 
+                    onError={(e) => {
+                      e.target.src = '/images/dummy/red-car.png';
+                    }}
                   />
                   <span className={`type-badge ${vehicle.vehicleType}`}>
                     {vehicle.vehicleType === 'bike' ? '🏍️' : vehicle.vehicleType === 'van' ? '🚐' : '🚗'}
                   </span>
                   <span className={`status-badge ${vehicle.advertStatus || vehicle.status}`}>
-                    {(vehicle.advertStatus || vehicle.status) === 'active' && '✓ Active'}
-                    {(vehicle.advertStatus || vehicle.status) === 'sold' && '✓ Sold'}
-                    {(vehicle.advertStatus || vehicle.status) === 'draft' && '📝 Draft'}
+                    {(vehicle.advertStatus || vehicle.status) === 'active' && '✓ ACTIVE'}
+                    {(vehicle.advertStatus || vehicle.status) === 'sold' && '✓ SOLD'}
+                    {(vehicle.advertStatus || vehicle.status) === 'draft' && '📝 DRAFT'}
                   </span>
                   {vehicle.images && vehicle.images.length > 1 && (
                     <span className="image-count">
@@ -437,13 +487,15 @@ const TradeInventoryPage = () => {
                 <div className="vehicle-details">
                   <div className="vehicle-title-row">
                     <h3 className="vehicle-title">
-                      {vehicle.year} {vehicle.make} {vehicle.model}
+                      {vehicle.year || 'N/A'} {vehicle.make || 'Unknown'} {vehicle.model || 'Model'}
                     </h3>
-                    <p className="vehicle-price">£{vehicle.price?.toLocaleString()}</p>
+                    <p className="vehicle-price">
+                      {vehicle.price ? `£${vehicle.price.toLocaleString()}` : 'POA'}
+                    </p>
                   </div>
                   
                   <p className="vehicle-specs">
-                    {vehicle.mileage?.toLocaleString()} miles • {vehicle.fuelType} • {vehicle.transmission}
+                    {vehicle.mileage ? `${vehicle.mileage.toLocaleString()} miles` : 'N/A'} • {vehicle.fuelType || 'N/A'} • {vehicle.transmission || 'N/A'}
                   </p>
                   
                   <div className="vehicle-meta">
@@ -451,7 +503,7 @@ const TradeInventoryPage = () => {
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M8 2C4.686 2 2 4.686 2 8s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 1a5 5 0 110 10A5 5 0 018 3zm-.5 2v3.5h3v1h-4V5h1z"/>
                       </svg>
-                      <span>Listed {new Date(vehicle.createdAt).toLocaleDateString()}</span>
+                      <span>Listed {vehicle.createdAt ? new Date(vehicle.createdAt).toLocaleDateString() : 'Unknown'}</span>
                     </div>
                     <div className="meta-item">
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">

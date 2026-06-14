@@ -21,6 +21,10 @@ const TradeSidebar = () => {
           <span className="icon">🚗</span>
           My Inventory
         </NavLink>
+        <NavLink to="/trade/feed-import" className={({ isActive }) => isActive ? 'active' : ''}>
+          <span className="icon">📥</span>
+          Stock Feed Import
+        </NavLink>
         <NavLink to="/trade/inventory/add" className={({ isActive }) => isActive ? 'active' : ''}>
           <span className="icon">➕</span>
           Add Vehicle

@@ -413,6 +413,18 @@ const TradeDashboard = () => {
               <h3>Analytics</h3>
               <p>View performance insights</p>
             </Link>
+
+            <Link to="/trade/feed-import" className="action-card feed-import-action">
+              <div className="action-icon">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                  <rect x="6" y="8" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M16 12V20M13 17L16 20L19 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M6 14H10M22 14H26" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <h3>Import Stock Feed</h3>
+              <p>Automatically sync your inventory</p>
+            </Link>
           </div>
         </div>
 

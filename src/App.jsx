@@ -54,6 +54,7 @@ import TradeAnalyticsPage from './pages/Trade/TradeAnalyticsPage'
 import TradeSubscriptionPage from './pages/Trade/TradeSubscriptionPage'
 import TradeSubscriptionCheckoutPage from './pages/Trade/TradeSubscriptionCheckoutPage'
 import TradeSubscriptionSuccessPage from './pages/Trade/TradeSubscriptionSuccessPage'
+import TradeFeedImportPage from './pages/Trade/TradeFeedImportPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import ProtectedTradeRoute from './components/Trade/ProtectedTradeRoute'
 import './App.css'
@@ -151,6 +152,7 @@ function App() {
                     <Route path="/trade/dashboard" element={<ProtectedTradeRoute><TradeDashboard /></ProtectedTradeRoute>} />
                     <Route path="/trade/inventory" element={<ProtectedTradeRoute requireSubscription={true}><TradeInventoryPage /></ProtectedTradeRoute>} />
                     <Route path="/trade/analytics" element={<ProtectedTradeRoute requireSubscription={true}><TradeAnalyticsPage /></ProtectedTradeRoute>} />
+                    <Route path="/trade/feed-import" element={<ProtectedTradeRoute requireSubscription={false}><TradeFeedImportPage /></ProtectedTradeRoute>} />
                     <Route path="/trade/subscription" element={<ProtectedTradeRoute><TradeSubscriptionPage /></ProtectedTradeRoute>} />
                     <Route path="/trade/subscription/checkout/:planSlug" element={<ProtectedTradeRoute><TradeSubscriptionCheckoutPage /></ProtectedTradeRoute>} />
                     <Route path="/trade/subscription/success" element={<ProtectedTradeRoute><TradeSubscriptionSuccessPage /></ProtectedTradeRoute>} />

@@ -1,9 +1,9 @@
-/* Trade Inventory Page Styles */
+/* Trade Inventory Page Styles - Specific overrides */
 
 .trade-dashboard-layout {
   display: flex;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #f8fafc;
 }
 
 .trade-dashboard-content {
@@ -15,7 +15,7 @@
 }
 
 /* Header */
-.inventory-header {
+.trade-dashboard-content .inventory-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -26,23 +26,26 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.header-left h1 {
+.inventory-header .header-left h1 {
   font-size: 2rem;
   margin: 0 0 0.5rem 0;
   color: #1a1a1a;
+  font-family: 'Inter', sans-serif;
 }
 
-.subtitle {
+.inventory-header .subtitle {
   color: #666;
   margin: 0;
+  font-size: 0.9rem;
 }
 
-.header-actions {
+.inventory-header .header-actions {
   display: flex;
   gap: 1rem;
+  align-items: center;
 }
 
-.btn-add-vehicle {
+.header-actions .btn-add-vehicle {
   padding: 0.75rem 1.5rem;
   background: #2563eb;
   color: white;
@@ -54,15 +57,16 @@
   gap: 0.5rem;
   text-decoration: none;
   transition: all 0.2s;
+  font-weight: 500;
+  font-size: 0.875rem;
 }
 
-.btn-add-vehicle:hover {
+.header-actions .btn-add-vehicle:hover {
   background: #1d4ed8;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
-
-/* Filters */
-.inventory-controls {
+/* Controls */
+.trade-dashboard-content .inventory-controls {
   background: white;
   padding: 1.5rem;
   border-radius: 12px;
@@ -70,30 +74,44 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.inventory-filters {
+.inventory-controls .inventory-filters {
   display: flex;
   gap: 2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
-.filter-group {
+.inventory-filters .filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.filter-group .filter-label {
+  font-weight: 600;
+  color: #4b5563;
+  font-size: 0.9rem;
+  min-width: 60px;
+}
+
+.filter-group button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.filter-label {
-  font-weight: 600;
-  color: #666;
-}
-
-.filter-group button {
-  padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
-  background: white;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
+.filter-group button:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
 }
 
 .filter-group button.active {
@@ -103,212 +121,440 @@
 }
 
 .count {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.3);
   padding: 0.125rem 0.5rem;
   border-radius: 12px;
-  font-size: 0.875rem;
-}
-
-/* Vehicles Grid */
-.vehicles-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
-}
-
-.vehicle-card {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: all 0.2s;
-}
-
-.vehicle-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-}
-
-.vehicle-image-container {
-  position: relative;
-  width: 100%;
-  height: 200px;
-  overflow: hidden;
-}
-
-.vehicle-image-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.status-badge {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  background: white;
 }
 
-.status-badge.active {
-  background: #10b981;
-  color: white;
+.filter-group button.active .count {
+  background: rgba(255,255,255,0.25);
 }
-
-.status-badge.sold {
-  background: #6b7280;
-  color: white;
-}
-
-.status-badge.draft {
-  background: #8b5cf6;
-  color: white;
-}
-
-.type-badge {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  padding: 0.5rem;
-  background: rgba(0,0,0,0.7);
-  border-radius: 8px;
-  font-size: 1.25rem;
-}
-
-/* Vehicle Details */
-.vehicle-details {
-  padding: 1.5rem;
-}
-
-.vehicle-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.5rem;
-}
-
-.vehicle-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
-  color: #1a1a1a;
-}
-
-.vehicle-price {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2563eb;
-}
-
-.vehicle-specs {
-  color: #666;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-.vehicle-meta {
+/* Search and Controls Row */
+.inventory-search-row {
   display: flex;
   gap: 1rem;
-  margin-bottom: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
-}
-
-.meta-item {
-  display: flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.875rem;
-  color: #666;
-}
-
-/* Actions */
-.vehicle-actions {
-  display: flex;
-  gap: 0.5rem;
+  justify-content: space-between;
   flex-wrap: wrap;
 }
 
-.btn-action {
+.search-box {
   flex: 1;
-  min-width: 80px;
-  padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
+  min-width: 250px;
+  max-width: 400px;
+  position: relative;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.625rem 1rem 0.625rem 2.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  transition: all 0.2s;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 1.125rem;
+}
+
+/* Sort and View Controls */
+.controls-right {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.sort-dropdown {
+  padding: 0.625rem 2.5rem 0.625rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1em;
+}
+/* View Toggle */
+.view-toggle {
+  display: flex;
+  gap: 0.25rem;
+  background: #f3f4f6;
+  padding: 0.25rem;
+  border-radius: 8px;
+}
+
+.view-toggle button {
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
-  font-size: 0.875rem;
   transition: all 0.2s;
-  text-decoration: none;
-  color: #1a1a1a;
-  background: white;
-}
-
-.btn-action:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.btn-edit {
-  color: #2563eb;
-  border-color: #2563eb;
-}
-
-.btn-edit:hover {
-  background: #2563eb;
-  color: white;
-}
-
-.btn-view {
   color: #6b7280;
-  border-color: #6b7280;
 }
 
-.btn-view:hover {
-  background: #6b7280;
-  color: white;
+.view-toggle button:hover {
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
 }
 
-.btn-sold {
-  background: #10b981;
-  color: white;
-  border-color: #10b981;
+.view-toggle button.active {
+  background: white;
+  color: #2563eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.btn-sold:hover {
-  background: #059669;
-  border-color: #059669;
+.view-toggle button svg {
+  width: 20px;
+  height: 20px;
 }
 
-.btn-relist {
-  background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
-  color: white;
+/* Vehicles Container - Override global styles */
+.trade-dashboard-content .vehicles-container {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: 1.5rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.trade-dashboard-content .vehicles-container.list {
+  grid-template-columns: 1fr !important;
+}
+
+/* Vehicle Card - Specific to trade inventory */
+.trade-dashboard-content .vehicles-container .vehicle-card {
+  background: white !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+  transition: all 0.3s ease !important;
+  border: 1px solid #e5e7eb !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.trade-dashboard-content .vehicles-container .vehicle-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12) !important;
+  border-color: #d1d5db !important;
+}
+/* Vehicle Image - Override global image styles */
+.trade-dashboard-content .vehicle-image-container {
+  position: relative !important;
+  width: 100% !important;
+  height: 200px !important;
+  overflow: hidden !important;
+  background: #f8f9fa !important;
+  border-radius: 0 !important; /* No border radius on image container, card handles it */
+  box-shadow: none !important; /* Remove global box shadow */
+}
+
+.trade-dashboard-content .vehicle-image-container img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transition: transform 0.3s ease !important;
+}
+
+.trade-dashboard-content .vehicle-card:hover .vehicle-image-container img {
+  transform: scale(1.02) !important;
+}
+
+/* Status Badge */
+.trade-dashboard-content .status-badge {
+  position: absolute !important;
+  top: 0.75rem !important;
+  right: 0.75rem !important;
+  padding: 0.25rem 0.625rem !important;
+  border-radius: 12px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(4px) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.025em !important;
+  color: #374151 !important;
+}
+
+.trade-dashboard-content .status-badge.active {
+  background: rgba(16, 185, 129, 0.95) !important;
+  color: white !important;
+}
+
+.trade-dashboard-content .status-badge.sold {
+  background: rgba(107, 114, 128, 0.95) !important;
+  color: white !important;
+}
+
+.trade-dashboard-content .status-badge.draft {
+  background: rgba(139, 92, 246, 0.95) !important;
+  color: white !important;
+}
+
+/* Type Badge */
+.trade-dashboard-content .type-badge {
+  position: absolute !important;
+  top: 0.75rem !important;
+  left: 0.75rem !important;
+  padding: 0.375rem 0.5rem !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+  border-radius: 6px !important;
+  font-size: 1rem !important;
+  backdrop-filter: blur(4px) !important;
+}
+/* Vehicle Details */
+.trade-dashboard-content .vehicle-details {
+  padding: 1.25rem !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.trade-dashboard-content .vehicle-title-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  margin-bottom: 0.75rem !important;
+  gap: 1rem !important;
+}
+
+.trade-dashboard-content .vehicle-title {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  color: #1a1a1a !important;
+  line-height: 1.4 !important;
+  flex: 1 !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.trade-dashboard-content .vehicle-price {
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  color: #2563eb !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+
+.trade-dashboard-content .vehicle-specs {
+  color: #6b7280 !important;
+  font-size: 0.875rem !important;
+  margin: 0 0 1rem 0 !important;
+  line-height: 1.4 !important;
+}
+
+.trade-dashboard-content .vehicle-meta {
+  display: flex !important;
+  gap: 1rem !important;
+  margin-bottom: 1rem !important;
+  padding-top: 0.75rem !important;
+  border-top: 1px solid #f3f4f6 !important;
+  flex-wrap: wrap !important;
+  font-size: 0.8125rem !important;
+}
+
+.trade-dashboard-content .meta-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  color: #6b7280 !important;
+}
+
+.trade-dashboard-content .meta-item svg {
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0 !important;
+}
+/* Actions - Horizontal Layout */
+.trade-dashboard-content .vehicle-actions {
+  display: flex !important;
+  gap: 0.375rem !important;
+  margin-top: auto !important;
+  flex-wrap: wrap !important;
+}
+
+.trade-dashboard-content .btn-action {
+  flex: 1 !important;
+  min-width: 65px !important;
+  padding: 0.5rem 0.75rem !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.25rem !important;
+  font-size: 0.75rem !important;
+  transition: all 0.2s !important;
+  text-decoration: none !important;
+  color: #374151 !important;
+  background: white !important;
+  font-weight: 500 !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.trade-dashboard-content .btn-action:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+.trade-dashboard-content .btn-action svg {
+  width: 12px !important;
+  height: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+.trade-dashboard-content .btn-edit {
+  color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.trade-dashboard-content .btn-edit:hover {
+  background: #2563eb !important;
+  color: white !important;
+}
+
+.trade-dashboard-content .btn-view {
+  color: #6b7280 !important;
+  border-color: #d1d5db !important;
+}
+
+.trade-dashboard-content .btn-view:hover {
+  background: #6b7280 !important;
+  color: white !important;
+}
+
+.trade-dashboard-content .btn-sold {
+  background: #10b981 !important;
+  color: white !important;
+  border-color: #10b981 !important;
+}
+
+.trade-dashboard-content .btn-sold:hover {
+  background: #059669 !important;
+  border-color: #059669 !important;
+}
+
+.trade-dashboard-content .btn-delete {
+  color: #dc2626 !important;
+  border-color: #fca5a5 !important;
+}
+
+.trade-dashboard-content .btn-delete:hover {
+  background: #dc2626 !important;
+  color: white !important;
+}
+/* Image Count Override */
+.trade-dashboard-content .image-count {
+  position: absolute !important;
+  bottom: 0.75rem !important;
+  right: 0.75rem !important;
+  left: auto !important;
+  top: auto !important;
+  padding: 0.25rem 0.5rem !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+  color: white !important;
+  border-radius: 4px !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  backdrop-filter: blur(4px) !important;
+  z-index: 10 !important;
+}
+
+.trade-dashboard-content .image-count svg {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+/* Warning Alert Box */
+.warning-alert {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.warning-alert .warning-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.warning-alert-content {
+  flex: 1;
+}
+
+.warning-alert-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #92400e;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.warning-alert-message {
+  font-size: 0.9375rem;
+  color: #78350f;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.warning-alert-link {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+.warning-alert-close {
+  background: transparent;
   border: none;
+  font-size: 1.25rem;
+  color: #92400e;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+/* Loading and Empty States */
+.trade-dashboard-content .loading-state {
+  text-align: center;
+  padding: 4rem 2rem;
 }
 
-.btn-relist:hover {
-  background: linear-gradient(135deg, #5a32a3 0%, #4a2885 100%);
-  transform: translateY(-1px);
-}
-
-.btn-delete {
-  color: #dc2626;
-  border-color: #dc2626;
-}
-
-.btn-delete:hover {
-  background: #dc2626;
-  color: white;
-}
-
-/* Empty State */
-.empty-state {
+.trade-dashboard-content .empty-state {
   text-align: center;
   padding: 4rem 2rem;
   background: white;
@@ -331,13 +577,7 @@
   margin-bottom: 2rem;
 }
 
-/* Loading State */
-.loading-state {
-  text-align: center;
-  padding: 4rem 2rem;
-}
-
-.spinner {
+.trade-dashboard-content .spinner {
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
@@ -390,29 +630,365 @@
   color: #dc2626;
   font-weight: 600;
 }
-
 /* Responsive */
 @media (max-width: 768px) {
   .trade-dashboard-content {
-    padding: 1rem;
+    padding: 1rem !important;
   }
 
-  .inventory-header {
-    flex-direction: column;
-    gap: 1rem;
+  .trade-dashboard-content .inventory-header {
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    padding: 1.5rem !important;
   }
 
-  .header-left .subtitle,
-  .header-left .subscription-usage {
-    display: none;
+  .trade-dashboard-content .header-actions {
+    width: 100% !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
   }
 
-  .header-actions {
-    width: 100%;
-    flex-direction: column;
+  .trade-dashboard-content .inventory-controls {
+    padding: 1rem !important;
   }
 
-  .vehicles-container {
-    grid-template-columns: 1fr;
+  .inventory-filters {
+    flex-direction: column !important;
+    gap: 1rem !important;
   }
+
+  .filter-group {
+    flex-wrap: wrap !important;
+  }
+
+  .inventory-search-row {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .search-box {
+    min-width: auto !important;
+    max-width: none !important;
+  }
+
+  .controls-right {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .sort-dropdown {
+    flex: 1 !important;
+    max-width: 200px !important;
+  }
+
+  .trade-dashboard-content .vehicles-container {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .trade-dashboard-content .vehicle-actions {
+    gap: 0.25rem !important;
+  }
+
+  .trade-dashboard-content .btn-action {
+    min-width: 55px !important;
+    padding: 0.5rem 0.625rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .trade-dashboard-content .btn-action svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .trade-dashboard-content {
+    padding: 0.75rem !important;
+  }
+
+  .trade-dashboard-content .inventory-header {
+    padding: 1rem !important;
+  }
+
+  .inventory-header .header-left h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .trade-dashboard-content .vehicle-title {
+    font-size: 0.9rem !important;
+  }
+
+  .trade-dashboard-content .vehicle-price {
+    font-size: 1rem !important;
+  }
+}
+/* List View Styling - Professional Layout */
+.trade-dashboard-content .vehicles-container.list .vehicle-card {
+  display: flex !important;
+  flex-direction: row !important;
+  height: auto !important;
+  min-height: 180px !important;
+  max-height: 200px !important;
+  overflow: hidden !important;
+}
+
+.trade-dashboard-content .vehicles-container.list .vehicle-image-container {
+  width: 280px !important;
+  min-width: 280px !important;
+  height: 100% !important;
+  flex-shrink: 0 !important;
+}
+
+.trade-dashboard-content .vehicles-container.list .vehicle-details {
+  flex: 1 !important;
+  padding: 1.5rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+.trade-dashboard-content .vehicles-container.list .vehicle-title-row {
+  margin-bottom: 0.5rem !important;
+}
+
+.trade-dashboard-content .vehicles-container.list .vehicle-title {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+}
+
+.trade-dashboard-content .vehicles-container.list .vehicle-price {
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+}
+
+.trade-dashboard-content .vehicles-container.list .vehicle-specs {
+  font-size: 0.9375rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.trade-dashboard-content .vehicles-container.list .vehicle-meta {
+  margin-bottom: 0.75rem !important;
+  padding-top: 0.5rem !important;
+}
+
+.trade-dashboard-content .vehicles-container.list .vehicle-actions {
+  flex-direction: row !important;
+  gap: 0.5rem !important;
+  margin-top: 0 !important;
+}
+
+.trade-dashboard-content .vehicles-container.list .btn-action {
+  min-width: 80px !important;
+  padding: 0.625rem 1rem !important;
+  font-size: 0.8125rem !important;
+}
+
+.trade-dashboard-content .vehicles-container.list .btn-action svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* List View Responsive */
+@media (max-width: 768px) {
+  .trade-dashboard-content .vehicles-container.list .vehicle-card {
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+  }
+  
+  .trade-dashboard-content .vehicles-container.list .vehicle-image-container {
+    width: 100% !important;
+    min-width: 100% !important;
+    height: 200px !important;
+  }
+  
+  .trade-dashboard-content .vehicles-container.list .vehicle-title {
+    font-size: 1.1rem !important;
+  }
+  
+  .trade-dashboard-content .vehicles-container.list .vehicle-price {
+    font-size: 1.25rem !important;
+  }
+  
+  .trade-dashboard-content .vehicles-container.list .vehicle-actions {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+  }
+  
+  .trade-dashboard-content .vehicles-container.list .btn-action {
+    min-width: 70px !important;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .trade-dashboard-content .vehicles-container.list .vehicle-actions {
+    flex-direction: column !important;
+    gap: 0.375rem !important;
+  }
+  
+  .trade-dashboard-content .vehicles-container.list .btn-action {
+    width: 100% !important;
+    min-width: auto !important;
+  }
+}
+/* Enhanced View Toggle Buttons */
+.trade-dashboard-content .view-toggle {
+  display: flex !important;
+  gap: 0 !important;
+  background: #f8f9fa !important;
+  padding: 0.25rem !important;
+  border-radius: 8px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.trade-dashboard-content .view-toggle button {
+  padding: 0.5rem 0.75rem !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  color: #6b7280 !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+}
+
+.trade-dashboard-content .view-toggle button:hover {
+  color: #2563eb !important;
+  background: rgba(37, 99, 235, 0.1) !important;
+}
+
+.trade-dashboard-content .view-toggle button.active {
+  background: white !important;
+  color: #2563eb !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+  font-weight: 600 !important;
+}
+
+.trade-dashboard-content .view-toggle button svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Sort Dropdown Enhancement */
+.trade-dashboard-content .sort-dropdown {
+  padding: 0.625rem 2.5rem 0.625rem 1rem !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  background: white !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.75rem center !important;
+  background-size: 1em !important;
+  font-weight: 500 !important;
+}
+
+.trade-dashboard-content .sort-dropdown:hover {
+  border-color: #2563eb !important;
+  background-color: #f8fafc !important;
+}
+
+.trade-dashboard-content .sort-dropdown:focus {
+  outline: none !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}
+/* Enhanced Search Box */
+.trade-dashboard-content .search-box {
+  flex: 1 !important;
+  min-width: 280px !important;
+  max-width: 420px !important;
+  position: relative !important;
+}
+
+.trade-dashboard-content .search-box input {
+  width: 100% !important;
+  padding: 0.75rem 1rem 0.75rem 2.75rem !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  transition: all 0.2s !important;
+  background: white !important;
+  font-weight: 400 !important;
+}
+
+.trade-dashboard-content .search-box input:focus {
+  outline: none !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+  background: white !important;
+}
+
+.trade-dashboard-content .search-box input::placeholder {
+  color: #9ca3af !important;
+  font-weight: 400 !important;
+}
+
+.trade-dashboard-content .search-icon {
+  position: absolute !important;
+  left: 0.875rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: #6b7280 !important;
+  font-size: 1rem !important;
+  pointer-events: none !important;
+}
+
+/* Enhanced Filter Buttons */
+.trade-dashboard-content .filter-group button {
+  padding: 0.625rem 1rem !important;
+  border: 1px solid #e5e7eb !important;
+  background: white !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  color: #374151 !important;
+}
+
+.trade-dashboard-content .filter-group button:hover {
+  border-color: #2563eb !important;
+  background: #f0f9ff !important;
+  color: #2563eb !important;
+}
+
+.trade-dashboard-content .filter-group button.active {
+  background: #2563eb !important;
+  color: white !important;
+  border-color: #2563eb !important;
+  font-weight: 600 !important;
+}
+
+.trade-dashboard-content .filter-group button .count {
+  background: rgba(107, 114, 128, 0.1) !important;
+  padding: 0.125rem 0.5rem !important;
+  border-radius: 12px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+}
+
+.trade-dashboard-content .filter-group button:hover .count {
+  background: rgba(37, 99, 235, 0.2) !important;
+  color: #2563eb !important;
+}
+
+.trade-dashboard-content .filter-group button.active .count {
+  background: rgba(255,255,255,0.25) !important;
+  color: white !important;
 }
