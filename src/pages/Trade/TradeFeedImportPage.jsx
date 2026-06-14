@@ -588,7 +588,7 @@ function TradeFeedImportPage() {
             ) : (
               <div className="feeds-grid">
                 {feeds.map(feed => (
-                  <div key={feed.id} className="feed-card enhanced">
+                  <div key={feed._id || feed.id} className="feed-card enhanced">
                     <div className="feed-header">
                       <div className="feed-title">
                         <h3>{feed.provider || 'Generic Feed'}</h3>
@@ -599,26 +599,26 @@ function TradeFeedImportPage() {
                         </span>
                       </div>
                       <div className="feed-type">
-                        {feed.feed_type ? feed.feed_type.toUpperCase() : 'Unknown'} Feed
+                        {feed.feedType ? feed.feedType.toUpperCase() : 'Unknown'} Feed
                       </div>
                     </div>
 
                     <div className="feed-url">
                       <div className="url-label">Feed URL</div>
-                      <div className="url-value">{feed.feed_url}</div>
+                      <div className="url-value">{feed.feedUrl || 'Feed URL not configured'}</div>
                     </div>
 
                     <div className="feed-stats">
                       <div className="stat">
                         <div className="stat-label">Last Sync</div>
                         <div className="stat-value">
-                          {feed.last_sync ? new Date(feed.last_sync).toLocaleDateString() : 'Never'}
+                          {feed.lastSync ? new Date(feed.lastSync).toLocaleDateString() : 'Never'}
                         </div>
                       </div>
                       <div className="stat">
                         <div className="stat-label">Auto Import</div>
                         <div className="stat-value">
-                          {feed.auto_import_enabled ? (
+                          {feed.autoImportEnabled ? (
                             <span className="auto-enabled">
                               <Icons.CheckCircle />
                               Every 15 min
@@ -632,7 +632,7 @@ function TradeFeedImportPage() {
 
                     <div className="feed-actions">
                       <button 
-                        onClick={() => handleSyncFeed(feed.id)}
+                        onClick={() => handleSyncFeed(feed._id || feed.id)}
                         className="btn-small btn-primary"
                         disabled={loading}
                       >
@@ -640,13 +640,13 @@ function TradeFeedImportPage() {
                         <span>Sync Now</span>
                       </button>
                       <button 
-                        onClick={() => handleToggleAutoImport(feed.id, feed.auto_import_enabled)}
+                        onClick={() => handleToggleAutoImport(feed._id || feed.id, feed.autoImportEnabled)}
                         className="btn-small btn-secondary"
                       >
-                        {feed.auto_import_enabled ? 'Disable Auto-Sync' : 'Enable Auto-Sync'}
+                        {feed.autoImportEnabled ? 'Disable Auto-Sync' : 'Enable Auto-Sync'}
                       </button>
                       <button 
-                        onClick={() => handleDeleteFeed(feed.id)}
+                        onClick={() => handleDeleteFeed(feed._id || feed.id)}
                         className="btn-small btn-danger"
                       >
                         Delete
