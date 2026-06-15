@@ -75,7 +75,7 @@ function TradeFeedImportPage() {
     try {
       const token = localStorage.getItem('tradeToken');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/trade/feed`,
+        `http://localhost:5000/api/trade/feed`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -93,7 +93,7 @@ function TradeFeedImportPage() {
     try {
       const token = localStorage.getItem('tradeToken');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/trade/feed/logs`,
+        `http://localhost:5000/api/trade/feed/logs`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -119,7 +119,7 @@ function TradeFeedImportPage() {
     try {
       const token = localStorage.getItem('tradeToken');
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/trade/feed/test`,
+        `http://localhost:5000/api/trade/feed/test`,
         { feedUrl },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -152,7 +152,7 @@ function TradeFeedImportPage() {
     try {
       const token = localStorage.getItem('tradeToken');
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/trade/feed/import`,
+        `http://localhost:5000/api/trade/feed/import`,
         { 
           feedUrl, 
           removeSoldVehicles,
@@ -195,7 +195,7 @@ function TradeFeedImportPage() {
     try {
       const token = localStorage.getItem('tradeToken');
       await axios.put(
-        `${import.meta.env.VITE_API_BASE_URL}/api/trade/feed/${feedId}`,
+        `http://localhost:5000/api/trade/feed/${feedId}`,
         { auto_import_enabled: !currentStatus },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -218,7 +218,7 @@ function TradeFeedImportPage() {
     try {
       const token = localStorage.getItem('tradeToken');
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/trade/feed/${feedId}/sync`,
+        `http://localhost:5000/api/trade/feed/${feedId}/sync`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -244,7 +244,7 @@ function TradeFeedImportPage() {
     try {
       const token = localStorage.getItem('tradeToken');
       await axios.delete(
-        `${import.meta.env.VITE_API_BASE_URL}/api/trade/feed/${feedId}`,
+        `http://localhost:5000/api/trade/feed/${feedId}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
