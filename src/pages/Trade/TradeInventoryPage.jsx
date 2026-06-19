@@ -462,9 +462,18 @@ const TradeInventoryPage = () => {
                     src={vehicle.images?.[0] || '/images/dummy/placeholder.svg'} 
                     alt={`${vehicle.make} ${vehicle.model}`} 
                     onError={(e) => {
+                      console.log('Image failed to load:', vehicle.images?.[0]);
                       e.target.src = '/images/dummy/red-car.png';
                     }}
+                    onLoad={() => {
+                      console.log('Image loaded successfully:', vehicle.images?.[0]);
+                    }}
                   />
+                  {!vehicle.images || vehicle.images.length === 0 ? (
+                    <div style={{position: 'absolute', top: '10px', left: '10px', background: 'red', color: 'white', padding: '5px'}}>
+                      NO IMAGES
+                    </div>
+                  ) : null}
                   <span className={`type-badge ${vehicle.vehicleType}`}>
                     {vehicle.vehicleType === 'bike' ? '🏍️' : vehicle.vehicleType === 'van' ? '🚐' : '🚗'}
                   </span>

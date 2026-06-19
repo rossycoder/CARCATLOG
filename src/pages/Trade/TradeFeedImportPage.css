@@ -957,11 +957,25 @@
 .error-badge {
   background: #fee2e2;
   color: #991b1b;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: 600;
+  display: inline-block;
   border: 1px solid #fecaca;
+}
+
+.error-badge.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #fca5a5;
+}
+
+.error-badge.clickable:hover {
+  background: #fecaca;
+  color: #7f1d1d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2);
 }
 
 .no-errors {

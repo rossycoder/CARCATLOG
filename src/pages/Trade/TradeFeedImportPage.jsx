@@ -62,7 +62,7 @@ function TradeFeedImportPage() {
   // Import settings
   const [removeSoldVehicles, setRemoveSoldVehicles] = useState(true);
   const [importImages, setImportImages] = useState(true);
-  const [useUnsplashFallback, setUseUnsplashFallback] = useState(true);
+  const [useUnsplashFallback, setUseUnsplashFallback] = useState(false); // ❌ Disabled - deprecated Unsplash API
   const [limitVehicles, setLimitVehicles] = useState(true);
   const [selectionMode, setSelectionMode] = useState('first');
 
@@ -167,22 +167,45 @@ function TradeFeedImportPage() {
       );
 
       if (response.data.success) {
-        let message = response.data.message;
+        const stats = response.data.stats || {};
+        const imported = stats.vehicles_imported || 0;
+        const updated = stats.vehicles_updated || 0;
+        const errors = stats.errors || [];
         
-        // Add additional info about the import
-        if (response.data.limitApplied) {
-          message += `\nSubscription limit was applied.`;
+        // Show detailed message based on results
+        if (imported > 0 || updated > 0) {
+          let message = `✅ Success!\n`;
+          if (imported > 0) message += `• Imported: ${imported} vehicles\n`;
+          if (updated > 0) message += `• Updated: ${updated} vehicles\n`;
+          
+          if (response.data.limitApplied) {
+            message += `\n⚠️ Subscription limit was applied.`;
+          }
+          if (response.data.unsplashImagesUsed > 0) {
+            message += `\n📸 ${response.data.unsplashImagesUsed} professional images added.`;
+          }
+          
+          alert(message);
+          setTestResult(null);
+          setFeedUrl('');
+          fetchFeeds();
+          fetchLogs();
+          setActiveTab('logs');
+        } else if (errors.length > 0) {
+          // Show errors instead of success
+          const errorSummary = errors.slice(0, 3).map(err => 
+            `• ${err.stockId || 'Unknown'}: ${err.error}`
+          ).join('\n');
+          
+          const moreErrors = errors.length > 3 ? `\n... and ${errors.length - 3} more errors` : '';
+          
+          alert(`❌ Import Failed - No vehicles imported\n\n${errorSummary}${moreErrors}\n\nCheck Sync History tab for full details.`);
+          fetchLogs();
+          setActiveTab('logs');
+        } else {
+          // No vehicles imported and no errors - something went wrong
+          alert('⚠️ No vehicles were imported. Please check:\n\n• Your subscription limit\n• Feed URL is correct\n• Backend console for errors');
         }
-        if (response.data.unsplashImagesUsed > 0) {
-          message += `\n${response.data.unsplashImagesUsed} high-quality images were added automatically.`;
-        }
-        
-        alert(message);
-        setTestResult(null);
-        setFeedUrl('');
-        fetchFeeds();
-        fetchLogs();
-        setActiveTab('logs');
       }
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to import feed');
@@ -225,12 +248,23 @@ function TradeFeedImportPage() {
         }
       );
 
-      if (response.data.success) {
-        alert('Feed synced successfully!');
-        fetchLogs();
+      const stats = response.data.stats || {};
+      const imported = stats.vehicles_imported || 0;
+      const updated = stats.vehicles_updated || 0;
+      const errors = stats.errors || [];
+
+      if (imported > 0 || updated > 0) {
+        alert(`✅ Synced!\n• Imported: ${imported}\n• Updated: ${updated}${errors.length > 0 ? `\n\n⚠️ ${errors.length} vehicles had errors — check Sync History.` : ''}`);
+      } else if (errors.length > 0) {
+        const errorSummary = errors.slice(0, 3).map(err => `• ${err.stockId || 'Unknown'}: ${err.error}`).join('\n');
+        alert(`❌ Sync failed — nothing imported or updated\n\n${errorSummary}\n\nCheck Sync History for full details.`);
+      } else {
+        alert('No changes — feed already up to date.');
       }
+
+      fetchLogs();
     } catch (error) {
-      alert('Failed to sync feed');
+      alert(error.response?.data?.message || 'Failed to sync feed');
     } finally {
       setLoading(false);
     }
@@ -715,7 +749,20 @@ function TradeFeedImportPage() {
                           </td>
                           <td>
                             {log.feedErrors && log.feedErrors.length > 0 ? (
-                              <span className="error-badge">{log.feedErrors.length} issues</span>
+                              <button 
+                                className="error-badge clickable" 
+                                onClick={() => {
+                                  alert(
+                                    `Import Errors (${log.feedErrors.length}):\n\n` +
+                                    log.feedErrors.map((err, i) => 
+                                      `${i + 1}. Stock ID: ${err.stockId || 'Unknown'}\n   Error: ${err.error}`
+                                    ).join('\n\n')
+                                  );
+                                }}
+                                title="Click to view error details"
+                              >
+                                {log.feedErrors.length} issues
+                              </button>
                             ) : (
                               <span className="no-errors">None</span>
                             )}
