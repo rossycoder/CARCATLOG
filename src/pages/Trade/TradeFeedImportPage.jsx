@@ -208,7 +208,16 @@ function TradeFeedImportPage() {
         }
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to import feed');
+      // ✅ Show actual error message, not generic "Failed to import feed"
+      const actualError = error.response?.data?.error ||
+                          error.response?.data?.message ||
+                          error.message ||
+                          'Failed to import feed';
+      
+      console.error('❌ Import error:', actualError);
+      console.error('Full error object:', error);
+      
+      alert(`❌ Import Failed:\n\n${actualError}\n\nCheck browser console for more details.`);
     } finally {
       setLoading(false);
     }
