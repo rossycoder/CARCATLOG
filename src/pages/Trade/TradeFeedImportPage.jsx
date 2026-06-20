@@ -253,7 +253,8 @@ function TradeFeedImportPage() {
         `${import.meta.env.VITE_API_URL || 'https://carcatlog-backendnpm-install.onrender.com/api'}/trade/feed/${feedId}/sync`,
         {},
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 300000 // 5 minutes timeout (feed sync can take a while)
         }
       );
 
