@@ -231,15 +231,23 @@ const CarAdvertEditPage = () => {
       // Auto-fill running costs
       if (enhancedData.runningCosts) {
         setAdvertData(prev => {
+          // If prev already has values from DB, preserve them — don't overwrite with API data
+          const prevCombined = prev.runningCosts.fuelEconomy.combined;
+          const prevCo2 = prev.runningCosts.co2Emissions;
+          const prevUrban = prev.runningCosts.fuelEconomy.urban;
+          const prevExtraUrban = prev.runningCosts.fuelEconomy.extraUrban;
+          const prevAnnualTax = prev.runningCosts.annualTax;
+          const prevInsuranceGroup = prev.runningCosts.insuranceGroup;
+
           const newRunningCosts = {
             fuelEconomy: {
-              urban: String(enhancedData.runningCosts?.fuelEconomy?.urban || prev.runningCosts.fuelEconomy.urban || ''),
-              extraUrban: String(enhancedData.runningCosts?.fuelEconomy?.extraUrban || prev.runningCosts.fuelEconomy.extraUrban || ''),
-              combined: String(enhancedData.runningCosts?.fuelEconomy?.combined || prev.runningCosts.fuelEconomy.combined || '')
+              urban: prevUrban || String(enhancedData.runningCosts?.fuelEconomy?.urban || ''),
+              extraUrban: prevExtraUrban || String(enhancedData.runningCosts?.fuelEconomy?.extraUrban || ''),
+              combined: prevCombined || String(enhancedData.runningCosts?.fuelEconomy?.combined || '')
             },
-            annualTax: String(enhancedData.runningCosts?.annualTax || prev.runningCosts.annualTax || ''),
-            insuranceGroup: String(enhancedData.runningCosts?.insuranceGroup || prev.runningCosts.insuranceGroup || ''),
-            co2Emissions: String(enhancedData.runningCosts?.co2Emissions || prev.runningCosts.co2Emissions || '')
+            annualTax: prevAnnualTax || String(enhancedData.runningCosts?.annualTax || ''),
+            insuranceGroup: prevInsuranceGroup || String(enhancedData.runningCosts?.insuranceGroup || ''),
+            co2Emissions: prevCo2 || String(enhancedData.runningCosts?.co2Emissions || '')
           };
           
           return {
@@ -345,13 +353,13 @@ const CarAdvertEditPage = () => {
             features: vehicleData.features || [],
             runningCosts: {
               fuelEconomy: {
-                urban: String(vehicleData.runningCosts?.fuelEconomy?.urban || ''),
-                extraUrban: String(vehicleData.runningCosts?.fuelEconomy?.extraUrban || ''),
-                combined: String(vehicleData.runningCosts?.fuelEconomy?.combined || '')
+                urban: String(vehicleData.runningCosts?.fuelEconomy?.urban || vehicleData.urbanMpg || ''),
+                extraUrban: String(vehicleData.runningCosts?.fuelEconomy?.extraUrban || vehicleData.extraUrbanMpg || ''),
+                combined: String(vehicleData.runningCosts?.fuelEconomy?.combined || vehicleData.combinedMpg || '')
               },
-              annualTax: String(vehicleData.runningCosts?.annualTax || ''),
-              insuranceGroup: String(vehicleData.runningCosts?.insuranceGroup || ''),
-              co2Emissions: String(vehicleData.runningCosts?.co2Emissions || '')
+              annualTax: String(vehicleData.runningCosts?.annualTax || vehicleData.annualTax || ''),
+              insuranceGroup: String(vehicleData.runningCosts?.insuranceGroup || vehicleData.insuranceGroup || ''),
+              co2Emissions: String(vehicleData.runningCosts?.co2Emissions || vehicleData.co2Emissions || '')
             },
             videoUrl: vehicleData.videoUrl || '',
             condition: vehicleData.condition || 'used'
@@ -508,21 +516,19 @@ const CarAdvertEditPage = () => {
                 }
               }
               
-              // Update running costs
+              // Update running costs — only fill fields that are currently empty
               if (enhancedVehicleData.runningCosts) {
-                
                 setAdvertData(prev => {
                   const newRunningCosts = {
                     fuelEconomy: {
-                      urban: String(enhancedVehicleData.runningCosts.fuelEconomy?.urban || ''),
-                      extraUrban: String(enhancedVehicleData.runningCosts.fuelEconomy?.extraUrban || ''),
-                      combined: String(enhancedVehicleData.runningCosts.fuelEconomy?.combined || '')
+                      urban: prev.runningCosts.fuelEconomy.urban || String(enhancedVehicleData.runningCosts.fuelEconomy?.urban || ''),
+                      extraUrban: prev.runningCosts.fuelEconomy.extraUrban || String(enhancedVehicleData.runningCosts.fuelEconomy?.extraUrban || ''),
+                      combined: prev.runningCosts.fuelEconomy.combined || String(enhancedVehicleData.runningCosts.fuelEconomy?.combined || '')
                     },
-                    annualTax: String(enhancedVehicleData.runningCosts.annualTax || ''),
-                    insuranceGroup: String(enhancedVehicleData.runningCosts.insuranceGroup || ''),
-                    co2Emissions: String(enhancedVehicleData.runningCosts.co2Emissions || '')
+                    annualTax: prev.runningCosts.annualTax || String(enhancedVehicleData.runningCosts.annualTax || ''),
+                    insuranceGroup: prev.runningCosts.insuranceGroup || String(enhancedVehicleData.runningCosts.insuranceGroup || ''),
+                    co2Emissions: prev.runningCosts.co2Emissions || String(enhancedVehicleData.runningCosts.co2Emissions || '')
                   };
-                  
                   
                   return {
                     ...prev,
@@ -701,18 +707,18 @@ const CarAdvertEditPage = () => {
               }
             }
             
-            // Update running costs
+            // Update running costs — only fill fields that are currently empty
             if (enhancedVehicleData.runningCosts) {
               setAdvertData(prev => {
                 const newRunningCosts = {
                   fuelEconomy: {
-                    urban: String(enhancedVehicleData.runningCosts.fuelEconomy?.urban || prev.runningCosts.fuelEconomy.urban || ''),
-                    extraUrban: String(enhancedVehicleData.runningCosts.fuelEconomy?.extraUrban || prev.runningCosts.fuelEconomy.extraUrban || ''),
-                    combined: String(enhancedVehicleData.runningCosts.fuelEconomy?.combined || prev.runningCosts.fuelEconomy.combined || '')
+                    urban: prev.runningCosts.fuelEconomy.urban || String(enhancedVehicleData.runningCosts.fuelEconomy?.urban || ''),
+                    extraUrban: prev.runningCosts.fuelEconomy.extraUrban || String(enhancedVehicleData.runningCosts.fuelEconomy?.extraUrban || ''),
+                    combined: prev.runningCosts.fuelEconomy.combined || String(enhancedVehicleData.runningCosts.fuelEconomy?.combined || '')
                   },
-                  annualTax: String(enhancedVehicleData.runningCosts.annualTax || prev.runningCosts.annualTax || ''),
-                  insuranceGroup: String(enhancedVehicleData.runningCosts.insuranceGroup || prev.runningCosts.insuranceGroup || ''),
-                  co2Emissions: String(enhancedVehicleData.runningCosts.co2Emissions || prev.runningCosts.co2Emissions || '')
+                  annualTax: prev.runningCosts.annualTax || String(enhancedVehicleData.runningCosts.annualTax || ''),
+                  insuranceGroup: prev.runningCosts.insuranceGroup || String(enhancedVehicleData.runningCosts.insuranceGroup || ''),
+                  co2Emissions: prev.runningCosts.co2Emissions || String(enhancedVehicleData.runningCosts.co2Emissions || '')
                 };
                 
                 return {
