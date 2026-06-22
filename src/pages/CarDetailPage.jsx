@@ -757,9 +757,18 @@ const CarDetailPage = () => {
                 </div>
               </div>
 
-              {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
+              {(car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber) && (
                 <>
-                  {callSession ? (
+                  {(car.isDealerListing || car.dealerId || car.sellerContact?.type === 'trade') ? (
+                    <a
+                      href={`tel:${car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber}`}
+                      className="phone-btn"
+                      style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}
+                      onClick={() => trackInquiry('phone')}
+                    >
+                      📞 {car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber}
+                    </a>
+                  ) : callSession ? (
                     <a href={`tel:${callSession.proxyNumber}`} className="phone-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
                       📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>{!callSession.isDirectNumber && callSession.expiresIn && `(expires in ${Math.floor(callSession.expiresIn / 60)}m)`}</span>
                     </a>
@@ -1245,16 +1254,17 @@ const CarDetailPage = () => {
 
                 {/* Contact Buttons */}
                 <div className="seller-contact-buttons">
-                  {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
+                  {(car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber) && (
                     <>
                       {/* Trade seller — show real number directly */}
                       {(car.isDealerListing || car.dealerId) ? (
                         <a
-                          href={`tel:${car.sellerContact?.phoneNumber || car.phoneNumber}`}
+                          href={`tel:${car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber}`}
                           className="call-seller-btn"
                           style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}
+                          onClick={() => trackInquiry('phone')}
                         >
-                          📞 {car.sellerContact?.phoneNumber || car.phoneNumber}
+                          📞 {car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber}
                         </a>
                       ) : callSession ? (
                         <a href={`tel:${callSession.proxyNumber}`} className="call-seller-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
@@ -1307,9 +1317,18 @@ const CarDetailPage = () => {
                 </div>
               </div>
 
-              {(car.sellerContact?.phoneNumber || car.phoneNumber) && (
+              {(car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber) && (
                 <>
-                  {callSession ? (
+                  {(car.isDealerListing || car.dealerId || car.sellerContact?.type === 'trade') ? (
+                    <a
+                      href={`tel:${car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber}`}
+                      className="phone-btn"
+                      style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}
+                      onClick={() => trackInquiry('phone')}
+                    >
+                      📞 {car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber}
+                    </a>
+                  ) : callSession ? (
                     <a href={`tel:${callSession.proxyNumber}`} className="phone-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
                       📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>{!callSession.isDirectNumber && callSession.expiresIn && `(expires in ${Math.floor(callSession.expiresIn / 60)}m)`}</span>
                     </a>
