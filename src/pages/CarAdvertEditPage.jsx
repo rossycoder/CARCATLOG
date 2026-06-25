@@ -46,6 +46,7 @@ const CarAdvertEditPage = () => {
   const [vehicleData, setVehicleData] = useState(null);
   const [carStatus, setCarStatus] = useState(null); // Track car status
   const [isDealerCar, setIsDealerCar] = useState(false); // Track if it's a dealer car
+  const [isCarOwner, setIsCarOwner] = useState(false); // Track if current user owns this car
   const [showPopup, setShowPopup] = useState(false);
   const [loadError, setLoadError] = useState(null);
   const [advertData, setAdvertData] = useState({
@@ -308,15 +309,17 @@ const CarAdvertEditPage = () => {
           const vehicleUserId = vehicleData.userId?._id?.toString() || vehicleData.userId?.toString();
           const currentUserId = user?._id?.toString() || user?.id?.toString();
           
-          // Only block regular users who don't own the car
-          // Skip check for: admins, trade dealers, or if car has no userId (new unassigned car)
-          if (user && !isTradeDealer && vehicleUserId && vehicleUserId !== currentUserId && !isAdmin) {
-            console.error('❌ Authorization failed: User does not own this car');
-            setLoadError('You do not have permission to edit this advert');
-            setIsLoading(false);
-            setTimeout(() => navigate('/'), 3000);
-            return;
-          }
+          // Check if current user owns the car
+          const isOwner = vehicleUserId === currentUserId;
+          
+          // Allow viewing for all users, but only allow editing for:
+          // 1. Owner of the car
+          // 2. Admins
+          // 3. Trade dealers (if they own the car)
+          // Store ownership status for conditional rendering
+          setIsCarOwner(isOwner || isAdmin);
+          
+          console.log('🔐 [Ownership Check] Vehicle User:', vehicleUserId, 'Current User:', currentUserId, 'Is Owner:', isOwner);
           
           // Authorization check for trade dealers - only block if car belongs to a DIFFERENT dealer
           const vehicleDealerId = vehicleData.dealerId?._id?.toString() || vehicleData.dealerId?.toString();
@@ -1602,14 +1605,30 @@ useEffect(() => {
         <div className="container">
           <button 
             className="back-link" 
-            onClick={() => navigate('/find-your-car')}
+            onClick={() => isTradeDealer ? navigate('/trade/inventory') : navigate('/find-your-car')}
           >
-            ← Back to Find Your Car
+            {isTradeDealer ? '← Back to Inventory' : '← Back to Find Your Car'}
           </button>
-          <h1>Your car advert - Incomplete</h1>
+          <h1>
+            {carStatus === 'active' 
+              ? 'Edit Your Car Advert' 
+              : carStatus === 'sold'
+              ? 'Your Car (Sold)'
+              : 'Your car advert - Incomplete'}
+          </h1>
           <div className="advert-info">
             <p className="user-email">{user?.email}</p>
             <p className="advert-id">Advert ID: {advertId}</p>
+            {carStatus && (
+              <p className="advert-status">
+                Status: <span className={`status-badge ${carStatus}`}>
+                  {carStatus === 'active' && '✓ ACTIVE'}
+                  {carStatus === 'sold' && '✓ SOLD'}
+                  {carStatus === 'draft' && '📝 DRAFT'}
+                  {carStatus === 'pending_payment' && '⏳ PENDING PAYMENT'}
+                </span>
+              </p>
+            )}
           </div>
         </div>
       </div>

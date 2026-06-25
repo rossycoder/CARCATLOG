@@ -524,6 +524,8 @@ const TradeInventoryPage = () => {
 
                   <div className="vehicle-actions">
                     <Link to={
+                      // For active cars: Go to edit page directly
+                      // For draft/pending cars: Go to edit page (they need to complete payment)
                       vehicle.vehicleType === 'bike' ? `/bikes/selling/advert/edit/${vehicle.advertId || vehicle._id}` : 
                       vehicle.vehicleType === 'van' ? `/vans/selling/advert/edit/${vehicle.advertId || vehicle._id}` :
                       `/selling/advert/edit/${vehicle.advertId || vehicle._id}`
@@ -531,7 +533,7 @@ const TradeInventoryPage = () => {
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M12.146.146a.5.5 0 01.708 0l3 3a.5.5 0 010 .708l-10 10a.5.5 0 01-.168.11l-5 2a.5.5 0 01-.65-.65l2-5a.5.5 0 01.11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 2.793L10.5 3 4 9.5 3.1 11.9l2.4-.9 6.5-6.5z"/>
                       </svg>
-                      Edit
+                      {(vehicle.advertStatus || vehicle.status) === 'active' ? 'Edit' : 'Complete'}
                     </Link>
                     <Link to={
                       vehicle.vehicleType === 'bike' ? `/bikes/${vehicle._id}` :

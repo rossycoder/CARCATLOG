@@ -9,6 +9,7 @@ import ElectricVehicleCharging from '../components/ElectricVehicleCharging';
 import ElectricVehicleRunningCosts from '../components/ElectricVehicleRunningCosts';
 import FinanceCalculator from '../components/FinanceCalculator';
 import { generateVariantDisplay, extractTownName, formatColor } from '../utils/vehicleFormatter';
+import authService from '../services/authService';
 import './CarDetailPage.css';
 
 const CarDetailPage = () => {
