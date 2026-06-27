@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { checkVehicleHistory } from '../services/vehicleHistoryService';
-import { lookupVehicle } from '../services/dvlaService';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import './VehiclePaymentPage.css';
 
 const VehiclePaymentPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const registration = searchParams.get('registration') || '';
+  // Use passed state from VehicleCheckPage if available
+  const passedVehicleData = location.state?.vehicleData;
   
   const [isLoading, setIsLoading] = useState(true);
   const [vehicleData, setVehicleData] = useState(null);
@@ -28,35 +29,99 @@ const VehiclePaymentPage = () => {
     try {
       setIsLoading(true);
       
-      // For payment page, we don't need full vehicle data
-      // Just set basic info for display
-      const basicData = {
+      // If vehicle data was passed from VehicleCheckPage, use it directly
+      if (passedVehicleData && passedVehicleData.make && passedVehicleData.make !== 'Unknown') {
+        setVehicleData({
+          vrm: registration,
+          make: passedVehicleData.make || 'Unknown',
+          model: passedVehicleData.model || 'Unknown',
+          bodyType: passedVehicleData.bodyType || 'N/A',
+          colour: passedVehicleData.colour || passedVehicleData.color || 'N/A',
+          firstRegistered: passedVehicleData.firstRegistered || passedVehicleData.year ? String(passedVehicleData.firstRegistered || passedVehicleData.year) : 'N/A',
+          fuelType: passedVehicleData.fuelType || 'N/A',
+          engineSize: passedVehicleData.engineSize ? `${passedVehicleData.engineSize}` : 'N/A',
+          transmission: passedVehicleData.transmission || 'N/A',
+        });
+        return;
+      }
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      
+      let carData = null;
+      
+      // First try: basic-lookup (specs API)
+      try {
+        const response = await fetch(`${API_URL}/vehicles/basic-lookup/${registration}`);
+        const result = await response.json();
+        if (result.success && result.data) {
+          carData = result.data;
+        }
+      } catch (e) {
+        // fallback below
+      }
+      
+      // Second try: check if car exists in DB by registration number
+      if (!carData || !carData.make || carData.make === 'Unknown') {
+        try {
+          // Use basicVehicleLookup result if make is known, else try DB
+          const dbResp = await fetch(`${API_URL}/vehicles?registrationNumber=${registration}&includeAllStatuses=true&limit=1`);
+          const dbResult = await dbResp.json();
+          const cars = dbResult.data || dbResult.cars || [];
+          const car = cars.find(c => 
+            c.registrationNumber?.replace(/\s/g,'').toUpperCase() === registration.replace(/\s/g,'').toUpperCase()
+          ) || cars[0];
+          if (car && car.make && car.make !== 'Unknown') {
+            carData = {
+              make: car.make,
+              model: car.model,
+              bodyType: car.bodyType,
+              color: car.color,
+              year: car.year,
+              fuelType: car.fuelType,
+              engineSize: car.engineSize,
+              transmission: car.transmission,
+            };
+          }
+        } catch (e) {
+          // use whatever we have
+        }
+      }
+      
+      if (carData) {
+        const d = carData;
+        setVehicleData({
+          vrm: registration,
+          make: d.make || 'Unknown',
+          model: d.model || 'Unknown',
+          bodyType: d.bodyType || 'N/A',
+          colour: d.color || d.colour || 'N/A',
+          firstRegistered: d.year ? `${d.year}` : 'N/A',
+          fuelType: d.fuelType || 'N/A',
+          engineSize: d.engineSize ? `${d.engineSize}L` : 'N/A',
+          transmission: d.transmission || 'N/A',
+        });
+      } else {
+        // Fallback if everything fails — still allow payment
+        setVehicleData({
+          vrm: registration,
+          make: 'Vehicle',
+          model: 'Information',
+          bodyType: 'Available after payment',
+          colour: 'N/A',
+          firstRegistered: 'N/A',
+        });
+      }
+      
+    } catch (err) {
+      console.error('Error in fetchVehicleData:', err);
+      // Don't block payment page on API error — use fallback
+      setVehicleData({
         vrm: registration,
         make: 'Vehicle',
         model: 'Information',
         bodyType: 'Available after payment',
         colour: 'N/A',
         firstRegistered: 'N/A',
-        fuelType: 'N/A',
-        engineSize: 'N/A',
-        transmission: 'N/A',
-        co2Emissions: 'N/A',
-        taxStatus: 'N/A',
-        motStatus: 'N/A',
-        _dataSource: {
-          dvla: false,
-          history: false,
-          fallback: true
-        },
-        _completeness: 'payment_mode'
-      };
-      
-      setVehicleData(basicData);
-      
-    } catch (err) {
-      console.error('Error in fetchVehicleData:', err);
-      setError('Unable to prepare payment page. Please try again.');
-      setVehicleData(null);
+      });
     } finally {
       setIsLoading(false);
     }

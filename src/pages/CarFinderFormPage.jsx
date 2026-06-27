@@ -56,6 +56,11 @@ const formatVehicleDetailsFromBasic = (basicData, registration, mileage) => {
     gearbox: isValidValue(basicData.gearbox) ? String(basicData.gearbox) : null,
     emissionClass: isValidValue(basicData.emissionClass) ? String(basicData.emissionClass) : null,
     co2Emissions: isValidValue(basicData.co2Emissions) ? Number(basicData.co2Emissions) : null,
+    urbanMpg: isValidValue(basicData.urbanMpg) ? Number(basicData.urbanMpg) : null,
+    extraUrbanMpg: isValidValue(basicData.extraUrbanMpg) ? Number(basicData.extraUrbanMpg) : null,
+    combinedMpg: isValidValue(basicData.combinedMpg) ? Number(basicData.combinedMpg) : null,
+    annualTax: isValidValue(basicData.annualTax) ? Number(basicData.annualTax) : null,
+    insuranceGroup: isValidValue(basicData.insuranceGroup) ? String(basicData.insuranceGroup) : null,
     
     // These fields are not available in basic lookup (will be fetched when car is saved)
     previousOwners: null,

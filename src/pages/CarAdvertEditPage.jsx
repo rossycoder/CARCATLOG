@@ -379,19 +379,31 @@ const CarAdvertEditPage = () => {
           if (vehicleData.registrationNumber) {
           }
           
-          // 🔒 PROTECTED: Check if we need to fetch enhanced data
-          // IMPORTANT: Only fetch for NEW cars without payment (draft/pending_payment)
-          // For existing cars with payment completed, data should already be in database
-          const needsValuation = !vehicleData.valuation?.privatePrice && !vehicleData.allValuations?.private;
+          // 🔒 CRITICAL: NO API CALLS for existing pending_payment cars
+          // If car exists in database with pending_payment status, use existing data
+          // API calls were already made when first user added the car
+          // Second user (taking over) should just see existing database data
+          const isPendingPaymentCar = vehicleData.advertStatus === 'pending_payment';
+          
+          // ONLY make API calls if:
+          // 1. Car is DRAFT (brand new, no data fetched yet)
+          // 2. Critical data is genuinely missing (not just pending payment takeover)
+          const isNewDraft = false; // API calls sirf paymentController mein hongi payment ke baad
+          
+          if (isPendingPaymentCar) {
+            console.log('ℹ️ Pending payment car detected - using existing database data (no API calls)');
+            console.log('   This car was already checked by previous user - reusing data to save costs');
+          }
+          
+          // Check what data is missing
+          const needsValuation = !vehicleData.valuation?.privatePrice && !vehicleData.allValuations?.private && !vehicleData.price;
           const needsRunningCosts = !vehicleData.runningCosts?.annualTax;
-          const needsEnhancedData = needsValuation || needsRunningCosts;
+          const needsMOTData = !vehicleData.motDue && !vehicleData.motExpiry;
+          const hasMOTHistory = vehicleData.motHistory && vehicleData.motHistory.length > 0;
           
-          // Check if this is a new user car (no payment completed yet)
-          const isNewUserCar = vehicleData.advertStatus === 'draft' || vehicleData.advertStatus === 'pending_payment';
-          
-          // 🚨 PRIORITY FIX: Always fetch valuation if missing (regardless of car status)
-          if (needsValuation && vehicleData.registrationNumber) {
-            console.log('🔍 Valuation data missing - fetching...');
+          // 🚨 ONLY fetch valuation for DRAFT cars (brand new)
+          if (isNewDraft && !isPendingPaymentCar && needsValuation && vehicleData.registrationNumber) {
+            console.log('🔍 New draft car - fetching valuation...');
             try {
               const valuationResponse = await lookupVehicle(vehicleData.registrationNumber, vehicleData.mileage);
               
@@ -416,31 +428,19 @@ const CarAdvertEditPage = () => {
                 } catch (saveError) {
                   console.error('❌ Failed to save valuation data:', saveError.message);
                 }
-              } else {
-                console.log('❌ No valuation data found in API response');
               }
             } catch (valuationError) {
               console.error('❌ Valuation lookup failed:', valuationError.message);
             }
           }
           
-          // 🔒 CRITICAL: Check if MOT data is missing
-          const needsMOTData = !vehicleData.motDue && !vehicleData.motExpiry;
-          const hasMOTHistory = vehicleData.motHistory && vehicleData.motHistory.length > 0;
-          
-          // 🚨 PRIORITY FIX: Fetch MOT if missing
-          // First: clear session cache so enhanced-lookup returns fresh MOT data
-          // Then: call mot-lookup directly as backup
+          // ✅ Fetch MOT if missing — cheap call (£0.02), always safe to call
           if ((needsMOTData || !hasMOTHistory) && vehicleData.registrationNumber) {
-            console.log('🔍 MOT data missing - clearing cache and fetching fresh data...');
-            
-            // Clear stale session cache so next lookupVehicle gets fresh MOT data
-            clearCache(vehicleData.registrationNumber);
-
+            console.log('🔍 MOT data missing - fetching from CheckCarDetails API...');
             try {
               const motResponse = await api.post('/vehicles/mot-lookup', {
                 registrationNumber: vehicleData.registrationNumber,
-                vehicleId: advertId   // save directly to DB in one shot
+                vehicleId: advertId
               });
               
               if (motResponse.data?.success && motResponse.data?.data?.motDueDate) {
@@ -454,7 +454,6 @@ const CarAdvertEditPage = () => {
                 
                 console.log('✅ MOT data fetched from CheckCarDetails:', motDueDate);
                 
-                // Update frontend state
                 setVehicleData(prev => ({
                   ...prev,
                   ...motStateUpdate,
@@ -463,132 +462,26 @@ const CarAdvertEditPage = () => {
                   allValuations:  prev.allValuations,
                   price:          prev.price
                 }));
-                // DB already saved by backend (vehicleId passed above)
-              } else {
-                console.log('❌ No MOT data found in CheckCarDetails response');
+                
+                // Save MOT to DB
+                try {
+                  await api.patch(`/vehicles/${advertId}`, {
+                    motStatus: motStateUpdate.motStatus,
+                    motDue:    motStateUpdate.motDue,
+                    motExpiry: motStateUpdate.motExpiry,
+                    motHistory: motStateUpdate.motHistory
+                  });
+                  console.log('✅ MOT data saved to database');
+                } catch (saveErr) {
+                  console.error('❌ Failed to save MOT to DB:', saveErr.message);
+                }
               }
             } catch (motError) {
               console.error('❌ CheckCarDetails MOT lookup failed:', motError.message);
             }
           }
           
-          
-          // 🔒 PROTECTED: Only fetch for NEW cars OR if critical data is missing
-          // MOT fetch: allow for ANY car status if motDue is missing (not just new cars)
-          const shouldFetchEnhancedData = isNewUserCar && needsEnhancedData;
-          const shouldFetchMOT = needsMOTData && !hasMOTHistory; // removed isNewUserCar restriction
-          
-          if (!shouldFetchEnhancedData && !shouldFetchMOT) {
-          }
-          
-          // Only fetch enhanced data for NEW user cars (draft/pending_payment)
-          if (vehicleData.registrationNumber && (shouldFetchEnhancedData || shouldFetchMOT)) {
-            if (isNewUserCar) {
-            } else if (needsMOTData) {
-            } else {
-            }
-            
-            try {
-              const enhancedVehicleData = await lookupVehicle(vehicleData.registrationNumber, vehicleData.mileage);
-              
-              // Update vehicle data with enhanced information
-              if (enhancedVehicleData.valuation) {
-                setVehicleData(prev => ({
-                  ...prev,
-                  valuation: enhancedVehicleData.valuation,
-                  allValuations: enhancedVehicleData.valuation.estimatedValue,
-                  estimatedValue: enhancedVehicleData.valuation.estimatedValue?.private || 
-                                enhancedVehicleData.valuation.estimatedValue?.retail ||
-                                enhancedVehicleData.valuation.estimatedValue
-                }));
-                
-                // Update price with private valuation
-                const privatePrice = enhancedVehicleData.valuation.estimatedValue?.private ||
-                                   enhancedVehicleData.valuation.estimatedValue?.retail ||
-                                   enhancedVehicleData.valuation.estimatedValue;
-                
-                if (privatePrice && privatePrice > 0) {
-                  setAdvertData(prev => ({
-                    ...prev,
-                    price: privatePrice
-                  }));
-                }
-              } else {
-                // No valuation available - keep existing price or let user set manually
-                if (!vehicleData.price || vehicleData.price === 0) {
-                }
-              }
-              
-              // Update running costs — only fill fields that are currently empty
-              if (enhancedVehicleData.runningCosts) {
-                setAdvertData(prev => {
-                  const newRunningCosts = {
-                    fuelEconomy: {
-                      urban: prev.runningCosts.fuelEconomy.urban || String(enhancedVehicleData.runningCosts.fuelEconomy?.urban || ''),
-                      extraUrban: prev.runningCosts.fuelEconomy.extraUrban || String(enhancedVehicleData.runningCosts.fuelEconomy?.extraUrban || ''),
-                      combined: prev.runningCosts.fuelEconomy.combined || String(enhancedVehicleData.runningCosts.fuelEconomy?.combined || '')
-                    },
-                    annualTax: prev.runningCosts.annualTax || String(enhancedVehicleData.runningCosts.annualTax || ''),
-                    insuranceGroup: prev.runningCosts.insuranceGroup || String(enhancedVehicleData.runningCosts.insuranceGroup || ''),
-                    co2Emissions: prev.runningCosts.co2Emissions || String(enhancedVehicleData.runningCosts.co2Emissions || '')
-                  };
-                  
-                  return {
-                    ...prev,
-                    runningCosts: newRunningCosts
-                  };
-                });
-              } else {
-              }
-              
-              // CRITICAL: Only update MOT data if it doesn't already exist in database
-              // This prevents duplicate API calls and overwrites
-              const hasMOTDataInDB = vehicleData.motHistory && vehicleData.motHistory.length > 0;
-              
-              if (!hasMOTDataInDB && (enhancedVehicleData.motStatus || enhancedVehicleData.motDue || enhancedVehicleData.motExpiry)) {
-                const motDataToSave = {
-                  motStatus: enhancedVehicleData.motStatus || vehicleData.motStatus,
-                  motDue: enhancedVehicleData.motDue || enhancedVehicleData.motExpiry || vehicleData.motDue,
-                  motExpiry: enhancedVehicleData.motExpiry || enhancedVehicleData.motDue || vehicleData.motExpiry,
-                  motHistory: enhancedVehicleData.motHistory || vehicleData.motHistory || []
-                };
-                
-                // CRITICAL: Update frontend state while preserving valuation
-                setVehicleData(prev => ({
-                  ...prev,
-                  ...motDataToSave,
-                  // Explicitly preserve valuation data
-                  valuation: prev.valuation,
-                  estimatedValue: prev.estimatedValue,
-                  allValuations: prev.allValuations,
-                  price: prev.price
-                }));
-                
-                // CRITICAL: Save MOT data to database immediately
-                try {
-                  await api.patch(`/vehicles/${advertId}`, {
-                    motStatus: motDataToSave.motStatus,
-                    motDue: motDataToSave.motDue,
-                    motExpiry: motDataToSave.motExpiry,
-                    motHistory: motDataToSave.motHistory
-                  });
-                } catch (saveError) {
-                  console.error('❌ Failed to save MOT data to database:', saveError.message);
-                }
-              } else if (hasMOTDataInDB) {
-              } else {
-                // FALLBACK: CheckCarDetails MOT API (already fetched above, skip duplicate call)
-                console.log('ℹ️ MOT from enhanced data not available — already handled by mot-lookup above');
-              }
-              
-              // For all cars: if motDue still missing after enhanced lookup, mot-lookup already handled it above
-              // No need for extra DVLA calls here — they return wrong dates
-            } catch (enhancedError) {
-              console.warn('⚠️ Failed to fetch enhanced data:', enhancedError.message);
-            }
-          } else {
-          }
-          
+          // ✅ Data loaded from database - ready to display
           setIsLoading(false);
           return;
         }
@@ -616,13 +509,10 @@ const CarAdvertEditPage = () => {
           motHistory: response.data.vehicleData.motHistory || prev?.motHistory
         }));
         
-        // Don't fetch MOT data from API to avoid charges
-        // For new users: MOT data should come from the initial vehicle lookup API call
-        // For existing cars: MOT data should already be in the car document from when payment was completed
-        if (response.data.vehicleData?.registrationNumber) {
-        }
+        // 🔒 NO API CALLS in fallback path either — all API calls happen in paymentController after payment
+        // MOT data should already be in DB from payment flow
         
-        // 🔒 PROTECTED: Check if we need to fetch enhanced data
+        // 🔒 PROTECTED: Only fetch for NEW cars OR if critical data is missing
         // IMPORTANT: Only fetch for NEW cars without payment (draft/pending_payment)
         // For existing cars with payment completed, data should already be in database
         const needsValuation = !response.data.vehicleData?.valuation?.privatePrice && 
@@ -638,10 +528,16 @@ const CarAdvertEditPage = () => {
         const needsMOTData = !response.data.vehicleData?.motDue && !response.data.vehicleData?.motExpiry;
         const hasMOTHistory = response.data.vehicleData?.motHistory && response.data.vehicleData.motHistory.length > 0;
         
-        // 🚨 Fetch MOT from CheckCarDetails if missing (accurate source)
-        if ((needsMOTData || !hasMOTHistory) && response.data.vehicleData?.registrationNumber) {
-          // Clear stale session cache so future lookups get fresh MOT data
-          clearCache(response.data.vehicleData.registrationNumber);
+        // MOT lookup — cheap call (£0.02), always safe for missing MOT data
+        // History API (£1.82) is NOT called here
+        
+        // 🔒 PROTECTED: Only fetch for NEW cars OR if critical data is missing
+        // DISABLED: Enhanced data (valuation etc) handled by paymentController
+        const shouldFetchEnhancedData = false; // was: isNewUserCar && needsEnhancedData
+        const shouldFetchMOT = (needsMOTData || !hasMOTHistory) && !!response.data.vehicleData?.registrationNumber;
+        
+        // Fetch MOT if missing — £0.02 cheap call, not history API
+        if (shouldFetchMOT) {
           try {
             const motResp = await api.post('/vehicles/mot-lookup', {
               registrationNumber: response.data.vehicleData.registrationNumber,
@@ -660,16 +556,20 @@ const CarAdvertEditPage = () => {
                 allValuations:  prev.allValuations,
                 price:          prev.price
               }));
-              console.log('✅ MOT fetched from CheckCarDetails (fallback path):', motDueDate);
+              // Save to DB
+              try {
+                await api.patch(`/vehicles/${advertId}`, {
+                  motStatus: ms || 'Valid',
+                  motDue: motDueDate,
+                  motExpiry: motDueDate,
+                  motHistory: mh || []
+                });
+              } catch (saveErr) {}
             }
           } catch (motErr) {
-            console.warn('⚠️ MOT lookup failed (fallback path):', motErr.message);
+            console.warn('⚠️ MOT lookup failed (fallback):', motErr.message);
           }
         }
-        
-        // 🔒 PROTECTED: Only fetch for NEW cars OR if critical data is missing
-        const shouldFetchEnhancedData = isNewUserCar && needsEnhancedData;
-        const shouldFetchMOT = false; // MOT now handled by mot-lookup above
         
         if (!shouldFetchEnhancedData && !shouldFetchMOT) {
         }
@@ -1337,6 +1237,8 @@ useEffect(() => {
     setIsUploading(true);
     setUploadProgress(0);
 
+    const uploadedPhotos = [];
+
     try {
       // Convert files to base64 and upload to Cloudinary
       for (let i = 0; i < validFiles.length; i++) {
@@ -1347,13 +1249,17 @@ useEffect(() => {
         const result = await uploadService.uploadImage(base64, advertId);
         
         if (result.success) {
+          const newPhoto = {
+            id: result.data.publicId,
+            url: result.data.url,
+            publicId: result.data.publicId
+          };
+          
+          uploadedPhotos.push(newPhoto);
+          
           setAdvertData(prev => ({
             ...prev,
-            photos: [...prev.photos, {
-              id: result.data.publicId,
-              url: result.data.url,
-              publicId: result.data.publicId
-            }]
+            photos: [...prev.photos, newPhoto]
           }));
         } else {
           console.error('Failed to upload image:', result.error);
@@ -1361,6 +1267,20 @@ useEffect(() => {
         
         // Update progress
         setUploadProgress(Math.round(((i + 1) / validFiles.length) * 100));
+      }
+      
+      // CRITICAL FIX: Auto-save uploaded photos to database immediately
+      if (uploadedPhotos.length > 0) {
+        try {
+          const allPhotos = [...advertData.photos, ...uploadedPhotos];
+          await api.patch(`/vehicles/${advertId}`, {
+            images: allPhotos.map(p => (typeof p === 'string' ? p : p.url))
+          });
+          console.log('✅ Photos auto-saved to database');
+        } catch (saveError) {
+          console.error('❌ Failed to auto-save photos to database:', saveError);
+          // Silently fail - no popup message
+        }
       }
     } catch (error) {
       console.error('Upload error:', error);
@@ -1442,30 +1362,32 @@ useEffect(() => {
   const validateForm = () => {
     const newErrors = {};
     
+    // Only show warnings, don't block saving
     if (!advertData.price || parseFloat(advertData.price) <= 0) {
-      newErrors.price = 'Please enter a valid price';
+      console.warn('⚠️ Warning: No price set');
     }
     
     if (!advertData.description.trim()) {
-      newErrors.description = 'Please add a description';
+      console.warn('⚠️ Warning: No description added');
     } else if (advertData.description.trim().length < 50) {
-      newErrors.description = 'Description should be at least 50 characters';
+      console.warn('⚠️ Warning: Description is short (less than 50 characters)');
     }
     
     if (advertData.photos.length === 0) {
-      newErrors.photos = 'Please add at least one photo';
+      console.warn('⚠️ Warning: No photos uploaded');
     }
     
     if (!advertData.contactPhone.trim()) {
-      newErrors.contactPhone = 'Please enter a contact phone number';
+      console.warn('⚠️ Warning: No contact phone number');
     }
     
     if (!advertData.contactEmail.trim()) {
-      newErrors.contactEmail = 'Please enter a contact email';
+      console.warn('⚠️ Warning: No contact email');
     }
     
+    // Always return true - allow saving
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return true;
   };
 
   const handleSave = async () => {
@@ -1610,22 +1532,18 @@ useEffect(() => {
             {isTradeDealer ? '← Back to Inventory' : '← Back to Find Your Car'}
           </button>
           <h1>
-            {carStatus === 'active' 
-              ? 'Edit Your Car Advert' 
-              : carStatus === 'sold'
+            {carStatus === 'sold'
               ? 'Your Car (Sold)'
-              : 'Your car advert - Incomplete'}
+              : 'Edit Your Car Advert'}
           </h1>
           <div className="advert-info">
             <p className="user-email">{user?.email}</p>
             <p className="advert-id">Advert ID: {advertId}</p>
-            {carStatus && (
+            {carStatus && carStatus !== 'draft' && carStatus !== 'pending_payment' && (
               <p className="advert-status">
                 Status: <span className={`status-badge ${carStatus}`}>
                   {carStatus === 'active' && '✓ ACTIVE'}
                   {carStatus === 'sold' && '✓ SOLD'}
-                  {carStatus === 'draft' && '📝 DRAFT'}
-                  {carStatus === 'pending_payment' && '⏳ PENDING PAYMENT'}
                 </span>
               </p>
             )}
@@ -1643,14 +1561,16 @@ useEffect(() => {
               <div className="save-info">
                 <span className="save-icon">💾</span>
                 <span className="save-text">
-                  {advertData.photos.length === 0 || !advertData.description.trim()
-                    ? 'Add photos and description to save'
+                  {advertData.photos.length === 0 
+                    ? 'Recommended: Add at least one photo'
+                    : !advertData.price || parseFloat(advertData.price) <= 0
+                    ? 'Recommended: Set a valid price'
                     : 'Click to save all your changes'}
                 </span>
               </div>
               <button
                 onClick={handleSave}
-                disabled={isSaving || advertData.photos.length === 0 || !advertData.description.trim()}
+                disabled={isSaving}
                 className="sticky-save-button"
               >
                 {isSaving ? '⏳ Saving...' : '✓ Save All Changes'}

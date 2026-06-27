@@ -25,9 +25,61 @@ const VehicleCheckPage = () => {
     try {
       
       // Use basic vehicle service for vehicle check (cheap API - no expensive history/MOT)
-      const response = await carService.basicLookup(registrationNumber, 0);
+      let apiResponse = null;
+      try {
+        apiResponse = await carService.basicLookup(registrationNumber, 0);
+      } catch (lookupErr) {
+        // API failed — try DB fallback below
+      }
       
-      if (response.success && response.data) {
+      // DB fallback: if API failed or returned no make, try searching our DB
+      if (!apiResponse?.success || !apiResponse?.data?.make || apiResponse?.data?.make === 'Unknown') {
+        try {
+          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+          const cleanReg = registrationNumber.toUpperCase().replace(/\s/g, '');
+          // Search active cars by registration
+          const dbResp = await fetch(`${API_URL}/vehicles?advertStatus=active&limit=50`);
+          const dbResult = await dbResp.json();
+          const cars = dbResult.data || dbResult.cars || [];
+          const car = cars.find(c => 
+            c.registrationNumber?.replace(/\s/g,'').toUpperCase() === cleanReg
+          );
+          if (car) {
+            const fallbackData = {
+              vrm: cleanReg,
+              make: car.make || 'Unknown',
+              model: car.model || 'Unknown',
+              variant: car.variant,
+              bodyType: car.bodyType,
+              colour: car.color,
+              firstRegistered: car.year,
+              fuelType: car.fuelType,
+              engineSize: car.engineSize,
+              transmission: car.transmission,
+              doors: car.doors,
+              seats: car.seats,
+              co2Emissions: car.co2Emissions || car.runningCosts?.co2Emissions || null,
+              fuelEconomy: car.runningCosts?.fuelEconomy || null,
+              insuranceGroup: car.insuranceGroup || car.runningCosts?.insuranceGroup || null,
+              annualTax: car.annualTax || car.runningCosts?.annualTax || null,
+              isStolen: false,
+              isWrittenOff: false,
+              hasOutstandingFinance: false,
+              writeOffCategory: null,
+              fullData: car
+            };
+            setVehicleData(fallbackData);
+            setShowVehicleFound(true);
+            return;
+          }
+        } catch (dbErr) {
+          // DB fallback also failed
+        }
+      }
+      
+      const response = apiResponse;
+      
+      if (response?.success && response?.data) {
         
         // Helper function to safely extract value from {value, source} format or direct value
         const getValue = (field) => {
@@ -89,17 +141,36 @@ const VehicleCheckPage = () => {
       }
     } catch (err) {
       console.error('Vehicle lookup error:', err);
-      const errorMessage = err.response?.data?.error || err.message || 'Failed to fetch vehicle data';
-      setError(String(errorMessage));
+      const statusCode = err.response?.status;
+      
+      // If vehicle not found (404) or API unavailable, still allow payment
+      // User can still buy a check — the report will be generated after payment
+      if (statusCode === 404 || statusCode === 503 || statusCode === 500) {
+        setVehicleData({
+          vrm: registrationNumber.toUpperCase(),
+          make: 'Unknown',
+          model: 'See report',
+          bodyType: null,
+          colour: null,
+          firstRegistered: null,
+          fuelType: null,
+        });
+        setShowVehicleFound(true);
+      } else {
+        const errorMessage = typeof (err.response?.data?.error) === 'string' 
+          ? err.response.data.error 
+          : err.response?.data?.message || err.message || 'Failed to fetch vehicle data';
+        setError(String(errorMessage));
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGetCheck = () => {
-    // Navigate to payment page with vehicle data
+    // Navigate to payment page with vehicle data passed as state
     const paymentUrl = `/vehicle-check/payment/new?registration=${encodeURIComponent(registrationNumber.toUpperCase())}`;
-    navigate(paymentUrl);
+    navigate(paymentUrl, { state: { vehicleData } });
   };
 
   const handleViewSampleReport = () => {
