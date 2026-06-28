@@ -434,9 +434,15 @@ const CarAdvertEditPage = () => {
             }
           }
           
-          // ✅ Fetch MOT if missing — cheap call (£0.02), always safe to call
-          if ((needsMOTData || !hasMOTHistory) && vehicleData.registrationNumber) {
-            console.log('🔍 MOT data missing - fetching from CheckCarDetails API...');
+          // ✅ Fetch MOT ONLY if genuinely missing from DB — cheap call (£0.02), not history API
+          // Skip if: dealer feed car (has no MOT data by design) OR data already in DB
+          const hasMOTInDB = vehicleData.motDue ||
+                             vehicleData.motExpiry ||
+                             (vehicleData.motHistory && vehicleData.motHistory.length > 0);
+          const isDealerFeedCar = vehicleData.isDealerListing && vehicleData.dataSource === 'feed';
+          
+          if (!hasMOTInDB && !isDealerFeedCar && vehicleData.registrationNumber) {
+            console.log('🔍 MOT missing from DB - fetching once (£0.02)...');
             try {
               const motResponse = await api.post('/vehicles/mot-lookup', {
                 registrationNumber: vehicleData.registrationNumber,
@@ -452,7 +458,7 @@ const CarAdvertEditPage = () => {
                   motHistory: fetchedMotHistory || []
                 };
                 
-                console.log('✅ MOT data fetched from CheckCarDetails:', motDueDate);
+                console.log('✅ MOT fetched & saving to DB (will not call again):', motDueDate);
                 
                 setVehicleData(prev => ({
                   ...prev,
@@ -463,7 +469,7 @@ const CarAdvertEditPage = () => {
                   price:          prev.price
                 }));
                 
-                // Save MOT to DB
+                // Save MOT to DB — next load will skip API call
                 try {
                   await api.patch(`/vehicles/${advertId}`, {
                     motStatus: motStateUpdate.motStatus,
@@ -471,13 +477,12 @@ const CarAdvertEditPage = () => {
                     motExpiry: motStateUpdate.motExpiry,
                     motHistory: motStateUpdate.motHistory
                   });
-                  console.log('✅ MOT data saved to database');
                 } catch (saveErr) {
                   console.error('❌ Failed to save MOT to DB:', saveErr.message);
                 }
               }
             } catch (motError) {
-              console.error('❌ CheckCarDetails MOT lookup failed:', motError.message);
+              console.error('❌ MOT lookup failed:', motError.message);
             }
           }
           
@@ -534,7 +539,11 @@ const CarAdvertEditPage = () => {
         // 🔒 PROTECTED: Only fetch for NEW cars OR if critical data is missing
         // DISABLED: Enhanced data (valuation etc) handled by paymentController
         const shouldFetchEnhancedData = false; // was: isNewUserCar && needsEnhancedData
-        const shouldFetchMOT = (needsMOTData || !hasMOTHistory) && !!response.data.vehicleData?.registrationNumber;
+        // MOT — only fetch if data missing from DB (any status)
+        const isActiveOrSoldFallback = false; // removed status restriction — fetch if missing
+        const shouldFetchMOT = (needsMOTData || !hasMOTHistory) &&
+                                !!response.data.vehicleData?.registrationNumber &&
+                                !isActiveOrSoldFallback;
         
         // Fetch MOT if missing — £0.02 cheap call, not history API
         if (shouldFetchMOT) {

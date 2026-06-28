@@ -308,7 +308,8 @@ const VehicleCheckPage = () => {
                 {String(vehicleData.make)} {String(vehicleData.model)} {vehicleData.firstRegistered ? String(vehicleData.firstRegistered) : ''}
               </h3>
               
-              {/* Safety Alert Checks - AutoTrader Style */}
+              {/* Safety Alert Checks - only show when real history check data exists */}
+              {vehicleData.historyCheckId && (
               <div className="safety-checks-section">
                 <h4 className="safety-checks-title">Vehicle Safety Checks</h4>
                 <div className="safety-checks-grid">
@@ -351,6 +352,7 @@ const VehicleCheckPage = () => {
                   </div>
                 </div>
               </div>
+              )}
               
               {/* Basic Vehicle Information */}
               <div className="vehicle-details-section-header">
