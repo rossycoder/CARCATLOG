@@ -462,11 +462,7 @@ const TradeInventoryPage = () => {
                     src={vehicle.images?.[0] || '/images/dummy/placeholder.svg'} 
                     alt={`${vehicle.make} ${vehicle.model}`} 
                     onError={(e) => {
-                      console.log('Image failed to load:', vehicle.images?.[0]);
                       e.target.src = '/images/dummy/red-car.png';
-                    }}
-                    onLoad={() => {
-                      console.log('Image loaded successfully:', vehicle.images?.[0]);
                     }}
                   />
                   {!vehicle.images || vehicle.images.length === 0 ? (

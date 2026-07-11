@@ -427,7 +427,7 @@ function MyListingsPage() {
                         {listing.advertStatus === 'active' && !isCarExpired(listing) && (
                           <>
                             <button className="btn-view" onClick={() => handleViewListing(listing._id, listing.vehicleType)}>👁️ View</button>
-                            <button className="btn-edit" onClick={() => handleEditListing(listing._id, listing.vehicleType)}>✏️ Edit</button>
+                            <button className="btn-edit" onClick={() => handleEditListing(listing.advertId || listing._id, listing.vehicleType)}>✏️ Edit</button>
                             <button className="btn-sold" onClick={() => handleMarkAsSold(listing._id)}>✓ Mark as Sold</button>
                           </>
                         )}
@@ -435,13 +435,13 @@ function MyListingsPage() {
                           <>
                             <button className="btn-view" onClick={() => handleViewListing(listing._id, listing.vehicleType)}>👁️ View</button>
                             <button className="btn-relist" onClick={() => handleRelistVehicle(listing._id, listing.vehicleType, listing)}>🔄 Relist</button>
-                            <button className="btn-edit" onClick={() => handleEditListing(listing._id, listing.vehicleType)}>✏️ Edit</button>
+                            <button className="btn-edit" onClick={() => handleEditListing(listing.advertId || listing._id, listing.vehicleType)}>✏️ Edit</button>
                           </>
                         )}
                         {listing.advertStatus === 'pending_payment' && (
                           <>
                             <button className="btn-view" onClick={() => handleViewListing(listing._id, listing.vehicleType)}>👁️ Preview</button>
-                            <button className="btn-edit" onClick={() => handleEditListing(listing._id, listing.vehicleType)}>✏️ Edit</button>
+                            <button className="btn-edit" onClick={() => handleEditListing(listing.advertId || listing._id, listing.vehicleType)}>✏️ Edit</button>
                           </>
                         )}
                         {listing.advertStatus === 'sold' && !isCarExpired(listing) && (

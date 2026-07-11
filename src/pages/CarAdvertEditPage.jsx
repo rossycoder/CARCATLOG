@@ -89,6 +89,12 @@ const CarAdvertEditPage = () => {
   const [runningCostsTimeout, setRunningCostsTimeout] = useState(null);
   const [featureSaveTimeout, setFeatureSaveTimeout] = useState(null);
   
+  // Valuation state
+  const [isLoadingValuation, setIsLoadingValuation] = useState(false);
+  const [valuationError, setValuationError] = useState(null);
+  const [showValuationDetails, setShowValuationDetails] = useState(false);
+  const [valuationFetched, setValuationFetched] = useState(false); // Track if valuation already fetched
+  
   // Vehicle details editing state (make, model, variant only)
   const [isVehicleDetailsEditing, setIsVehicleDetailsEditing] = useState(false);
   const [editableVehicleData, setEditableVehicleData] = useState({
@@ -120,6 +126,87 @@ const CarAdvertEditPage = () => {
   // Drag-and-drop reorder state for photos
   const dragIndex = useRef(null);
   const dragOverIndex = useRef(null);
+
+  // Fetch fresh valuation from API
+  const handleGetValuation = async () => {
+    if (!vehicleData?.registrationNumber || !vehicleData?.mileage) {
+      setValuationError('Registration number and mileage are required for valuation');
+      return;
+    }
+
+    setIsLoadingValuation(true);
+    setValuationError(null);
+
+    try {
+      // Call the fresh valuation API endpoint
+      const response = await api.post('/vehicle-valuation/fresh', {
+        vrm: vehicleData.registrationNumber,
+        mileage: parseInt(vehicleData.mileage)
+      });
+
+      if (response.data?.success && response.data?.data) {
+        const valuationData = response.data.data;
+        
+        // Extract valuation values
+        const privatePrice = valuationData.estimatedValue?.private || 0;
+        const dealerPrice = valuationData.estimatedValue?.retail || 0;
+        const tradePrice = valuationData.estimatedValue?.trade || 0;
+
+        // Update vehicle data with valuation
+        const updatedVehicleData = {
+          ...vehicleData,
+          estimatedValue: privatePrice,
+          allValuations: {
+            private: privatePrice,
+            retail: dealerPrice,
+            trade: tradePrice
+          },
+          valuation: {
+            privatePrice,
+            dealerPrice,
+            partExchangePrice: tradePrice,
+            confidence: valuationData.confidence || 'medium',
+            valuationDate: new Date().toISOString()
+          },
+          valuationConfidence: valuationData.confidence || 'medium'
+        };
+
+        setVehicleData(updatedVehicleData);
+
+        // Update price with private valuation
+        setAdvertData(prev => ({
+          ...prev,
+          price: privatePrice
+        }));
+
+        // Save valuation to database immediately
+        try {
+          await api.patch(`/vehicles/${advertId}`, {
+            estimatedValue: privatePrice,
+            valuation: {
+              privatePrice,
+              dealerPrice,
+              partExchangePrice: tradePrice,
+              confidence: valuationData.confidence || 'medium',
+              valuationDate: new Date().toISOString()
+            }
+          });
+          
+          // Show success message
+          setShowValuationDetails(true);
+        } catch (saveError) {
+          console.error('❌ Failed to save valuation to database:', saveError);
+          setValuationError('Valuation fetched but failed to save. Please try again.');
+        }
+      }
+    } catch (error) {
+      console.error('❌ Valuation API call failed:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch valuation';
+      setValuationError(errorMessage);
+    } finally {
+      setIsLoadingValuation(false);
+    }
+  };
 
   // Logo upload handler
   const handleLogoUpload = async (e) => {
@@ -191,6 +278,104 @@ const CarAdvertEditPage = () => {
     
     return () => clearTimeout(timeout);
   }, [advertData.businessName, advertData.businessWebsite]);
+
+  // Auto-fetch valuation when page loads (if not already available)
+  // CRITICAL: This runs ONLY ONCE per page load
+  useEffect(() => {
+    const fetchValuationAutomatically = async () => {
+      // STRICT CHECKS to prevent duplicate API calls
+      const hasValuation = vehicleData?.allValuations?.private || vehicleData?.valuation?.privatePrice;
+      
+      // ONLY fetch if ALL conditions are met:
+      if (vehicleData && 
+          vehicleData.registrationNumber && 
+          vehicleData.mileage && 
+          !hasValuation &&              // No valuation in DB
+          !isLoadingValuation &&        // Not currently loading
+          !isLoading &&                 // Page fully loaded
+          !valuationFetched) {          // Never fetched before in this session
+        
+        console.log('🔄 Auto-fetching valuation (ONE TIME ONLY) for:', vehicleData.registrationNumber);
+        
+        // Mark as fetched IMMEDIATELY to prevent duplicate calls
+        setValuationFetched(true);
+        setIsLoadingValuation(true);
+        setValuationError(null);
+
+        try {
+          const response = await api.post('/vehicle-valuation/fresh', {
+            vrm: vehicleData.registrationNumber,
+            mileage: parseInt(vehicleData.mileage)
+          });
+
+          if (response.data?.success && response.data?.data) {
+            const valuationData = response.data.data;
+            
+            const privatePrice = valuationData.estimatedValue?.private || 0;
+            const dealerPrice = valuationData.estimatedValue?.retail || 0;
+            const tradePrice = valuationData.estimatedValue?.trade || 0;
+
+            const updatedVehicleData = {
+              ...vehicleData,
+              estimatedValue: privatePrice,
+              allValuations: {
+                private: privatePrice,
+                retail: dealerPrice,
+                trade: tradePrice
+              },
+              valuation: {
+                privatePrice,
+                dealerPrice,
+                partExchangePrice: tradePrice,
+                confidence: valuationData.confidence || 'medium',
+                valuationDate: new Date().toISOString()
+              },
+              valuationConfidence: valuationData.confidence || 'medium'
+            };
+
+            setVehicleData(updatedVehicleData);
+
+            // Update price with private valuation
+            setAdvertData(prev => ({
+              ...prev,
+              price: privatePrice
+            }));
+
+            // Save to database
+            try {
+              await api.patch(`/vehicles/${advertId}`, {
+                estimatedValue: privatePrice,
+                valuation: {
+                  privatePrice,
+                  dealerPrice,
+                  partExchangePrice: tradePrice,
+                  confidence: valuationData.confidence || 'medium',
+                  valuationDate: new Date().toISOString()
+                }
+              });
+              
+              console.log('✅ Valuation fetched and saved (ONE TIME - will not fetch again)');
+              setShowValuationDetails(true);
+            } catch (saveError) {
+              console.error('❌ Failed to save valuation:', saveError);
+            }
+          }
+        } catch (error) {
+          console.error('❌ Auto-fetch valuation failed:', error);
+          // Don't show error to user for auto-fetch
+        } finally {
+          setIsLoadingValuation(false);
+        }
+      } else if (hasValuation) {
+        // Valuation already exists in DB - NO API CALL
+        console.log('✅ Valuation already exists in database - skipping API call');
+        setValuationFetched(true); // Mark as fetched to prevent future attempts
+        setShowValuationDetails(true);
+      }
+    };
+
+    fetchValuationAutomatically();
+  }, [vehicleData?.registrationNumber, vehicleData?.mileage, isLoading, advertId, valuationFetched]); // Added valuationFetched to dependencies
 
   // Show popup when page loads
   useEffect(() => {
@@ -319,8 +504,6 @@ const CarAdvertEditPage = () => {
           // Store ownership status for conditional rendering
           setIsCarOwner(isOwner || isAdmin);
           
-          console.log('🔐 [Ownership Check] Vehicle User:', vehicleUserId, 'Current User:', currentUserId, 'Is Owner:', isOwner);
-          
           // Authorization check for trade dealers - only block if car belongs to a DIFFERENT dealer
           const vehicleDealerId = vehicleData.dealerId?._id?.toString() || vehicleData.dealerId?.toString();
           const currentDealerId = dealer?._id?.toString() || dealer?.id?.toString();
@@ -336,10 +519,11 @@ const CarAdvertEditPage = () => {
           
           
           // Populate form fields with existing data
-          // Use actual saved price first, fall back to valuation only if no price set
-          const preferredPrice = enhancedVehicleData.price || 
-                                enhancedVehicleData.valuation?.privatePrice || 
-                                enhancedVehicleData.allValuations?.private || 0;
+          // PRIORITY: Use valuation privatePrice first, then saved price as fallback
+          const preferredPrice = enhancedVehicleData.valuation?.privatePrice || 
+                                enhancedVehicleData.allValuations?.private || 
+                                enhancedVehicleData.price || 
+                                enhancedVehicleData.estimatedValue || 0;
           
           
           // Ensure price is a valid number
@@ -354,6 +538,7 @@ const CarAdvertEditPage = () => {
             contactEmail: vehicleData.sellerContact?.email || '',
             location: vehicleData.postcode || '',
             features: vehicleData.features || [],
+            serviceHistory: vehicleData.serviceHistory || 'Contact seller',
             runningCosts: {
               fuelEconomy: {
                 urban: String(vehicleData.runningCosts?.fuelEconomy?.urban || vehicleData.urbanMpg || ''),
@@ -390,11 +575,6 @@ const CarAdvertEditPage = () => {
           // 2. Critical data is genuinely missing (not just pending payment takeover)
           const isNewDraft = false; // API calls sirf paymentController mein hongi payment ke baad
           
-          if (isPendingPaymentCar) {
-            console.log('ℹ️ Pending payment car detected - using existing database data (no API calls)');
-            console.log('   This car was already checked by previous user - reusing data to save costs');
-          }
-          
           // Check what data is missing
           const needsValuation = !vehicleData.valuation?.privatePrice && !vehicleData.allValuations?.private && !vehicleData.price;
           const needsRunningCosts = !vehicleData.runningCosts?.annualTax;
@@ -403,13 +583,10 @@ const CarAdvertEditPage = () => {
           
           // 🚨 ONLY fetch valuation for DRAFT cars (brand new)
           if (isNewDraft && !isPendingPaymentCar && needsValuation && vehicleData.registrationNumber) {
-            console.log('🔍 New draft car - fetching valuation...');
             try {
               const valuationResponse = await lookupVehicle(vehicleData.registrationNumber, vehicleData.mileage);
               
               if (valuationResponse.valuation) {
-                console.log('✅ Valuation data fetched:', valuationResponse.valuation);
-                
                 // Update frontend state
                 setVehicleData(prev => ({
                   ...prev,
@@ -424,7 +601,6 @@ const CarAdvertEditPage = () => {
                     valuation: valuationResponse.valuation,
                     estimatedValue: valuationResponse.valuation.privatePrice
                   });
-                  console.log('✅ Valuation data saved to database');
                 } catch (saveError) {
                   console.error('❌ Failed to save valuation data:', saveError.message);
                 }
@@ -442,7 +618,6 @@ const CarAdvertEditPage = () => {
           const isDealerFeedCar = vehicleData.isDealerListing && vehicleData.dataSource === 'feed';
           
           if (!hasMOTInDB && !isDealerFeedCar && vehicleData.registrationNumber) {
-            console.log('🔍 MOT missing from DB - fetching once (£0.02)...');
             try {
               const motResponse = await api.post('/vehicles/mot-lookup', {
                 registrationNumber: vehicleData.registrationNumber,
@@ -457,8 +632,6 @@ const CarAdvertEditPage = () => {
                   motExpiry: motDueDate,
                   motHistory: fetchedMotHistory || []
                 };
-                
-                console.log('✅ MOT fetched & saving to DB (will not call again):', motDueDate);
                 
                 setVehicleData(prev => ({
                   ...prev,
@@ -664,7 +837,6 @@ const CarAdvertEditPage = () => {
             } else if (hasMOTDataInDB) {
             } else {
               // MOT already handled by mot-lookup above — skip duplicate call
-              console.log('ℹ️ MOT fallback skipped — already handled by mot-lookup');
             }
           } catch (enhancedError) {
             console.warn('⚠️ Failed to fetch enhanced data:', enhancedError.message);
@@ -1285,7 +1457,6 @@ useEffect(() => {
           await api.patch(`/vehicles/${advertId}`, {
             images: allPhotos.map(p => (typeof p === 'string' ? p : p.url))
           });
-          console.log('✅ Photos auto-saved to database');
         } catch (saveError) {
           console.error('❌ Failed to auto-save photos to database:', saveError);
           // Silently fail - no popup message
@@ -1438,8 +1609,6 @@ useEffect(() => {
   };
 
   const handlePublish = () => {
-  console.log('handlePublish called:', { isTradeDealer, dealer, carStatus, advertId });
-
   const hasBusinessInfo = !!(
     (advertData?.businessLogo && advertData.businessLogo.trim()) ||
     (advertData?.businessWebsite && advertData.businessWebsite.trim()) ||
@@ -1820,34 +1989,30 @@ useEffect(() => {
                         {(() => {
                           // Debug logging
                           
-                          // Try multiple sources for the price
+                          // PRIORITY: Always prefer private sale valuation over stored price
                           let displayPrice = null;
                           
-                          // 1. Try advertData.price (should be set from backend)
-                          if (advertData.price && (typeof advertData.price === 'number' ? advertData.price > 0 : parseFloat(advertData.price) > 0)) {
-                            displayPrice = typeof advertData.price === 'number' ? advertData.price : parseFloat(advertData.price);
+                          // 1. Try vehicleData.allValuations.private (most reliable)
+                          if (vehicleData?.allValuations?.private && vehicleData.allValuations.private > 0) {
+                            displayPrice = vehicleData.allValuations.private;
                           }
-                          // 2. Try vehicleData.valuation.estimatedValue.private
-                          else if (vehicleData?.valuation?.estimatedValue?.private && vehicleData.valuation.estimatedValue.private > 0) {
-                            displayPrice = vehicleData.valuation.estimatedValue.private;
-                          }
-                          // 3. Try vehicleData.valuation.estimatedValue.retail
-                          else if (vehicleData?.valuation?.estimatedValue?.retail && vehicleData.valuation.estimatedValue.retail > 0) {
-                            displayPrice = vehicleData.valuation.estimatedValue.retail;
-                          }
-                          // 4. Try vehicleData.valuation.privatePrice
+                          // 2. Try vehicleData.valuation.privatePrice
                           else if (vehicleData?.valuation?.privatePrice && vehicleData.valuation.privatePrice > 0) {
                             displayPrice = vehicleData.valuation.privatePrice;
                           }
-                          // 5. Try vehicleData.allValuations.private
-                          else if (vehicleData?.allValuations?.private && vehicleData.allValuations.private > 0) {
-                            displayPrice = vehicleData.allValuations.private;
+                          // 3. Try vehicleData.valuation.estimatedValue.private
+                          else if (vehicleData?.valuation?.estimatedValue?.private && vehicleData.valuation.estimatedValue.private > 0) {
+                            displayPrice = vehicleData.valuation.estimatedValue.private;
                           }
-                          // 6. Try vehicleData.estimatedValue
+                          // 4. Try advertData.price (user edited or saved price)
+                          else if (advertData.price && (typeof advertData.price === 'number' ? advertData.price > 0 : parseFloat(advertData.price) > 0)) {
+                            displayPrice = typeof advertData.price === 'number' ? advertData.price : parseFloat(advertData.price);
+                          }
+                          // 5. Try vehicleData.estimatedValue
                           else if (vehicleData?.estimatedValue && vehicleData.estimatedValue > 0) {
                             displayPrice = vehicleData.estimatedValue;
                           }
-                          // 7. Try vehicleData.price (database price)
+                          // 6. Try vehicleData.price (database price)
                           else if (vehicleData?.price && vehicleData.price > 0) {
                             displayPrice = vehicleData.price;
                           }
@@ -1900,28 +2065,74 @@ useEffect(() => {
               {errors.price && (
                 <p className="error-message">{errors.price}</p>
               )}
-              <p className="price-note">
+              
+              {/* Valuation Section - Auto-loads, no button needed */}
+              <div className="valuation-section" style={{ marginTop: '20px', padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#333' }}>
+                    💰 Vehicle Valuation
+                  </h4>
+                  {isLoadingValuation && (
+                    <span style={{ fontSize: '14px', color: '#666' }}>
+                      ⏳ Fetching valuation...
+                    </span>
+                  )}
+                </div>
+                
+                {valuationError && (
+                  <div style={{ padding: '12px', backgroundColor: '#fff3cd', border: '1px solid #ffc107', borderRadius: '6px', marginBottom: '12px' }}>
+                    <p style={{ margin: 0, color: '#856404', fontSize: '14px' }}>
+                      ⚠️ {valuationError}
+                    </p>
+                  </div>
+                )}
+                
                 {vehicleData?.estimatedValue && vehicleData.estimatedValue > 0 ? (
-                  <>
-                    Our current valuation for your vehicle is £{(vehicleData.allValuations?.private || vehicleData.valuation?.privatePrice || vehicleData.estimatedValue).toLocaleString()}
-                    {vehicleData.allValuations && (
-                      <span className="valuation-breakdown" style={{ display: 'block', fontSize: '0.9em', marginTop: '8px', color: '#666' }}>
-                        💡 Valuation range: 
-                        {vehicleData.allValuations.private && ` Private £${vehicleData.allValuations.private.toLocaleString()}`}
-                        {vehicleData.allValuations.trade && ` | Trade £${vehicleData.allValuations.trade.toLocaleString()}`}
-                        {vehicleData.allValuations.retail && ` | Retail £${vehicleData.allValuations.retail.toLocaleString()}`}
-                      </span>
+                  <div>
+                    <p style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#666' }}>
+                      Our current valuation for your vehicle is <strong style={{ color: '#1a4ba0', fontSize: '16px' }}>£{(vehicleData.allValuations?.private || vehicleData.valuation?.privatePrice || vehicleData.estimatedValue).toLocaleString()}</strong>
+                    </p>
+                    {vehicleData.allValuations && showValuationDetails && (
+                      <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '6px', border: '1px solid #ddd', marginTop: '8px' }}>
+                        <p style={{ margin: '0 0 10px 0', fontSize: '13px', fontWeight: '600', color: '#333' }}>💡 Valuation Breakdown:</p>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', fontSize: '13px' }}>
+                          {vehicleData.allValuations.private && (
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontWeight: '600', fontSize: '15px', color: '#333' }}>£{vehicleData.allValuations.private.toLocaleString()}</div>
+                              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Private Sale</div>
+                            </div>
+                          )}
+                          {vehicleData.allValuations.trade && (
+                            <div style={{ textAlign: 'center', borderLeft: '1px solid #e0e0e0', borderRight: '1px solid #e0e0e0' }}>
+                              <div style={{ fontWeight: '600', fontSize: '15px', color: '#333' }}>£{vehicleData.allValuations.trade.toLocaleString()}</div>
+                              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Part Exchange</div>
+                            </div>
+                          )}
+                          {vehicleData.allValuations.retail && (
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontWeight: '600', fontSize: '15px', color: '#333' }}>£{vehicleData.allValuations.retail.toLocaleString()}</div>
+                              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Dealer Retail</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     )}
                     {vehicleData.valuationConfidence === 'low' && (
-                      <span style={{ display: 'block', fontSize: '0.85em', marginTop: '4px', color: '#ff9800' }}>
+                      <p style={{ margin: '8px 0 0 0', fontSize: '13px', color: '#ff9800' }}>
                         ⚠️ Limited data available - please verify with similar vehicles
-                      </span>
+                      </p>
                     )}
-                  </>
+                  </div>
+                ) : isLoadingValuation ? (
+                  <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
+                    ⏳ Loading valuation data...
+                  </p>
                 ) : (
-                  '⚠️ Valuation not available for this vehicle. Please research similar vehicles to set a fair price.'
+                  <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
+                    ⚠️ Valuation not available for this vehicle.
+                  </p>
                 )}
-              </p>
+              </div>
             </div>
           </section>
 

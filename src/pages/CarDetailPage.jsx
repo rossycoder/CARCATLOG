@@ -205,9 +205,6 @@ const CarDetailPage = () => {
       }
       
       const data = await response.json();
-      console.log('🔍 [CarDetailPage] API Response:', data);
-      console.log('🖼️ [CarDetailPage] Images received:', data.data?.images);
-      console.log('🖼️ [CarDetailPage] Images count:', data.data?.images?.length);
       setCar(data.data);
     } catch (err) {
       console.error('Error fetching car details:', err);

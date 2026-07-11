@@ -784,36 +784,16 @@ const CarFinderFormPage = () => {
                           // Trade dealer - create advert
                           const response = await advertService.createAdvert(vehicleDetails);
                           
-                          console.log('🔍 [Trade Dealer] Backend response:', response);
-                          
                           if (response.success && response.data) {
-                            console.log('   Response data:', {
-                              id: response.data.id,
-                              advertId: response.data.advertId,
-                              status: response.data.status,
-                              _existingCar: response.data._existingCar,
-                              _isOwnedByUser: response.data._isOwnedByUser
-                            });
-                            
-                            // Check if car already exists and is active
-                            if (response.data._existingCar && response.data.status === 'active') {
-                              console.log('   🚗 Existing active car detected');
-                              // Active car exists
-                              if (response.data._isOwnedByUser) {
-                                console.log('   ✅ Same user - redirecting to EDIT page with ID:', response.data.id);
-                                // Same user - go to edit page
-                                navigate(`/selling/advert/edit/${response.data.id}`);
-                              } else {
-                                console.log('   ⚠️ Different user - redirecting to CAR DETAIL page with ID:', response.data.id);
-                                // Different user - go to car detail page (public listing)
-                                navigate(`/cars/${response.data.id}`);
-                              }
-                            } else {
-                              console.log('   📝 New or draft car - redirecting to EDIT page with ID:', response.data.id);
-                              // New car or draft - go to edit page
-                              navigate(`/selling/advert/edit/${response.data.id}`);
-                            }
-                          } else {
+  // Active car — kisi bhi user ki ho, car detail page par bhejo
+  if (response.data._existingCar && response.data.status === 'active') {
+    const carId = response.data.id;
+    navigate(`/cars/${carId}`);
+    return;
+  }
+  // Pending takeover ya apni car — edit page par bhejo
+  navigate(`/selling/advert/edit/${response.data.advertId || response.data.id}`);
+} else {
                             throw new Error('Failed to create advert');
                           }
                         } catch (error) {
@@ -851,34 +831,14 @@ const CarFinderFormPage = () => {
                           // Regular user - create advert
                           const response = await advertService.createAdvert(vehicleDetails);
                           
-                          console.log('🔍 [Regular User] Backend response:', response);
-                          
                           if (response.success && response.data) {
-                            console.log('   Response data:', {
-                              id: response.data.id,
-                              advertId: response.data.advertId,
-                              status: response.data.status,
-                              _existingCar: response.data._existingCar,
-                              _isOwnedByUser: response.data._isOwnedByUser
-                            });
-                            
                             // Check if car already exists and is active
                             if (response.data._existingCar && response.data.status === 'active') {
-                              console.log('   🚗 Existing active car detected');
-                              // Active car exists
-                              if (response.data._isOwnedByUser) {
-                                console.log('   ✅ Same user - redirecting to EDIT page with ID:', response.data.id);
-                                // Same user - go to edit page
-                                navigate(`/selling/advert/edit/${response.data.id}`);
-                              } else {
-                                console.log('   ⚠️ Different user - redirecting to CAR DETAIL page with ID:', response.data.id);
-                                // Different user - go to car detail page (public listing)
-                                navigate(`/cars/${response.data.id}`);
-                              }
+                              // Active car — go to car detail page using advertId or _id
+                              const carId = response.data.advertId || response.data.id;
+                              navigate(`/cars/${carId}`);
                             } else {
-                              console.log('   📝 New or draft car - redirecting to EDIT page with ID:', response.data.id);
-                              // New car or draft - go to edit page
-                              navigate(`/selling/advert/edit/${response.data.id}`);
+                              navigate(`/selling/advert/edit/${response.data.advertId || response.data.id}`);
                             }
                           } else {
                             throw new Error('Failed to create advert');

@@ -30,7 +30,16 @@ export const createAdvert = async (vehicleData) => {
     
     return response.data;
   } catch (error) {
-    // Silently handle errors in production - don't log to console
+    // If backend returned a real HTTP error (409, 4xx, 5xx), rethrow it
+    // Don't fallback to localStorage for server-side business logic errors
+    if (error.response) {
+      const err = new Error(error.response.data?.message || 'Server error');
+      err.status = error.response.status;
+      err.data = error.response.data;
+      throw err;
+    }
+    
+    // Only use localStorage fallback for network/timeout errors (no response)
     if (process.env.NODE_ENV !== 'production') {
       console.warn('Advert creation failed, using fallback:', error.message);
     }
@@ -170,14 +179,86 @@ export const getAdvert = async (advertId) => {
  */
 export const updateAdvert = async (advertId, advertData, vehicleData, contactDetails = null) => {
   try {
-    const payload = { advertData, vehicleData };
-    if (contactDetails) {
-      payload.contactDetails = contactDetails;
+    // CRITICAL FIX: Use /vehicles endpoint and map fields correctly
+    const payload = {};
+    
+    // Only include fields that have actual values
+    if (advertData.price !== undefined && advertData.price !== null && advertData.price !== '') {
+      payload.price = parseFloat(advertData.price) || 0;
     }
     
-    const response = await api.put(`/adverts/${advertId}`, payload);
+    if (advertData.description) {
+      payload.description = advertData.description;
+    }
+    
+    if (advertData.photos && advertData.photos.length > 0) {
+      payload.images = advertData.photos.map(p => (typeof p === 'string' ? p : p.url));
+    }
+    
+    if (advertData.contactPhone || advertData.contactEmail || contactDetails) {
+      payload.sellerContact = {
+        phoneNumber: advertData.contactPhone || contactDetails?.phoneNumber || '',
+        email: advertData.contactEmail || contactDetails?.email || ''
+      };
+    }
+    
+    if (advertData.location) {
+      payload.postcode = advertData.location;
+    }
+    
+    if (advertData.features && advertData.features.length > 0) {
+      payload.features = advertData.features;
+    }
+    
+    if (advertData.runningCosts) {
+      payload.runningCosts = advertData.runningCosts;
+    }
+    
+    if (advertData.videoUrl) {
+      payload.videoUrl = advertData.videoUrl;
+    }
+    
+    if (advertData.condition) {
+      payload.condition = advertData.condition;
+    }
+    
+    // Business info for trade dealers
+    if (advertData.businessName) {
+      payload.businessName = advertData.businessName;
+    }
+    
+    if (advertData.businessLogo) {
+      payload.businessLogo = advertData.businessLogo;
+    }
+    
+    if (advertData.businessWebsite) {
+      payload.businessWebsite = advertData.businessWebsite;
+    }
+    
+    // Vehicle data updates (if provided)
+    if (vehicleData) {
+      // Only include vehicleData fields that are in the ALLOWED list
+      const allowedVehicleFields = [
+        'motDue', 'motExpiry', 'motStatus', 'motHistory',
+        'valuation', 'estimatedValue', 'allValuations',
+        'model', 'variant', 'engineSize', 'doors', 'seats',
+        'transmission', 'fuelType', 'color',
+        'taxStatus', 'taxDueDate', 'co2Emissions'
+      ];
+      
+      allowedVehicleFields.forEach(field => {
+        if (vehicleData[field] !== undefined) {
+          payload[field] = vehicleData[field];
+        }
+      });
+    }
+    
+    const response = await api.patch(`/vehicles/${advertId}`, payload);
+    
     return response.data;
   } catch (error) {
+    console.error('❌ Failed to update vehicle:', error.response?.data || error.message);
+    
     // Fallback to localStorage
     const localData = localStorage.getItem(`advert_${advertId}`);
     if (localData) {
