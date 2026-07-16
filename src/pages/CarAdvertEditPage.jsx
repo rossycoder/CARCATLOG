@@ -173,11 +173,12 @@ const CarAdvertEditPage = () => {
 
         setVehicleData(updatedVehicleData);
 
-        // Update price with private valuation
-        setAdvertData(prev => ({
-          ...prev,
-          price: privatePrice
-        }));
+        // ❌ REMOVED: Don't auto-update price with valuation
+        // Dealer's price should NOT be overridden automatically
+        // setAdvertData(prev => ({
+        //   ...prev,
+        //   price: privatePrice
+        // }));
 
         // Save valuation to database immediately
         try {
@@ -279,118 +280,34 @@ const CarAdvertEditPage = () => {
     return () => clearTimeout(timeout);
   }, [advertData.businessName, advertData.businessWebsite]);
 
-  // Auto-fetch valuation when page loads (if not already available)
-  // CRITICAL: This runs ONLY ONCE per page load
-  useEffect(() => {
-    const fetchValuationAutomatically = async () => {
-      // STRICT CHECKS to prevent duplicate API calls
-      // ✅ FIXED: Check multiple valuation sources (more robust check)
-      const hasValuation = 
-        vehicleData?.allValuations?.private || 
-        vehicleData?.valuation?.privatePrice || 
-        vehicleData?.estimatedValue || 
-        vehicleData?.valuationData?.privatePrice;
-      
-      // ONLY fetch if ALL conditions are met:
-      if (vehicleData && 
-          vehicleData.registrationNumber && 
-          vehicleData.mileage && 
-          !hasValuation &&              // No valuation in DB
-          !isLoadingValuation &&        // Not currently loading
-          !isLoading &&                 // Page fully loaded
-          !valuationFetched &&          // Never fetched before in this session
-          !vehicleData._valuationChecked) {  // ✅ NEW: Track if we already checked this car
-        
-        console.log('🔄 Auto-fetching valuation (ONE TIME ONLY) for:', vehicleData.registrationNumber);
-        
-        // Mark as fetched IMMEDIATELY to prevent duplicate calls
-        setValuationFetched(true);
-        
-        // Mark this car as checked to prevent re-checking
-        setVehicleData(prev => ({ ...prev, _valuationChecked: true }));
-        
-        setIsLoadingValuation(true);
-        setValuationError(null);
-
-        try {
-          const response = await api.post('/vehicle-valuation/fresh', {
-            vrm: vehicleData.registrationNumber,
-            mileage: parseInt(vehicleData.mileage)
-          });
-
-          if (response.data?.success && response.data?.data) {
-            const valuationData = response.data.data;
-            
-            const privatePrice = valuationData.estimatedValue?.private || 0;
-            const dealerPrice = valuationData.estimatedValue?.retail || 0;
-            const tradePrice = valuationData.estimatedValue?.trade || 0;
-
-            const updatedVehicleData = {
-              ...vehicleData,
-              estimatedValue: privatePrice,
-              allValuations: {
-                private: privatePrice,
-                retail: dealerPrice,
-                trade: tradePrice
-              },
-              valuation: {
-                privatePrice,
-                dealerPrice,
-                partExchangePrice: tradePrice,
-                confidence: valuationData.confidence || 'medium',
-                valuationDate: new Date().toISOString()
-              },
-              valuationConfidence: valuationData.confidence || 'medium'
-            };
-
-            setVehicleData(updatedVehicleData);
-
-            // Update price with private valuation
-            setAdvertData(prev => ({
-              ...prev,
-              price: privatePrice
-            }));
-
-            // Save to database
-            try {
-              await api.patch(`/vehicles/${advertId}`, {
-                estimatedValue: privatePrice,
-                valuation: {
-                  privatePrice,
-                  dealerPrice,
-                  partExchangePrice: tradePrice,
-                  confidence: valuationData.confidence || 'medium',
-                  valuationDate: new Date().toISOString()
-                }
-              });
-              
-              console.log('✅ Valuation fetched and saved (ONE TIME - will not fetch again)');
-              setShowValuationDetails(true);
-            } catch (saveError) {
-              console.error('❌ Failed to save valuation:', saveError);
-            }
-          }
-        } catch (error) {
-          console.error('❌ Auto-fetch valuation failed:', error);
-          // Don't show error to user for auto-fetch
-        } finally {
-          setIsLoadingValuation(false);
-        }
-      } else if (hasValuation) {
-        // Valuation already exists in DB - NO API CALL
-        console.log('✅ Valuation already exists in database - skipping API call');
-        setValuationFetched(true); // Mark as fetched to prevent future attempts
-        setShowValuationDetails(true);
-        
-        // Mark this car as checked to prevent re-checking
-        if (!vehicleData._valuationChecked) {
-          setVehicleData(prev => ({ ...prev, _valuationChecked: true }));
-        }
-      }
-    };
-
-    fetchValuationAutomatically();
-  }, [advertId, isLoading]); // ✅ CRITICAL FIX: Remove vehicleData dependencies to prevent re-runs
+  // ❌ DISABLED: Auto-fetch valuation on edit page
+  // Valuation API should NOT be called when editing existing cars
+  // Only fetch valuation during initial car creation (payment flow)
+  // 
+  // Reason: Dealer has already set their price intentionally
+  // Auto-fetching valuation would show market value that might confuse pricing
+  
+  // useEffect(() => {
+  //   const fetchValuationAutomatically = async () => {
+  //     const hasValuation = 
+  //       vehicleData?.allValuations?.private || 
+  //       vehicleData?.valuation?.privatePrice || 
+  //       vehicleData?.estimatedValue || 
+  //       vehicleData?.valuationData?.privatePrice;
+  //     
+  //     if (vehicleData && 
+  //         vehicleData.registrationNumber && 
+  //         vehicleData.mileage && 
+  //         !hasValuation &&
+  //         !isLoadingValuation &&
+  //         !isLoading &&
+  //         !valuationFetched &&
+  //         !vehicleData._valuationChecked) {
+  //       // ... fetch logic
+  //     }
+  //   };
+  //   fetchValuationAutomatically();
+  // }, [advertId, isLoading]);
 
   // Show popup when page loads
   useEffect(() => {
