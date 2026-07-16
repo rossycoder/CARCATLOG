@@ -776,13 +776,14 @@ const CarAdvertEditPage = () => {
         } else {
         }
         
-        // Handle price carefully - prefer PRIVATE sale price
-        // Priority: privatePrice > allValuations.private > advertData.price > estimatedValue
-        let priceValue = response.data.vehicleData?.valuation?.privatePrice ||
+        // Handle price carefully - prefer DEALER'S SET PRICE over valuation
+        // ✅ CRITICAL FIX: Dealer's price has HIGHEST priority
+        // Priority: advertData.price (dealer set) > valuation (reference only)
+        let priceValue = response.data.advertData?.price ||  // ← DEALER PRICE FIRST
+                        response.data.vehicleData?.valuation?.privatePrice ||
                         response.data.vehicleData?.allValuations?.private ||
                         response.data.vehicleData?.estimatedValue?.private ||
-                        response.data.vehicleData?.estimatedValue?.retail ||
-                        response.data.advertData?.price;
+                        response.data.vehicleData?.estimatedValue?.retail;
         
         if (priceValue === null || priceValue === undefined) {
           priceValue = response.data.vehicleData?.estimatedValue;
