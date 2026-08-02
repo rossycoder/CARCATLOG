@@ -888,39 +888,41 @@ const CarDetailPage = () => {
                   }
                   
                   const priceRatio = car.price / marketValue;
-                  let priceLevel = null;
-                  let needleAngle = 0;
+                  let priceLevel = '';
+                  let needleAngle = 270;
                   let labelColor = '';
+                  let underlineColor = '';
                   
-                  if (priceRatio <= 0.75) {
+                  if (priceRatio <= 0.78) {
                     priceLevel = 'Great price';
-                    needleAngle = 54;
-                    labelColor = '#A5D6A7';
-                  } else if (priceRatio <= 0.85) {
+                    needleAngle = 210;
+                    labelColor = '#1565C0';
+                    underlineColor = '#4A90E2';
+                  } else if (priceRatio <= 0.92) {
                     priceLevel = 'Good price';
-                    needleAngle = 80;
-                    labelColor = '#388E3C';
-                  } else if (priceRatio <= 0.95) {
-                    priceLevel = 'Good price';
-                    needleAngle = 100;
-                    labelColor = '#388E3C';
+                    needleAngle = 240;
+                    labelColor = '#0D47A1';
+                    underlineColor = '#1657C4';
                   } else if (priceRatio <= 1.05) {
                     priceLevel = 'Fair price';
-                    needleAngle = 126;
-                    labelColor = '#FFC107';
-                  } else if (priceRatio <= 1.15) {
+                    needleAngle = 300;
+                    labelColor = '#E65100';
+                    underlineColor = '#F5A623';
+                  } else if (priceRatio <= 1.20) {
                     priceLevel = 'Higher price';
-                    needleAngle = 162;
-                    labelColor = '#FF7043';
+                    needleAngle = 330;
+                    labelColor = '#E65100';
+                    underlineColor = '#FF7043';
                   } else {
                     priceLevel = 'Higher price';
-                    needleAngle = 170;
-                    labelColor = '#FF5722';
+                    needleAngle = 350;
+                    labelColor = '#BF360C';
+                    underlineColor = '#FF5722';
                   }
                   
-                  const svgAngle = 180 - needleAngle;
-                  const needleX = 100 + 70 * Math.cos(svgAngle * Math.PI / 180);
-                  const needleY = 100 - 70 * Math.sin(svgAngle * Math.PI / 180);
+                  const rad = needleAngle * Math.PI / 180;
+                  const nx = 120 + 60 * Math.cos(rad);
+                  const ny = 120 + 60 * Math.sin(rad);
                   
                   return (
                     <div 
@@ -930,19 +932,36 @@ const CarDetailPage = () => {
                       title="Tap to see full price analysis"
                     >
                       <div className="price-gauge">
-                        <svg viewBox="0 0 200 120" className="gauge-svg">
-                          <path d="M 20 100 A 80 80 0 0 1 38 48" fill="none" stroke="#BDBDBD" strokeWidth="16" strokeLinecap="round"/>
-                          <path d="M 38 48 A 80 80 0 0 1 70 26" fill="none" stroke="#A5D6A7" strokeWidth="16" strokeLinecap="round"/>
-                          <path d="M 70 26 A 80 80 0 0 1 130 26" fill="none" stroke="#388E3C" strokeWidth="16" strokeLinecap="round"/>
-                          <path d="M 130 26 A 80 80 0 0 1 162 48" fill="none" stroke="#FFC107" strokeWidth="16" strokeLinecap="round"/>
-                          <path d="M 162 48 A 80 80 0 0 1 180 100" fill="none" stroke="#FF7043" strokeWidth="16" strokeLinecap="round"/>
-                          <line x1="100" y1="100" x2={needleX} y2={needleY} stroke="#1a1a1a" strokeWidth="5" strokeLinecap="round"/>
-                          <circle cx="100" cy="100" r="8" fill="#1a1a1a"/>
-                          <circle cx="100" cy="100" r="4" fill="#fff"/>
+                        <svg viewBox="0 0 240 140" className="gauge-svg">
+                          {/* Outer blue arc - with gap from inner segments */}
+                          <path d="M 28 120 A 92 92 0 0 1 212 120" fill="none" stroke="#2196F3" strokeWidth="6" strokeLinecap="round" opacity="1"/>
+                          
+                          {/* Inner colored segments with MINIMAL GAPS - flat edges */}
+                          {/* Gray segment - left */}
+                          <path d="M 50 120 A 70 70 0 0 1 71 66" fill="none" stroke="#CFD8DC" strokeWidth="16" strokeLinecap="butt"/>
+                          
+                          {/* Light blue segment - left-center (tiny gap) */}
+                          <path d="M 73 64 A 70 70 0 0 1 108 45" fill="none" stroke="#90CAF9" strokeWidth="16" strokeLinecap="butt"/>
+                          
+                          {/* Dark blue segment - center (tiny gap) */}
+                          <path d="M 110 44 A 70 70 0 0 1 130 44" fill="none" stroke="#1565C0" strokeWidth="16" strokeLinecap="butt"/>
+                          
+                          {/* Yellow/Orange segment - center-right (tiny gap) */}
+                          <path d="M 132 45 A 70 70 0 0 1 167 64" fill="none" stroke="#FFB300" strokeWidth="16" strokeLinecap="butt"/>
+                          
+                          {/* Orange segment - right (tiny gap) */}
+                          <path d="M 169 66 A 70 70 0 0 1 190 120" fill="none" stroke="#FF6F00" strokeWidth="16" strokeLinecap="butt"/>
+                          
+                          {/* Needle */}
+                          <line x1="120" y1="120" x2={nx} y2={ny} stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round"/>
+                          
+                          {/* Hollow center pivot */}
+                          <circle cx="120" cy="120" r="8" fill="#fff" stroke="#1a1a1a" strokeWidth="3"/>
                         </svg>
                       </div>
-                      <div className="price-label" style={{ backgroundColor: labelColor }}>
-                        {priceLevel}
+                      <div className="price-label-wrap">
+                        <div className="price-label-text" style={{ color: labelColor }}>{priceLevel}</div>
+                        <div className="price-label-underline" style={{ background: underlineColor }}></div>
                       </div>
                     </div>
                   );

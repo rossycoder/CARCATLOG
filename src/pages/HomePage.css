@@ -904,6 +904,20 @@
 
 .essentials-grid-horizontal { display: grid; grid-template-columns: repeat(4, 1fr); }
 
+/* Tablet - 2 columns for buying essentials */
+@media (max-width: 1024px) {
+  .essentials-grid-horizontal {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile - 2 columns for buying essentials */
+@media (max-width: 768px) {
+  .essentials-grid-horizontal {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .essential-card-horizontal {
   display: flex;
   flex-direction: row;
@@ -1123,7 +1137,6 @@
 @media (max-width: 1024px) {
   .hero-section-new { padding-top: 135px; }
   .category-grid { grid-template-columns: repeat(3, 1fr); }
-  .essentials-grid-horizontal { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* =========================================================
@@ -1395,7 +1408,6 @@
     max-width: 100%;
   }
   
-  .essentials-grid-horizontal { grid-template-columns: repeat(2, 1fr); }
   .vehicles-carousel { 
     display: flex;
     overflow-x: auto;
@@ -1480,7 +1492,6 @@
   }
 
   .category-grid { grid-template-columns: repeat(2, 1fr); }
-  .essentials-grid-horizontal { grid-template-columns: repeat(2, 1fr); }
   .vehicles-carousel { 
     display: flex;
     overflow-x: auto;

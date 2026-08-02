@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaFacebookF, FaYoutube, FaInstagram, FaTiktok } from 'react-icons/fa';
 import SEOHelmet from '../components/SEO/SEOHelmet';
@@ -12,6 +12,7 @@ import './HomePage.css';
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const carouselRef = useRef(null);
   const [postcode, setPostcode] = useState('');
   const [make, setMake] = useState('Any');
   const [model, setModel] = useState('Any');
@@ -44,6 +45,30 @@ const HomePage = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Auto-scroll effect for mobile carousel
+  useEffect(() => {
+    if (!isMobile || !carouselRef.current || latestVehicles.length === 0) return;
+
+    const carousel = carouselRef.current;
+    const scrollAmount = carousel.offsetWidth * 0.85; // 85% width per card
+    const maxIndex = showAllVehicles ? EXPANDED_VEHICLE_COUNT : DEFAULT_VEHICLE_COUNT;
+    let currentIndex = 0;
+
+    const autoScroll = setInterval(() => {
+      currentIndex++;
+      if (currentIndex >= maxIndex || currentIndex >= latestVehicles.length) {
+        currentIndex = 0; // Loop back to start
+      }
+      
+      carousel.scrollTo({
+        left: scrollAmount * currentIndex,
+        behavior: 'smooth'
+      });
+    }, 3000); // Scroll every 3 seconds
+
+    return () => clearInterval(autoScroll);
+  }, [isMobile, latestVehicles.length, showAllVehicles, DEFAULT_VEHICLE_COUNT, EXPANDED_VEHICLE_COUNT]);
 
   // Fetch count — re-runs when make or model changes
   const fetchCarCount = useCallback(async (selectedMake, selectedModel, selectedPostcode = '', selectedMileage = 'Any') => {
@@ -451,7 +476,7 @@ const HomePage = () => {
                   {showAllCategories && (
                     <>
                       <div className="category-card" onClick={() => navigate('/search-results?bodyType=Hatchback')}>
-                        <div className="category-image"><img src="/car/saloon.jfif" alt="Hatchback" /></div>
+                        <div className="category-image"><img src="/car/hatchback.jpeg" alt="Hatchback" /></div>
                         <div className="category-info">
                           <h3>Hatchback</h3>
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
@@ -591,7 +616,7 @@ const HomePage = () => {
                 {loadingVehicles ? (
                   <div className="loading-message">Loading latest vehicles...</div>
                 ) : (
-                  <div className={`vehicles-carousel ${showAllVehicles ? 'expanded' : ''}`}>
+                  <div ref={carouselRef} className={`vehicles-carousel ${showAllVehicles ? 'expanded' : ''}`}>
                     {visibleVehicles.length > 0 ? (
                       visibleVehicles.map((vehicle) => {
                         return <CarCard key={vehicle._id} car={vehicle} />;

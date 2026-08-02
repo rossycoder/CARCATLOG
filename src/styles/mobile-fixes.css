@@ -242,6 +242,14 @@
   /* Show mobile header indicator, hide sidebar indicator on mobile */
   .mobile-header-indicator {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .car-header-right {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-end !important;
   }
   
   /* Make price indicator more compact on mobile */
