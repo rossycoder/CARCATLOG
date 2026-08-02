@@ -90,7 +90,7 @@
 }
 
 .mot-test-item.passed {
-  border-left: 4px solid #28a745;
+  border-left: 4px solid #0066cc;
 }
 
 .mot-test-item.failed {

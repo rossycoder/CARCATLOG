@@ -29,8 +29,25 @@
 }
 
 .stat-icon {
-  font-size: 1.5rem;
-  flex-shrink: 0;
+  font-size: 1.5rem !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  background-image: none !important;
+  color: white !important;
+  border-radius: 0 !important;
+}
+
+.stat-icon img {
+  width: 80px !important;
+  height: 80px !important;
+  object-fit: contain !important;
+  object-position: center center !important;
 }
 
 .stat-details {

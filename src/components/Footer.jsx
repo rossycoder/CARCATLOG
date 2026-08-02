@@ -23,11 +23,27 @@ const Footer = () => {
       <footer className="footer">
       <div className="container">
         <div className="footer-content">
-          {/* Column 1 - Logo & Navigation Links */}
-          <div className="footer-column footer-column-1">
+          {/* Left Column - Logo & Links */}
+          <div className="footer-column footer-left">
             <div className="footer-logo">
-              <img src="/images/brands/logo.jpeg" alt="CarMarket Logo" className="logo-image" />
+              <img src="/images/brands/logo.jpeg" alt="CarCatALog Logo" className="logo-image" />
             </div>
+            
+            <div className="footer-social-icons-small">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <FaFacebookF />
+              </a>
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                <FaYoutube />
+              </a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <FaInstagram />
+              </a>
+              <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                <FaTiktok />
+              </a>
+            </div>
+
             <nav className="footer-nav">
               <Link to="/security">Security advice</Link>
               <Link to="/contact">Contact us</Link>
@@ -37,30 +53,61 @@ const Footer = () => {
               <Link to="/privacy-notice">Privacy notice</Link>
               <Link to="/accessibility-statement">Accessibility statement</Link>
               <Link to="/cookies-policy">Cookies policy</Link>
-              <Link to="/account-deletion">Account deletion policy</Link>
             </nav>
-            <Link to="/cookies-policy" className="manage-cookies">Manage cookies</Link>
           </div>
 
-          {/* Column 3 - Engagement & Legal */}
-          <div className="footer-column footer-column-3">
+          {/* Middle Column - Social Media Section */}
+          <div className="footer-column footer-center">
+            <h3>Follow us on social media</h3>
+            <p className="social-subtitle">All the latest news for you</p>
+            
+            <div className="social-icons-large">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <div className="social-circle">
+                  <FaFacebookF />
+                </div>
+                <span>Facebook</span>
+              </a>
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                <div className="social-circle">
+                  <FaYoutube />
+                </div>
+                <span>YouTube</span>
+              </a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <div className="social-circle">
+                  <FaInstagram />
+                </div>
+                <span>Instagram</span>
+              </a>
+              <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                <div className="social-circle">
+                  <FaTiktok />
+                </div>
+                <span>TikTok</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Right Column - Feedback & Legal */}
+          <div className="footer-column footer-right">
             <div className="feedback-section">
-              <h3>Help us improve our website</h3>
+              <h4>Help us improve our website</h4>
               <button className="feedback-btn">Send feedback</button>
             </div>
 
-            <div className="social-icons">
+            <div className="footer-social-icons-dark">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                <FaFacebookF className="social-icon" />
+                <FaFacebookF />
               </a>
               <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
-                <FaYoutube className="social-icon" />
+                <FaYoutube />
               </a>
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                <FaInstagram className="social-icon" />
+                <FaInstagram />
               </a>
               <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
-                <FaTiktok className="social-icon" />
+                <FaTiktok />
               </a>
             </div>
 
@@ -88,13 +135,10 @@ const Footer = () => {
 
             <div className="legal-text">
               <p className="copyright">Copyright © CCAL Group Ltd {new Date().getFullYear()}.</p>
-              
               <div className="registered-office">
                 <p><strong>Registered office</strong></p>
-                <p>Saxon House</p>
-                <p>27 Duke Street</p>
-                <p>Chelmsford</p>
-                <p>CM1 1HT</p>
+                <p>Saxon House, 27 Duke Street</p>
+                <p>Chelmsford, CM1 1HT</p>
                 <p>Phone: 0330 1337 818</p>
               </div>
             </div>

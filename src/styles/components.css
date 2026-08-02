@@ -12,6 +12,7 @@
   border-color: var(--color-primary-dark);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
+  outline: none;
 }
 
 .btn-secondary {
@@ -296,3 +297,34 @@
 .shadow { box-shadow: var(--shadow-base); }
 .shadow-lg { box-shadow: var(--shadow-lg); }
 .shadow-xl { box-shadow: var(--shadow-xl); }
+
+
+/* Remove green outline/ring from all buttons and links */
+button:hover,
+button:focus,
+button:active,
+a:hover,
+a:focus,
+a:active,
+.btn:hover,
+.btn:focus,
+.btn:active,
+[role="button"]:hover,
+[role="button"]:focus,
+[role="button"]:active {
+  outline: none !important;
+  outline-color: transparent !important;
+  outline-style: none !important;
+  outline-width: 0 !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Remove any webkit/browser default focus ring */
+*:focus {
+  outline: none !important;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 2px !important;
+}

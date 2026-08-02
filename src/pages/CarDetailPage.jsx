@@ -33,6 +33,95 @@ const CarDetailPage = () => {
   // Call masking state
   const [callSession, setCallSession] = useState(null); // { proxyNumber, expiresIn }
   const [callLoading, setCallLoading] = useState(false);
+  
+  // Share functionality state
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  
+  // Favorite functionality state
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+
+  const handleShare = () => {
+    setShowShareMenu(!showShareMenu);
+    setShareCopied(false);
+  };
+
+  const toggleFavorite = async (e) => {
+    e.stopPropagation();
+    
+    const token = localStorage.getItem('token') || localStorage.getItem('tradeToken');
+    if (!token) {
+      alert('Please sign in to save favorites');
+      navigate('/signin');
+      return;
+    }
+
+    setFavoriteLoading(true);
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_BASE_URL}/saved-cars/toggle`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ carId: car._id })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setIsFavorite(data.isSaved);
+      } else {
+        alert(data.message || 'Failed to update favorites');
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      alert('Failed to update favorites');
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
+
+  const shareToSocial = (platform) => {
+    const url = window.location.href;
+    const title = `${car.year} ${car.make} ${car.model} - ${formatPrice(car.price)}`;
+    const text = `Check out this ${car.year} ${car.make} ${car.model} for sale at ${formatPrice(car.price)}`;
+    
+    let shareUrl = '';
+    
+    switch (platform) {
+      case 'whatsapp':
+        shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+        break;
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+        break;
+      case 'email':
+        shareUrl = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(text + '\n\n' + url)}`;
+        break;
+      case 'copy':
+        navigator.clipboard.writeText(url).then(() => {
+          setShareCopied(true);
+          setTimeout(() => {
+            setShareCopied(false);
+            setShowShareMenu(false);
+          }, 2000);
+        });
+        return;
+      default:
+        return;
+    }
+    
+    if (shareUrl) {
+      window.open(shareUrl, '_blank', 'width=600,height=400');
+      setShowShareMenu(false);
+    }
+  };
 
   const handleMaskedCall = async () => {
     const token = localStorage.getItem('token') || localStorage.getItem('tradeToken');
@@ -97,6 +186,7 @@ const CarDetailPage = () => {
 
   useEffect(() => {
     fetchCarDetails();
+    checkIfFavorite();
   }, [id]);
 
   // Add window resize listener to detect mobile/desktop
@@ -160,6 +250,20 @@ const CarDetailPage = () => {
     return () => window.removeEventListener('keydown', handleKey);
   }, [lightboxOpen, car]);
 
+  // Close share menu when clicking outside
+  useEffect(() => {
+    if (!showShareMenu) return;
+    
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.share-icon-btn') && !e.target.closest('.share-menu-image')) {
+        setShowShareMenu(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showShareMenu]);
+
   // Smooth scroll to section
   const scrollToSection = (sectionId) => {
     const section = document.getElementById(sectionId);
@@ -211,6 +315,28 @@ const CarDetailPage = () => {
       setError(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const checkIfFavorite = async () => {
+    const token = localStorage.getItem('token') || localStorage.getItem('tradeToken');
+    if (!token) return;
+
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_BASE_URL}/saved-cars`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        const savedCarIds = data.data.map(savedCar => savedCar.carId);
+        setIsFavorite(savedCarIds.includes(id));
+      }
+    } catch (error) {
+      console.error('Error checking favorite status:', error);
     }
   };
 
@@ -421,10 +547,60 @@ const CarDetailPage = () => {
       />
       <div className="car-detail-page">
         <div className="detail-container">
-          {/* Back Button */}
-          <button onClick={handleBackClick} className="back-to-results">
-            ← Back to results
-          </button>
+          {/* Back Button and Action Icons Row */}
+          <div className="page-header-row">
+            <button onClick={handleBackClick} className="back-to-results">
+              ← Back to results
+            </button>
+            
+            {/* Action Icons - Heart and Share */}
+            <div className="page-action-icons">
+              {/* Favorite Icon */}
+              <button 
+                className={`page-icon-btn favorite-icon-btn ${isFavorite ? 'active' : ''}`}
+                onClick={(e) => { e.stopPropagation(); toggleFavorite(e); }}
+                disabled={favoriteLoading}
+                title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              >
+                <svg 
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill={isFavorite ? 'currentColor' : 'none'}
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </button>
+
+              {/* Share Icon */}
+              <button 
+                className="page-icon-btn share-icon-btn"
+                onClick={(e) => { e.stopPropagation(); handleShare(); }}
+                title="Share this car"
+              >
+                <svg 
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
 
         {/* Sticky Navigation Tabs */}
         <div className="sticky-nav-tabs">
@@ -537,6 +713,44 @@ const CarDetailPage = () => {
             </div>
           )}
         </div>
+
+        {/* Share Dropdown Menu - Positioned below image gallery */}
+        {showShareMenu && (
+          <div className="share-menu-image">
+            <button onClick={() => shareToSocial('whatsapp')} className="share-option">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+              </svg>
+              WhatsApp
+            </button>
+            <button onClick={() => shareToSocial('facebook')} className="share-option">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+              Facebook
+            </button>
+            <button onClick={() => shareToSocial('twitter')} className="share-option">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+              </svg>
+              Twitter
+            </button>
+            <button onClick={() => shareToSocial('email')} className="share-option">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              Email
+            </button>
+            <button onClick={() => shareToSocial('copy')} className="share-option">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              {shareCopied ? 'Copied!' : 'Copy Link'}
+            </button>
+          </div>
+        )}
 
         {/* Lightbox Modal */}
         {lightboxOpen && (
@@ -761,13 +975,13 @@ const CarDetailPage = () => {
                     <a
                       href={`tel:${car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber}`}
                       className="phone-btn"
-                      style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}
+                      style={{ textDecoration: 'none', display: 'block', background: '#0066cc' }}
                       onClick={() => trackInquiry('phone')}
                     >
                       📞 {car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber}
                     </a>
                   ) : callSession ? (
-                    <a href={`tel:${callSession.proxyNumber}`} className="phone-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
+                    <a href={`tel:${callSession.proxyNumber}`} className="phone-btn" style={{ textDecoration: 'none', display: 'block', background: '#0066cc' }}>
                       📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>{!callSession.isDirectNumber && callSession.expiresIn && `(expires in ${Math.floor(callSession.expiresIn / 60)}m)`}</span>
                     </a>
                   ) : (
@@ -800,7 +1014,9 @@ const CarDetailPage = () => {
               
               <div className="spec-grid">
                 <div className="spec-item">
-                  <span className="spec-icon">📏</span>
+                  <span className="spec-icon">
+                    <img src="/icon/mileage.jpeg" alt="Mileage" style={{ width: '80px', height: '80px' }} />
+                  </span>
                   <div className="spec-details">
                     <span className="spec-label">Mileage</span>
                     <span className="spec-value">{formatMileage(car.mileage)} miles</span>
@@ -808,7 +1024,9 @@ const CarDetailPage = () => {
                 </div>
 
                 <div className="spec-item">
-                  <span className="spec-icon">📅</span>
+                  <span className="spec-icon">
+                    <img src="/icon/registration.jpeg" alt="Registration" style={{ width: '80px', height: '80px' }} />
+                  </span>
                   <div className="spec-details">
                     <span className="spec-label">Registration</span>
                     <span className="spec-value">
@@ -821,7 +1039,9 @@ const CarDetailPage = () => {
                 </div>
 
                 <div className="spec-item">
-                  <span className="spec-icon">⚙️</span>
+                  <span className="spec-icon">
+                    <img src="/icon/fuel-type.jpeg" alt="Fuel type" style={{ width: '80px', height: '80px' }} />
+                  </span>
                   <div className="spec-details">
                     <span className="spec-label">Fuel type</span>
                     <span className="spec-value">{car.fuelType}</span>
@@ -829,7 +1049,9 @@ const CarDetailPage = () => {
                 </div>
 
                 <div className="spec-item">
-                  <span className="spec-icon">🚗</span>
+                  <span className="spec-icon">
+                    <img src="/icon/body-type.jpeg" alt="Body type" style={{ width: '80px', height: '80px' }} />
+                  </span>
                   <div className="spec-details">
                     <span className="spec-label">Body type</span>
                     <span className="spec-value">{car.bodyType ? car.bodyType.charAt(0).toUpperCase() + car.bodyType.slice(1).toLowerCase() : 'Hatchback'}</span>
@@ -838,7 +1060,9 @@ const CarDetailPage = () => {
                 {/* Engine size for NON-ELECTRIC cars, or PLUG-IN HYBRIDS (they have both engine and electric) */}
                 {(!isElectricOrPluginHybrid(car.fuelType) || car.fuelType.toLowerCase().includes('plug-in')) && (
                   <div className="spec-item">
-                    <span className="spec-icon">🔧</span>
+                    <span className="spec-icon">
+                      <img src="/icon/engine-size.jpeg" alt="Engine size" style={{ width: '80px', height: '80px' }} />
+                    </span>
                     <div className="spec-details">
                       <span className="spec-label">Engine size</span>
                       <span className="spec-value">
@@ -862,7 +1086,9 @@ const CarDetailPage = () => {
                 {/* Electric Range for ELECTRIC and PLUG-IN HYBRID cars */}
                 {isElectricOrPluginHybrid(car.fuelType) && (
                   <div className="spec-item">
-                    <span className="spec-icon">🔋</span>
+                    <span className="spec-icon">
+                      <img src="/icon/electric-range.jpeg" alt="Electric Range" style={{ width: '80px', height: '80px' }} />
+                    </span>
                     <div className="spec-details">
                       <span className="spec-label">Electric Range</span>
                       <span className="spec-value">
@@ -875,7 +1101,9 @@ const CarDetailPage = () => {
                 )}
 
                 <div className="spec-item">
-                  <span className="spec-icon">⚙️</span>
+                  <span className="spec-icon">
+                    <img src="/icon/gearbox.jpeg" alt="Gearbox" style={{ width: '80px', height: '80px' }} />
+                  </span>
                   <div className="spec-details">
                     <span className="spec-label">Gearbox</span>
                     <span className="spec-value">
@@ -887,11 +1115,7 @@ const CarDetailPage = () => {
 
                 <div className="spec-item">
                   <span className="spec-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 10v11h18V7H7L3 10z"></path>
-                      <path d="M7 7v13"></path>
-                      <circle cx="16" cy="15" r="1"></circle>
-                    </svg>
+                    <img src="/icon/doors.jpeg" alt="Doors" style={{ width: '80px', height: '80px' }} />
                   </span>
                   <div className="spec-details">
                     <span className="spec-label">Doors</span>
@@ -901,7 +1125,7 @@ const CarDetailPage = () => {
 
                 <div className="spec-item">
                   <span className="spec-icon">
-                    <img src="/images/brands/car-seat-svgrepo-com.svg" alt="Seats" style={{ width: '24px', height: '24px' }} />
+                    <img src="/icon/seats.jpeg" alt="Seats" style={{ width: '80px', height: '80px' }} />
                   </span>
                   <div className="spec-details">
                     <span className="spec-label">Seats</span>
@@ -910,7 +1134,9 @@ const CarDetailPage = () => {
                 </div>
 
                 <div className="spec-item">
-                  <span className="spec-icon">🎨</span>
+                  <span className="spec-icon">
+                    <img src="/icon/body-color.jpeg" alt="Body colour" style={{ width: '80px', height: '80px' }} />
+                  </span>
                   <div className="spec-details">
                     <span className="spec-label">Body colour</span>
                     <span className="spec-value">
@@ -921,7 +1147,9 @@ const CarDetailPage = () => {
 
                 {/* MOT Due Information */}
                 <div className="spec-item">
-                  <span className="spec-icon">🔍</span>
+                  <span className="spec-icon">
+                    <img src="/icon/mot-due.jpeg" alt="MOT Due" style={{ width: '80px', height: '80px' }} />
+                  </span>
                   <div className="spec-details">
                     <span className="spec-label">MOT Due</span>
                     <span className="spec-value">
@@ -1014,11 +1242,7 @@ const CarDetailPage = () => {
                 <div className="running-costs-horizontal">
                   <div className="running-cost-item">
                     <div className="cost-icon-wrapper">
-                      <svg className="cost-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                        <path d="M2 17l10 5 10-5"/>
-                        <path d="M2 12l10 5 10-5"/>
-                      </svg>
+                      <img src="/icon/running cost/combined-mpg.jpeg" alt="CO2 Emissions" style={{ width: '80px', height: '80px' }} />
                     </div>
                     <div className="cost-content">
                       <div className="cost-label">CO₂ emissions</div>
@@ -1030,9 +1254,7 @@ const CarDetailPage = () => {
 
                   <div className="running-cost-item">
                     <div className="cost-icon-wrapper">
-                      <svg className="cost-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                      </svg>
+                      <img src="/icon/running cost/insurance.jpeg" alt="Insurance" style={{ width: '80px', height: '80px' }} />
                     </div>
                     <div className="cost-content">
                       <div className="cost-label">Insurance group</div>
@@ -1042,10 +1264,7 @@ const CarDetailPage = () => {
 
                   <div className="running-cost-item">
                     <div className="cost-icon-wrapper">
-                      <svg className="cost-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M16 8l-4 4-4-4"/>
-                      </svg>
+                      <img src="/icon/running cost/tax.jpeg" alt="Tax" style={{ width: '80px', height: '80px' }} />
                     </div>
                     <div className="cost-content">
                       <div className="cost-label">Tax per year</div>
@@ -1061,7 +1280,9 @@ const CarDetailPage = () => {
                     <div className="fuel-economy-grid">
                       {car.runningCosts.fuelEconomy.combined && (
                         <div className="fuel-economy-item">
-                          <span className="fuel-icon">⛽</span>
+                          <span className="fuel-icon">
+                            <img src="/icon/running cost/co2-emissions.jpeg" alt="Combined MPG" style={{ width: '80px', height: '80px' }} />
+                          </span>
                           <div className="fuel-details">
                             <span className="fuel-label">Combined MPG</span>
                             <span className="fuel-value">{car.runningCosts.fuelEconomy.combined} mpg</span>
@@ -1071,7 +1292,9 @@ const CarDetailPage = () => {
 
                       {car.runningCosts.fuelEconomy.urban && (
                         <div className="fuel-economy-item">
-                          <span className="fuel-icon">🏙️</span>
+                          <span className="fuel-icon">
+                            <img src="/icon/running cost/urban-mpg.jpeg" alt="Urban MPG" style={{ width: '80px', height: '80px' }} />
+                          </span>
                           <div className="fuel-details">
                             <span className="fuel-label">Urban MPG</span>
                             <span className="fuel-value">{car.runningCosts.fuelEconomy.urban} mpg</span>
@@ -1081,7 +1304,9 @@ const CarDetailPage = () => {
 
                       {car.runningCosts.fuelEconomy.extraUrban && (
                         <div className="fuel-economy-item">
-                          <span className="fuel-icon">🛣️</span>
+                          <span className="fuel-icon">
+                            <img src="/icon/running cost/combined-mpg.jpeg" alt="Extra Urban MPG" style={{ width: '80px', height: '80px' }} />
+                          </span>
                           <div className="fuel-details">
                             <span className="fuel-label">Extra Urban MPG</span>
                             <span className="fuel-value">{car.runningCosts.fuelEconomy.extraUrban} mpg</span>
@@ -1097,7 +1322,9 @@ const CarDetailPage = () => {
                     <div className="fuel-economy-grid">
                       {(car.runningCosts?.electricRange || car.electricRange) && (
                         <div className="fuel-economy-item">
-                          <span className="fuel-icon">🔋</span>
+                          <span className="fuel-icon">
+                            <img src="/icon/running cost/electric-range.jpeg" alt="Electric Range" style={{ width: '80px', height: '80px' }} />
+                          </span>
                           <div className="fuel-details">
                             <span className="fuel-label">Electric Range</span>
                             <span className="fuel-value">{car.runningCosts?.electricRange || car.electricRange} miles</span>
@@ -1107,7 +1334,9 @@ const CarDetailPage = () => {
 
                       {(car.runningCosts?.batteryCapacity || car.batteryCapacity) && (
                         <div className="fuel-economy-item">
-                          <span className="fuel-icon">🔋</span>
+                          <span className="fuel-icon">
+                            <img src="/icon/running cost/battery.jpeg" alt="Battery Capacity" style={{ width: '80px', height: '80px' }} />
+                          </span>
                           <div className="fuel-details">
                             <span className="fuel-label">Battery Capacity</span>
                             <span className="fuel-value">{car.runningCosts?.batteryCapacity || car.batteryCapacity} kWh</span>
@@ -1117,7 +1346,9 @@ const CarDetailPage = () => {
 
                       {(car.runningCosts?.chargingTime || car.chargingTime) && (
                         <div className="fuel-economy-item">
-                          <span className="fuel-icon">⚡</span>
+                          <span className="fuel-icon">
+                            <img src="/icon/running cost/charging-time.jpeg" alt="Charging Time" style={{ width: '80px', height: '80px' }} />
+                          </span>
                           <div className="fuel-details">
                             <span className="fuel-label">Charging Time</span>
                             <span className="fuel-value">{car.runningCosts?.chargingTime || car.chargingTime} hours</span>
@@ -1259,13 +1490,13 @@ const CarDetailPage = () => {
                         <a
                           href={`tel:${car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber}`}
                           className="call-seller-btn"
-                          style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}
+                          style={{ textDecoration: 'none', display: 'block', background: '#0066cc' }}
                           onClick={() => trackInquiry('phone')}
                         >
                           📞 {car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber}
                         </a>
                       ) : callSession ? (
-                        <a href={`tel:${callSession.proxyNumber}`} className="call-seller-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
+                        <a href={`tel:${callSession.proxyNumber}`} className="call-seller-btn" style={{ textDecoration: 'none', display: 'block', background: '#0066cc' }}>
                           📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>{!callSession.isDirectNumber && callSession.expiresIn && `(expires in ${Math.floor(callSession.expiresIn / 60)}m)`}</span>
                         </a>
                       ) : (
@@ -1321,13 +1552,13 @@ const CarDetailPage = () => {
                     <a
                       href={`tel:${car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber}`}
                       className="phone-btn"
-                      style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}
+                      style={{ textDecoration: 'none', display: 'block', background: '#0066cc' }}
                       onClick={() => trackInquiry('phone')}
                     >
                       📞 {car.sellerContact?.phoneNumber || car.sellerContact?.phone || car.phoneNumber}
                     </a>
                   ) : callSession ? (
-                    <a href={`tel:${callSession.proxyNumber}`} className="phone-btn" style={{ textDecoration: 'none', display: 'block', background: '#10b981' }}>
+                    <a href={`tel:${callSession.proxyNumber}`} className="phone-btn" style={{ textDecoration: 'none', display: 'block', background: '#0066cc' }}>
                       📞 {callSession.proxyNumber} <span style={{ fontSize: '0.75rem', opacity: 0.85 }}>{!callSession.isDirectNumber && callSession.expiresIn && `(expires in ${Math.floor(callSession.expiresIn / 60)}m)`}</span>
                     </a>
                   ) : (
@@ -1434,31 +1665,39 @@ const CarDetailPage = () => {
               return (
                 <div className="good-price-indicator" id="price-indicator-section">
                   <div className="price-gauge">
-                    <svg viewBox="0 0 200 120" className="gauge-svg">
-                      {/* Gauge background arcs - 5 zones */}
+                    <svg viewBox="0 0 240 150" className="gauge-svg">
+                      {/* OUTER BLUE GAUGE ARC - Thin and clean */}
+                      <path d="M 30 130 A 90 90 0 0 1 210 130" fill="none" stroke="#2196F3" strokeWidth="6" strokeLinecap="round"/>
                       
-                      {/* Zone 1: Gray - FAR LEFT (0-36°) */}
-                      <path d="M 20 100 A 80 80 0 0 1 38 48" fill="none" stroke="#BDBDBD" strokeWidth="16" strokeLinecap="round"/>
+                      {/* SPACE between outer blue arc and inner colored segments */}
                       
-                      {/* Zone 2: Light Green - LEFT-CENTER (36-72°) */}
-                      <path d="M 38 48 A 80 80 0 0 1 70 26" fill="none" stroke="#A5D6A7" strokeWidth="16" strokeLinecap="round"/>
+                      {/* INNER COLORED RANGE SEGMENTS - Equal minimal spacing between ALL segments */}
                       
-                      {/* Zone 3: Dark Green - CENTER (72-108°) */}
-                      <path d="M 70 26 A 80 80 0 0 1 130 26" fill="none" stroke="#388E3C" strokeWidth="16" strokeLinecap="round"/>
+                      {/* Zone 1: Gray - FAR LEFT */}
+                      <path d="M 48 126 A 70 70 0 0 1 70 84" fill="none" stroke="#D3D3D3" strokeWidth="10" strokeLinecap="butt"/>
                       
-                      {/* Zone 4: Yellow/Gold - RIGHT-CENTER (108-144°) */}
-                      <path d="M 130 26 A 80 80 0 0 1 162 48" fill="none" stroke="#FFC107" strokeWidth="16" strokeLinecap="round"/>
+                      {/* Zone 2: Light Blue - LEFT-CENTER (1 unit gap) */}
+                      <path d="M 71 83 A 70 70 0 0 1 88 71" fill="none" stroke="#90CAF9" strokeWidth="10" strokeLinecap="butt"/>
                       
-                      {/* Zone 5: Coral/Orange - FAR RIGHT (144-180°) */}
-                      <path d="M 162 48 A 80 80 0 0 1 180 100" fill="none" stroke="#FF7043" strokeWidth="16" strokeLinecap="round"/>
+                      {/* Zone 3: Dark Blue - CENTER LEFT (1 unit gap) */}
+                      <path d="M 89 70 A 70 70 0 0 1 118 60" fill="none" stroke="#2196F3" strokeWidth="10" strokeLinecap="butt"/>
                       
-                      {/* Needle pointing to appropriate zone */}
-                      <line x1="100" y1="100" x2={needleX} y2={needleY} stroke="#1a1a1a" strokeWidth="5" strokeLinecap="round"/>
-                      <circle cx="100" cy="100" r="8" fill="#1a1a1a"/>
-                      <circle cx="100" cy="100" r="4" fill="#fff"/>
+                      {/* Zone 4: Yellow/Orange - CENTER RIGHT (1 unit gap - same as others) */}
+                      <path d="M 119 60 A 70 70 0 0 1 151 70" fill="none" stroke="#FFA726" strokeWidth="10" strokeLinecap="butt"/>
+                      
+                      {/* Zone 5: Orange - RIGHT-CENTER (1 unit gap) */}
+                      <path d="M 152 71 A 70 70 0 0 1 169 83" fill="none" stroke="#FF7043" strokeWidth="10" strokeLinecap="butt"/>
+                      
+                      {/* Zone 6: Red/Orange - FAR RIGHT (1 unit gap) */}
+                      <path d="M 170 84 A 70 70 0 0 1 192 126" fill="none" stroke="#FF7043" strokeWidth="10" strokeLinecap="butt"/>
+                      
+                      {/* Needle pointing to appropriate zone - SHORTER */}
+                      <line x1="120" y1="130" x2={120 + 50 * Math.cos((180 - needleAngle) * Math.PI / 180)} y2={130 - 50 * Math.sin((180 - needleAngle) * Math.PI / 180)} stroke="#212121" strokeWidth="4" strokeLinecap="round"/>
+                      <circle cx="120" cy="130" r="8" fill="#212121"/>
+                      <circle cx="120" cy="130" r="4" fill="#fff"/>
                     </svg>
                   </div>
-                  <div className="price-label" style={{ backgroundColor: labelColor }}>
+                  <div className="price-label">
                     {priceLevel}
                   </div>
                   <div className="price-amount">

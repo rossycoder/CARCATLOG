@@ -6,50 +6,193 @@
   border-top: 1px solid #e0e0e0;
 }
 
-.back-to-top-link {
-  display: block;
-  text-align: center;
-  margin: 0 auto 40px;
-  padding: 0;
-  background: none;
-  border: none;
-  color: var(--primary-color);
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: underline;
-  transition: color 0.3s;
-}
-
-.back-to-top-link:hover {
-  color: #0052a3;
+.footer .container {
+  max-width: 1260px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .footer-content {
   display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: 60px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 40px;
   margin-bottom: 20px;
 }
 
-/* Column 1 - Logo & Links */
-.footer-column-1 {
+/* LEFT COLUMN - Logo & Links */
+.footer-left {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.footer-logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+.footer-logo .logo-image {
+  height: 70px;
+  width: auto;
 }
 
-.logo-image {
-  height: 90px;
-  width: auto;
-  object-fit: contain;
+.footer-social-icons-small {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-social-icons-small a {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.footer-social-icons-small a:hover {
+  background: #007bff;
+  transform: translateY(-2px);
+}
+
+.footer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-nav a {
+  color: #666;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-nav a:hover {
+  color: #007bff;
+}
+
+/* MIDDLE COLUMN - Social Media */
+.footer-center {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.footer-center h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.social-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+.social-icons-large {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+}
+
+.social-icons-large a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #1a1a1a;
+  transition: all 0.3s;
+}
+
+.social-icons-large a:hover {
+  transform: translateY(-4px);
+}
+
+.social-icons-large a:hover .social-circle {
+  background: #007bff;
+  transform: scale(1.1);
+}
+
+.social-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition: all 0.3s;
+}
+
+.social-icons-large span {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* RIGHT COLUMN - Feedback & Legal */
+.footer-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.feedback-section {
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.feedback-section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 10px 0;
+}
+
+.feedback-btn {
+  background: white;
+  color: #007bff;
+  border: 2px solid #007bff;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.feedback-btn:hover {
+  background: #007bff;
+  color: white;
+}
+
+.footer-social-icons-dark {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-social-icons-dark a {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.footer-social-icons-dark a:hover {
+  background: #007bff;
+  transform: translateY(-2px);
 }
 
 .footer-nav {
@@ -316,63 +459,103 @@
   
   .footer-content {
     grid-template-columns: 1fr;
-    gap: 25px;
+    gap: 30px;
   }
   
-  .footer-column-1 {
+  /* Left Column */
+  .footer-left {
+    order: 1;
     gap: 16px;
   }
   
   .footer-logo {
-    justify-content: center;
-    margin-bottom: 8px;
-  }
-  
-  .logo-image {
-    height: 45px;
-  }
-  
-  .footer-nav {
-    gap: 10px;
-    align-items: center;
-  }
-  
-  .footer-nav a,
-  .manage-cookies {
-    font-size: 0.9rem;
-  }
-  
-  .accordion-header {
-    padding: 14px 0;
-    font-size: 0.9rem;
-  }
-  
-  .accordion-content {
-    padding: 0 0 14px 28px;
-    gap: 8px;
-  }
-  
-  .accordion-content a {
-    font-size: 0.85rem;
-  }
-  
-  .footer-column-3 {
-    gap: 20px;
     text-align: center;
   }
   
-  .feedback-section h3 {
+  .footer-logo .logo-image {
+    height: 50px;
+  }
+  
+  .footer-social-icons-small {
+    justify-content: center;
+  }
+  
+  .footer-nav {
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .footer-nav a {
+    font-size: 0.9rem;
+  }
+  
+  /* Middle Column - Social Media */
+  .footer-center {
+    order: 2;
+    padding: 25px 0;
+    background: #f8f9fa;
+    border-radius: 12px;
+  }
+  
+  .footer-center h3 {
+    font-size: 1.3rem;
+  }
+  
+  .social-subtitle {
+    font-size: 0.85rem;
+  }
+  
+  /* Display all 4 social icons in ONE ROW on mobile */
+  .social-icons-large {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+  
+  .social-icons-large a {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .social-circle {
+    width: 55px;
+    height: 55px;
+    font-size: 22px;
+  }
+  
+  .social-icons-large span {
+    font-size: 0.75rem;
+  }
+  
+  /* Right Column */
+  .footer-right {
+    order: 3;
+    gap: 20px;
+  }
+  
+  .feedback-section {
+    text-align: center;
+  }
+  
+  .feedback-section h4 {
     font-size: 0.95rem;
-    margin-bottom: 10px;
   }
   
   .feedback-btn {
     padding: 9px 20px;
     font-size: 0.9rem;
   }
+  
+  .footer-social-icons-dark {
+    justify-content: center;
+  }
 
   .app-badges {
     justify-content: center;
+    flex-wrap: wrap;
   }
 
   .app-badge {
@@ -398,17 +581,12 @@
     font-size: 1rem;
   }
 
-  .social-icons {
-    justify-content: center;
-  }
-  
-  .social-icons a {
-    width: 38px;
-    height: 38px;
-  }
-  
   .legal-text {
     font-size: 0.75rem;
+    text-align: center;
+  }
+  
+  .registered-office {
     text-align: center;
   }
 }
@@ -426,28 +604,62 @@
   }
   
   .footer-content {
-    gap: 20px;
+    gap: 24px;
   }
   
-  .logo-image {
-    height: 40px;
+  /* Left Column */
+  .footer-left {
+    gap: 14px;
   }
   
-  .footer-nav a,
-  .manage-cookies {
+  .footer-logo .logo-image {
+    height: 45px;
+  }
+  
+  .footer-social-icons-small a {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+  
+  .footer-nav a {
     font-size: 0.85rem;
   }
   
-  .accordion-header {
-    padding: 12px 0;
-    font-size: 0.85rem;
+  /* Middle Column - Social Media */
+  .footer-center {
+    padding: 20px 12px;
   }
   
-  .accordion-content a {
+  .footer-center h3 {
+    font-size: 1.15rem;
+  }
+  
+  .social-subtitle {
     font-size: 0.8rem;
   }
   
-  .feedback-section h3 {
+  /* Display all 4 social icons in ONE ROW - smaller on small mobile */
+  .social-icons-large {
+    gap: 15px;
+  }
+  
+  .social-circle {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
+  .social-icons-large span {
+    font-size: 0.7rem;
+  }
+  
+  /* Right Column */
+  .footer-right {
+    gap: 18px;
+  }
+  
+  .feedback-section h4 {
     font-size: 0.9rem;
   }
   
@@ -456,13 +668,10 @@
     font-size: 0.85rem;
   }
   
-  .social-icons a {
-    width: 36px;
-    height: 36px;
-  }
-  
-  .social-icon {
-    font-size: 1rem;
+  .footer-social-icons-dark a {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
   }
   
   .app-badge {
@@ -490,6 +699,32 @@
   
   .legal-text {
     font-size: 0.7rem;
+  }
+}
+
+/* Extra Small Mobile - 320px to 380px */
+@media (max-width: 380px) {
+  .footer-center {
+    padding: 18px 10px;
+  }
+  
+  .footer-center h3 {
+    font-size: 1.05rem;
+  }
+  
+  /* Display all 4 social icons in ONE ROW - very compact */
+  .social-icons-large {
+    gap: 10px;
+  }
+  
+  .social-circle {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+  }
+  
+  .social-icons-large span {
+    font-size: 0.65rem;
   }
 }
 

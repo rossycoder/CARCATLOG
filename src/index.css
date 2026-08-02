@@ -116,3 +116,24 @@ button, input, select, textarea {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
+
+
+/* REMOVE ALL GREEN COLORS FROM BUTTONS AND HOVER STATES */
+/* Override any default browser or Tailwind green colors */
+button:not([class*="bg-"]):hover,
+.btn:hover {
+  filter: hue-rotate(0deg) !important;
+}
+
+/* Remove green from focus states */
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Add blue outline for accessibility (keyboard navigation only) */
+*:focus-visible {
+  outline: 2px solid #007bff !important;
+  outline-offset: 2px !important;
+}
+

@@ -106,14 +106,47 @@ function MyListingsPage() {
     try {
       if (isAdminView) {
         // Admin uses admin update route
-        await api.patch(`/admin/listings/${listingId}`, { advertStatus: 'sold' });
+        const response = await api.patch(`/admin/listings/${listingId}`, { advertStatus: 'sold' });
       } else {
-        await api.patch(`/vehicles/${listingId}/status`, { advertStatus: 'sold' });
+        const response = await api.patch(`/vehicles/${listingId}/status`, { advertStatus: 'sold' });
       }
-      fetchMyListings();
+      await fetchMyListings();
+      alert('Vehicle marked as sold successfully!');
     } catch (err) {
       console.error('Error marking as sold:', err);
-      alert('Failed to mark as sold');
+      console.error('Error response:', err.response?.data);
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Failed to mark as sold';
+      alert(errorMsg);
+    }
+  };
+
+  const handleMarkAsDraft = async (listingId) => {
+    if (!window.confirm('Mark this vehicle as draft? It will be hidden from public view.')) return;
+
+    try {
+      const response = await api.patch(`/admin/listings/${listingId}`, { advertStatus: 'draft' });
+      await fetchMyListings();
+      alert('Vehicle marked as draft successfully!');
+    } catch (err) {
+      console.error('Error marking as draft:', err);
+      console.error('Error response:', err.response?.data);
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Failed to mark as draft';
+      alert(errorMsg);
+    }
+  };
+
+  const handleMarkAsActive = async (listingId) => {
+    if (!window.confirm('Mark this vehicle as active? It will be visible to the public.')) return;
+
+    try {
+      const response = await api.patch(`/admin/listings/${listingId}`, { advertStatus: 'active' });
+      await fetchMyListings();
+      alert('Vehicle marked as active successfully!');
+    } catch (err) {
+      console.error('Error marking as active:', err);
+      console.error('Error response:', err.response?.data);
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Failed to mark as active';
+      alert(errorMsg);
     }
   };
 
@@ -254,15 +287,43 @@ function MyListingsPage() {
             'Draft': 'draft',
             'Pending': 'pending_payment'
           };
-          if (listing.advertStatus !== statusMap[statusFilter]) return false;
+          
+          // Special handling for Expired filter
+          if (statusFilter === 'Expired') {
+            // Show cars with status 'expired' OR active cars with past expiry date
+            const isExpiredStatus = listing.advertStatus === 'expired';
+            const isActiveButExpired = isCarExpired(listing);
+            
+            if (!isExpiredStatus && !isActiveButExpired) return false;
+          } else {
+            // Normal status matching for other filters
+            if (listing.advertStatus !== statusMap[statusFilter]) return false;
+          }
         }
 
         // Plan Type filter
         if (planFilter !== 'All Plans') {
           const packageName = listing.advertisingPackage?.packageName?.toLowerCase() || '';
-          if (planFilter === 'Bronze' && !packageName.includes('bronze')) return false;
-          if (planFilter === 'Silver' && !packageName.includes('silver')) return false;
-          if (planFilter === 'Gold' && !packageName.includes('gold')) return false;
+          
+          if (planFilter === 'PAYG') {
+            // PAYG: Private users only (cars without dealerId)
+            // These are individual sellers using pay-as-you-go packages
+            
+            // Check if listing has dealerId (could be string or object)
+            const hasDealerId = listing.dealerId && 
+                               (typeof listing.dealerId === 'string' ? listing.dealerId : listing.dealerId._id);
+            
+            // Exclude if has dealerId (trade dealer)
+            if (hasDealerId) return false;
+            
+            // Include this listing (it's PAYG - private user)
+            return true;
+          } else {
+            // Trade dealer packages (Bronze/Silver/Gold)
+            if (planFilter === 'Bronze' && !packageName.includes('bronze')) return false;
+            if (planFilter === 'Silver' && !packageName.includes('silver')) return false;
+            if (planFilter === 'Gold' && !packageName.includes('gold')) return false;
+          }
         }
 
         return true;
@@ -315,7 +376,9 @@ function MyListingsPage() {
                   type="text"
                   placeholder="Search by Name, Email, Vehicle, or Reg"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                  }}
                 />
                 <span className="search-icon">🔍</span>
               </div>
@@ -340,6 +403,7 @@ function MyListingsPage() {
                     <option value="Bronze">Bronze</option>
                     <option value="Silver">Silver</option>
                     <option value="Gold">Gold</option>
+                    <option value="PAYG">PAYG (Private)</option>
                   </select>
                 </div>
                 
@@ -394,7 +458,15 @@ function MyListingsPage() {
                       <h3 className="listing-title">{listing.make} {listing.model}</h3>
                       <p className="listing-subtitle">{listing.year} • {listing.registrationNumber || 'N/A'}</p>
                       <div className="listing-owner">
-                        <span className="owner-badge">👤 {listing.ownerName || listing.ownerEmail || 'Unknown'}</span>
+                        <span className="owner-badge">
+                          👤 {listing.ownerName || listing.ownerEmail || 'Unknown'}
+                          {listing.ownerType === 'private' && (
+                            <span className="type-badge badge-private" style={{ marginLeft: '0.5rem', fontSize: '0.7rem', padding: '0.15rem 0.4rem', background: '#e3f2fd', color: '#1976d2', borderRadius: '3px', fontWeight: 600 }}>PAYG</span>
+                          )}
+                          {listing.ownerType === 'trade' && (
+                            <span className="type-badge badge-trade" style={{ marginLeft: '0.5rem', fontSize: '0.7rem', padding: '0.15rem 0.4rem', background: '#fff3e0', color: '#f57c00', borderRadius: '3px', fontWeight: 600 }}>TRADE</span>
+                          )}
+                        </span>
                       </div>
                       <div className="listing-specs">
                         <span>{listing.mileage?.toLocaleString() || '0'} miles</span>
@@ -594,7 +666,9 @@ function MyListingsPage() {
                   type="text"
                   placeholder="Search by Name, Email, or Phone"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                  }}
                 />
                 <span className="search-icon">🔍</span>
               </div>

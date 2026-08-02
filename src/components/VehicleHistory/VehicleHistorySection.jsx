@@ -100,7 +100,9 @@ const VehicleHistorySection = ({ vrm, carData }) => {
         <div className={`history-error ${error?.isNotFound ? 'history-not-found' : ''} ${error?.isServiceUnavailable ? 'history-service-unavailable' : ''}`}>
           <div className="history-summary">
             <div className="history-stat">
-              <span className="stat-icon">👤</span>
+              <span className="stat-icon">
+                <img src="/icon/owners.jpeg" alt="Owners" style={{ width: '80px', height: '80px' }} />
+              </span>
               <div className="stat-details">
                 <span className="stat-label">Owners</span>
                 <span className="stat-value">Contact seller</span>
@@ -108,7 +110,9 @@ const VehicleHistorySection = ({ vrm, carData }) => {
             </div>
 
             <div className="history-stat">
-              <span className="stat-icon">🔑</span>
+              <span className="stat-icon">
+                <img src="/icon/keys.jpeg" alt="Keys" style={{ width: '80px', height: '80px' }} />
+              </span>
               <div className="stat-details">
                 <span className="stat-label">Keys</span>
                 <span className="stat-value">Contact seller</span>
@@ -116,7 +120,9 @@ const VehicleHistorySection = ({ vrm, carData }) => {
             </div>
 
             <div className="history-stat">
-              <span className="stat-icon">📋</span>
+              <span className="stat-icon">
+                <img src="/icon/service-history.jpeg" alt="Service History" style={{ width: '80px', height: '80px' }} />
+              </span>
               <div className="stat-details">
                 <span className="stat-label">Service history</span>
                 <span className="stat-value">Contact seller</span>
@@ -336,7 +342,9 @@ const VehicleHistorySection = ({ vrm, carData }) => {
       
       <div className="history-summary">
         <div className="history-stat">
-          <span className="stat-icon">👤</span>
+          <span className="stat-icon">
+            <img src="/icon/owners.jpeg" alt="Owners" style={{ width: '80px', height: '80px' }} />
+          </span>
           <div className="stat-details">
             <span className="stat-label">Owners</span>
             <span className="stat-value">
@@ -363,7 +371,9 @@ const VehicleHistorySection = ({ vrm, carData }) => {
         </div>
 
         <div className="history-stat">
-          <span className="stat-icon">🔑</span>
+          <span className="stat-icon">
+            <img src="/icon/keys.jpeg" alt="Keys" style={{ width: '80px', height: '80px' }} />
+          </span>
           <div className="stat-details">
             <span className="stat-label">Keys</span>
             <span className="stat-value">
@@ -378,7 +388,9 @@ const VehicleHistorySection = ({ vrm, carData }) => {
         </div>
 
         <div className="history-stat">
-          <span className="stat-icon">📋</span>
+          <span className="stat-icon">
+            <img src="/icon/service-history.jpeg" alt="Service History" style={{ width: '80px', height: '80px' }} />
+          </span>
           <div className="stat-details">
             <span className="stat-label">Service history</span>
             <span className="stat-value">

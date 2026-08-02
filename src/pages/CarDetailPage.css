@@ -20,6 +20,13 @@
 }
 
 /* Back Button */
+.page-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .back-to-results {
   background: none;
   border: none;
@@ -27,7 +34,6 @@
   font-size: 0.95rem;
   cursor: pointer;
   padding: 8px 0;
-  margin-bottom: 20px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -37,6 +43,56 @@
 .back-to-results:hover {
   color: #004499;
   text-decoration: underline;
+}
+
+/* Page Action Icons - Next to Back Button */
+.page-action-icons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.page-icon-btn {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.page-icon-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.page-icon-btn svg {
+  stroke: #666;
+}
+
+.page-icon-btn:hover svg {
+  stroke: #333;
+}
+
+/* Favorite Icon Styling */
+.page-icon-btn.favorite-icon-btn.active svg {
+  fill: #dc3545;
+  stroke: #dc3545;
+}
+
+.page-icon-btn.favorite-icon-btn:hover svg {
+  stroke: #dc3545;
+}
+
+.page-icon-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Sticky Navigation Tabs */
@@ -494,12 +550,18 @@
 .spec-icon {
   font-size: 1.5rem;
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #6c757d;
+}
+
+.spec-icon img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
 }
 
 .spec-icon svg {
@@ -886,9 +948,15 @@
 
   .spec-icon {
     font-size: 1.2rem;
-    width: 24px;
-    height: 24px;
+    width: 80px;
+    height: 80px;
     flex-shrink: 0;
+  }
+
+  .spec-icon img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
   }
 
   .spec-details {
@@ -1229,14 +1297,20 @@
 }
 
 .cost-icon-wrapper {
-  width: 40px;
-  height: 40px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
-  border-radius: 50%;
+  background: transparent;
+  border-radius: 0;
   flex-shrink: 0;
+}
+
+.cost-icon-wrapper img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
 }
 
 .cost-icon-svg {
@@ -1281,7 +1355,7 @@
 
 .fuel-economy-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center; /* Changed from flex-start to center */
   gap: 12px;
   padding: 16px;
   background: #f8f9fa;
@@ -1297,16 +1371,21 @@
 }
 
 .fuel-icon {
-  font-size: 1.8rem;
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
+  background: transparent;
+  border-radius: 0;
+  border: none;
+}
+
+.fuel-icon img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
 }
 
 .fuel-details {
@@ -1345,8 +1424,13 @@
   }
 
   .cost-icon-wrapper {
-    width: 32px;
-    height: 32px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .cost-icon-wrapper img {
+    width: 50px;
+    height: 50px;
   }
 
   .cost-label {
@@ -1367,9 +1451,13 @@
   }
   
   .fuel-icon {
-    font-size: 1.6rem;
-    width: 36px;
-    height: 36px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .fuel-icon img {
+    width: 50px;
+    height: 50px;
   }
   
   .fuel-label {
@@ -1384,12 +1472,26 @@
 @media (max-width: 480px) {
   .running-costs-horizontal {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Single column */
     gap: 10px;
   }
   
   .running-cost-item {
     padding: 12px 10px;
+  }
+  
+  /* Remove reordering - keep natural order */
+  .running-cost-item:nth-child(1),
+  .running-cost-item:nth-child(2),
+  .running-cost-item:nth-child(3) {
+    order: unset;
+  }
+  
+  /* Move Additional Running Costs (Combined MPG) section up */
+  .additional-running-costs {
+    order: -1; /* Move before running-cost-items */
+    margin-top: -20px;
+    margin-bottom: 10px;
   }
   
   .fuel-economy-grid {
@@ -1402,9 +1504,13 @@
   }
   
   .fuel-icon {
-    font-size: 1.5rem;
-    width: 32px;
-    height: 32px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .fuel-icon img {
+    width: 50px;
+    height: 50px;
   }
 }
 
@@ -1569,45 +1675,53 @@
 }
 
 
-/* Good Price Indicator - Below Finance Calculator */
+/* Good Price Indicator - Image-style design */
 .good-price-indicator {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 32px 24px 24px;
   margin-top: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   text-align: center;
+  border: 1px solid #f0f0f0;
 }
 
 .price-gauge {
   width: 100%;
-  max-width: 200px;
-  margin: 0 auto 10px;
+  max-width: 400px;
+  margin: 0 auto 20px;
+  position: relative;
 }
 
 .gauge-svg {
   width: 100%;
   height: auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
 }
 
 .price-label {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  padding: 0;
+  border-radius: 0;
   display: inline-block;
   margin-top: 10px;
   transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .price-amount {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #2d2d2d;
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #e0e0e0;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #2196F3;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 3px solid #2196F3;
+  border-top-width: 2px;
+  border-top-style: solid;
+  letter-spacing: -1px;
 }
 
 /* Price level specific colors are set inline via style attribute */
@@ -1808,4 +1922,386 @@ a.call-seller-btn:active {
   background: rgba(0,0,0,0.4);
   padding: 4px 12px;
   border-radius: 20px;
+}
+
+
+/* =====================================================
+   SHARE BUTTON STYLES
+   ===================================================== */
+
+.share-button-container {
+  position: relative;
+  display: inline-block;
+  margin-left: 16px;
+}
+
+.share-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: white;
+  border: 2px solid #0066cc;
+  border-radius: 6px;
+  color: #0066cc;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.share-button:hover {
+  background: #f0f7ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
+}
+
+.share-button svg {
+  flex-shrink: 0;
+}
+
+.share-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  min-width: 200px;
+  z-index: 1000;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.share-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: white;
+  border: none;
+  border-radius: 6px;
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.share-option:hover {
+  background: #f5f5f5;
+  color: #0066cc;
+}
+
+.share-option svg {
+  flex-shrink: 0;
+}
+
+/* Specific colors for social platforms */
+.share-option:nth-child(1):hover {
+  /* WhatsApp */
+  background: #25D366;
+  color: white;
+}
+
+.share-option:nth-child(2):hover {
+  /* Facebook */
+  background: #1877F2;
+  color: white;
+}
+
+.share-option:nth-child(3):hover {
+  /* Twitter */
+  background: #1DA1F2;
+  color: white;
+}
+
+.share-option:nth-child(4):hover {
+  /* Email */
+  background: #EA4335;
+  color: white;
+}
+
+.share-option:nth-child(5):hover {
+  /* Copy Link */
+  background: #0066cc;
+  color: white;
+}
+
+/* Mobile responsive */
+@media (max-width: 968px) {
+  .share-button-container {
+    margin-left: 0;
+    margin-top: 12px;
+    width: 100%;
+  }
+
+  .share-button {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
+  }
+
+  .share-menu {
+    left: 0;
+    right: 0;
+    min-width: auto;
+  }
+
+  /* Position in car-header */
+  .car-header-left {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .share-button {
+    font-size: 0.9rem;
+    padding: 10px 14px;
+  }
+
+  .share-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .share-option {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .share-option svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Close share menu when clicking outside */
+.share-button-container.active .share-menu {
+  display: block;
+}
+
+/* Action Buttons Row - Share and Favorite */
+.action-buttons-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  align-items: center;
+}
+
+/* Image Action Icons - On top right of image gallery */
+.image-action-icons {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 12px !important;
+  align-items: center !important;
+  z-index: 10 !important;
+  pointer-events: auto !important;
+}
+
+.image-icon-btn {
+  background: white !important;
+  border: none !important;
+  padding: 10px !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  width: 44px !important;
+  height: 44px !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+}
+
+.image-icon-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.image-icon-btn svg {
+  stroke: #666;
+}
+
+.image-icon-btn:hover svg {
+  stroke: #333;
+}
+
+/* Favorite Icon on Image */
+.favorite-icon-btn.active svg {
+  fill: #dc3545;
+  stroke: #dc3545;
+}
+
+.favorite-icon-btn:hover svg {
+  stroke: #dc3545;
+}
+
+.image-icon-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Favorite Button */
+.favorite-button {
+  background: transparent;
+  border: none;
+  color: #666;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.favorite-button:hover {
+  transform: scale(1.1);
+  color: #dc3545;
+}
+
+.favorite-button.active {
+  color: #dc3545;
+}
+
+.favorite-button.active svg {
+  fill: #dc3545;
+}
+
+.favorite-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Share Button Container */
+.share-button-container {
+  position: relative;
+  display: inline-block;
+}
+
+.share-button {
+  background: transparent;
+  border: none;
+  color: #666;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.share-button:hover {
+  transform: scale(1.1);
+  color: #333;
+}
+
+.share-button svg {
+  flex-shrink: 0;
+}
+
+.share-text {
+  white-space: nowrap;
+}
+
+/* Share Dropdown Menu */
+.share-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  overflow: hidden;
+  animation: slideDown 0.2s ease;
+}
+
+/* Share Menu for Image Gallery */
+.share-menu-image {
+  position: absolute;
+  top: 90px;
+  right: 20px;
+  min-width: 200px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  overflow: hidden;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.share-option {
+  width: 100%;
+  padding: 12px 16px;
+  background: white;
+  border: none;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: #333;
+  transition: background 0.2s;
+}
+
+.share-option:last-child {
+  border-bottom: none;
+}
+
+.share-option:hover {
+  background: #f5f5f5;
+}
+
+.share-option svg {
+  flex-shrink: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .action-buttons-row {
+    gap: 12px;
+  }
+
+  .share-button {
+    padding: 12px 16px;
+  }
 }
