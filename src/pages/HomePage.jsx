@@ -466,7 +466,7 @@ const HomePage = () => {
                     </div>
                   </div>
                   <div className="category-card" onClick={() => navigate('/search-results?bodyType=Convertible')}>
-                    <div className="category-image"><img src="/car/convertible.jfif" alt="Convertible" /></div>
+                    <div className="category-image" style={{ minHeight: '200px', height: '200px' }}><img src="/car/convertible.jfif" alt="Convertible" /></div>
                     <div className="category-info">
                       <h3>Convertible</h3>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
@@ -577,8 +577,8 @@ const HomePage = () => {
                       <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>Choose from our Pay As You Go or Subscription packages.</li>
                       <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>Dealer dashboard with Analytics & Performance tools.</li>
                       <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>Dealer branding</li>
-                      <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>Stock feed integration with all CSV, Json & XML management system.</li>
-                      <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>Less than a third of the cost with 30 day free trial.</li>
+                      <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>Stock feed integration with all CSV, Json & XML management systems.</li>
+                      <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>Less than a third of the cost with a <span style={{ color: '#dc3545', fontWeight: 'bold' }}>30 DAY FREE TRIAL</span>.</li>
                     </ul>
                     <button className="btn-trade-login" onClick={() => navigate('/trade/login')}>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -93,9 +93,30 @@
 .section-header h2 { font-size: clamp(1.1rem, 2.5vw, 1.6rem); }
 .view-all-btn-blue { font-size: clamp(0.65rem, 1.3vw, 0.85rem); padding: clamp(6px, 1.3vw, 10px) clamp(10px, 2vw, 20px); }
 .category-grid { gap: clamp(8px, 1.8vw, 24px); }
-.category-image { height: clamp(80px, 15vw, 200px); }
 .category-info { padding: clamp(8px, 1.5vw, 20px); }
 .category-info h3 { font-size: clamp(0.75rem, 1.6vw, 1.1rem); }
+
+/* Category image heights - responsive and specific */
+.category-image { 
+  height: 200px !important; 
+  min-height: 200px !important;
+} /* Default desktop */
+
+/* Medium screens - tablet and desktop-on-mobile (includes 807px) */
+@media (max-width: 1200px) and (min-width: 769px) {
+  .category-image { 
+    height: 200px !important;
+    min-height: 200px !important;
+  }
+}
+
+/* Mobile screens */
+@media (max-width: 768px) {
+  .category-image { 
+    height: 160px !important;
+    min-height: 160px !important;
+  }
+}
 .category-info p { font-size: clamp(0.6rem, 1.2vw, 0.85rem); }
 
 .value-left { padding: clamp(14px, 3vw, 40px) 0 clamp(14px, 3vw, 40px) clamp(14px, 3vw, 40px); }
@@ -676,7 +697,7 @@
 .category-card:hover { transform: translateY(-4px); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15); }
 
 .category-image { width: 100%; overflow: hidden; flex-shrink: 0; }
-.category-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; display: block; }
+.category-image img { width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; display: block; }
 .category-card:hover .category-image img { transform: scale(1.05); }
 
 .category-info { 
@@ -1434,7 +1455,6 @@
   }
   .trust-features-grid-icons { grid-template-columns: repeat(2, 1fr); }
 
-  .category-image { height: 100px; }
   .benefit-icon-simple { width: 60px; height: 60px; }
   
   /* Mobile: Valuation section car image */

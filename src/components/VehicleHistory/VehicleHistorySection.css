@@ -281,4 +281,14 @@
   .vehicle-history-section {
     padding: 16px;
   }
+  
+  .stat-icon {
+    width: 50px !important;
+    height: 50px !important;
+  }
+  
+  .stat-icon img {
+    width: 50px !important;
+    height: 50px !important;
+  }
 }

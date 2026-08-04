@@ -134,21 +134,33 @@ const ElectricVehicleRunningCosts = ({ vehicle }) => {
       <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
         <h4 className="text-lg font-semibold text-gray-800 mb-3">Additional Electric Vehicle Benefits</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h5 className="font-medium text-gray-700 mb-2">🚗 Congestion Charge</h5>
-            <p className="text-sm text-gray-600">Exempt from London Congestion Charge (£15/day saving)</p>
+          <div className="flex items-start gap-3">
+            <img src="/icon/electric/Congestion Charge.jpeg" alt="Congestion Charge" style={{ width: '35px', height: '35px', objectFit: 'contain', flexShrink: 0 }} />
+            <div>
+              <h5 className="font-medium text-gray-700 mb-2">Congestion Charge</h5>
+              <p className="text-sm text-gray-600">Exempt from London Congestion Charge (£15/day saving)</p>
+            </div>
           </div>
-          <div>
-            <h5 className="font-medium text-gray-700 mb-2">🅿️ Parking Benefits</h5>
-            <p className="text-sm text-gray-600">Free parking in many city centers and reduced rates</p>
+          <div className="flex items-start gap-3">
+            <img src="/icon/electric/Parking Benefits.jpeg" alt="Parking Benefits" style={{ width: '35px', height: '35px', objectFit: 'contain', flexShrink: 0 }} />
+            <div>
+              <h5 className="font-medium text-gray-700 mb-2">Parking Benefits</h5>
+              <p className="text-sm text-gray-600">Free parking in many city centers and reduced rates</p>
+            </div>
           </div>
-          <div>
-            <h5 className="font-medium text-gray-700 mb-2">🔧 Lower Maintenance</h5>
-            <p className="text-sm text-gray-600">Fewer moving parts, no oil changes, reduced brake wear</p>
+          <div className="flex items-start gap-3">
+            <img src="/icon/electric/Lower Maintenance.jpeg" alt="Lower Maintenance" style={{ width: '35px', height: '35px', objectFit: 'contain', flexShrink: 0 }} />
+            <div>
+              <h5 className="font-medium text-gray-700 mb-2">Lower Maintenance</h5>
+              <p className="text-sm text-gray-600">Fewer moving parts, no oil changes, reduced brake wear</p>
+            </div>
           </div>
-          <div>
-            <h5 className="font-medium text-gray-700 mb-2">🏠 Home Charging</h5>
-            <p className="text-sm text-gray-600">Convenience of charging at home overnight</p>
+          <div className="flex items-start gap-3">
+            <img src="/icon/electric/Home Charging.jpeg" alt="Home Charging" style={{ width: '35px', height: '35px', objectFit: 'contain', flexShrink: 0 }} />
+            <div>
+              <h5 className="font-medium text-gray-700 mb-2">Home Charging</h5>
+              <p className="text-sm text-gray-600">Convenience of charging at home overnight</p>
+            </div>
           </div>
         </div>
       </div>

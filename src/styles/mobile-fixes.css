@@ -339,7 +339,8 @@
 
   .spec-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 4px !important;
+    column-gap: 4px !important;
+    row-gap: 6px !important;
     align-items: stretch !important;
     width: 100% !important;
     margin-bottom: 6px !important;
@@ -347,7 +348,7 @@
 
   .spec-item {
     padding: 10px 8px !important;
-    min-height: 70px !important;
+    height: 75px !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
@@ -357,12 +358,15 @@
     overflow: hidden !important;
     writing-mode: horizontal-tb !important;
     text-orientation: mixed !important;
+    border: 1.5px solid #d0e4f7 !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
   }
   
   .spec-item .spec-icon {
     font-size: 1.2rem !important;
-    width: 60px !important;
-    height: 60px !important;
+    width: 28px !important;
+    height: 28px !important;
     flex-shrink: 0 !important;
     display: flex !important;
     align-items: center !important;
@@ -372,8 +376,8 @@
   }
 
   .spec-item .spec-icon img {
-    width: 100% !important;
-    height: 100% !important;
+    width: 28px !important;
+    height: 28px !important;
     object-fit: contain !important;
   }
   
@@ -928,5 +932,61 @@ a.call-seller-btn:active {
 @media (max-width: 480px) {
   .menu-btn::after {
     font-size: 0.55rem !important;
+  }
+}
+
+/* ========================================
+   ELECTRIC VEHICLE ICONS - MOBILE SIZE
+   ======================================== */
+@media (max-width: 768px) {
+  /* Electric Range, Battery Capacity, Charging Time icons */
+  .fuel-economy-item .fuel-icon {
+    width: 28px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .fuel-economy-item .fuel-icon img {
+    width: 28px !important;
+    height: 28px !important;
+    object-fit: contain !important;
+  }
+  
+  /* Additional running costs icons (electric vehicle specific) */
+  .additional-running-costs .fuel-icon {
+    width: 28px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .additional-running-costs .fuel-icon img {
+    width: 28px !important;
+    height: 28px !important;
+    object-fit: contain !important;
+  }
+  
+  /* Running costs horizontal icons */
+  .running-costs-horizontal .cost-icon-wrapper {
+    width: 28px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .running-costs-horizontal .cost-icon-wrapper img {
+    width: 28px !important;
+    height: 28px !important;
+    object-fit: contain !important;
+  }
+  
+  /* Ensure all running cost items have consistent icon alignment */
+  .running-cost-item,
+  .fuel-economy-item {
+    align-items: center !important;
   }
 }
